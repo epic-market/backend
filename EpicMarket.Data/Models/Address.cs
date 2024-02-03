@@ -1,0 +1,25 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace EpicMarket.Data.Models
+{
+    public class Address
+    {
+        public int Id { get; set; }
+        public string Address1 { get; set; }
+        public string Address2 { get; set; }
+        public string State { get; set; }
+        public string City { get; set; }
+        public string Pincode { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public string MetaData { get; set; }
+
+        public virtual ICollection<Person> Persons { get; set; }
+        public virtual ICollection<Business> Businesses { get; set; }
+        public virtual ICollection<Order> Orders { get; set; }
+    }
+}

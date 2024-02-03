@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34511.84
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EpicMarket.Business.API", "EpicMarket.Business.API\EpicMarket.Business.API.csproj", "{D96A9C49-B657-4E0A-9D98-4E9451C6C51E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EpicMarket.Data", "EpicMarket.Data\EpicMarket.Data.csproj", "{02817AAD-9E71-4E4B-82C6-7BEC1D04C61C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EpicMarket.Contracts", "EpicMarket.Contracts\EpicMarket.Contracts.csproj", "{DD052459-2CC1-4F37-81E7-E5D3A7183B0B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EpicMarket.Entities", "EpicMarket.Entities\EpicMarket.Entities.csproj", "{649CF788-4132-4BCE-8741-750ECA6185B4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EpicMarket.Services", "EpicMarket.Services\EpicMarket.Services.csproj", "{ECD82020-21A2-48D3-B2D1-55088322C903}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EpicMarket.Admin.MVC", "EpicMarket.Admin.MVC\EpicMarket.Admin.MVC.csproj", "{8EA8CFDD-A101-47EF-BE3B-C181FC69D319}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D96A9C49-B657-4E0A-9D98-4E9451C6C51E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D96A9C49-B657-4E0A-9D98-4E9451C6C51E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D96A9C49-B657-4E0A-9D98-4E9451C6C51E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D96A9C49-B657-4E0A-9D98-4E9451C6C51E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02817AAD-9E71-4E4B-82C6-7BEC1D04C61C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02817AAD-9E71-4E4B-82C6-7BEC1D04C61C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02817AAD-9E71-4E4B-82C6-7BEC1D04C61C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02817AAD-9E71-4E4B-82C6-7BEC1D04C61C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD052459-2CC1-4F37-81E7-E5D3A7183B0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD052459-2CC1-4F37-81E7-E5D3A7183B0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD052459-2CC1-4F37-81E7-E5D3A7183B0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD052459-2CC1-4F37-81E7-E5D3A7183B0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{649CF788-4132-4BCE-8741-750ECA6185B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{649CF788-4132-4BCE-8741-750ECA6185B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{649CF788-4132-4BCE-8741-750ECA6185B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{649CF788-4132-4BCE-8741-750ECA6185B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECD82020-21A2-48D3-B2D1-55088322C903}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECD82020-21A2-48D3-B2D1-55088322C903}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECD82020-21A2-48D3-B2D1-55088322C903}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECD82020-21A2-48D3-B2D1-55088322C903}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8EA8CFDD-A101-47EF-BE3B-C181FC69D319}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EA8CFDD-A101-47EF-BE3B-C181FC69D319}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EA8CFDD-A101-47EF-BE3B-C181FC69D319}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EA8CFDD-A101-47EF-BE3B-C181FC69D319}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DAB4BE9C-6DEA-4962-A4D8-2E86315398D3}
+	EndGlobalSection
+EndGlobal
