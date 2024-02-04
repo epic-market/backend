@@ -14,6 +14,6 @@ namespace EpicMarket.Data.Models
         public string Type { get; set; }
 
         // Navigation property
-        public virtual ICollection<Business> Businesses { get; set; }
+        public virtual ICollection<Business>? Businesses { get; set; }
     }
 }

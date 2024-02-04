@@ -16,7 +16,7 @@ namespace EpicMarket.Data.Models
         public double TotalPrice { get; set; }
 
         // Navigation properties
-        public virtual Order Order { get; set; }
-        public virtual Catalog Catalog { get; set; }
+        public virtual Order? Order { get; set; }
+        public virtual Catalog? Catalog { get; set; }
     }
 }

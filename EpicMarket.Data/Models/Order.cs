@@ -20,9 +20,9 @@ namespace EpicMarket.Data.Models
         public int AddressID { get; set; }
 
         // Navigation properties
-        public virtual Person Person { get; set; }
-        public virtual Business Business { get; set; }
-        public virtual Address Address { get; set; }
-        public virtual ICollection<OrderDetail> OrderDetails { get; set; }
+        public virtual Person? Person { get; set; }
+        public virtual Business? Business { get; set; }
+        public virtual Address? Address { get; set; }
+        public virtual ICollection<OrderDetail>? OrderDetails { get; set; }
     }
 }
