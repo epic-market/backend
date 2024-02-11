@@ -51,7 +51,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         {
             ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Address1");
             ViewData["BusinessCategoryID"] = new SelectList(_context.BusinessCategories, "ID", "Description");
-            ViewData["PersonID"] = new SelectList(_context.Persons, "Id", "Email");
+            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Email");
             return View();
         }
 
@@ -70,7 +70,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
             ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Address1", business.AddressID);
             ViewData["BusinessCategoryID"] = new SelectList(_context.BusinessCategories, "ID", "Description", business.BusinessCategoryID);
-            ViewData["PersonID"] = new SelectList(_context.Persons, "Id", "Email", business.PersonID);
+            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Email", business.PersonID);
             return View(business);
         }
 
@@ -89,7 +89,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
             ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Address1", business.AddressID);
             ViewData["BusinessCategoryID"] = new SelectList(_context.BusinessCategories, "ID", "Description", business.BusinessCategoryID);
-            ViewData["PersonID"] = new SelectList(_context.Persons, "Id", "Email", business.PersonID);
+            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Email", business.PersonID);
             return View(business);
         }
 
@@ -127,7 +127,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
             ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Address1", business.AddressID);
             ViewData["BusinessCategoryID"] = new SelectList(_context.BusinessCategories, "ID", "Description", business.BusinessCategoryID);
-            ViewData["PersonID"] = new SelectList(_context.Persons, "Id", "Email", business.PersonID);
+            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Email", business.PersonID);
             return View(business);
         }
 

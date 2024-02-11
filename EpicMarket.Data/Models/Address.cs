@@ -22,7 +22,7 @@ namespace EpicMarket.Data.Models
 
 
      
-        public virtual ICollection<Person>? Persons { get; set; }
+        public virtual ICollection<AppUser>? Persons { get; set; }
 
         public virtual ICollection<Business>? Businesses { get; set; }
 

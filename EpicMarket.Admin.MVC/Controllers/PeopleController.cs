@@ -21,7 +21,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: People
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Persons.Include(p => p.Address);
+            var applicationDbContext = _context.Users.Include(p => p.Address);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -33,7 +33,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var person = await _context.Persons
+            var person = await _context.Users
                 .Include(p => p.Address)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (person == null)
@@ -56,7 +56,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,Email,Phone,AddressId")] Person person)
+        public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,Email,Phone,AddressId")] AppUser person)
         {
             if (ModelState.IsValid)
             {
@@ -76,7 +76,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var person = await _context.Persons.FindAsync(id);
+            var person = await _context.Users.FindAsync(id);
             if (person == null)
             {
                 return NotFound();
@@ -90,7 +90,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,Email,Phone,AddressId")] Person person)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,Email,Phone,AddressId")] AppUser person)
         {
             if (id != person.Id)
             {
@@ -129,7 +129,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var person = await _context.Persons
+            var person = await _context.Users
                 .Include(p => p.Address)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (person == null)
@@ -145,10 +145,10 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var person = await _context.Persons.FindAsync(id);
+            var person = await _context.Users.FindAsync(id);
             if (person != null)
             {
-                _context.Persons.Remove(person);
+                _context.Users.Remove(person);
             }
 
             await _context.SaveChangesAsync();
@@ -157,7 +157,7 @@ namespace EpicMarket.Admin.MVC.Controllers
 
         private bool PersonExists(int id)
         {
-            return _context.Persons.Any(e => e.Id == id);
+            return _context.Users.Any(e => e.Id == id);
         }
     }
 }

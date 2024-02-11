@@ -25,7 +25,7 @@ namespace EpicMarket.Data.Models
         public bool Status { get; set; }
 
         // Navigation properties
-        public virtual Person? Person { get; set; }
+        public virtual AppUser? Person { get; set; }
         public virtual BusinessCategory? BusinessCategory { get; set; }
         public virtual Address? Address   { get; set; }
     }

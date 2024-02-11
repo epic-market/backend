@@ -51,7 +51,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         {
             ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Address1");
             ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "Banner");
-            ViewData["PersonID"] = new SelectList(_context.Persons, "Id", "Email");
+            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Email");
             return View();
         }
 
@@ -70,7 +70,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
             ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Address1", order.AddressID);
             ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "Banner", order.BusinessID);
-            ViewData["PersonID"] = new SelectList(_context.Persons, "Id", "Email", order.PersonID);
+            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Email", order.PersonID);
             return View(order);
         }
 
@@ -89,7 +89,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
             ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Address1", order.AddressID);
             ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "Banner", order.BusinessID);
-            ViewData["PersonID"] = new SelectList(_context.Persons, "Id", "Email", order.PersonID);
+            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Email", order.PersonID);
             return View(order);
         }
 
@@ -127,7 +127,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
             ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Address1", order.AddressID);
             ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "Banner", order.BusinessID);
-            ViewData["PersonID"] = new SelectList(_context.Persons, "Id", "Email", order.PersonID);
+            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Email", order.PersonID);
             return View(order);
         }
 
