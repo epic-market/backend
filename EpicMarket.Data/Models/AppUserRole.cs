@@ -1,4 +1,5 @@
 ﻿
+using EpicMarket.Data.ApplicationModels;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -13,5 +14,7 @@ namespace EpicMarket.Data.Models
         public AppUser User { get; set; }
 
         public AppRole Roles { get; set; }
+
+      
     }
 }
