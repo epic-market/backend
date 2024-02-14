@@ -14,7 +14,5 @@ namespace EpicMarket.Data.Models
         public AppUser User { get; set; }
 
         public AppRole Roles { get; set; }
-
-      
     }
 }

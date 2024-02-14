@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using System.Security.Principal;
 
 namespace EpicMarket.Data.Models
 {
@@ -15,11 +16,26 @@ namespace EpicMarket.Data.Models
         }
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Business> Businesses { get; set; }
-        public DbSet<BusinessCategory> BusinessCategories { get; set; }
+        public DbSet<BusinessCategoryInternal> BusinessCategories { get; set; }
         public DbSet<Catalog> Catalogs { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<ApplicationConfiguration> ApplicationConfigurations { get; set; }
+
+        public DbSet<AccessControlList> AccessControlLists { get; set; }
+
+        public DbSet<AccessType> AccessTypes { get; set; }
+        public DbSet<ApplicationSecurables> ApplicationSecurables { get; set; }
+        public DbSet<Outlet> Outlets { get; set; }
+        public DbSet<OutletPerson> OutletPeople { get; set; }
+
+        public DbSet<OutletProduct> OutletProducts { get; set; }
+
+        public DbSet<ProductInternal> ProductInternals { get; set; }
+
+        public DbSet<SupportTicketType> SupportTicketTypes { get; set; }
+
+        public DbSet<SupportTicket> SupportTickets { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -34,6 +50,37 @@ namespace EpicMarket.Data.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+
+            modelBuilder.Entity<OutletPerson>()
+                      .HasOne(op => op.Person)
+                      .WithMany(u => u.OutletPeople)
+                      .HasForeignKey(op => op.PersonId)
+                      .OnDelete(DeleteBehavior.Restrict); 
+
+            modelBuilder.Entity<OutletPerson>()
+                      .HasOne(op => op.Outlet)
+                      .WithMany(u => u.OutletPeople)
+                      .HasForeignKey(op => op.PersonId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<OutletProduct>()
+                 .HasOne(op => op.Product)
+                 .WithMany(u => u.OutletProducts)
+                 .HasForeignKey(op => op.ProductID)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<OutletProduct>()
+                  .HasOne(op => op.Outlet)
+                  .WithMany(u => u.OutletProducts)
+                  .HasForeignKey(op => op.ProductID)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<OutletPerson>()
+                      .HasOne(op => op.Outlet)
+                      .WithMany(u => u.OutletPeople)
+                      .HasForeignKey(op => op.PersonId)
+                      .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<AppUser>()
                 .HasMany(ur => ur.UserRoles)

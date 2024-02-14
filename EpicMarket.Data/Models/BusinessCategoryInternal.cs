@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EpicMarket.Data.Models
 {
-    public class BusinessCategory : BaseModel
+    public class BusinessCategoryInternal : BaseModel
     {
         public int ID { get; set; }
         public string Name { get; set; }
@@ -15,6 +15,6 @@ namespace EpicMarket.Data.Models
         public string Type { get; set; }
 
         // Navigation property
-        public virtual ICollection<Business>? Businesses { get; set; }
+        public virtual ICollection<Business> Businesses { get; set; }
     }
 }

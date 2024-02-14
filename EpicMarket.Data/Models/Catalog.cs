@@ -27,6 +27,8 @@ namespace EpicMarket.Data.Models
         public string Status { get; set; }
 
         // Navigation property
-        public virtual Business? Business { get; set; }
+        public virtual Business Business { get; set; }
+
+        public virtual ICollection<OutletProduct> OutletProducts { get; set; }
     }
 }

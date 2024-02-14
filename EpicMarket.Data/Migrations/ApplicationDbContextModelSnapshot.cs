@@ -47,7 +47,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("SecurableID");
 
-                    b.ToTable("AccessControlList");
+                    b.ToTable("AccessControlLists");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.ApplicationModels.AccessType", b =>
@@ -66,7 +66,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AccessType");
+                    b.ToTable("AccessTypes");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.ApplicationModels.ApplicationConfiguration", b =>
@@ -383,7 +383,7 @@ namespace EpicMarket.Data.Migrations
                     b.ToTable("Businesses");
                 });
 
-            modelBuilder.Entity("EpicMarket.Data.Models.BusinessCategory", b =>
+            modelBuilder.Entity("EpicMarket.Data.Models.BusinessCategoryInternal", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -591,6 +591,171 @@ namespace EpicMarket.Data.Migrations
                     b.ToTable("OrderDetails");
                 });
 
+            modelBuilder.Entity("EpicMarket.Data.Models.Outlet", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("AddressID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("BussinessID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ContactEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("ContactNumber")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsOpen")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ReviewCount")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
+
+                    b.Property<double?>("Weight")
+                        .HasColumnType("float");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("AddressID");
+
+                    b.HasIndex("BussinessID");
+
+                    b.ToTable("Outlets");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.OutletPerson", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("OutletId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PersonId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("PersonId");
+
+                    b.ToTable("OutletPeople");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.OutletProduct", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("OutletID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("ProductID");
+
+                    b.ToTable("OutletProducts");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.ProductInternal", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("BarCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Images")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("ProductInternals");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.SupportTicket", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("Attachment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PersonId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TicketTypeID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("PersonId");
+
+                    b.HasIndex("TicketTypeID");
+
+                    b.ToTable("SupportTickets");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.SupportTicketType", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("SupportTicketTypes");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
                     b.Property<int>("Id")
@@ -744,7 +909,7 @@ namespace EpicMarket.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("EpicMarket.Data.Models.BusinessCategory", "BusinessCategory")
+                    b.HasOne("EpicMarket.Data.Models.BusinessCategoryInternal", "BusinessCategory")
                         .WithMany("Businesses")
                         .HasForeignKey("BusinessCategoryID")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -820,6 +985,82 @@ namespace EpicMarket.Data.Migrations
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("EpicMarket.Data.Models.Outlet", b =>
+                {
+                    b.HasOne("EpicMarket.Data.Models.Address", "Address")
+                        .WithMany("Outlets")
+                        .HasForeignKey("AddressID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EpicMarket.Data.Models.Business", "Bussiness")
+                        .WithMany("Outlets")
+                        .HasForeignKey("BussinessID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Address");
+
+                    b.Navigation("Bussiness");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.OutletPerson", b =>
+                {
+                    b.HasOne("EpicMarket.Data.Models.Outlet", "Outlet")
+                        .WithMany("OutletPeople")
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("EpicMarket.Data.Models.AppUser", "Person")
+                        .WithMany("OutletPeople")
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Outlet");
+
+                    b.Navigation("Person");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.OutletProduct", b =>
+                {
+                    b.HasOne("EpicMarket.Data.Models.Catalog", "Product")
+                        .WithMany("OutletProducts")
+                        .HasForeignKey("ProductID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("EpicMarket.Data.Models.Outlet", "Outlet")
+                        .WithMany("OutletProducts")
+                        .HasForeignKey("ProductID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Outlet");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.SupportTicket", b =>
+                {
+                    b.HasOne("EpicMarket.Data.Models.AppUser", "Person")
+                        .WithMany("SupportTickets")
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EpicMarket.Data.Models.SupportTicketType", "TicketType")
+                        .WithMany("SupportTickets")
+                        .HasForeignKey("TicketTypeID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Person");
+
+                    b.Navigation("TicketType");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
                     b.HasOne("EpicMarket.Data.Models.AppRole", null)
@@ -872,6 +1113,8 @@ namespace EpicMarket.Data.Migrations
 
                     b.Navigation("Orders");
 
+                    b.Navigation("Outlets");
+
                     b.Navigation("Persons");
                 });
 
@@ -888,17 +1131,43 @@ namespace EpicMarket.Data.Migrations
 
                     b.Navigation("Orders");
 
+                    b.Navigation("OutletPeople");
+
+                    b.Navigation("SupportTickets");
+
                     b.Navigation("UserRoles");
                 });
 
-            modelBuilder.Entity("EpicMarket.Data.Models.BusinessCategory", b =>
+            modelBuilder.Entity("EpicMarket.Data.Models.Business", b =>
+                {
+                    b.Navigation("Outlets");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.BusinessCategoryInternal", b =>
                 {
                     b.Navigation("Businesses");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.Catalog", b =>
+                {
+                    b.Navigation("OutletProducts");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Order", b =>
                 {
                     b.Navigation("OrderDetails");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.Outlet", b =>
+                {
+                    b.Navigation("OutletPeople");
+
+                    b.Navigation("OutletProducts");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.SupportTicketType", b =>
+                {
+                    b.Navigation("SupportTickets");
                 });
 #pragma warning restore 612, 618
         }
