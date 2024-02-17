@@ -3,7 +3,11 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EpicMarket.Contracts\EpicMarket.Contracts.csproj" />
+    <ProjectReference Include="..\EpicMarket.Data\EpicMarket.Data.csproj" />
+  </ItemGroup>
 
 </Project>

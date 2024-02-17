@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\EpicMarket.Data\EpicMarket.Data.csproj" />
+  </ItemGroup>
+
 </Project>
