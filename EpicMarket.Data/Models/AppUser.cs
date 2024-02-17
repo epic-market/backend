@@ -16,8 +16,7 @@ namespace EpicMarket.Data.Models
         public string LastName { get; set; }
         public string Phone { get; set; }
         public DateTime LastActive { get; set; } = DateTime.Now;
-        public int AddressId { get; set; }
-        public Address Address { get; set; }   
+ 
         public virtual ICollection<Business> Businesses { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
 
@@ -26,6 +25,8 @@ namespace EpicMarket.Data.Models
         public virtual ICollection<OutletPerson> OutletPeople { get; set; }
 
         public virtual ICollection<SupportTicket> SupportTickets { get; set; }
+
+        public virtual ICollection<UserAddress> UserAddresses { get; set; }
 
     }
 }
