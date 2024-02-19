@@ -14,14 +14,16 @@ namespace EpicMarket.Business.API.Controllers
         private readonly ITokenService _tokenService;
         private readonly IMapper _mapper;
         private readonly ILogger<AccountController> logger;
+        private readonly ICommunicationService communication;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
-        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, IMapper mapper,ILogger<AccountController> logger)
+        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, IMapper mapper, ILogger<AccountController> logger, ICommunicationService communication)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _mapper = mapper;
             this.logger = logger;
+            this.communication = communication;
             _tokenService = tokenService;
         }
 
@@ -53,6 +55,8 @@ namespace EpicMarket.Business.API.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
+
+            //communication.SendEmail("akhil@epicmarket.in", "This is test mail form code", "Its working");
 
             var user = await _userManager.Users
                 .SingleOrDefaultAsync(x => x.UserName == loginDto.Username.ToLower());

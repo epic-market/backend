@@ -1,8 +1,10 @@
-﻿using EpicMarket.Data.Models;
+﻿using EpicMarket.Data.ApplicationModels;
+using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -36,6 +38,27 @@ namespace EpicMarket.Data.Common
 
             await userManager.CreateAsync(admin, "Pa$$w0rd");
             await userManager.AddToRolesAsync(admin, new[] { "Admin", "Moderator" });
+        }
+
+
+        public static async Task Seeddata(ApplicationDbContext context)
+        {
+            if (await context.AccessTypes.AnyAsync()) return;
+
+            var accessTypes = new List<AccessType>
+            {
+              new AccessType{ Name = "ReadOnly" , Priority = 2},
+              new AccessType{ Name = "ReadWrite" , Priority = 1},
+              new AccessType{ Name = "Denied" , Priority = 3}
+            };
+
+            foreach (var accessType in accessTypes)
+            {
+                await context.AccessTypes.AddAsync(accessType);
+            }
+
+            await context.SaveChangesAsync();
+
         }
     }
 }
