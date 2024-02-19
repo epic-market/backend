@@ -5,6 +5,7 @@ using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +14,7 @@ builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddControllers();
 builder.Services.AddCors();
 builder.Services.AddIdentityServices(builder.Configuration);
-
+builder.Host.UseSerilog();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -37,7 +38,7 @@ app.UseCors(x => x.AllowAnyHeader()
 app.UseAuthentication();
 app.UseAuthorization();
 
-
+app.UseSerilogRequestLogging();
 app.MapControllers();
 
 using var scope = app.Services.CreateScope();
@@ -55,6 +56,5 @@ catch (Exception ex)
     var logger = services.GetRequiredService<ILogger<Program>>();
     logger.LogError(ex, "An error occurred during migration");
 }
-
 
 app.Run();

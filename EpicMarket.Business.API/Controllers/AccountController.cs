@@ -13,19 +13,22 @@ namespace EpicMarket.Business.API.Controllers
     {
         private readonly ITokenService _tokenService;
         private readonly IMapper _mapper;
+        private readonly ILogger<AccountController> logger;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
-        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, IMapper mapper)
+        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, IMapper mapper,ILogger<AccountController> logger)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _mapper = mapper;
+            this.logger = logger;
             _tokenService = tokenService;
         }
 
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
+
             if (await UserExists(registerDto.Username)) return BadRequest("Username is taken");
 
             var user = _mapper.Map<AppUser>(registerDto);
@@ -50,6 +53,7 @@ namespace EpicMarket.Business.API.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
+
             var user = await _userManager.Users
                 .SingleOrDefaultAsync(x => x.UserName == loginDto.Username.ToLower());
 

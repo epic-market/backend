@@ -2,6 +2,12 @@
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Services;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.Extensions.Configuration;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.MSSqlServer;
+using System.Configuration;
 
 namespace EpicMarket.Business.API.Extension
 {
@@ -16,6 +22,39 @@ namespace EpicMarket.Business.API.Extension
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<LogUserActivity>();
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
+            Serilog.Log.Logger = new LoggerConfiguration()
+                            .WriteTo.Console()
+                            .WriteTo.Debug(outputTemplate: DateTime.Now.ToString())
+                            .Enrich.WithThreadId()
+                            .Enrich.WithThreadName()
+                            .Enrich.FromLogContext()
+                           ////https://stackoverflow.com/questions/63873570/serilog-file-name-utc-date-format
+                           .WriteTo.File(
+                                           "Logs/epicmarketAPI-.txt",
+                                           rollingInterval: RollingInterval.Hour,
+                                           fileSizeLimitBytes: 100000,
+                                           outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level}] [{UserName}]-[{CorrelationId}] {Message:lj} {Exception} {NewLine}")
+                           .Enrich.WithCorrelationId()
+            /*Install-Package Serilog.Sinks.MSSqlServer 
+             Here we are simply specifying a local SQL instance as the target, with a table name of “Logs”. 
+             Make sure you update the connection string to fit your needs, and you’ll need to create the LoggingDb database if it doesn’t exist. 
+             */
+                           .WriteTo.MSSqlServer(
+                                   config.GetConnectionString("DefaultConnection"),
+                       new MSSqlServerSinkOptions
+                       {
+                           TableName = "EpicMarketLogs",
+                           SchemaName = "dbo",
+                           AutoCreateSqlTable = true
+                       }, restrictedToMinimumLevel: LogEventLevel.Warning)
+                           /*These are the events emitted for a single request to the homepage. The Serilog.AspNetCore package, which we installed at the beginning of this article,
+                            helps condense these log events into more manageable information.
+                            First, we need to override the default log level for the Microsoft.AspNet logger in our logger config:*/
+                           .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+                       //.WriteTo.ApplicationInsights(new TelemetryConfiguration { InstrumentationKey = config["ApplicationInsights:Key"] }, TelemetryConverter.Traces)
+                           .CreateLogger();
+            Serilog.Log.Information("Starting web job");
+            services.AddSingleton(Serilog.Log.Logger);
             return services;
         }
     }
