@@ -1,6 +1,0 @@
-@EpicMarket.identity.API_HostAddress = http://localhost:5062
-
-GET {{EpicMarket.identity.API_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
