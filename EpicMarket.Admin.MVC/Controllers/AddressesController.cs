@@ -53,7 +53,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Address1,Address2,State,City,Pincode,Latitude,Longitude,MetaData")] Address address)
+        public async Task<IActionResult> Create([Bind("Id,Address1,Address2,State,City,Pincode,Latitude,Longitude,MetaData,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Address address)
         {
             if (ModelState.IsValid)
             {
@@ -85,7 +85,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Address1,Address2,State,City,Pincode,Latitude,Longitude,MetaData")] Address address)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Address1,Address2,State,City,Pincode,Latitude,Longitude,MetaData,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Address address)
         {
             if (id != address.Id)
             {

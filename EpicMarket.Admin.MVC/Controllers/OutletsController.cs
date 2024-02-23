@@ -1,0 +1,169 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using EpicMarket.Data.Models;
+
+namespace EpicMarket.Admin.MVC.Controllers
+{
+    public class OutletsController : Controller
+    {
+        private readonly ApplicationDbContext _context;
+
+        public OutletsController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        // GET: Outlets
+        public async Task<IActionResult> Index()
+        {
+            var applicationDbContext = _context.Outlets.Include(o => o.Address).Include(o => o.Bussiness);
+            return View(await applicationDbContext.ToListAsync());
+        }
+
+        // GET: Outlets/Details/5
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var outlet = await _context.Outlets
+                .Include(o => o.Address)
+                .Include(o => o.Bussiness)
+                .FirstOrDefaultAsync(m => m.ID == id);
+            if (outlet == null)
+            {
+                return NotFound();
+            }
+
+            return View(outlet);
+        }
+
+        // GET: Outlets/Create
+        public IActionResult Create()
+        {
+            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id");
+            ViewData["BussinessID"] = new SelectList(_context.Businesses, "ID", "ID");
+            return View();
+        }
+
+        // POST: Outlets/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("ID,BussinessID,AddressID,Name,Description,ContactNumber,ContactEmail,Rating,ReviewCount,IsOpen,Weight,Status")] Outlet outlet)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Add(outlet);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", outlet.AddressID);
+            ViewData["BussinessID"] = new SelectList(_context.Businesses, "ID", "ID", outlet.BussinessID);
+            return View(outlet);
+        }
+
+        // GET: Outlets/Edit/5
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var outlet = await _context.Outlets.FindAsync(id);
+            if (outlet == null)
+            {
+                return NotFound();
+            }
+            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", outlet.AddressID);
+            ViewData["BussinessID"] = new SelectList(_context.Businesses, "ID", "ID", outlet.BussinessID);
+            return View(outlet);
+        }
+
+        // POST: Outlets/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("ID,BussinessID,AddressID,Name,Description,ContactNumber,ContactEmail,Rating,ReviewCount,IsOpen,Weight,Status")] Outlet outlet)
+        {
+            if (id != outlet.ID)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(outlet);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!OutletExists(outlet.ID))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", outlet.AddressID);
+            ViewData["BussinessID"] = new SelectList(_context.Businesses, "ID", "ID", outlet.BussinessID);
+            return View(outlet);
+        }
+
+        // GET: Outlets/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var outlet = await _context.Outlets
+                .Include(o => o.Address)
+                .Include(o => o.Bussiness)
+                .FirstOrDefaultAsync(m => m.ID == id);
+            if (outlet == null)
+            {
+                return NotFound();
+            }
+
+            return View(outlet);
+        }
+
+        // POST: Outlets/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var outlet = await _context.Outlets.FindAsync(id);
+            if (outlet != null)
+            {
+                _context.Outlets.Remove(outlet);
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        private bool OutletExists(int id)
+        {
+            return _context.Outlets.Any(e => e.ID == id);
+        }
+    }
+}

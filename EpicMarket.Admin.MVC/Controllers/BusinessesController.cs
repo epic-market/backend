@@ -49,9 +49,9 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: Businesses/Create
         public IActionResult Create()
         {
-            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Address1");
-            ViewData["BusinessCategoryID"] = new SelectList(_context.BusinessCategories, "ID", "Description");
-            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Email");
+            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id");
+            ViewData["BusinessCategoryID"] = new SelectList(_context.BusinessCategories, "ID", "ID");
+            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Id");
             return View();
         }
 
@@ -60,7 +60,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,PersonID,BusinessCategoryID,Name,Description,Banner,Logo,ContactNumber,ContactEmail,AddressID,Rating,ReviewCount,IsOpen,Weight,Status")] Business business)
+        public async Task<IActionResult> Create([Bind("ID,PersonID,BusinessCategoryID,Name,Description,Banner,Logo,ContactNumber,ContactEmail,AddressID,Rating,ReviewCount,IsOpen,Weight,Status,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Business business)
         {
             if (ModelState.IsValid)
             {
@@ -68,9 +68,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Address1", business.AddressID);
-            ViewData["BusinessCategoryID"] = new SelectList(_context.BusinessCategories, "ID", "Description", business.BusinessCategoryID);
-            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Email", business.PersonID);
+            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", business.AddressID);
+            ViewData["BusinessCategoryID"] = new SelectList(_context.BusinessCategories, "ID", "ID", business.BusinessCategoryID);
+            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Id", business.PersonID);
             return View(business);
         }
 
@@ -87,9 +87,9 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 return NotFound();
             }
-            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Address1", business.AddressID);
-            ViewData["BusinessCategoryID"] = new SelectList(_context.BusinessCategories, "ID", "Description", business.BusinessCategoryID);
-            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Email", business.PersonID);
+            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", business.AddressID);
+            ViewData["BusinessCategoryID"] = new SelectList(_context.BusinessCategories, "ID", "ID", business.BusinessCategoryID);
+            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Id", business.PersonID);
             return View(business);
         }
 
@@ -98,7 +98,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,PersonID,BusinessCategoryID,Name,Description,Banner,Logo,ContactNumber,ContactEmail,AddressID,Rating,ReviewCount,IsOpen,Weight,Status")] Business business)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,PersonID,BusinessCategoryID,Name,Description,Banner,Logo,ContactNumber,ContactEmail,AddressID,Rating,ReviewCount,IsOpen,Weight,Status,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Business business)
         {
             if (id != business.ID)
             {
@@ -125,9 +125,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Address1", business.AddressID);
-            ViewData["BusinessCategoryID"] = new SelectList(_context.BusinessCategories, "ID", "Description", business.BusinessCategoryID);
-            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Email", business.PersonID);
+            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", business.AddressID);
+            ViewData["BusinessCategoryID"] = new SelectList(_context.BusinessCategories, "ID", "ID", business.BusinessCategoryID);
+            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Id", business.PersonID);
             return View(business);
         }
 

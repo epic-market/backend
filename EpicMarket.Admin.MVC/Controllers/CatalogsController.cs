@@ -47,7 +47,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: Catalogs/Create
         public IActionResult Create()
         {
-            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "Banner");
+            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID");
             return View();
         }
 
@@ -56,7 +56,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,BusinessID,Barcode,Name,Description,Images,Category,Rate,IsActive,InStock,IsRecommended,MaximumOrderPurchase,Rating,ReviewCount,OrderCount,Status")] Catalog catalog)
+        public async Task<IActionResult> Create([Bind("ID,BusinessID,Barcode,Name,Description,Images,Category,Rate,IsActive,InStock,IsRecommended,MaximumOrderPurchase,Rating,ReviewCount,OrderCount,Status,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Catalog catalog)
         {
             if (ModelState.IsValid)
             {
@@ -64,7 +64,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "Banner", catalog.BusinessID);
+            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID", catalog.BusinessID);
             return View(catalog);
         }
 
@@ -81,7 +81,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 return NotFound();
             }
-            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "Banner", catalog.BusinessID);
+            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID", catalog.BusinessID);
             return View(catalog);
         }
 
@@ -90,7 +90,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,BusinessID,Barcode,Name,Description,Images,Category,Rate,IsActive,InStock,IsRecommended,MaximumOrderPurchase,Rating,ReviewCount,OrderCount,Status")] Catalog catalog)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,BusinessID,Barcode,Name,Description,Images,Category,Rate,IsActive,InStock,IsRecommended,MaximumOrderPurchase,Rating,ReviewCount,OrderCount,Status,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Catalog catalog)
         {
             if (id != catalog.ID)
             {
@@ -117,7 +117,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "Banner", catalog.BusinessID);
+            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID", catalog.BusinessID);
             return View(catalog);
         }
 

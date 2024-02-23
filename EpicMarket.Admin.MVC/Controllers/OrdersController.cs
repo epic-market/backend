@@ -49,9 +49,9 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: Orders/Create
         public IActionResult Create()
         {
-            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Address1");
-            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "Banner");
-            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Email");
+            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id");
+            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID");
+            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Id");
             return View();
         }
 
@@ -60,7 +60,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,PersonID,BusinessID,OrderType,TotalPrice,TotalItems,OrderAt,Status,PaymentMode,AddressID")] Order order)
+        public async Task<IActionResult> Create([Bind("ID,PersonID,BusinessID,OrderType,TotalPrice,TotalItems,OrderAt,Status,PaymentMode,AddressID,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Order order)
         {
             if (ModelState.IsValid)
             {
@@ -68,9 +68,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Address1", order.AddressID);
-            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "Banner", order.BusinessID);
-            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Email", order.PersonID);
+            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", order.AddressID);
+            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID", order.BusinessID);
+            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Id", order.PersonID);
             return View(order);
         }
 
@@ -87,9 +87,9 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 return NotFound();
             }
-            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Address1", order.AddressID);
-            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "Banner", order.BusinessID);
-            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Email", order.PersonID);
+            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", order.AddressID);
+            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID", order.BusinessID);
+            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Id", order.PersonID);
             return View(order);
         }
 
@@ -98,7 +98,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,PersonID,BusinessID,OrderType,TotalPrice,TotalItems,OrderAt,Status,PaymentMode,AddressID")] Order order)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,PersonID,BusinessID,OrderType,TotalPrice,TotalItems,OrderAt,Status,PaymentMode,AddressID,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Order order)
         {
             if (id != order.ID)
             {
@@ -125,9 +125,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Address1", order.AddressID);
-            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "Banner", order.BusinessID);
-            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Email", order.PersonID);
+            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", order.AddressID);
+            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID", order.BusinessID);
+            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Id", order.PersonID);
             return View(order);
         }
 

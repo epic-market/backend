@@ -48,8 +48,8 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: OrderDetails/Create
         public IActionResult Create()
         {
-            ViewData["CatalogID"] = new SelectList(_context.Catalogs, "ID", "Category");
-            ViewData["OrderID"] = new SelectList(_context.Orders, "ID", "OrderType");
+            ViewData["CatalogID"] = new SelectList(_context.Catalogs, "ID", "ID");
+            ViewData["OrderID"] = new SelectList(_context.Orders, "ID", "ID");
             return View();
         }
 
@@ -58,7 +58,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,OrderID,CatalogID,Quantity,Rate,TotalPrice")] OrderDetail orderDetail)
+        public async Task<IActionResult> Create([Bind("ID,OrderID,CatalogID,Quantity,Rate,TotalPrice,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] OrderDetail orderDetail)
         {
             if (ModelState.IsValid)
             {
@@ -66,8 +66,8 @@ namespace EpicMarket.Admin.MVC.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CatalogID"] = new SelectList(_context.Catalogs, "ID", "Category", orderDetail.CatalogID);
-            ViewData["OrderID"] = new SelectList(_context.Orders, "ID", "OrderType", orderDetail.OrderID);
+            ViewData["CatalogID"] = new SelectList(_context.Catalogs, "ID", "ID", orderDetail.CatalogID);
+            ViewData["OrderID"] = new SelectList(_context.Orders, "ID", "ID", orderDetail.OrderID);
             return View(orderDetail);
         }
 
@@ -84,8 +84,8 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 return NotFound();
             }
-            ViewData["CatalogID"] = new SelectList(_context.Catalogs, "ID", "Category", orderDetail.CatalogID);
-            ViewData["OrderID"] = new SelectList(_context.Orders, "ID", "OrderType", orderDetail.OrderID);
+            ViewData["CatalogID"] = new SelectList(_context.Catalogs, "ID", "ID", orderDetail.CatalogID);
+            ViewData["OrderID"] = new SelectList(_context.Orders, "ID", "ID", orderDetail.OrderID);
             return View(orderDetail);
         }
 
@@ -94,7 +94,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,OrderID,CatalogID,Quantity,Rate,TotalPrice")] OrderDetail orderDetail)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,OrderID,CatalogID,Quantity,Rate,TotalPrice,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] OrderDetail orderDetail)
         {
             if (id != orderDetail.ID)
             {
@@ -121,8 +121,8 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CatalogID"] = new SelectList(_context.Catalogs, "ID", "Category", orderDetail.CatalogID);
-            ViewData["OrderID"] = new SelectList(_context.Orders, "ID", "OrderType", orderDetail.OrderID);
+            ViewData["CatalogID"] = new SelectList(_context.Catalogs, "ID", "ID", orderDetail.CatalogID);
+            ViewData["OrderID"] = new SelectList(_context.Orders, "ID", "ID", orderDetail.OrderID);
             return View(orderDetail);
         }
 
