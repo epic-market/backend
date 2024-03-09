@@ -17,18 +17,25 @@ namespace EpicMarket.Services
     {
         private readonly SymmetricSecurityKey _key;
         private readonly UserManager<AppUser> _userManager;
-        public TokenService(IConfiguration config, UserManager<AppUser> userManager)
+        private readonly ApplicationDbContext dbContext;
+
+        public TokenService(IConfiguration config, UserManager<AppUser> userManager,ApplicationDbContext dbContext)
         {
             _userManager = userManager;
+            this.dbContext = dbContext;
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
         }
 
         public async Task<string> CreateToken(AppUser user)
         {
+
+            var Businessid = dbContext.Businesses.Where(c => c.PersonID == user.Id).FirstOrDefault().ID;
+
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.NameId, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
+                new Claim("BussinessID", Businessid.ToString())
             };
 
             var roles = await _userManager.GetRolesAsync(user);
