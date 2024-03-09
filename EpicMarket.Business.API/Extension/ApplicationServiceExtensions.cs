@@ -23,6 +23,9 @@ namespace EpicMarket.Business.API.Extension
             services.AddScoped<IApplicationConfigurationService, ApplicationConfigurationService>();
             services.AddScoped<ICommunicationService, CommunicationService>();
             services.AddScoped<IBusinessService, BusinessService>();
+            services.AddScoped<IStaticService, StaticService>();
+            services.AddScoped<IAddressService, AddressService>();
+            services.AddScoped<IBranchService, BranchService>();
             services.AddScoped<LogUserActivity>();
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
             Serilog.Log.Logger = new LoggerConfiguration()

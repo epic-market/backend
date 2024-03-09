@@ -9,6 +9,7 @@ namespace EpicMarket.Business.API.Helpers
         public AutoMapperProfiles()
         {
             CreateMap<RegisterDto, AppUser>();
+            CreateMap<AddressDto, Address>();
         }
     }
 }

@@ -30,8 +30,8 @@ namespace EpicMarket.Business.API.Controllers
         {
             this.logger.LogInformation("Business Controller -> Register()-> params {0}", JsonConvert.SerializeObject(new { Params = businessRegisterDto }));
             businessRegisterDto.UserID = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value) ;
-
-            var id = await businessService.RegisterBusiness(businessRegisterDto);
+            var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
+            var id = await businessService.RegisterBusiness(businessRegisterDto, UserName);
             this.logger.LogInformation("Business Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
 
             return Ok(id);

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EpicMarket.Data.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EpicMarket.Data.Models
 {
-    public class Outlet
+    public class Outlet :BaseModel
     {
         public int ID { get; set; }
         public int BussinessID { get; set; }
@@ -17,9 +18,9 @@ namespace EpicMarket.Data.Models
         public string ContactEmail { get; set; }
         public int? Rating { get; set; }
         public int? ReviewCount { get; set; }
-        public bool IsOpen { get; set; }
+        public bool? IsOpen { get; set; }
         public double? Weight { get; set; }
-        public bool Status { get; set; }
+        public bool? Status { get; set; }
 
         public virtual Business Bussiness { get; set; }
         public virtual Address Address { get; set; }

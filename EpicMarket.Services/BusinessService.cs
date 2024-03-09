@@ -14,24 +14,27 @@ namespace EpicMarket.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper mapper;
+        private readonly IAddressService addressService;
 
-        public BusinessService(ApplicationDbContext context, IMapper mapper)
+        public BusinessService(ApplicationDbContext context, IMapper mapper , IAddressService addressService)
         {
             _context = context;
             this.mapper = mapper;
+            this.addressService = addressService;
         }
-        public async Task<int> RegisterBusiness(BusinessRegisterDto businessRegisterDto)
+        public async Task<int> RegisterBusiness(BusinessRegisterDto businessRegisterDto, string UserName)
         {
-            var addressModel = new Address();
+          
+            var addressModel = new AddressDto();
             addressModel.Address1 = businessRegisterDto.Address;
             addressModel.City  = businessRegisterDto.City;
             addressModel.State = businessRegisterDto.State;
             addressModel.Pincode = businessRegisterDto.PinCode;
             addressModel.Latitude = businessRegisterDto.Latitude;
             addressModel.Longitude = businessRegisterDto.Longitude;
-            _context.Addresses.Add(addressModel);
-             await _context.SaveChangesAsync();
-            int addressId = addressModel.Id;
+            addressModel.CreateBy = UserName;
+            addressModel.CreateDate = DateTime.Now;
+            int addressId = await addressService.AddAddress(addressModel);
 
             var businessModel = new Business();
             businessModel.AddressID = addressId;
@@ -42,11 +45,11 @@ namespace EpicMarket.Services
             businessModel.Logo = businessRegisterDto.LogoURL;
             businessModel.ContactNumber = businessRegisterDto.ContactNumber;
             businessModel.ContactEmail = businessRegisterDto.ContactEmail;
+            businessModel.CreateBy = UserName;
+            businessModel.CreateDate = DateTime.Now;
 
             _context.Businesses.Add(businessModel);
             await _context.SaveChangesAsync();
-
-
 
             return businessModel.ID;
         }
