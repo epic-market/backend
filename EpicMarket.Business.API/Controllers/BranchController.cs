@@ -22,7 +22,7 @@ namespace EpicMarket.Business.API.Controllers
        
         }
 
-        [HttpPost("GetAllBranches")]
+        [HttpGet("GetAllBranches")]
         public async Task<ActionResult<List<BranchResult>>> GetAllBranches(BranchParams branchParams)
         {
             this.logger.LogInformation("Branch Controller -> GetAllBranches()-> params {0}", JsonConvert.SerializeObject(new { Params = branchParams }));
