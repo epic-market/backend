@@ -49,6 +49,9 @@ namespace EpicMarket.Business.API.Controllers
             {
                 Username = user.UserName,
                 Token = await _tokenService.CreateToken(user),
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Phone  = user.PhoneNumber
             };
         }
 
@@ -71,7 +74,10 @@ namespace EpicMarket.Business.API.Controllers
             return new UserDto
             {
                 Username = user.UserName,
-                Token = await _tokenService.CreateToken(user)
+                Token = await _tokenService.CreateToken(user),
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Phone = user.PhoneNumber
             };
         }
 

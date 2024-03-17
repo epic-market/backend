@@ -29,13 +29,10 @@ namespace EpicMarket.Services
         public async Task<string> CreateToken(AppUser user)
         {
 
-            var Businessid = dbContext.Businesses.Where(c => c.PersonID == user.Id).FirstOrDefault().ID;
-
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.NameId, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
-                new Claim("BussinessID", Businessid.ToString())
             };
 
             var roles = await _userManager.GetRolesAsync(user);
