@@ -61,7 +61,7 @@ namespace EpicMarket.Data.Models
             modelBuilder.Entity<OutletPerson>()
                       .HasOne(op => op.Outlet)
                       .WithMany(u => u.OutletPeople)
-                      .HasForeignKey(op => op.PersonId)
+                      .HasForeignKey(op => op.OutletId)
                       .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<OutletProduct>()
@@ -73,7 +73,7 @@ namespace EpicMarket.Data.Models
             modelBuilder.Entity<OutletProduct>()
                   .HasOne(op => op.Outlet)
                   .WithMany(u => u.OutletProducts)
-                  .HasForeignKey(op => op.ProductID)
+                  .HasForeignKey(op => op.OutletID)
                   .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<OutletPerson>()

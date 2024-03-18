@@ -23,7 +23,7 @@ namespace EpicMarket.Services
         }
         public Task<List<DropDownOptions>> BusinessCategoriesOptions()
         {
-           return _context.BusinessCategories.Select(c => new DropDownOptions { Text = c.Name, Value = c.ID }).ToListAsync();
+            return _context.BusinessCategories.Select(c => new DropDownOptions { Text = c.Name, Value = c.ID }).ToListAsync();
         }
     }
 }

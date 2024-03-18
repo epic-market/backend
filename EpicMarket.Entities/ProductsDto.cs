@@ -20,7 +20,7 @@ namespace EpicMarket.Entities
 
         public string ImageURL { get; set; }
 
-        public int Rate { get; set; }
+        public double Rate { get; set; }
 
         public int Selected { get; set; }
     }

@@ -9,7 +9,7 @@ namespace EpicMarket.Contracts
 {
     public interface IProductService
     {
-        Task<List<ProductsMapOptionResult>> GetAllProductForMap(int BusinessID);
+        Task<List<ProductsMapOptionResult>> GetAllProductForMap(int businessID, int outletID);
 
     }
 }

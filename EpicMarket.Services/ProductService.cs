@@ -2,6 +2,8 @@
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,9 +26,24 @@ namespace EpicMarket.Services
             this.addressService = addressService;
         }
 
-        public Task<List<ProductsMapOptionResult>> GetAllProductForMap(int BusinessID)
+        public async Task<List<ProductsMapOptionResult>> GetAllProductForMap(int BusinessID,int BranchId)
         {
-            throw new NotImplementedException();
+
+            var _ = await (from catalogItem in _context.Catalogs
+                    join outletProduct in (_context.OutletProducts.Where(a => a.OutletID == 1))
+                    on catalogItem.ID equals outletProduct.ProductID into joinedProducts
+                    from matchedProduct in joinedProducts.DefaultIfEmpty()
+                    where catalogItem.BusinessID == 6
+                    select new ProductsMapOptionResult
+                    {
+                        Name = catalogItem.Name,
+                        Description = catalogItem.Description,
+                        ImageURL = catalogItem.Images,
+                        Rate = catalogItem.Rate,
+                        Selected = matchedProduct == null ? 0 : 1,
+                    }).ToListAsync();
+
+            return _;
         }
     }
 }

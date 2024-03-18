@@ -12,22 +12,21 @@ namespace EpicMarket.Business.API.Controllers
     {
 
         private readonly ILogger<ProductsController> logger;
+        private readonly IProductService productService;
         private readonly IBranchService branchService;
 
-        public ProductsController(ILogger<ProductsController> logger, IBranchService branchService)
+        public ProductsController(ILogger<ProductsController> logger, IProductService productService)
         {
             this.logger = logger;
-            this.branchService = branchService;
+            this.productService = productService;
         }
 
-        [HttpPost("GetAllProductForMap")]
-        public async Task<ActionResult<List<ProductsMapOptionResult>>> GetAllProductForMap(int BussinessID)
+        [HttpGet("GetAllProductForMap")]
+        public async Task<ActionResult<List<ProductsMapOptionResult>>> GetAllProductForMap(int bussinessID,int outletID)
         {
-            this.logger.LogInformation("Products Controller -> GetAllProductForMap()-> params {0}", JsonConvert.SerializeObject(new { Params = BussinessID }));
+            this.logger.LogInformation("Products Controller -> GetAllProductForMap()-> params {0}", JsonConvert.SerializeObject(new { Params = bussinessID }));
 
-            var branchParams = new BranchParams();
-
-            var results = await branchService.GetAllBranches(branchParams);
+            var results = await productService.GetAllProductForMap(bussinessID, outletID);
 
             this.logger.LogInformation("Products Controller -> GetAllProductForMap()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
 
