@@ -18,21 +18,20 @@ namespace EpicMarket.Services
             this._applicationConfigurationService = applicationConfigurationService;
         }
 
-        public void SendEmail(string email, string subject, string message)
+        public async Task SendEmailAsync(string email, string subject, string message)
         {
             var Frommail = "gadamsattiakhil@outlook.com";//this._applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.SMTPFromEmail);
             var pass = "Demo@1234";//this._applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.SMTPPassword);
             var server = "smtp-mail.outlook.com";//this._applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.SMTPServer);
             var port = 587;//Convert.ToInt32(this._applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.SMTPPort));
 
+
             MailMessage mail = new MailMessage(from: Frommail, to: email)
             {
                 Subject = subject,
                 Body = message,
-                IsBodyHtml = true,
+                IsBodyHtml = true
             };
-
-            mail.BodyEncoding = Encoding.Default;
 
             var client = new SmtpClient()
             {
@@ -42,8 +41,15 @@ namespace EpicMarket.Services
                 Credentials = new NetworkCredential(Frommail, pass),
             };
 
-            client.SendMailAsync(mail);
-
+            try
+            {
+                await client.SendMailAsync(mail);
+                Console.WriteLine("Mail sent successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending mail: {ex.Message}");
+            }
         }
     }
 }
