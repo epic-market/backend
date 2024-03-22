@@ -8,6 +8,6 @@ namespace EpicMarket.Contracts
 {
     public interface ICommunicationService
     {
-        public Task SendEmailAsync(string email, string subject, string message);
+        public void SendEmailAsync(string email, string subject, string message);
     }
 }

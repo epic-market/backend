@@ -31,4 +31,12 @@ namespace EpicMarket.Entities
 
         public string EmailID { get; set; }
     }
+
+    public class CheckLinkResult
+    {
+        public string UserID { get; set; }
+        public string FirstName { get; set; }
+        public string BusinessName { get; set; }
+        public string BusinessEmail { get; set; }
+    }
 }

@@ -30,10 +30,22 @@ namespace EpicMarket.Business.API.Controllers
         public async Task<ActionResult<int>> Register(AddEmployeeParam addEmployeeParam)
         {
             this.logger.LogInformation("Employee Controller -> Register()-> params {0}", JsonConvert.SerializeObject(new { Params = addEmployeeParam }));
-            //addEmployeeParam.UserID = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            //var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-            var id = employeeService.Register(addEmployeeParam);
+            addEmployeeParam.UserID = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
+            var id = await employeeService.Register(addEmployeeParam);
             this.logger.LogInformation("Business Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
+
+            return Ok(id);
+        }
+
+
+        [HttpGet("CheckEmployeeLink")]
+        [AllowAnonymous]
+        public async Task<ActionResult<int>> CheckEmployeeLink(string queryParam)
+        {
+            this.logger.LogInformation("Employee Controller -> CheckEmployeeLink()-> params {0}", JsonConvert.SerializeObject(new { Params = queryParam }));
+            var id =  employeeService.CheckEmployeeLink(queryParam);
+            this.logger.LogInformation("Business Controller -> CheckEmployeeLink()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
 
             return Ok(id);
         }

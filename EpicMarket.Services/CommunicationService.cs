@@ -18,7 +18,7 @@ namespace EpicMarket.Services
             this._applicationConfigurationService = applicationConfigurationService;
         }
 
-        public async Task SendEmailAsync(string email, string subject, string message)
+        public void SendEmailAsync(string email, string subject, string message)
         {
             var Frommail = "gadamsattiakhil@outlook.com";//this._applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.SMTPFromEmail);
             var pass = "Demo@1234";//this._applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.SMTPPassword);
@@ -43,7 +43,7 @@ namespace EpicMarket.Services
 
             try
             {
-                await client.SendMailAsync(mail);
+                client.Send(mail);
                 Console.WriteLine("Mail sent successfully.");
             }
             catch (Exception ex)

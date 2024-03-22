@@ -31,5 +31,7 @@ namespace EpicMarket.Data.Models
         public virtual Address? Address   { get; set; }
 
         public virtual ICollection<Outlet> Outlets { get; set; }
+
+        public virtual ICollection<BusinessEmployeeMap> BusinessEmployees { get; set; }
     }
 }

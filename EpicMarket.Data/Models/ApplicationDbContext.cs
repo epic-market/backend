@@ -37,6 +37,8 @@ namespace EpicMarket.Data.Models
 
         public DbSet<SupportTicket> SupportTickets { get; set; }
 
+        public DbSet<BusinessEmployeeMap> BusinessEmployeeMaps { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var configuration = new ConfigurationBuilder()
@@ -62,6 +64,19 @@ namespace EpicMarket.Data.Models
                       .HasOne(op => op.Outlet)
                       .WithMany(u => u.OutletPeople)
                       .HasForeignKey(op => op.OutletId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+
+            modelBuilder.Entity<BusinessEmployeeMap>()
+                     .HasOne(op => op.Employee)
+                     .WithMany(u => u.BusinessEmployeeMaps)
+                     .HasForeignKey(op => op.EmployeeID)
+                     .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<BusinessEmployeeMap>()
+                      .HasOne(op => op.Bussiness)
+                      .WithMany(u => u.BusinessEmployees)
+                      .HasForeignKey(op => op.BussinessID)
                       .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<OutletProduct>()

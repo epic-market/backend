@@ -4,6 +4,7 @@ using EpicMarket.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EpicMarket.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240322051908_AddedUniqueGuid")]
+    partial class AddedUniqueGuid
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -424,29 +427,6 @@ namespace EpicMarket.Data.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("BusinessCategories");
-                });
-
-            modelBuilder.Entity("EpicMarket.Data.Models.BusinessEmployeeMap", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<int>("BussinessID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("EmployeeID")
-                        .HasColumnType("int");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("BussinessID");
-
-                    b.HasIndex("EmployeeID");
-
-                    b.ToTable("BusinessEmployeeMaps");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Catalog", b =>
@@ -993,25 +973,6 @@ namespace EpicMarket.Data.Migrations
                     b.Navigation("Person");
                 });
 
-            modelBuilder.Entity("EpicMarket.Data.Models.BusinessEmployeeMap", b =>
-                {
-                    b.HasOne("EpicMarket.Data.Models.Business", "Bussiness")
-                        .WithMany("BusinessEmployees")
-                        .HasForeignKey("BussinessID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("EpicMarket.Data.Models.AppUser", "Employee")
-                        .WithMany("BusinessEmployeeMaps")
-                        .HasForeignKey("EmployeeID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Bussiness");
-
-                    b.Navigation("Employee");
-                });
-
             modelBuilder.Entity("EpicMarket.Data.Models.Catalog", b =>
                 {
                     b.HasOne("EpicMarket.Data.Models.Business", "Business")
@@ -1232,8 +1193,6 @@ namespace EpicMarket.Data.Migrations
 
             modelBuilder.Entity("EpicMarket.Data.Models.AppUser", b =>
                 {
-                    b.Navigation("BusinessEmployeeMaps");
-
                     b.Navigation("Businesses");
 
                     b.Navigation("Orders");
@@ -1249,8 +1208,6 @@ namespace EpicMarket.Data.Migrations
 
             modelBuilder.Entity("EpicMarket.Data.Models.Business", b =>
                 {
-                    b.Navigation("BusinessEmployees");
-
                     b.Navigation("Outlets");
                 });
 
