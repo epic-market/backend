@@ -24,4 +24,4 @@ jobs:
         run: sudo docker pull ghcr.io/${{ github.repository }}:latest
 
       - name: Run Docker container
-        run: sudo docker run -d -p 3002:80 ghcr.io/${{ github.repository }}
+        run: sudo docker run -d -p 3003:8080 ghcr.io/${{ github.repository }}
