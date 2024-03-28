@@ -1,0 +1,27 @@
+name: CD - Deploy to AWS EC2
+
+on:
+  workflow_call:
+
+  workflow_dispatch:
+
+concurrency:
+  group: 'cd'
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Remove existing Docker containers and images
+        run: /home/ubuntu/remove_containers.sh ghcr.io/${{ github.repository }}
+
+      - name: Login to Docker Hub
+        run: sudo docker login -u ${{ github.actor }} -p ${{ secrets.CONTAINER_REGISTRY_TOKEN }} ghcr.io
+
+      - name: Pull Docker image
+        run: sudo docker pull ghcr.io/${{ github.repository }}:latest
+
+      - name: Run Docker container
+        run: sudo docker run -d -p 3002:80 ghcr.io/${{ github.repository }}
