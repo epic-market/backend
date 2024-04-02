@@ -16,7 +16,6 @@ namespace EpicMarket.Business.API.Controllers
         private readonly ILogger<EmployeeController> logger;
         private readonly IEmployeeService employeeService;
 
-
         public EmployeeController(ILogger<EmployeeController> logger, IEmployeeService employeeService)
         {
             this.logger = logger;

@@ -15,7 +15,6 @@ namespace EpicMarket.Data.Models
         // Foreign key to Address table
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string Phone { get; set; }
         public string UniqueGuid { get; set; }
         public int OTP { get; set; }
         public DateTime LastActive { get; set; } = DateTime.Now;

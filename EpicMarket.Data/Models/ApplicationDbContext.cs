@@ -21,9 +21,7 @@ namespace EpicMarket.Data.Models
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<ApplicationConfiguration> ApplicationConfigurations { get; set; }
-
         public DbSet<AccessControlList> AccessControlLists { get; set; }
-
         public DbSet<AccessType> AccessTypes { get; set; }
         public DbSet<ApplicationSecurables> ApplicationSecurables { get; set; }
         public DbSet<Outlet> Outlets { get; set; }
