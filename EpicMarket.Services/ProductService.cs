@@ -26,6 +26,17 @@ namespace EpicMarket.Services
             this.addressService = addressService;
         }
 
+        public int AddProduct(ProductsDto productsDto, string UserName)
+        {
+            var product = mapper.Map<Catalog>(productsDto);
+            product.CreateBy = UserName;
+            product.CreateDate = DateTime.Now;
+            _context.Catalogs.Add(product);
+            _context.SaveChanges();
+
+            return product.ID;
+        }
+
         public async Task<List<ProductsMapOptionResult>> GetAllProductForMap(int BusinessID,int BranchId)
         {
 

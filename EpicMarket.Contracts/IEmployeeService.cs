@@ -12,5 +12,7 @@ namespace EpicMarket.Contracts
     {
         Task<AddEmployeeResult> Register(AddEmployeeParam addEmployeeParam);
         CheckLinkResult CheckEmployeeLink(string queryParam);
+
+        Task<int> CreateEmployeeAccount(EmployeeDto employee);
     }
 }

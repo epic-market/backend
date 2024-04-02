@@ -50,5 +50,16 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(id);
         }
 
+        [HttpPost("CreateEmployeeAccount")]
+        [AllowAnonymous]
+        public async Task<ActionResult<int>> CreateEmployeeAccount(EmployeeDto employeeDto)
+        {
+            this.logger.LogInformation("Employee Controller -> CheckEmployeeLink()-> params {0}", JsonConvert.SerializeObject(new { Params = employeeDto }));
+            var id = await employeeService.CreateEmployeeAccount(employeeDto);
+            this.logger.LogInformation("Business Controller -> CheckEmployeeLink()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
+            return Ok(id);
+        }
+
+
     }
 }
