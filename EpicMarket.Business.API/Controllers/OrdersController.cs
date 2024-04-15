@@ -1,5 +1,6 @@
 ﻿using EpicMarket.Contracts;
 using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
 using EpicMarket.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -21,14 +22,21 @@ namespace EpicMarket.Business.API.Controllers
         }
         [HttpPost("AddOrder")]
         [AllowAnonymous]
-        public async Task<ActionResult<int>> AddOrder(OrdersDto ordersDto)
+        public async Task<ActionResult<OperationResult<int>>> AddOrder(OrdersDto ordersDto)
         {
-            this.logger.LogInformation("Orders Controller -> AddOrder()-> params {0}", JsonConvert.SerializeObject(new { Params = ordersDto }));
+            var response = new OperationResult<int>();
+
+
+			this.logger.LogInformation("Orders Controller -> AddOrder()-> params {0}", JsonConvert.SerializeObject(new { Params = ordersDto }));
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
             var id = await orderService.CreateOrder(ordersDto , UserName);
+
             this.logger.LogInformation("Orders Controller -> AddOrder()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
 
-            return Ok(id);
+			response.Data = id;
+
+
+			return Ok(response);
         }
 
 

@@ -3,6 +3,8 @@ using EpicMarket.Contracts;
 using EpicMarket.Data;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,8 +30,9 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
+        public async Task<ActionResult<OperationResult<UserDto>>> Register(RegisterDto registerDto)
         {
+            var response = new OperationResult<UserDto>();
 
             if (await UserExists(registerDto.Username)) return BadRequest("Username is taken");
 
@@ -45,7 +48,7 @@ namespace EpicMarket.Business.API.Controllers
 
             if (!roleResult.Succeeded) return BadRequest(result.Errors);
 
-            return new UserDto
+			response.Data =  new UserDto
             {
                 Username = user.UserName,
                 Token = await _tokenService.CreateToken(user),
@@ -53,15 +56,18 @@ namespace EpicMarket.Business.API.Controllers
                 LastName = user.LastName,
                 Phone  = user.PhoneNumber
             };
+
+            return response;
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
+        public async Task<ActionResult<OperationResult<UserDto>>> Login(LoginDto loginDto)
         {
 
-            //communication.SendEmail("akhil@epicmarket.in", "This is test mail form code", "Its working");
+			var response = new OperationResult<UserDto>();
+			//communication.SendEmail("akhil@epicmarket.in", "This is test mail form code", "Its working");
 
-            var user = await _userManager.Users
+			var user = await _userManager.Users
                 .SingleOrDefaultAsync(x => x.UserName == loginDto.Username.ToLower());
 
             if (user == null) return Unauthorized("Invalid username");
@@ -69,9 +75,9 @@ namespace EpicMarket.Business.API.Controllers
             var result = await _signInManager
                 .CheckPasswordSignInAsync(user, loginDto.Password, false);
 
-            if (!result.Succeeded) return Unauthorized();
+            if (!result.Succeeded) return Unauthorized() ;
 
-            return new UserDto
+			response.Data = new UserDto
             {
                 Username = user.UserName,
                 Token = await _tokenService.CreateToken(user),
@@ -79,6 +85,9 @@ namespace EpicMarket.Business.API.Controllers
                 LastName = user.LastName,
                 Phone = user.PhoneNumber
             };
+
+			return response;
+
         }
 
         private async Task<bool> UserExists(string username)

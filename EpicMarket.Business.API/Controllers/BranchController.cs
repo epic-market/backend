@@ -1,5 +1,6 @@
 ﻿using EpicMarket.Contracts;
 using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -23,53 +24,70 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpGet("GetAllBranches")]
-        public async Task<ActionResult<List<BranchResult>>> GetAllBranches(BranchParams branchParams)
+        public async Task<ActionResult<OperationResult<List<BranchResult>>>> GetAllBranches(BranchParams branchParams)
         {
+            var response = new OperationResult<List<BranchResult>>();
+
             this.logger.LogInformation("Branch Controller -> GetAllBranches()-> params {0}", JsonConvert.SerializeObject(new { Params = branchParams }));
 
             var results = await branchService.GetAllBranches(branchParams);
 
             this.logger.LogInformation("Branch Controller -> GetAllBranches()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
 
-            return Ok(results);
+			response.Data = results;
+
+			return Ok(response);
         }
 
-        [HttpPost("AddBranch")]
-        public async Task<ActionResult<int>> AddBranch(BranchDto branchDto)
+
+
+		[HttpPost("AddBranch")]
+        public async Task<ActionResult<OperationResult<int>>> AddBranch(BranchDto branchDto)
         {
-            this.logger.LogInformation("Branch Controller -> AddBranch()-> params {0}", JsonConvert.SerializeObject(new { Params = branchDto }));
+            var response = new OperationResult<int>();
+
+			this.logger.LogInformation("Branch Controller -> AddBranch()-> params {0}", JsonConvert.SerializeObject(new { Params = branchDto }));
 
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
 
             var id = await branchService.AddBranch(branchDto, UserName);
             this.logger.LogInformation("Branch Controller -> AddBranch()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
 
-            return Ok(id);
+            response.Data = id;
+
+			return Ok(response);
         }
 
 
         [HttpPost("MapBranchToPeople")]
-        public async Task<ActionResult<int>> MapBranchToPeople(BranchPeopleMapParams branchPeopleMap)
+        public async Task<ActionResult<OperationResult<int>>> MapBranchToPeople(BranchPeopleMapParams branchPeopleMap)
         {
-            this.logger.LogInformation("Branch Controller -> MapBranchToPeople()-> params {0}", JsonConvert.SerializeObject(new { Params = branchPeopleMap }));
+			var response = new OperationResult<int>();
+			this.logger.LogInformation("Branch Controller -> MapBranchToPeople()-> params {0}", JsonConvert.SerializeObject(new { Params = branchPeopleMap }));
             
             var id = await branchService.MapBranchToPeople(branchPeopleMap);
 
             this.logger.LogInformation("Branch Controller -> MapBranchToPeople()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
+            
+            response.Data = id;
 
-            return Ok(id);
+            return Ok(response);
         }
 
         [HttpPost("MapBranchToProduct")]
-        public async Task<ActionResult<int>> MapBranchToProduct(BranchProductMapParams branchProductMap)
+        public async Task<ActionResult<OperationResult<int>>> MapBranchToProduct(BranchProductMapParams branchProductMap)
         {
-            this.logger.LogInformation("Branch Controller -> MapBranchToProduct()-> params {0}", JsonConvert.SerializeObject(new { Params = branchProductMap }));
+
+			var response = new OperationResult<int>();
+			this.logger.LogInformation("Branch Controller -> MapBranchToProduct()-> params {0}", JsonConvert.SerializeObject(new { Params = branchProductMap }));
 
             var id = await branchService.MapBranchToProducts(branchProductMap);
 
             this.logger.LogInformation("Branch Controller -> MapBranchToProduct()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
 
-            return Ok(id);
+			response.Data = id;
+
+			return Ok(response);
         }
 
     }

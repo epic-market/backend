@@ -1,5 +1,6 @@
 ﻿using EpicMarket.Contracts;
 using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
 using EpicMarket.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -25,14 +26,19 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpGet("GetBusinessCategoriesOptions")]
         [Authorize]
-        public async Task<ActionResult<int>> GetBusinessCategoriesOptions()
+        public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetBusinessCategoriesOptions()
         {
+            var reponse = new OperationResult<List<DropDownOptions>>();
+
             this.logger.LogInformation("Static Controller -> GetBusinessCategoriesOptions()");
 
             var options = await staticService.BusinessCategoriesOptions();
             this.logger.LogInformation("Static Controller-> GetBusinessCategoriesOptions()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = options }));
 
-            return Ok(options);
+            reponse.Data = options;
+
+
+			return Ok(options);
         }
     }
 }
