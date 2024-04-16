@@ -1,0 +1,16 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
+WORKDIR /src
+
+# Copy everything
+COPY . ./
+# Restore as distinct layers
+RUN dotnet restore ./EpicMarket.Admin.MVC/EpicMarket.Admin.MVC.csproj
+# Build and publish a release
+RUN dotnet publish "./EpicMarket.Admin.MVC/EpicMarket.Admin.MVC.csproj" -c Release -o out
+
+# Build runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /mvc
+COPY --from=build-env /src/out .
+EXPOSE 8080
+ENTRYPOINT ["dotnet", "EpicMarket.Admin.MVC.dll"]

@@ -2,11 +2,15 @@ name: CD - Deploy to AWS EC2
 
 on:
   workflow_call:
-
-  workflow_dispatch:
+    inputs:
+      is_api:
+        description: 'True to deploy API and False to deploy MVC'
+        required: true
+        type: boolean
+        default: true
 
 concurrency:
-  group: 'cd'
+  group: 'cd-${{ inputs.is_api }}'
   cancel-in-progress: true
 
 jobs:
@@ -14,14 +18,34 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - name: Determine which application to deploy
+        id: determine-application
+        run: |
+          if [${{ inputs.is_api }}]
+          then
+            echo "::set-output name=application::api"
+          else
+            echo "::set-output name=application::mvc"
+          fi
+
       - name: Remove existing Docker containers and images
-        run: /home/ubuntu/remove_containers.sh ghcr.io/${{ github.repository }}
+        run: /home/ubuntu/remove_containers.sh ghcr.io/${{ github.repository }}-${{ steps.determine-application.outputs.application }}
 
       - name: Login to Docker Hub
         run: sudo docker login -u ${{ github.actor }} -p ${{ secrets.CONTAINER_REGISTRY_TOKEN }} ghcr.io
 
       - name: Pull Docker image
-        run: sudo docker pull ghcr.io/${{ github.repository }}:latest
+        run: sudo docker pull ghcr.io/${{ github.repository }}-${{ steps.determine-application.outputs.application }}:latest
+
+      - name: Determine port based on input
+        id: determine-port
+        run: |
+          if [${{ inputs.is_api }}]
+          then
+            echo "::set-output name=port::3003"
+          else
+            echo "::set-output name=port::3001"
+          fi
 
       - name: Run Docker container
-        run: sudo docker run -d -p 3003:8080 ghcr.io/${{ github.repository }}
+        run: sudo docker run -d -p ${{ steps.determine-port.outputs.port }}:8080 ghcr.io/${{ github.repository }}-${{ steps.determine-application.outputs.application }}
