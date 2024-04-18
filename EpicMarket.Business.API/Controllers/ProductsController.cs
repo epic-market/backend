@@ -51,7 +51,7 @@ namespace EpicMarket.Business.API.Controllers
 
             response.Data  = productService.AddProduct(productsDto, UserName);
 
-            this.logger.LogInformation("Products Controller -> AddProduct()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
+            this.logger.LogInformation("Products Controller -> AddProduct()-> return {0}", JsonConvert.SerializeObject(new { Results = response }));
 
             return Ok(response);
         }

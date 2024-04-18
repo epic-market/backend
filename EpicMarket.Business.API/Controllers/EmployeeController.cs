@@ -53,7 +53,7 @@ namespace EpicMarket.Business.API.Controllers
 
 			this.logger.LogInformation("Employee Controller -> CheckEmployeeLink()-> params {0}", JsonConvert.SerializeObject(new { Params = queryParam }));
             var result =  employeeService.CheckEmployeeLink(queryParam);
-            this.logger.LogInformation("Business Controller -> CheckEmployeeLink()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
+            this.logger.LogInformation("Business Controller -> CheckEmployeeLink()-> return {0}", JsonConvert.SerializeObject(new { Value = result }));
 
             response.Data = result;  
 
@@ -70,7 +70,7 @@ namespace EpicMarket.Business.API.Controllers
 
 			this.logger.LogInformation("Employee Controller -> CheckEmployeeLink()-> params {0}", JsonConvert.SerializeObject(new { Params = employeeDto }));
             var result = await employeeService.CreateEmployeeAccount(employeeDto);
-            this.logger.LogInformation("Business Controller -> CheckEmployeeLink()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
+            this.logger.LogInformation("Business Controller -> CheckEmployeeLink()-> return {0}", JsonConvert.SerializeObject(new { Value = result }));
 
             response.Data = result;
 
