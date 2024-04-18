@@ -21,8 +21,8 @@ jobs:
       - name: Determine which application to deploy
         id: determine-application
         run: |
-          if [${{ inputs.is_api }}]
-          then
+          is_api=${{ inputs.is_api }}
+          if [ "$is_api" = "true" ]; then
             echo "::set-output name=application::api"
           else
             echo "::set-output name=application::mvc"
@@ -40,8 +40,8 @@ jobs:
       - name: Determine port based on input
         id: determine-port
         run: |
-          if [${{ inputs.is_api }}]
-          then
+          is_api=${{ inputs.is_api }}
+          if [ "$is_api" = "true" ]; then
             echo "::set-output name=port::3003"
           else
             echo "::set-output name=port::3001"
