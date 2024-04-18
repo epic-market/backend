@@ -22,14 +22,16 @@ namespace EpicMarket.Services
         private readonly IMapper mapper;
         private readonly IApplicationConfigurationService applicationConfiguration;
         private readonly UserManager<AppUser> userManager;
+        private readonly IAddressService addressService;
         private readonly ICommunicationService communicationService;
 
-        public EmployeeService(ApplicationDbContext context, IMapper mapper , IApplicationConfigurationService applicationConfiguration,ICommunicationService communicationService, UserManager<AppUser> userManager)
+        public EmployeeService(ApplicationDbContext context, IMapper mapper , IApplicationConfigurationService applicationConfiguration,ICommunicationService communicationService, UserManager<AppUser> userManager,IAddressService addressService)
         {
             _context = context;
             this.mapper = mapper;
             this.applicationConfiguration = applicationConfiguration;
             this.userManager = userManager;
+            this.addressService = addressService;
             this.communicationService = communicationService;
         }
         public async Task<AddEmployeeResult> Register(AddEmployeeParam addEmployeeParam)
@@ -124,6 +126,31 @@ namespace EpicMarket.Services
             {
                 throw new Exception("Link is Not correct");
             }
+        }
+
+        public async Task<int> CreateEmployeeAccount(EmployeeDto employee)
+        {
+            var address = new AddressDto()
+            {
+                Address1 =  employee.Address,
+                City = employee.City,
+                State =employee.State,
+                Pincode = employee.Pincode,
+            };
+
+            var addressId = await addressService.AddAddress(address);
+
+            var User = _context.Users.Where(u => employee.ID == u.Id).FirstOrDefault();
+            User.FirstName = employee.FirstName;
+            User.LastName = employee.LastName;
+            User.Email = employee.Email;
+            User.PhoneNumber = employee.ContactNumber;
+            await userManager.AddPasswordAsync(User, employee.Password);
+            _context.Users.Update(User);
+            _context.SaveChanges();
+
+            return User.Id;
+
         }
     }
 }

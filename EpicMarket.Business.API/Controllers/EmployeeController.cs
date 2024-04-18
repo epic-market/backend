@@ -1,5 +1,7 @@
-﻿using EpicMarket.Contracts;
+﻿using Azure;
+using EpicMarket.Contracts;
 using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
 using EpicMarket.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -16,7 +18,6 @@ namespace EpicMarket.Business.API.Controllers
         private readonly ILogger<EmployeeController> logger;
         private readonly IEmployeeService employeeService;
 
-
         public EmployeeController(ILogger<EmployeeController> logger, IEmployeeService employeeService)
         {
             this.logger = logger;
@@ -27,28 +28,55 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpPost("AddEmployee")]
         [AllowAnonymous]
-        public async Task<ActionResult<int>> Register(AddEmployeeParam addEmployeeParam)
+        public async Task<ActionResult<OperationResult<AddEmployeeResult>>> Register(AddEmployeeParam addEmployeeParam)
         {
+            var response = new OperationResult<AddEmployeeResult>();
+
             this.logger.LogInformation("Employee Controller -> Register()-> params {0}", JsonConvert.SerializeObject(new { Params = addEmployeeParam }));
             addEmployeeParam.UserID = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-            var id = await employeeService.Register(addEmployeeParam);
-            this.logger.LogInformation("Business Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
+            var result = await employeeService.Register(addEmployeeParam);
+            this.logger.LogInformation("Business Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = result }));
 
-            return Ok(id);
+            response.Data = result;
+
+            return Ok(response);
         }
 
 
         [HttpGet("CheckEmployeeLink")]
         [AllowAnonymous]
-        public async Task<ActionResult<int>> CheckEmployeeLink(string queryParam)
+        public async Task<ActionResult<OperationResult<CheckLinkResult>>> CheckEmployeeLink(string queryParam)
         {
-            this.logger.LogInformation("Employee Controller -> CheckEmployeeLink()-> params {0}", JsonConvert.SerializeObject(new { Params = queryParam }));
-            var id =  employeeService.CheckEmployeeLink(queryParam);
-            this.logger.LogInformation("Business Controller -> CheckEmployeeLink()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
+            var response = new OperationResult<CheckLinkResult>();
 
-            return Ok(id);
+
+			this.logger.LogInformation("Employee Controller -> CheckEmployeeLink()-> params {0}", JsonConvert.SerializeObject(new { Params = queryParam }));
+            var result =  employeeService.CheckEmployeeLink(queryParam);
+            this.logger.LogInformation("Business Controller -> CheckEmployeeLink()-> return {0}", JsonConvert.SerializeObject(new { Value = result }));
+
+            response.Data = result;  
+
+            return Ok(response);
         }
+
+        [HttpPost("CreateEmployeeAccount")]
+        [AllowAnonymous]
+        public async Task<ActionResult<int>> CreateEmployeeAccount(EmployeeDto employeeDto)
+        {
+
+			var response = new OperationResult<int>();
+
+
+			this.logger.LogInformation("Employee Controller -> CheckEmployeeLink()-> params {0}", JsonConvert.SerializeObject(new { Params = employeeDto }));
+            var result = await employeeService.CreateEmployeeAccount(employeeDto);
+            this.logger.LogInformation("Business Controller -> CheckEmployeeLink()-> return {0}", JsonConvert.SerializeObject(new { Value = result }));
+
+            response.Data = result;
+
+            return Ok(response);
+        }
+
 
     }
 }

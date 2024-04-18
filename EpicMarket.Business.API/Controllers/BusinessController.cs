@@ -1,6 +1,7 @@
 ﻿using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -26,15 +27,20 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpPost("RegisterDetails")]
         [Authorize]
-        public async Task<ActionResult<int>> Register(BusinessRegisterDto businessRegisterDto)
+        public async Task<ActionResult<OperationResult<int>>> Register(BusinessRegisterDto businessRegisterDto)
         {
-            this.logger.LogInformation("Business Controller -> Register()-> params {0}", JsonConvert.SerializeObject(new { Params = businessRegisterDto }));
+            var response = new OperationResult<int>();
+
+			this.logger.LogInformation("Business Controller -> Register()-> params {0}", JsonConvert.SerializeObject(new { Params = businessRegisterDto }));
             businessRegisterDto.UserID = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value) ;
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
             var id = await businessService.RegisterBusiness(businessRegisterDto, UserName);
             this.logger.LogInformation("Business Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
 
-            return Ok(id);
+			response.Data = id;
+
+
+			return Ok(response);
         }
 
     }

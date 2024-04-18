@@ -10,6 +10,8 @@ namespace EpicMarket.Business.API.Helpers
         {
             CreateMap<RegisterDto, AppUser>();
             CreateMap<AddressDto, Address>();
+            CreateMap<ProductsDto, Catalog>();
+            CreateMap<Catalog, ProductsDto>();
         }
     }
 }
