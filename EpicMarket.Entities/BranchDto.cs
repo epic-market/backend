@@ -9,6 +9,8 @@ namespace EpicMarket.Entities
 
     public class BranchDto
     {
+        public int? ID { get; set; }
+        public int? AddressID { get; set; }
         public int BussinessID { get; set; }
         public string Name { get; set; }
 
@@ -50,16 +52,20 @@ namespace EpicMarket.Entities
         public string State { get; set; }
 
         public int Pincode { get; set; }
+
+        public int Count { get; set; }
+
+        public int AddressID { get; set; }
     }
 
     public class BranchParams
     {
         public int BusinessId { get; set; }
-        public int PageIndex { get; set; }
-        public int pageSize { get; set; }
-        public string sortColumn { get; set; }
-        public bool ascending { get; set; }
-        public string searchTerm { get; set; }
+        public int PageIndex { get; set; } = 1;
+        public int pageSize { get; set; } = 10;
+        public string sortColumn { get; set; } = string.Empty;
+        public bool ascending { get; set; } = true;
+        public string searchTerm { get; set; } = string.Empty;
 
     }
 

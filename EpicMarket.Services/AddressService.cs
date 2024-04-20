@@ -24,7 +24,15 @@ namespace EpicMarket.Services
         public async Task<int> AddAddress(AddressDto addressDto)
         {
             var addressModel = mapper.Map<Address>(addressDto);
-            _context.Addresses.Add(addressModel);
+            if (addressDto.ID != null)
+            {
+                _context.Addresses.Update(addressModel);
+            }
+            else 
+            {
+                _context.Addresses.Add(addressModel);
+            }
+            
              await _context.SaveChangesAsync();
             return addressModel.Id;
             
