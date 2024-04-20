@@ -25,17 +25,28 @@ namespace EpicMarket.Services
             this.addressService = addressService;
         }
 
-        public async Task<int> AddBranch(BranchDto branchDto,  string UserName)
+        public async Task<int> AddOrUpdateBranch(BranchDto branchDto,  string UserName)
         {
             var addressModel = new AddressDto();
+         
             addressModel.Address1 = branchDto.Address;
             addressModel.City = branchDto.City;
             addressModel.State = branchDto.State;
             addressModel.Pincode = branchDto.Pincode;
             addressModel.Latitude = branchDto.Latitude;
             addressModel.Longitude = branchDto.Longitude;
-            addressModel.CreateBy = UserName;
-            addressModel.CreateDate = DateTime.Now;
+
+            if (branchDto.ID != null)
+            {
+                addressModel.ModifiedBy = UserName;
+                addressModel.ModifiedDate = DateTime.Now;
+                addressModel.ID = branchDto.AddressID;
+            }
+            else {
+                addressModel.CreateBy = UserName;
+                addressModel.CreateDate = DateTime.Now;
+            }
+           
 
             int addressId = await addressService.AddAddress(addressModel); 
 
@@ -46,10 +57,21 @@ namespace EpicMarket.Services
             outletModel.Description = branchDto.Description;
             outletModel.ContactEmail = branchDto.ContactEmail;
             outletModel.ContactNumber = branchDto.ContactNumber;
-            outletModel.CreateBy = UserName;
-            outletModel.CreateDate = DateTime.Now;
+            outletModel.ID = (int)branchDto.ID;
 
-            _context.Outlets.Add(outletModel);
+            if (branchDto.ID != null)
+            {
+                outletModel.ModifiedBy = UserName;
+                outletModel.ModifiedDate = DateTime.Now;
+                _context.Outlets.Update(outletModel);
+            }
+            else
+            {
+                outletModel.CreateBy = UserName;
+                outletModel.CreateDate = DateTime.Now;
+                _context.Outlets.Add(outletModel);
+            }
+      
             await _context.SaveChangesAsync();
 
             return outletModel.ID;
@@ -81,18 +103,19 @@ namespace EpicMarket.Services
 
         public async Task<int> MapBranchToProducts(BranchProductMapParams branchProductMap)
         {
+            
             foreach (var i in branchProductMap.AddProductsId)
             {
-                var branchPeople = new OutletPerson();
-                branchPeople.OutletId = branchProductMap.OutletId;
-                branchPeople.PersonId = i;
-                _context.OutletPeople.Add(branchPeople);
+                var branchProduct = new OutletProduct();
+                branchProduct.OutletID = branchProductMap.OutletId;
+                branchProduct.ProductID = i;
+                _context.OutletProducts.Add(branchProduct);
             }
 
             foreach (var i in branchProductMap.RemovedProductsId)
             {
-                var branchPeople = await _context.OutletPeople.Where(c => c.PersonId == i && c.OutletId == branchProductMap.OutletId).FirstOrDefaultAsync();
-                _context.OutletPeople.Remove(branchPeople);
+                var removedProducts = await _context.OutletProducts.Where(c => c.ProductID == i && c.OutletID == branchProductMap.OutletId).FirstOrDefaultAsync();
+                _context.OutletProducts.Remove(removedProducts);
             }
 
             var j = await _context.SaveChangesAsync();
@@ -115,8 +138,8 @@ namespace EpicMarket.Services
             // 3 .Appying Sorting
             switch (branchParams.sortColumn)
             {
-                case "BussinessID":
-                    sortedOutlets = branchParams.ascending ? sortedOutlets.OrderBy(c => c.BussinessID) : sortedOutlets.OrderByDescending(c => c.BussinessID);
+                case "BranchID":
+                    sortedOutlets = branchParams.ascending ? sortedOutlets.OrderBy(c => c.ID) : sortedOutlets.OrderByDescending(c => c.ID);
                     break;
                 case "Name":
                     sortedOutlets = branchParams.ascending ? sortedOutlets.OrderBy(c => c.Name) : sortedOutlets.OrderByDescending(c => c.Name);
@@ -124,6 +147,10 @@ namespace EpicMarket.Services
                 default:
                     break;
             }
+
+            //getting the total count
+            int totalCount = sortedOutlets.Count();
+
 
             // 4. Apply pagination (skip and take)
             var pagedOutlets = sortedOutlets
@@ -141,12 +168,29 @@ namespace EpicMarket.Services
                 Address = c.Address.Address1,
                 City = c.Address.City,
                 Pincode = c.Address.Pincode,
-                State = c.Address.State
+                State = c.Address.State,
+                Count = totalCount
             }).ToListAsync();
 
             return results;
         }
 
+        public async Task<BranchResult> GetBranchByID(int branchId)
+        {
+           return await _context.Outlets.Where(o => o.ID == branchId).Include(o=> o.Address).Select(o => new BranchResult()
+           {
+               ID = o.ID,
+               Name = o.Name,
+               Description = o.Description,
+               ContactEmail = o.ContactEmail,
+               ContactNumber = o.ContactNumber,
+               Address = o.Address.Address1,
+               City = o.Address.City,
+               Pincode = o.Address.Pincode,
+               State = o.Address.State,
+               AddressID = o.AddressID
+           }).FirstOrDefaultAsync();
+        }
 
 
     }

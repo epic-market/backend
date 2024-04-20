@@ -11,10 +11,12 @@ namespace EpicMarket.Contracts
     {
         Task<List<BranchResult>> GetAllBranches(BranchParams branchParams);
 
-        Task<int> AddBranch(BranchDto branchDto, string UserName);
+        Task<int> AddOrUpdateBranch(BranchDto branchDto, string UserName);
 
         Task<int> MapBranchToPeople(BranchPeopleMapParams branchPeopleMapParams);
 
         Task<int> MapBranchToProducts(BranchProductMapParams branchProductMap);
+
+        Task<BranchResult> GetBranchByID(int branchId);
     }
 }

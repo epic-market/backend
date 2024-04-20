@@ -24,7 +24,7 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpGet("GetAllBranches")]
-        public async Task<ActionResult<OperationResult<List<BranchResult>>>> GetAllBranches(BranchParams branchParams)
+        public async Task<ActionResult<OperationResult<List<BranchResult>>>> GetAllBranches([FromQuery]BranchParams branchParams)
         {
             var response = new OperationResult<List<BranchResult>>();
 
@@ -40,8 +40,24 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
+        [HttpGet("GetBranchByID")]
+        public async Task<ActionResult<OperationResult<BranchResult>>> GetBranchByID(int branchId)
+        {
+            var response = new OperationResult<BranchResult>();
 
-		[HttpPost("AddBranch")]
+            this.logger.LogInformation("Branch Controller -> GetBranchByID()-> params {0}", JsonConvert.SerializeObject(new { Params = new { branchID = branchId } }));
+
+            var results = await branchService.GetBranchByID(branchId);
+
+            this.logger.LogInformation("Branch Controller -> GetAllBranches()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
+
+            response.Data = results;
+
+            return Ok(response);
+        }
+
+
+        [HttpPost("AddOrUpdateBranch")]
         public async Task<ActionResult<OperationResult<int>>> AddBranch(BranchDto branchDto)
         {
             var response = new OperationResult<int>();
@@ -50,7 +66,7 @@ namespace EpicMarket.Business.API.Controllers
 
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
 
-            var id = await branchService.AddBranch(branchDto, UserName);
+            var id = await branchService.AddOrUpdateBranch(branchDto, UserName);
             this.logger.LogInformation("Branch Controller -> AddBranch()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
 
             response.Data = id;

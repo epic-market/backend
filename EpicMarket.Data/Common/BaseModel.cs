@@ -12,7 +12,7 @@ namespace EpicMarket.Data.Common
 
         public string  CreateBy { get; set; }
 
-        public string ModifiedDate { get; set; }
+        public DateTime ModifiedDate { get; set; }
 
         public string ModifiedBy { get; set; }
     }
