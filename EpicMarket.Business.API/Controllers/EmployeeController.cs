@@ -78,5 +78,22 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
+        [HttpGet("GetAllEmployeesForMap")]
+        public async Task<ActionResult<OperationResult<List<EmployeeMapOptionResult>>>> GetAllEmployeesForMap(int bussinessID, int outletID)
+        {
+            var response = new OperationResult<List<EmployeeMapOptionResult>>();
+
+            this.logger.LogInformation("Products Controller -> GetAllProductForMap()-> params {0}", JsonConvert.SerializeObject(new { Params = bussinessID }));
+
+            var results = await employeeService.GetAllEmployeesForMap(bussinessID, outletID);
+
+            this.logger.LogInformation("Products Controller -> GetAllProductForMap()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
+
+            response.Data = results;
+
+            return Ok(response);
+        }
+
+
     }
 }

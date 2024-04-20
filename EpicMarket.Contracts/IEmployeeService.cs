@@ -14,5 +14,7 @@ namespace EpicMarket.Contracts
         CheckLinkResult CheckEmployeeLink(string queryParam);
 
         Task<int> CreateEmployeeAccount(EmployeeDto employee);
+
+        Task<List<EmployeeMapOptionResult>> GetAllEmployeesForMap(int businessid, int Outletid);
     }
 }

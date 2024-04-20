@@ -89,11 +89,6 @@ namespace EpicMarket.Data.Models
                   .HasForeignKey(op => op.OutletID)
                   .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<OutletPerson>()
-                      .HasOne(op => op.Outlet)
-                      .WithMany(u => u.OutletPeople)
-                      .HasForeignKey(op => op.PersonId)
-                      .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<AppUser>()
                 .HasMany(ur => ur.UserRoles)

@@ -152,5 +152,23 @@ namespace EpicMarket.Services
             return User.Id;
 
         }
+
+        public async Task<List<EmployeeMapOptionResult>> GetAllEmployeesForMap(int businessid, int Outletid)
+        {
+            var _ = await (from singleEmployee in _context.BusinessEmployeeMaps.Include(e => e.Employee)
+                          join OutletPerson in (_context.OutletPeople.Where(a => a.OutletId == Outletid))
+                          on singleEmployee.EmployeeID equals OutletPerson.PersonId into joinedEmployees
+                          from matchedEmployee in joinedEmployees.DefaultIfEmpty()
+                          where singleEmployee.BussinessID == businessid
+                          select new EmployeeMapOptionResult
+                          {
+                              Id = singleEmployee.EmployeeID,
+                              Name = singleEmployee.Employee.FirstName,
+                              Email = singleEmployee.Employee.Email,
+                              Selected = matchedEmployee == null ? 0 : 1,
+                          }).ToListAsync();
+
+            return _;
+        }
     }
 }

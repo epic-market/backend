@@ -40,13 +40,15 @@ namespace EpicMarket.Services
         public async Task<List<ProductsMapOptionResult>> GetAllProductForMap(int BusinessID,int BranchId)
         {
 
+
             var _ = await (from catalogItem in _context.Catalogs
-                    join outletProduct in (_context.OutletProducts.Where(a => a.OutletID == 1))
+                    join outletProduct in (_context.OutletProducts.Where(a => a.OutletID == BranchId))
                     on catalogItem.ID equals outletProduct.ProductID into joinedProducts
                     from matchedProduct in joinedProducts.DefaultIfEmpty()
-                    where catalogItem.BusinessID == 6
+                    where catalogItem.BusinessID == BusinessID
                     select new ProductsMapOptionResult
                     {
+                        Id = catalogItem.ID,
                         Name = catalogItem.Name,
                         Description = catalogItem.Description,
                         ImageURL = catalogItem.Images,

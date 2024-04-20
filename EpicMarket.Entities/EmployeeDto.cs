@@ -61,4 +61,15 @@ namespace EpicMarket.Entities
         public string BusinessName { get; set; }
         public string BusinessEmail { get; set; }
     }
+
+    public class EmployeeMapOptionResult
+    {
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+
+        public string Email { get; set; }
+
+        public int Selected { get; set; }
+    }
 }
