@@ -1,0 +1,21 @@
+﻿using EpicMarket.Entities;
+using Microsoft.EntityFrameworkCore.Query.Internal;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace EpicMarket.Contracts
+{
+    public interface IHomeService
+    {
+        Task<List<FaqCategoryDto>> GetAllFaqCategoryAsync(string typeOfFAQ);
+
+        Task<List<FaqDto>> GetAllFaqByCategoryAsync(int Category);
+
+        Task<List<BlogDto>> GetAllBlogs(BlogParams blogParams);
+
+        Task<BlogDto> GetBlogDetails(int blogId);
+    }
+}

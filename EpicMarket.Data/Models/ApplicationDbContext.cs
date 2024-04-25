@@ -37,6 +37,12 @@ namespace EpicMarket.Data.Models
 
         public DbSet<BusinessEmployeeMap> BusinessEmployeeMaps { get; set; }
 
+        public DbSet<FAQ> FAQs { get; set; }
+
+        public DbSet<FAQCategory> FAQCategories { get; set; }
+
+        public DbSet<Blog> Blogs { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var configuration = new ConfigurationBuilder()
@@ -50,6 +56,11 @@ namespace EpicMarket.Data.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+
+
+
+
 
 
             modelBuilder.Entity<OutletPerson>()
@@ -134,6 +145,13 @@ namespace EpicMarket.Data.Models
                         .WithMany(o => o.OrderDetails)
                         .HasForeignKey(od => od.OrderID)
                         .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<FAQ>()
+                        .HasOne(c => c.Category)
+                        .WithMany(fc => fc.FAQs)
+                        .HasForeignKey(fk => fk.CategoryId)
+                        .OnDelete(DeleteBehavior.Restrict);
+                        
         }
     }
 }
