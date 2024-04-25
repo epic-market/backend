@@ -6,6 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.Models;
+using EpicMarket.Entities;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.AspNetCore.Razor.Language.Intermediate;
+using EpicMarket.Admin.MVC.Models;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -19,9 +23,24 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: FAQCategories
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string search="",string orderBy="",int currentPage=1)
         {
-            return View(await _context.FAQCategories.ToListAsync());
+
+            var viewModel = new FAQCategoryModel();
+            search = string.IsNullOrEmpty(search) ? "" : search.ToLower();
+
+            var data =  _context.FAQCategories.Where(row => row.CategoryTitle.Contains(search));
+            var totalRecords = data.Count();
+            int pageSize = 1;
+            var totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
+
+            var pagenateddata = await data.Skip((currentPage - 1) * pageSize).Take(pageSize).ToListAsync();
+            viewModel.CurrentPage = currentPage;
+            viewModel.TotalPages = totalPages;
+            viewModel.PageSize = pageSize;
+            viewModel.Search = search;
+            viewModel.FAQCategory = pagenateddata;
+            return View(viewModel);
         }
 
         // GET: FAQCategories/Details/5

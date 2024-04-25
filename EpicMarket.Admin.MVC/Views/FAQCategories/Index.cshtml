@@ -1,4 +1,4 @@
-﻿@model IEnumerable<EpicMarket.Data.Models.FAQCategory>
+﻿@model EpicMarket.Admin.MVC.Models.FAQCategoryModel
 
 @{
     ViewData["Title"] = "Index";
@@ -10,32 +10,42 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+<form asp-action="Index">
+    <div class="row">
+        <div class="col-md-8">
+            <input name="search" class="form-control" placeholder="Seach by title" />
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-info">Search</button>
+        </div>
+    </div>
+</form>
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.CategoryTitle)
+                Title
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.TypeOfFAQ)
+                TypeOfFAQ
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.CreateDate)
+                CreateDate
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.CreateBy)
+                CreateBy
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ModifiedDate)
+                ModifiedDate
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ModifiedBy)
+                ModifiedBy
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+@foreach (var item in Model.FAQCategory) {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.CategoryTitle)
@@ -64,3 +74,39 @@
 }
     </tbody>
 </table>
+<nav aria-label="Page navigation example">
+    <ul class="pagination">
+        @if (Model.CurrentPage > 1)
+        {
+            <li class="page-item">
+                <a class="page-link" href="/FAQCategories?search=@Model.Search&currentPage=@(Model.CurrentPage-1)" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        }
+
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            @if (i ==Model.CurrentPage)
+            {
+                <li class="page-item active"><a class="page-link" href="/FAQCategories?search=@Model.Search&currentPage=@i">@i</a></li>
+
+            }
+            else
+            {
+                <li class="page-item"><a class="page-link" href="/FAQCategories?search=@Model.Search&currentPage=@i">@i</a></li>
+            }
+           
+        }
+   
+        @if (Model.CurrentPage < Model.TotalPages)
+        {
+            <li class="page-item">
+                <a class="page-link" href="/FAQCategories?search=@Model.Search&currentPage=@(Model.CurrentPage+1)" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        }
+      
+    </ul>
+</nav>
