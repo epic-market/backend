@@ -36,7 +36,7 @@ namespace EpicMarket.Business.API.Controllers
             addEmployeeParam.UserID = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
             var result = await employeeService.Register(addEmployeeParam);
-            this.logger.LogInformation("Business Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = result }));
+            this.logger.LogInformation("Employee Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = result }));
 
             response.Data = result;
 
@@ -53,7 +53,7 @@ namespace EpicMarket.Business.API.Controllers
 
 			this.logger.LogInformation("Employee Controller -> CheckEmployeeLink()-> params {0}", JsonConvert.SerializeObject(new { Params = queryParam }));
             var result =  employeeService.CheckEmployeeLink(queryParam);
-            this.logger.LogInformation("Business Controller -> CheckEmployeeLink()-> return {0}", JsonConvert.SerializeObject(new { Value = result }));
+            this.logger.LogInformation("Employee Controller -> CheckEmployeeLink()-> return {0}", JsonConvert.SerializeObject(new { Value = result }));
 
             response.Data = result;  
 
@@ -70,7 +70,7 @@ namespace EpicMarket.Business.API.Controllers
 
 			this.logger.LogInformation("Employee Controller -> CheckEmployeeLink()-> params {0}", JsonConvert.SerializeObject(new { Params = employeeDto }));
             var result = await employeeService.CreateEmployeeAccount(employeeDto);
-            this.logger.LogInformation("Business Controller -> CheckEmployeeLink()-> return {0}", JsonConvert.SerializeObject(new { Value = result }));
+            this.logger.LogInformation("Employee Controller -> CheckEmployeeLink()-> return {0}", JsonConvert.SerializeObject(new { Value = result }));
 
             response.Data = result;
 
@@ -83,11 +83,44 @@ namespace EpicMarket.Business.API.Controllers
         {
             var response = new OperationResult<List<EmployeeMapOptionResult>>();
 
-            this.logger.LogInformation("Products Controller -> GetAllProductForMap()-> params {0}", JsonConvert.SerializeObject(new { Params = bussinessID }));
+            this.logger.LogInformation("Employee Controller -> GetAllProductForMap()-> params {0}", JsonConvert.SerializeObject(new { Params = bussinessID }));
 
             var results = await employeeService.GetAllEmployeesForMap(bussinessID, outletID);
 
-            this.logger.LogInformation("Products Controller -> GetAllProductForMap()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
+            this.logger.LogInformation("Employee Controller -> GetAllProductForMap()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
+
+            response.Data = results;
+
+            return Ok(response);
+        }
+
+
+        [HttpGet("GetAllEmployees")]
+        public async Task<ActionResult<OperationResult<List<EmployeeResult>>>> GetAllEmployees([FromQuery]EmployeeParams employeeParams)
+        {
+            var response = new OperationResult<List<EmployeeResult>>();
+
+            this.logger.LogInformation("Employee Controller -> GetAllEmployees()-> params {0}", JsonConvert.SerializeObject(new { Params = employeeParams }));
+
+            var results = await employeeService.GetAllEmployees(employeeParams);
+
+            this.logger.LogInformation("Employee Controller -> GetAllEmployees()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
+
+            response.Data = results;
+
+            return Ok(response);
+        }
+
+        [HttpGet("GetEmployeeDetails")]
+        public async Task<ActionResult<OperationResult<SingleEmployeeResult>>> GetEmployeeDetails(int employeeId)
+        {
+            var response = new OperationResult<SingleEmployeeResult>();
+
+            this.logger.LogInformation("Employee Controller -> GetAllEmployees()-> params {0}", JsonConvert.SerializeObject(new { Params = employeeId }));
+
+            var results = await employeeService.GetEmployeeDetails(employeeId);
+
+            this.logger.LogInformation("Employee Controller -> GetAllEmployees()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
 
             response.Data = results;
 

@@ -16,5 +16,9 @@ namespace EpicMarket.Contracts
         Task<int> CreateEmployeeAccount(EmployeeDto employee);
 
         Task<List<EmployeeMapOptionResult>> GetAllEmployeesForMap(int businessid, int Outletid);
+
+        Task<List<EmployeeResult>> GetAllEmployees(EmployeeParams employeeParams);
+
+        Task<SingleEmployeeResult> GetEmployeeDetails(int employeeId);
     }
 }
