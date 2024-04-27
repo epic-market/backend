@@ -9,6 +9,7 @@ namespace EpicMarket.Entities
 {
     public class ProductsDto
     {
+        public int? Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public string Category{ get; set; }
@@ -33,5 +34,27 @@ namespace EpicMarket.Entities
         public double Rate { get; set; }
 
         public int Selected { get; set; }
+    }
+
+    public class ProductParams
+    {
+        public int BusinessId { get; set; }
+        public int PageIndex { get; set; } = 1;
+        public int pageSize { get; set; } = 10;
+        public string sortColumn { get; set; } = string.Empty;
+        public bool ascending { get; set; } = true;
+        public string searchTerm { get; set; } = string.Empty;
+
+    }
+
+    public class ProductResult
+    {
+        public int ProductId { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public double Rate { get; set; }
+        public bool IsActive { get; set; }
+        public bool InStock { get; set; }
+        public int Count { get; set; }
     }
 }

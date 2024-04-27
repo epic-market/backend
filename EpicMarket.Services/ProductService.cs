@@ -26,12 +26,21 @@ namespace EpicMarket.Services
             this.addressService = addressService;
         }
 
-        public int AddProduct(ProductsDto productsDto, string UserName)
+        public int AddOrUpdateProduct(ProductsDto productsDto, string UserName)
         {
             var product = mapper.Map<Catalog>(productsDto);
-            product.CreateBy = UserName;
-            product.CreateDate = DateTime.Now;
-            _context.Catalogs.Add(product);
+            if (productsDto.Id == null)
+            {
+                product.CreateBy = UserName;
+                product.CreateDate = DateTime.Now;
+                _context.Catalogs.Add(product);
+            }
+            else 
+            {
+                product.ModifiedBy = UserName;
+                product.ModifiedDate = DateTime.Now;
+                _context.Catalogs.Update(product);
+            }
             _context.SaveChanges();
 
             return product.ID;
@@ -57,6 +66,74 @@ namespace EpicMarket.Services
                     }).ToListAsync();
 
             return _;
+        }
+
+        public async Task<List<ProductResult>> GetAllProducts(ProductParams productParams)
+        {
+            //1 . filter with BusinessID
+            var Products = _context.Catalogs
+                                .Where(c => c.BusinessID == productParams.BusinessId);
+
+
+            //2 . Appling Searching
+            var sortedProducts = Products.Where(row => row.Name.Contains(productParams.searchTerm) || row.Description.Contains(productParams.searchTerm));
+
+
+            // 3 .Appying Sorting
+            switch (productParams.sortColumn)
+            {
+                case "ProductID":
+                    sortedProducts = productParams.ascending ? sortedProducts.OrderBy(c => c.ID) : sortedProducts.OrderByDescending(c => c.ID);
+                    break;
+                case "Name":
+                    sortedProducts = productParams.ascending ? sortedProducts.OrderBy(c => c.Name) : sortedProducts.OrderByDescending(c => c.Name);
+                    break;
+                default:
+                    break;
+            }
+
+            //getting the total count
+            int totalCount = sortedProducts.Count();
+
+
+            // 4. Apply pagination (skip and take)
+            var pagedProducts = sortedProducts
+                .Skip((productParams.PageIndex - 1) * productParams.pageSize) // Skip items for previous pages
+                .Take(productParams.pageSize); // Take items for the current page
+
+            // 5. Select data and add SRNO
+            var results = await pagedProducts.Select(c => new ProductResult()
+            {
+                ProductId = c.ID,
+                Name = c.Name,
+                Description = c.Description,
+                Rate = c.Rate,
+                InStock = c.InStock,
+                IsActive = c.IsActive,  
+                Count = totalCount
+            }).ToListAsync();
+
+            return results;
+        }
+
+        public async Task<ProductsDto> GetProductDetails(int productId)
+        {
+            return await _context.Catalogs.Where(c=> c.ID == productId).Select(c => new ProductsDto
+            { 
+                Id=c.ID,
+                Name = c.Name,
+                Description = c.Description,
+                Rate = c.Rate,
+                InStock = c.InStock,
+                IsActive = c.IsActive,
+                BusinessID = c.BusinessID,
+                Category = c.Category,
+                Images = c.Images,
+                MaximumPurchaceOrder   = (int)c.MaximumOrderPurchase,
+                IsRecomended = c.IsRecommended,
+            }
+            
+            ).FirstOrDefaultAsync();
         }
     }
 }

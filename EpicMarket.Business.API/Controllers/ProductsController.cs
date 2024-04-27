@@ -40,8 +40,8 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
-        [HttpPost("AddProduct")]
-        public async Task<ActionResult<OperationResult<int>>> AddProduct(ProductsDto productsDto)
+        [HttpPost("AddOrUpdateProduct")]
+        public  ActionResult<OperationResult<int>> AddOrUpdateProduct(ProductsDto productsDto)
         {
 
 			var response = new OperationResult<int>();
@@ -49,11 +49,50 @@ namespace EpicMarket.Business.API.Controllers
 			this.logger.LogInformation("Products Controller -> AddProduct()-> params {0}", JsonConvert.SerializeObject(new { Params = productsDto }));
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
 
-            response.Data  = productService.AddProduct(productsDto, UserName);
+            response.Data  = productService.AddOrUpdateProduct(productsDto, UserName);
 
             this.logger.LogInformation("Products Controller -> AddProduct()-> return {0}", JsonConvert.SerializeObject(new { Results = response }));
 
             return Ok(response);
         }
+
+
+        [HttpGet("GetAllProducts")]
+        public async Task<ActionResult<OperationResult<List<ProductResult>>>> GetAllProducts([FromQuery] ProductParams productResult)
+        {
+            var response = new OperationResult<List<ProductResult>>();
+
+            this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = productResult }));
+
+            var results = await productService.GetAllProducts(productResult);
+
+            this.logger.LogInformation("Products Controller -> GetAllProducts()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
+
+            response.Data = results;
+
+            return Ok(response);
+        }
+
+
+        [HttpGet("GetProductDetails")]
+        public async Task<ActionResult<OperationResult<ProductsDto>>> GetProductDetails(int productId)
+        {
+            var response = new OperationResult<ProductsDto>();
+
+            this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = productId }));
+
+            var results = await productService.GetProductDetails(productId);
+
+            this.logger.LogInformation("Products Controller -> GetAllProducts()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
+
+            response.Data = results;
+
+            return Ok(response);
+        }
+
+
+
+
+
     }
 }
