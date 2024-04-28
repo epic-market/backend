@@ -45,6 +45,8 @@ namespace EpicMarket.Data.Models
 
         public DbSet<UserAddress> UserAddresses { get; set; }
 
+        public DbSet<OrderStatusOptions> OrderStatusOptions { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var configuration = new ConfigurationBuilder()
