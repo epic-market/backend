@@ -12,13 +12,13 @@ namespace EpicMarket.Data.Models
         public int ID { get; set; }
         public int PersonID { get; set; }
         public int BusinessID { get; set; }
-        public string OrderType { get; set; }
-        public double TotalPrice { get; set; }
-        public int TotalItems { get; set; }
-        public DateTime OrderAt { get; set; }
-        public string Status { get; set; }
-        public string PaymentMode { get; set; }
-        public int AddressID { get; set; }
+        public string OrderType { get; set; } //online or offline
+        public double TotalPrice { get; set; }// total value of the order
+        public int TotalItems { get; set; } //total quantity of the items
+        public DateTime OrderAt { get; set; } //date time
+        public string Status { get; set; } // delivered, packing 
+        public string PaymentMode { get; set; } // cash , online
+        public int? AddressID { get; set; }
 
         // Navigation properties
         public virtual AppUser? Person { get; set; }

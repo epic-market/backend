@@ -149,6 +149,14 @@ namespace EpicMarket.Services
             _context.Users.Update(User);
             _context.SaveChanges();
 
+            var userAddress = new UserAddress() {
+                AddressId = addressId,
+                UserId = User.Id,
+            };
+
+            _context.UserAddresses.Add(userAddress);
+            _context.SaveChanges();
+
             return User.Id;
 
         }
@@ -169,6 +177,73 @@ namespace EpicMarket.Services
                           }).ToListAsync();
 
             return _;
+        }
+
+        public async Task<List<EmployeeResult>> GetAllEmployees(EmployeeParams employeeParams)
+        {
+
+            //1 . filter with BusinessID
+            var Employess = _context.BusinessEmployeeMaps
+                                .Include(c=> c.Employee).Where(c => c.BussinessID == employeeParams.BusinessId);
+
+
+            //2 . Appling Searching
+            var searchedEmployees = Employess.Where(
+                row => row.Employee.FirstName.Contains(employeeParams.searchTerm) ||
+                (row.Employee.Id).ToString() == employeeParams.searchTerm);
+
+
+            var sortedEmployess = searchedEmployees;
+            // 3 .Appying Sorting
+            switch (employeeParams.sortColumn)
+            {
+                case "EmployeeID":
+                    sortedEmployess = employeeParams.ascending ? searchedEmployees.OrderBy(c => c.Employee.Id) : searchedEmployees.OrderByDescending(c => c.Employee.Id);
+                    break;
+                case "Name":
+                    sortedEmployess = employeeParams.ascending ? searchedEmployees.OrderBy(c => c.Employee.FirstName) : searchedEmployees.OrderByDescending(c => c.Employee.FirstName);
+                    break;
+                default:
+                    break;
+            }
+
+            //getting the total count
+            int totalCount = sortedEmployess.Count();
+
+
+            // 4. Apply pagination (skip and take)
+            var pagedOutlets = sortedEmployess
+                .Skip((employeeParams.PageIndex - 1) * employeeParams.pageSize) // Skip items for previous pages
+                .Take(employeeParams.pageSize); // Take items for the current page
+
+            // 5. Select data and add SRNO
+            var results = await pagedOutlets.Select(c => new EmployeeResult()
+            {
+                EmployeeID = c.Employee.Id,
+                FirstName = c.Employee.FirstName,
+                ContactNumber = c.Employee.PhoneNumber,
+                EmailId = c.Employee.Email,
+                Count = totalCount
+            }).ToListAsync();
+
+            return results;
+        }
+
+        public async Task<SingleEmployeeResult> GetEmployeeDetails(int employeeId)
+        {
+           return await _context.UserAddresses.Where(c=>c.UserId == employeeId).Include(c => c.User).Include(c=>c.Address).Select(
+               c=> new SingleEmployeeResult()
+               { 
+                 EmployeeID = c.User.Id,
+                 EmailId= c.User.Email,
+                 FirstName = c.User.FirstName,
+                 LastName = c.User.LastName,
+                 ContactNumber= c.User.PhoneNumber,
+                 Address = c.Address.Address1,
+                 City = c.Address.City,
+                 State = c.Address.State,
+                 PinCode = c.Address.Pincode
+               }).FirstOrDefaultAsync();
         }
     }
 }

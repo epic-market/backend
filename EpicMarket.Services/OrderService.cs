@@ -3,6 +3,7 @@ using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -32,17 +33,9 @@ namespace EpicMarket.Services
             this.communicationService = communicationService;
         }
 
-        public int ID { get; set; }
-        public int PersonID { get; set; }
-        public int BusinessID { get; set; }
-        public string OrderType { get; set; }
-        public double TotalPrice { get; set; }
-        public int TotalItems { get; set; }
-        public DateTime OrderAt { get; set; }
-        public string Status { get; set; }
-        public string PaymentMode { get; set; }
-        public int AddressID { get; set; }
-        public async Task<int> CreateOrder(OrdersDto orderdto,string UserName)
+
+
+        public  int CreateOrder(OrdersDto orderdto,string UserName)
         {
 
             var ListOfOrderDetails = JsonConvert.DeserializeObject<List<OrderDetailsDto>>(orderdto.OrderDetails);
@@ -50,31 +43,126 @@ namespace EpicMarket.Services
             var User = new AppUser();
 
             User.FirstName = orderdto.CustomerName;
-
             User.UserName = orderdto.CustomerEmail;
-
             User.PhoneNumber = orderdto.CustomerPhone;
 
             _context.Users.Add(User);
             _context.SaveChanges();
-             
 
-            return 1;
+            var newOrder = new Order()
+            {
+                PersonID = User.Id,
+                BusinessID = orderdto.BusinessID,
+                OrderType = orderdto.OrderedMode,
+                OrderAt = DateTime.Now,
+                Status = orderdto.Status,
+                PaymentMode = orderdto.PaymentMode,
+                TotalItems = orderdto.TotalItems,
+                TotalPrice = orderdto.TotalPrice,
+            };
+            
+            _context.Orders.Add(newOrder);
+            _context.SaveChanges();
+
+            var orderDetails = mapper.Map<List<OrderDetail>>(ListOfOrderDetails);
+            orderDetails.ForEach(od => od.OrderID = newOrder.ID);
+            _context.OrderDetails.AddRange(orderDetails);
+            _context.SaveChanges();
+
+            return newOrder.ID;
         }
 
-        public Task<DropDownOptions> GetOrderStatusOptions()
+        public async Task<List<DropDownOptions>> GetOrderStatusOptions()
         {
-            throw new NotImplementedException();
+            return await _context.OrderStatusOptions.Select(c => new DropDownOptions()
+            {
+                Text = c.OrderStatus,
+                Value = c.Id
+            }).ToListAsync();
         }
 
-        public Task<OrdersDto> GetSingleOrder(int OrderId)
+        public async Task<OrdersDto> GetSingleOrder(int OrderId)
         {
-            throw new NotImplementedException();
+            var OrderDetails  = _context.OrderDetails.Where(c => c.OrderID == OrderId ).ToListAsync();
+            var OrderDetailsString = OrderDetails.ToString();
+
+
+            var Order = await _context.Orders.Where(c => c.ID == OrderId).Include(c => c.Person).Include(c => c.Address).Select(
+                c => new OrdersDto()
+                {
+                    CustomerName = c.Person.FirstName + " " + c.Person.LastName,
+                    CustomerEmail = c.Person.Email,
+                    CustomerPhone = c.Person.PhoneNumber,
+                    OrderDate = c.OrderAt,
+                    PaymentMode = c.PaymentMode,
+                    OrderedMode = c.OrderType,
+                    Status = c.Status,
+                    OrderDetails = OrderDetailsString,
+                }).FirstOrDefaultAsync();
+
+            return Order;
+
         }
 
-        public Task<int> UpdateStatus(int OrderId, string OrderStatus)
+        public int UpdateStatus(int OrderId, string OrderStatus)
         {
-            throw new NotImplementedException();
+            var Order = _context.Orders.Find(OrderId);
+            Order.Status = OrderStatus;
+            _context.Orders.Update(Order);
+            _context.SaveChanges();
+
+            return Order.ID;
+
         }
+
+        public async Task<List<OrderResult>> GetAllBranches(OrderParams orderParams)
+        {
+
+            //1 . filter with BusinessID
+            var orders = _context.Orders
+                                .Where(c => c.BusinessID == orderParams.BusinessId).Include(c=> c.Person);
+
+
+            //2 . Appling Searching
+            var sortedOrders = orders.Where(row => row.Person.FirstName.Contains(orderParams.searchTerm) || row.ID.ToString() == orderParams.searchTerm);
+
+
+            // 3 .Appying Sorting
+            switch (orderParams.sortColumn)
+            {
+                case "OrderID":
+                    sortedOrders = orderParams.ascending ? sortedOrders.OrderBy(c => c.ID) : sortedOrders.OrderByDescending(c => c.ID);
+                    break;
+                case "Status":
+                    sortedOrders = orderParams.ascending ? sortedOrders.OrderBy(c => c.Status) : sortedOrders.OrderByDescending(c => c.Status);
+                    break;
+                default:
+                    break;
+            }
+
+            //getting the total count
+            int totalCount = sortedOrders.Count();
+
+
+            // 4. Apply pagination (skip and take)
+            var pagedOrders = sortedOrders
+                .Skip((orderParams.PageIndex - 1) * orderParams.pageSize) // Skip items for previous pages
+                .Take(orderParams.pageSize); // Take items for the current page
+
+            // 5. Select data and add SRNO
+            var results = await pagedOrders.Select(c => new OrderResult()
+            {
+                ID = c.ID,
+                CustomerName = c.Person.FirstName + "" + c.Person.LastName,
+                Status = c.Status,
+                TotalPrice = c.TotalPrice,
+                TotalItems = c.TotalItems,
+                OrderType = c.OrderType,
+                Count = totalCount
+            }).ToListAsync();
+
+            return results;
+        }
+
     }
 }

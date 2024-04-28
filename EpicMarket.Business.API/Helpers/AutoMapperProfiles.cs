@@ -16,6 +16,8 @@ namespace EpicMarket.Business.API.Helpers
             CreateMap<FaqDto, FAQ>();
             CreateMap<FaqCategoryDto, FAQCategory>();
             CreateMap<FAQCategory, FaqCategoryDto>();
+            CreateMap<OrderDetailsDto, OrderDetail>();
+            CreateMap<OrderDetail, OrderDetailsDto>();
         }
     }
 }

@@ -43,6 +43,10 @@ namespace EpicMarket.Data.Models
 
         public DbSet<Blog> Blogs { get; set; }
 
+        public DbSet<UserAddress> UserAddresses { get; set; }
+
+        public DbSet<OrderStatusOptions> OrderStatusOptions { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var configuration = new ConfigurationBuilder()
@@ -58,8 +62,18 @@ namespace EpicMarket.Data.Models
             base.OnModelCreating(modelBuilder);
 
 
+            modelBuilder.Entity<UserAddress>()
+                    .HasOne(op => op.User)
+                    .WithMany(u => u.UserAddresses)
+                    .HasForeignKey(op => op.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
 
+            modelBuilder.Entity<UserAddress>()
+                       .HasOne(op => op.Address)
+                       .WithMany(u => u.UserAddresses)
+                       .HasForeignKey(op => op.AddressId)
+                       .OnDelete(DeleteBehavior.Restrict);
 
 
 

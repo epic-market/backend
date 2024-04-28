@@ -633,7 +633,7 @@ namespace EpicMarket.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
-                    b.Property<int>("AddressID")
+                    b.Property<int?>("AddressID")
                         .HasColumnType("int");
 
                     b.Property<int>("BusinessID")
@@ -725,6 +725,22 @@ namespace EpicMarket.Data.Migrations
                     b.HasIndex("OrderID");
 
                     b.ToTable("OrderDetails");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.OrderStatusOptions", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("OrderStatus")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("OrderStatusOptions");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Outlet", b =>
@@ -928,7 +944,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserAddress");
+                    b.ToTable("UserAddresses");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -1144,9 +1160,7 @@ namespace EpicMarket.Data.Migrations
                 {
                     b.HasOne("EpicMarket.Data.Models.Address", "Address")
                         .WithMany("Orders")
-                        .HasForeignKey("AddressID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AddressID");
 
                     b.HasOne("EpicMarket.Data.Models.Business", "Business")
                         .WithMany()
@@ -1267,13 +1281,13 @@ namespace EpicMarket.Data.Migrations
                     b.HasOne("EpicMarket.Data.Models.Address", "Address")
                         .WithMany("UserAddresses")
                         .HasForeignKey("AddressId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("EpicMarket.Data.Models.AppUser", "User")
                         .WithMany("UserAddresses")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Address");
