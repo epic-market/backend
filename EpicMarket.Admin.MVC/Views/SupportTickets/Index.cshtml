@@ -4,10 +4,22 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
+<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+    <div class="breadcrumb-title pe-3">Support</div>
+    <div class="ps-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 p-0">
+                <li class="breadcrumb-item">
+                    <a asp-action="Index"><i class="bx bx-home-alt"></i></a>
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<p class="d-flex justify-content-end">
+    <a asp-action="Create" class="btn btn-primary px-5"><i class='bx bx-plus mr-1'></i>Create New</a>
 </p>
 <div class="card">
     <div class="card-body">
@@ -49,7 +61,7 @@
                             <td>
                                 <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
                                 <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
-                                <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+                                <button type="button" class="btn btn-danger delete-btn" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal" data-id="@item.ID">Delete</button>
                             </td>
                         </tr>
                     }
@@ -58,10 +70,75 @@
         </div>
     </div>
 </div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleVerticallycenteredModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Action</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">Are you sure You would like to Delete this Record?</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" onclick="deleteRecord()">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
 @section Scripts {
-	<script>
-		$(document).ready(function () {
-			$('#example').DataTable();
-		});
-	</script>
+    <script>
+        $(document).ready(function () {
+            $('#example').DataTable();
+            debugger
+            if (localStorage.getItem('deletionOccurred') === 'true') {
+                // Show the Lobibox notification
+                Lobibox.notify('success', {
+                    pauseDelayOnHover: true,
+                    size: 'mini',
+                    rounded: true,
+                    icon: 'bx bx-check-circle',
+                    delayIndicator: false,
+                    continueDelayOnInactiveTab: false,
+                    position: 'top right',
+                    msg: 'Successfully deleted.'
+                });
+
+                // Clear the flag to prevent the notification from appearing again
+                localStorage.removeItem('deletionOccurred');
+            }
+        });
+        var deleteItemId; // Global variable to store the ID of the item to be deleted
+        // This function is called when the "Delete" button is clicked. It stores the item's ID in a global variable.
+        $('.delete-btn').click(function () {
+            deleteItemId = $(this).data('id');
+            console.log(deleteItemId)// Store the ID from the data-id attribute
+        });
+
+        function deleteRecord() {
+            $.ajax({
+                url: '@Url.Action("Delete", "SupportTickets")', // Ensure this matches the controller name and action
+                type: 'POST',
+                data: { id: deleteItemId }, // Send the ID as data
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() // Include the anti-forgery token
+                },
+                success: function (result) {
+                    debugger
+                    // Set a flag to indicate that a deletion has occurred
+                    localStorage.setItem('deletionOccurred', 'true');
+
+                    // Hide the modal and reload the page
+                    $('#exampleVerticallycenteredModal').modal('hide');
+                    location.reload(); // This will refresh the page
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error deleting record: " + error);
+                }
+            });
+        }
+
+
+    </script>
 }

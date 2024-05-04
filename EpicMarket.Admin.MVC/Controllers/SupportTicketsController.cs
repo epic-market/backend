@@ -25,6 +25,13 @@ namespace EpicMarket.Admin.MVC.Controllers
             return View(await applicationDbContext.ToListAsync());
         }
 
+        [HttpPost, ActionName("GetData")]
+        public async Task<IActionResult> GetData()
+        {
+            var applicationDbContext = _context.SupportTickets.Include(s => s.Person).Include(s => s.TicketType);
+            return View(await applicationDbContext.ToListAsync());
+        }
+
         // GET: SupportTickets/Details/5
         public async Task<IActionResult> Details(int? id)
         {
