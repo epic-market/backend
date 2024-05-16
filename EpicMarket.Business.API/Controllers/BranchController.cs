@@ -1,4 +1,5 @@
 ﻿using EpicMarket.Contracts;
+using EpicMarket.Data.Models;
 using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Authorization;
@@ -16,8 +17,8 @@ namespace EpicMarket.Business.API.Controllers
         private readonly ILogger<BranchController> logger;
         private readonly IBranchService branchService;
 
-        public BranchController(ILogger<BranchController> logger, IBranchService branchService)
-        {
+        public BranchController(ILogger<BranchController> logger, IBranchService branchService, ApplicationDbContext dbContext) : base(dbContext)
+		{
             this.logger = logger;
             this.branchService = branchService;
        
@@ -30,7 +31,7 @@ namespace EpicMarket.Business.API.Controllers
 
             this.logger.LogInformation("Branch Controller -> GetAllBranches()-> params {0}", JsonConvert.SerializeObject(new { Params = branchParams }));
 
-            var results = await branchService.GetAllBranches(branchParams);
+            var results = await branchService.GetAllBranches(branchParams, this.BusinessId);
 
             this.logger.LogInformation("Branch Controller -> GetAllBranches()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
 
@@ -66,7 +67,7 @@ namespace EpicMarket.Business.API.Controllers
 
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
 
-            var id = await branchService.AddOrUpdateBranch(branchDto, UserName);
+            var id = await branchService.AddOrUpdateBranch(branchDto, UserName, this.BusinessId);
             this.logger.LogInformation("Branch Controller -> AddBranch()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
 
             response.Data = id;

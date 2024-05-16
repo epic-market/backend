@@ -1,4 +1,5 @@
 ﻿using EpicMarket.Contracts;
+using EpicMarket.Data.Models;
 using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
 using EpicMarket.Services;
@@ -17,20 +18,20 @@ namespace EpicMarket.Business.API.Controllers
         private readonly IProductService productService;
         private readonly IBranchService branchService;
 
-        public ProductsController(ILogger<ProductsController> logger, IProductService productService)
-        {
+        public ProductsController(ILogger<ProductsController> logger, IProductService productService, ApplicationDbContext dbContext) : base(dbContext)
+		{
             this.logger = logger;
             this.productService = productService;
         }
 
         [HttpGet("GetAllProductForMap")]
-        public async Task<ActionResult<OperationResult<List<ProductsMapOptionResult>>>> GetAllProductForMap(int bussinessID,int outletID)
+        public async Task<ActionResult<OperationResult<List<ProductsMapOptionResult>>>> GetAllProductForMap(int outletID)
         {
             var response = new OperationResult<List<ProductsMapOptionResult>>();
 
-			this.logger.LogInformation("Products Controller -> GetAllProductForMap()-> params {0}", JsonConvert.SerializeObject(new { Params = bussinessID }));
+			this.logger.LogInformation("Products Controller -> GetAllProductForMap()-> params {0}", JsonConvert.SerializeObject(new { Params = outletID }));
 
-            var results = await productService.GetAllProductForMap(bussinessID, outletID);
+            var results = await productService.GetAllProductForMap(this.BusinessId, outletID);
 
             this.logger.LogInformation("Products Controller -> GetAllProductForMap()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
 
@@ -49,7 +50,7 @@ namespace EpicMarket.Business.API.Controllers
 			this.logger.LogInformation("Products Controller -> AddProduct()-> params {0}", JsonConvert.SerializeObject(new { Params = productsDto }));
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
 
-            response.Data  = productService.AddOrUpdateProduct(productsDto, UserName);
+            response.Data  = productService.AddOrUpdateProduct(productsDto, UserName,this.BusinessId);
 
             this.logger.LogInformation("Products Controller -> AddProduct()-> return {0}", JsonConvert.SerializeObject(new { Results = response }));
 
@@ -64,7 +65,7 @@ namespace EpicMarket.Business.API.Controllers
 
             this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = productResult }));
 
-            var results = await productService.GetAllProducts(productResult);
+            var results = await productService.GetAllProducts(productResult,this.BusinessId);
 
             this.logger.LogInformation("Products Controller -> GetAllProducts()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
 

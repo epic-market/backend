@@ -35,7 +35,7 @@ namespace EpicMarket.Services
 
 
 
-        public  int CreateOrder(OrdersDto orderdto,string UserName)
+        public  int CreateOrder(OrdersDto orderdto,string UserName, int businessId)
         {
 
             var ListOfOrderDetails = JsonConvert.DeserializeObject<List<OrderDetailsDto>>(orderdto.OrderDetails);
@@ -52,7 +52,7 @@ namespace EpicMarket.Services
             var newOrder = new Order()
             {
                 PersonID = User.Id,
-                BusinessID = orderdto.BusinessID,
+                BusinessID = businessId,
                 OrderType = orderdto.OrderedMode,
                 OrderAt = DateTime.Now,
                 Status = orderdto.Status,
@@ -83,8 +83,8 @@ namespace EpicMarket.Services
 
         public async Task<OrdersDto> GetSingleOrder(int OrderId)
         {
-            var OrderDetails  = _context.OrderDetails.Where(c => c.OrderID == OrderId ).ToListAsync();
-            var OrderDetailsString = OrderDetails.ToString();
+			List<OrderDetail> OrderDetails  = await _context.OrderDetails.Where(c => c.OrderID == OrderId ).ToListAsync();
+            string OrderDetailsString = JsonConvert.SerializeObject(OrderDetails);
 
 
             var Order = await _context.Orders.Where(c => c.ID == OrderId).Include(c => c.Person).Include(c => c.Address).Select(
@@ -115,12 +115,12 @@ namespace EpicMarket.Services
 
         }
 
-        public async Task<List<OrderResult>> GetAllBranches(OrderParams orderParams)
+        public async Task<List<OrderResult>> GetAllBranches(OrderParams orderParams, int businessID)
         {
 
             //1 . filter with BusinessID
             var orders = _context.Orders
-                                .Where(c => c.BusinessID == orderParams.BusinessId).Include(c=> c.Person);
+                                .Where(c => c.BusinessID == businessID).Include(c=> c.Person);
 
 
             //2 . Appling Searching

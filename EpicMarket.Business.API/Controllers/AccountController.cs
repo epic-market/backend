@@ -19,8 +19,8 @@ namespace EpicMarket.Business.API.Controllers
         private readonly ICommunicationService communication;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
-        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, IMapper mapper, ILogger<AccountController> logger, ICommunicationService communication)
-        {
+        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, IMapper mapper, ILogger<AccountController> logger, ICommunicationService communication, ApplicationDbContext dbContext) : base(dbContext)
+		{
             _signInManager = signInManager;
             _userManager = userManager;
             _mapper = mapper;
@@ -39,6 +39,9 @@ namespace EpicMarket.Business.API.Controllers
             var user = _mapper.Map<AppUser>(registerDto);
 
             user.UserName = registerDto.Username.ToLower();
+            user.Email = registerDto.Username.ToLower();
+            user.PhoneNumber = registerDto.Phone;
+
 
             var result = await _userManager.CreateAsync(user, registerDto.Password);
 

@@ -35,7 +35,6 @@ namespace EpicMarket.Entities
 
     public class AddEmployeeParam 
     {
-        public int BusinessID { get; set; }
 
         public int UserID { get; set; }
 
@@ -46,13 +45,10 @@ namespace EpicMarket.Entities
 
     public class AddEmployeeResult
     {
-        public int BusinessID { get; set; }
 
         public int UserID { get; set; }
 
         public string FirstName { get; set; }
-
-        public string EmailID { get; set; }
     }
 
     public class CheckLinkResult
@@ -77,7 +73,6 @@ namespace EpicMarket.Entities
 
     public class EmployeeParams
     {
-        public int BusinessId { get; set; }
         public int PageIndex { get; set; } = 1;
         public int pageSize { get; set; } = 10;
         public string searchTerm { get; set; } = string.Empty;

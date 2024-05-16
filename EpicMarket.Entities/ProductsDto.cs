@@ -10,17 +10,17 @@ namespace EpicMarket.Entities
     public class ProductsDto
     {
         public int? Id { get; set; }
-        public string Name { get; set; }
+		public long? Barcode { get; set; }
+		public string Name { get; set; }
         public string Description { get; set; }
         public string Category{ get; set; }
         public double Rate { get; set; }
         public bool IsActive { get; set; }
         public bool InStock { get; set; }
-        public bool IsRecomended { get; set; }
-        public int MaximumPurchaceOrder  { get; set; }
         public string Images { get; set; }
-        public int BusinessID { get; set; }
-    }
+		public bool IsRecommended { get; set; }
+		public int? MaximumOrderPurchase { get; set; }
+	}
     public class ProductsMapOptionResult 
     {
         public int Id { get; set; }
@@ -38,7 +38,6 @@ namespace EpicMarket.Entities
 
     public class ProductParams
     {
-        public int BusinessId { get; set; }
         public int PageIndex { get; set; } = 1;
         public int pageSize { get; set; } = 10;
         public string sortColumn { get; set; } = string.Empty;

@@ -34,7 +34,7 @@ namespace EpicMarket.Services
             this.addressService = addressService;
             this.communicationService = communicationService;
         }
-        public async Task<AddEmployeeResult> Register(AddEmployeeParam addEmployeeParam)
+        public async Task<AddEmployeeResult> Register(AddEmployeeParam addEmployeeParam, int businessid)
         {
             var employee = new AddEmployeeResult();
 
@@ -59,11 +59,11 @@ namespace EpicMarket.Services
 
             var EmailTemplete = applicationConfiguration.GetApplicationConfigurationValue("BusinessOwnerInvitation");
 
-            var Business = _context.Businesses.Find(addEmployeeParam.BusinessID);
+            var Business = _context.Businesses.Find(businessid);
 
             var User = _context.Users.Find(addEmployeeParam.UserID);
 
-            var _ =  _context.BusinessEmployeeMaps.Add(new BusinessEmployeeMap() {  BussinessID  = addEmployeeParam.BusinessID , EmployeeID = user.Id});
+            var _ =  _context.BusinessEmployeeMaps.Add(new BusinessEmployeeMap() {  BussinessID  = businessid, EmployeeID = user.Id});
             
             await _context.SaveChangesAsync();
             
@@ -84,7 +84,11 @@ namespace EpicMarket.Services
 
             communicationService.SendEmailAsync(addEmployeeParam.EmailID, "Welcome to Epic Market", message);
 
-            return employee;
+			employee.UserID = user.Id;
+            employee.FirstName = user.FirstName;
+
+
+			return employee;
 
 
         }
@@ -145,6 +149,7 @@ namespace EpicMarket.Services
             User.LastName = employee.LastName;
             User.Email = employee.Email;
             User.PhoneNumber = employee.ContactNumber;
+            User.UniqueGuid = null;
             await userManager.AddPasswordAsync(User, employee.Password);
             _context.Users.Update(User);
             _context.SaveChanges();
@@ -179,12 +184,12 @@ namespace EpicMarket.Services
             return _;
         }
 
-        public async Task<List<EmployeeResult>> GetAllEmployees(EmployeeParams employeeParams)
+        public async Task<List<EmployeeResult>> GetAllEmployees(EmployeeParams employeeParams, int businessid)
         {
 
             //1 . filter with BusinessID
             var Employess = _context.BusinessEmployeeMaps
-                                .Include(c=> c.Employee).Where(c => c.BussinessID == employeeParams.BusinessId);
+                                .Include(c=> c.Employee).Where(c => c.BussinessID == businessid);
 
 
             //2 . Appling Searching

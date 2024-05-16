@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -16,12 +17,14 @@ namespace EpicMarket.Business.API.Controllers
     public class BusinessController : BaseApiController
     {
         private readonly ILogger<BusinessController> logger;
-        private readonly IBusinessService businessService;
+		private readonly UserManager<AppUser> userManager;
+		private readonly IBusinessService businessService;
 
-        public BusinessController(ILogger<BusinessController> logger , IBusinessService businessService)
-        {
+        public BusinessController(ILogger<BusinessController> logger , UserManager<AppUser> _userManager, IBusinessService businessService, ApplicationDbContext dbContext) : base(dbContext)
+		{
             this.logger = logger;
-            this.businessService = businessService;
+			userManager = _userManager;
+			this.businessService = businessService;
         }
 
 
@@ -35,10 +38,14 @@ namespace EpicMarket.Business.API.Controllers
             businessRegisterDto.UserID = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value) ;
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
             var id = await businessService.RegisterBusiness(businessRegisterDto, UserName);
+
+            var appuser = await userManager.Users.Where(c=>c.Id == businessRegisterDto.UserID).FirstOrDefaultAsync();
+
+			await userManager.AddToRoleAsync(appuser, "businessOwner");
+
             this.logger.LogInformation("Business Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
 
 			response.Data = id;
-
 
 			return Ok(response);
         }

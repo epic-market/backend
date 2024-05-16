@@ -11,7 +11,6 @@ namespace EpicMarket.Entities
     {
         public int? ID { get; set; }
         public int? AddressID { get; set; }
-        public int BussinessID { get; set; }
         public string Name { get; set; }
 
         public string Description { get; set; }
@@ -60,7 +59,6 @@ namespace EpicMarket.Entities
 
     public class BranchParams
     {
-        public int BusinessId { get; set; }
         public int PageIndex { get; set; } = 1;
         public int pageSize { get; set; } = 10;
         public string sortColumn { get; set; } = string.Empty;

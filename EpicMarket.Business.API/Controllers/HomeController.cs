@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using EpicMarket.Data.Models;
 
 namespace EpicMarket.Business.API.Controllers
 {
@@ -16,8 +17,8 @@ namespace EpicMarket.Business.API.Controllers
         private readonly IBusinessService businessService;
         private readonly IHomeService homeService;
 
-        public HomeController(ILogger<HomeController> logger, IBusinessService businessService, IHomeService homeService)
-        {
+        public HomeController(ILogger<HomeController> logger, IBusinessService businessService, IHomeService homeService, ApplicationDbContext dbContext) : base(dbContext)
+		{
             this.logger = logger;
             this.businessService = businessService;
             this.homeService = homeService;

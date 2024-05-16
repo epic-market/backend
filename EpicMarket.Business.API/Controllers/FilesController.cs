@@ -1,6 +1,7 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
 using EpicMarket.Contracts;
+using EpicMarket.Data.Models;
 using EpicMarket.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,8 +14,8 @@ namespace EpicMarket.Business.API.Controllers
 
 		private readonly IFileService fileService;
 
-		public FilesController(IFileService fileService)
-        {
+		public FilesController(IFileService fileService, ApplicationDbContext dbContext) : base(dbContext)
+		{
 			this.fileService = fileService;
 		}
 

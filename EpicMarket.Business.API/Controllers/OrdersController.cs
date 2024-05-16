@@ -6,6 +6,7 @@ using EpicMarket.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Security.Claims;
 
@@ -16,11 +17,13 @@ namespace EpicMarket.Business.API.Controllers
         private readonly ILogger<OrdersController> logger;
         private readonly IOrderService orderService;
 
-        public OrdersController(ILogger<OrdersController> logger, IOrderService orderService)
+        public OrdersController(ILogger<OrdersController> logger, IOrderService orderService,ApplicationDbContext dbContext):base(dbContext)
         {
             this.logger = logger;
             this.orderService = orderService;
         }
+
+       
         [HttpPost("AddOrder")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<int>>> AddOrder(OrdersDto ordersDto)
@@ -30,7 +33,7 @@ namespace EpicMarket.Business.API.Controllers
 
 			this.logger.LogInformation("Orders Controller -> AddOrder()-> params {0}", JsonConvert.SerializeObject(new { Params = ordersDto }));
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-            var id = orderService.CreateOrder(ordersDto , UserName);
+            var id = orderService.CreateOrder(ordersDto , UserName,this.BusinessId);
 
             this.logger.LogInformation("Orders Controller -> AddOrder()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
 
@@ -96,7 +99,7 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
-        [HttpPost("GetAllBranches")]
+        [HttpPost("GetAllOrders")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<List<OrderResult>>>> GetAllBranches(OrderParams orderParams)
         {
@@ -104,7 +107,7 @@ namespace EpicMarket.Business.API.Controllers
 
             this.logger.LogInformation("Orders Controller -> GetAllBranches()-> params {0}", JsonConvert.SerializeObject(new { Params = orderParams }));
 
-            var orderResults = await orderService.GetAllBranches(orderParams);
+            var orderResults = await orderService.GetAllBranches(orderParams,this.BusinessId);
 
             this.logger.LogInformation("Orders Controller -> GetAllBranches()-> return {0}", JsonConvert.SerializeObject(new { Value = orderResults }));
 

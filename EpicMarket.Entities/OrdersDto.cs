@@ -10,12 +10,10 @@ namespace EpicMarket.Entities
     {
         public DateTime OrderDate { get; set; } = DateTime.Now;
 
-        public int BusinessID { get; set; }
-
         public string PaymentMode { get; set; }
 
         public string OrderedMode { get; set; }
-
+        
         public string Status { get; set; }
         
         public double TotalPrice { get; set; }
@@ -33,7 +31,6 @@ namespace EpicMarket.Entities
 
     public class OrderParams
     {
-        public int BusinessId { get; set; }
         public int PageIndex { get; set; } = 1;
         public int pageSize { get; set; } = 10;
         public string sortColumn { get; set; } = string.Empty;
