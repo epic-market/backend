@@ -1,7 +1,9 @@
 ﻿using EpicMarket.Contracts;
 using EpicMarket.Data.ApplicationModels;
 using EpicMarket.Data.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using NVelocity.Context;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +16,7 @@ namespace EpicMarket.Services
     {
         private readonly ApplicationDbContext context;
 
+
         public UserRepository(ApplicationDbContext context)
         {
             this.context = context;
@@ -23,7 +26,11 @@ namespace EpicMarket.Services
 
         public List<AccessControlList> Permissions => throw new NotImplementedException();
 
-
+        public bool IsBusinessVerified(int id)
+        {
+            var statusid = context.Businesses.Where(c => c.PersonID == id).Select(c => c.StatusId).FirstOrDefault();
+            return statusid == 2; 
+        }
 
         public async Task<AppUser> GetUserByIdAsync(int id)
         {

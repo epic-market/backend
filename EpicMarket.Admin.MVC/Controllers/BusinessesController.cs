@@ -90,7 +90,8 @@ namespace EpicMarket.Admin.MVC.Controllers
             ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", business.AddressID);
             ViewData["BusinessCategoryID"] = new SelectList(_context.BusinessCategories, "ID", "ID", business.BusinessCategoryID);
             ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Id", business.PersonID);
-            return View(business);
+			ViewData["StatusID"] = new SelectList(_context.StatusOptionSets, "Id", "Status", business.StatusId);
+			return View(business);
         }
 
         // POST: Businesses/Edit/5
@@ -98,7 +99,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,PersonID,BusinessCategoryID,Name,Description,Banner,Logo,ContactNumber,ContactEmail,AddressID,Rating,ReviewCount,IsOpen,Weight,Status,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Business business)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,PersonID,BusinessCategoryID,Name,Description,Banner,Logo,ContactNumber,ContactEmail,AddressID,Rating,ReviewCount,IsOpen,Weight,Status,CreateDate,CreateBy,ModifiedDate,ModifiedBy,StatusId")] Business business)
         {
             if (id != business.ID)
             {

@@ -159,7 +159,9 @@ namespace EpicMarket.Services
                 UserId = User.Id,
             };
 
-            _context.UserAddresses.Add(userAddress);
+			await userManager.AddToRoleAsync(User, "businessEmployee");
+
+			_context.UserAddresses.Add(userAddress);
             _context.SaveChanges();
 
             return User.Id;

@@ -47,7 +47,9 @@ namespace EpicMarket.Data.Models
 
         public DbSet<OrderStatusOptions> OrderStatusOptions { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+		public DbSet<StatusOptionSet> StatusOptionSets { get; set; }
+
+		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var configuration = new ConfigurationBuilder()
                                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -69,7 +71,7 @@ namespace EpicMarket.Data.Models
                     .OnDelete(DeleteBehavior.Restrict);
 
 
-            modelBuilder.Entity<UserAddress>()
+			modelBuilder.Entity<UserAddress>()
                        .HasOne(op => op.Address)
                        .WithMany(u => u.UserAddresses)
                        .HasForeignKey(op => op.AddressId)

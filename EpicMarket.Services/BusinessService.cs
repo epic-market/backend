@@ -47,7 +47,7 @@ namespace EpicMarket.Services
             businessModel.ContactEmail = businessRegisterDto.ContactEmail;
             businessModel.CreateBy = UserName;
             businessModel.CreateDate = DateTime.Now;
-
+            businessModel.StatusId = 1; // hardcode to Inprogress status
             _context.Businesses.Add(businessModel);
             await _context.SaveChangesAsync();
 

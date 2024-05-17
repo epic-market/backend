@@ -115,7 +115,7 @@ namespace EpicMarket.Services
 
         }
 
-        public async Task<List<OrderResult>> GetAllBranches(OrderParams orderParams, int businessID)
+        public async Task<List<OrderResult>> GetAllOrders(OrderParams orderParams, int businessID)
         {
 
             //1 . filter with BusinessID

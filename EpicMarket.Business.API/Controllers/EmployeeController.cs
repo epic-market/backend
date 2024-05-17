@@ -78,7 +78,8 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpGet("GetAllEmployeesForMap")]
-        public async Task<ActionResult<OperationResult<List<EmployeeMapOptionResult>>>> GetAllEmployeesForMap(int outletID)
+		[Authorize(Roles = "businessOwner")]
+		public async Task<ActionResult<OperationResult<List<EmployeeMapOptionResult>>>> GetAllEmployeesForMap(int outletID)
         {
             var response = new OperationResult<List<EmployeeMapOptionResult>>();
 
@@ -95,7 +96,8 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpGet("GetAllEmployees")]
-        public async Task<ActionResult<OperationResult<List<EmployeeResult>>>> GetAllEmployees([FromQuery]EmployeeParams employeeParams)
+		[Authorize(Roles = "businessOwner")]
+		public async Task<ActionResult<OperationResult<List<EmployeeResult>>>> GetAllEmployees([FromQuery]EmployeeParams employeeParams)
         {
             var response = new OperationResult<List<EmployeeResult>>();
 
@@ -111,7 +113,8 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpGet("GetEmployeeDetails")]
-        public async Task<ActionResult<OperationResult<SingleEmployeeResult>>> GetEmployeeDetails(int employeeId)
+		[Authorize(Roles = "businessOwner")]
+		public async Task<ActionResult<OperationResult<SingleEmployeeResult>>> GetEmployeeDetails(int employeeId)
         {
             var response = new OperationResult<SingleEmployeeResult>();
 

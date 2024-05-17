@@ -25,8 +25,8 @@ namespace EpicMarket.Business.API.Controllers
 
        
         [HttpPost("AddOrder")]
-        [AllowAnonymous]
-        public async Task<ActionResult<OperationResult<int>>> AddOrder(OrdersDto ordersDto)
+		[Authorize(Roles = "businessEmployee,businessOwner")]
+		public async Task<ActionResult<OperationResult<int>>> AddOrder(OrdersDto ordersDto)
         {
             var response = new OperationResult<int>();
 
@@ -47,8 +47,8 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpGet("GetSingleOrder")]
-        [AllowAnonymous]
-        public async Task<ActionResult<OperationResult<OrdersDto>>> GetSingleOrder(int OrderId)
+		[Authorize(Roles = "businessEmployee,businessOwner")]
+		public async Task<ActionResult<OperationResult<OrdersDto>>> GetSingleOrder(int OrderId)
         {
             var response = new OperationResult<OrdersDto>();
 
@@ -65,8 +65,8 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpPost("UpdateStatus")]
-        [AllowAnonymous]
-        public ActionResult<OperationResult<int>> UpdateStatus(int OrderId, string OrderStatus)
+		[Authorize(Roles = "businessEmployee,businessOwner")]
+		public ActionResult<OperationResult<int>> UpdateStatus(int OrderId, string OrderStatus)
         {
             var response = new OperationResult<int>();
 
@@ -82,8 +82,8 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpPost("GetOrderStatusOptions")]
-        [AllowAnonymous]
-        public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetOrderStatusOptions()
+		[Authorize(Roles = "businessEmployee,businessOwner")]
+		public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetOrderStatusOptions()
         {
             var response = new OperationResult<List<DropDownOptions>>();
 
@@ -100,14 +100,14 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpPost("GetAllOrders")]
-        [AllowAnonymous]
-        public async Task<ActionResult<OperationResult<List<OrderResult>>>> GetAllBranches(OrderParams orderParams)
+		[Authorize(Roles = "businessEmployee,businessOwner")]
+		public async Task<ActionResult<OperationResult<List<OrderResult>>>> GetAllOrders(OrderParams orderParams)
         {
             var response = new OperationResult<List<OrderResult>>();
 
             this.logger.LogInformation("Orders Controller -> GetAllBranches()-> params {0}", JsonConvert.SerializeObject(new { Params = orderParams }));
 
-            var orderResults = await orderService.GetAllBranches(orderParams,this.BusinessId);
+            var orderResults = await orderService.GetAllOrders(orderParams,this.BusinessId);
 
             this.logger.LogInformation("Orders Controller -> GetAllBranches()-> return {0}", JsonConvert.SerializeObject(new { Value = orderResults }));
 

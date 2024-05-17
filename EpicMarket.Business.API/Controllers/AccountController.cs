@@ -64,10 +64,10 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<OperationResult<UserDto>>> Login(LoginDto loginDto)
+        public async Task<ActionResult<OperationResult<LoginResult>>> Login(LoginDto loginDto)
         {
 
-			var response = new OperationResult<UserDto>();
+			var response = new OperationResult<LoginResult>();
 			//communication.SendEmail("akhil@epicmarket.in", "This is test mail form code", "Its working");
 
 			var user = await _userManager.Users
@@ -80,17 +80,42 @@ namespace EpicMarket.Business.API.Controllers
 
             if (!result.Succeeded) return Unauthorized() ;
 
-			response.Data = new UserDto
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var userBusinessDto = new UserBusinessDto();
+
+            if (roles.Contains("businessOwner"))
             {
-                Username = user.UserName,
-                Token = await _tokenService.CreateToken(user),
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Phone = user.PhoneNumber
-            };
+                userBusinessDto = dbContext.Businesses.Where(c => c.PersonID == user.Id).Include(c => c.Status).Select(c => new UserBusinessDto()
+                {
+                    businessId = c.ID,
+                    businessStatus = c.Status.Status,
+                }).FirstOrDefault();
+            } else if (roles.Contains("businessEmployee"))
+            { 
+                userBusinessDto = dbContext.BusinessEmployeeMaps.Where(c => c.EmployeeID == user.Id).Include(c=>c.Bussiness).Include(c => c.Bussiness.Status).Select(c => new UserBusinessDto()
+				{
+					businessId = c.Bussiness.ID,
+					businessStatus = c.Bussiness.Status.Status,
+				}).FirstOrDefault();
+			}
+
+
+
+            response.Data = new LoginResult() { 
+                     UserDetails = new UserDto
+			         {
+				         Username = user.UserName,
+				         Token = await _tokenService.CreateToken(user),
+				         FirstName = user.FirstName,
+				         LastName = user.LastName,
+				         Phone = user.PhoneNumber
+			         },
+                     UserBusinessDto = userBusinessDto
+		    };
 
 			return response;
-
         }
 
         private async Task<bool> UserExists(string username)

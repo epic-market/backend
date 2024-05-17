@@ -3,6 +3,7 @@ using EpicMarket.Data.Models;
 using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
 using EpicMarket.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -25,7 +26,8 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpGet("GetAllProductForMap")]
-        public async Task<ActionResult<OperationResult<List<ProductsMapOptionResult>>>> GetAllProductForMap(int outletID)
+		[Authorize(Roles = "businessOwner")]
+		public async Task<ActionResult<OperationResult<List<ProductsMapOptionResult>>>> GetAllProductForMap(int outletID)
         {
             var response = new OperationResult<List<ProductsMapOptionResult>>();
 
@@ -42,7 +44,8 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpPost("AddOrUpdateProduct")]
-        public  ActionResult<OperationResult<int>> AddOrUpdateProduct(ProductsDto productsDto)
+		[Authorize(Roles = "businessOwner")]
+		public  ActionResult<OperationResult<int>> AddOrUpdateProduct(ProductsDto productsDto)
         {
 
 			var response = new OperationResult<int>();
@@ -59,7 +62,8 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpGet("GetAllProducts")]
-        public async Task<ActionResult<OperationResult<List<ProductResult>>>> GetAllProducts([FromQuery] ProductParams productResult)
+		[Authorize(Roles = "businessEmployee,businessOwner")]
+		public async Task<ActionResult<OperationResult<List<ProductResult>>>> GetAllProducts([FromQuery] ProductParams productResult)
         {
             var response = new OperationResult<List<ProductResult>>();
 
@@ -76,7 +80,8 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpGet("GetProductDetails")]
-        public async Task<ActionResult<OperationResult<ProductsDto>>> GetProductDetails(int productId)
+		[Authorize(Roles = "businessEmployee,businessOwner")]
+		public async Task<ActionResult<OperationResult<ProductsDto>>> GetProductDetails(int productId)
         {
             var response = new OperationResult<ProductsDto>();
 
