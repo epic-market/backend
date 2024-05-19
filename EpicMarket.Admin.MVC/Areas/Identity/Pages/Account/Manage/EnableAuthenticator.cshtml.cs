@@ -181,7 +181,7 @@ namespace EpicMarket.Admin.MVC.Areas.Identity.Pages.Account.Manage
             return string.Format(
                 CultureInfo.InvariantCulture,
                 AuthenticatorUriFormat,
-                _urlEncoder.Encode("EpicMarket Admin"),
+                _urlEncoder.Encode("EpicMarketAdmin"),
                 _urlEncoder.Encode(email),
                 unformattedKey);
         }

@@ -57,7 +57,8 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var appUser = await _context.Users.FindAsync(id);
+            var appUser = await _context.Users
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (appUser == null)
             {
                 return NotFound();
@@ -79,21 +80,15 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             appUser.LastActive = DateTime.Now;
             appUser.NormalizedUserName = userManager.NormalizeName(appUser.UserName);
-            appUser.NormalizedEmail = userManager.NormalizeName(appUser.NormalizedEmail);
+            appUser.NormalizedEmail = userManager.NormalizeName(appUser.Email);
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var result = await userManager.UpdateAsync(appUser);
-                    if (!result.Succeeded)
-                    {
-                        // Handle errors
-                        foreach (var error in result.Errors)
-                        {
-                            Console.WriteLine($"Error updating user: {error.Description}");
-                        }
-                    }
+                    _context.Users.Update(appUser);
+                _context.SaveChanges();
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
