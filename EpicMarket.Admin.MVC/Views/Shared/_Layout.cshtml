@@ -26,6 +26,8 @@
 	<link rel="stylesheet" href="~/assets/css/dark-theme.css" />
 	<link rel="stylesheet" href="~/assets/css/semi-dark.css" />
 	<link rel="stylesheet" href="~/assets/css/header-colors.css" />
+	<link rel="stylesheet" href="~/assets/plugins/notifications/css/lobibox.min.css" />
+	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 	<title>Epic Market</title>
 </head>
 <body>
@@ -90,6 +92,22 @@
 				<li>
 					<a href="javascript:;" class="has-arrow">
 						<div class="parent-icon">
+							<i class="bx bx-help-circle"></i>
+						</div>
+						<div class="menu-title">App Users</div>
+					</a>
+					<ul>
+						<li class="list-group-item">
+							<a asp-area="" asp-controller="AppUsers" asp-action="Index"> <i class="bx bx-right-arrow-alt"></i>Users</a>
+						</li>
+						<li class="list-group-item">
+							<a asp-area="" asp-controller="AppUserRoles" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Roles</a>
+						</li>
+					</ul>
+				</li>
+				<li>
+					<a href="javascript:;" class="has-arrow">
+						<div class="parent-icon">
 							<i class='bx bx-cart'></i>
 						</div>
 						<div class="menu-title">Internal</div>
@@ -101,6 +119,20 @@
 						<li class="list-group-item">
 							<a  asp-area="" asp-controller="ProductInternals" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Product (Internal)</a>
 						</li>
+					</ul>
+				</li>
+				<li>
+					<a href="javascript:;" class="has-arrow">
+						<div class="parent-icon">
+							<i class='bx bx-cart'></i>
+						</div>
+						<div class="menu-title">OptionSets</div>
+					</a>
+					<ul>
+						<li class="list-group-item">
+							<a asp-area="" asp-controller="StatusOptionSets" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Status OptionSet</a>
+						</li>
+
 					</ul>
 				</li>
 				<li>
@@ -601,27 +633,19 @@
 					</div>
 					<div class="user-box dropdown">
 						<a class="d-flex align-items-center nav-link dropdown-toggle dropdown-toggle-nocaret" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-							<img src="~/assets/images/avatars/avatar-2.png" class="user-img" alt="user avatar">
 							<div class="user-info ps-3">
-								<p class="user-name mb-0">Pauline Seitz</p>
-								<p class="designattion mb-0">Web Designer</p>
+								<p class="user-name mb-0">@User.Identity?.Name</p>
 							</div>
 						</a>
 						<ul class="dropdown-menu dropdown-menu-end">
 							<li>
-								<a class="dropdown-item" href="javascript:;"><i class="bx bx-user"></i><span>Profile</span></a>
+								<a class="dropdown-item" href="/Identity/Account/Manage"><i class="bx bx-user"></i><span>Profile</span></a>
 							</li>
 							<li>
-								<a class="dropdown-item" href="javascript:;"><i class="bx bx-cog"></i><span>Settings</span></a>
+								<a class="dropdown-item" href="/Identity/Account/Manage/ChangePassword"><i class="bx bx-cog"></i><span>Change Password</span></a>
 							</li>
 							<li>
-								<a class="dropdown-item" href="javascript:;"><i class='bx bx-home-circle'></i><span>Dashboard</span></a>
-							</li>
-							<li>
-								<a class="dropdown-item" href="javascript:;"><i class='bx bx-dollar-circle'></i><span>Earnings</span></a>
-							</li>
-							<li>
-								<a class="dropdown-item" href="javascript:;"><i class='bx bx-download'></i><span>Downloads</span></a>
+								<a class="dropdown-item" href="/Identity/Account/Manage/TwoFactorAuthentication"><i class='bx bx-home-circle'></i><span>Two Factor Authentication</span></a>
 							</li>
 							<li>
 								<div class="dropdown-divider mb-0"></div>
@@ -677,7 +701,8 @@
 	<script src="~/assets/js/app.js"></script>
 	<script src="~/assets/plugins/datatable/js/jquery.dataTables.min.js"></script>
 	<script src="~/assets/plugins/datatable/js/dataTables.bootstrap5.min.js"></script>
-
+	<script src="~/assets/plugins/notifications/js/lobibox.min.js"></script>
+	<script src="~/assets/plugins/notifications/js/notifications.min.js"></script>
 
 
 	@await RenderSectionAsync("Scripts", required: false)

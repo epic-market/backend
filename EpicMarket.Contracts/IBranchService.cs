@@ -9,9 +9,9 @@ namespace EpicMarket.Contracts
 {
     public interface IBranchService
     {
-        Task<List<BranchResult>> GetAllBranches(BranchParams branchParams);
+        Task<List<BranchResult>> GetAllBranches(BranchParams branchParams, int BusinessID);
 
-        Task<int> AddOrUpdateBranch(BranchDto branchDto, string UserName);
+        Task<int> AddOrUpdateBranch(BranchDto branchDto, string UserName, int BusinessID);
 
         Task<int> MapBranchToPeople(BranchPeopleMapParams branchPeopleMapParams);
 

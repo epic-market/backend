@@ -17,7 +17,21 @@ namespace EpicMarket.Data.Common
         public static async Task SeedUsers(UserManager<AppUser> userManager,
             RoleManager<AppRole> roleManager)
         {
-            if (await userManager.Users.AnyAsync()) return;
+  
+
+			if (roleManager.Roles.Where(c => c.Name == "businessOwner").ToList().Count == 0) 
+            {
+                var newrole = new AppRole { Name = "businessOwner" };
+				await roleManager.CreateAsync(newrole);
+			}
+
+			if (roleManager.Roles.Where(c => c.Name == "businessEmployee").ToList().Count == 0)
+			{
+				var newrole = new AppRole { Name = "businessEmployee" };
+				await roleManager.CreateAsync(newrole);
+			}
+
+			if (await userManager.Users.AnyAsync()) return;
 
             var roles = new List<AppRole>
             {

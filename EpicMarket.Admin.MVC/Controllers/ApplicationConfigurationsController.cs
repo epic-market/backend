@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.ApplicationModels;
 using EpicMarket.Data.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ApplicationConfigurationsController : Controller
     {
         private readonly ApplicationDbContext _context;

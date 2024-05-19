@@ -14,4 +14,17 @@ namespace EpicMarket.Entities
         public string LastName { get; set; }
         public string Phone { get; set; }
     }
+	public class UserBusinessDto
+	{
+		public int businessId { get; set; }
+
+        public string businessStatus { get; set; }
+    }
+
+	public class LoginResult
+	{
+        public UserDto UserDetails { get; set; }
+
+        public UserBusinessDto UserBusiness { get; set; }
+    }
 }

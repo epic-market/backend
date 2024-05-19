@@ -19,8 +19,8 @@ namespace EpicMarket.Business.API.Controllers
         private readonly ICommunicationService communication;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
-        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, IMapper mapper, ILogger<AccountController> logger, ICommunicationService communication)
-        {
+        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, IMapper mapper, ILogger<AccountController> logger, ICommunicationService communication, ApplicationDbContext dbContext) : base(dbContext)
+		{
             _signInManager = signInManager;
             _userManager = userManager;
             _mapper = mapper;
@@ -34,11 +34,14 @@ namespace EpicMarket.Business.API.Controllers
         {
             var response = new OperationResult<UserDto>();
 
-            if (await UserExists(registerDto.Username)) return BadRequest("Username is taken");
+            if (await UserExists(registerDto.Email)) return BadRequest("Username is taken");
 
             var user = _mapper.Map<AppUser>(registerDto);
 
-            user.UserName = registerDto.Username.ToLower();
+            user.UserName = registerDto.Email.ToLower();
+            user.Email = registerDto.Email.ToLower();
+            user.PhoneNumber = registerDto.Phone;
+
 
             var result = await _userManager.CreateAsync(user, registerDto.Password);
 
@@ -61,14 +64,14 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<OperationResult<UserDto>>> Login(LoginDto loginDto)
+        public async Task<ActionResult<OperationResult<LoginResult>>> Login(LoginDto loginDto)
         {
 
-			var response = new OperationResult<UserDto>();
+			var response = new OperationResult<LoginResult>();
 			//communication.SendEmail("akhil@epicmarket.in", "This is test mail form code", "Its working");
 
 			var user = await _userManager.Users
-                .SingleOrDefaultAsync(x => x.UserName == loginDto.Username.ToLower());
+                .SingleOrDefaultAsync(x => x.UserName == loginDto.Email.ToLower());
 
             if (user == null) return Unauthorized("Invalid username");
 
@@ -77,17 +80,40 @@ namespace EpicMarket.Business.API.Controllers
 
             if (!result.Succeeded) return Unauthorized() ;
 
-			response.Data = new UserDto
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var userBusinessDto = new UserBusinessDto();
+
+            if (roles.Contains("businessOwner"))
             {
-                Username = user.UserName,
-                Token = await _tokenService.CreateToken(user),
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Phone = user.PhoneNumber
-            };
+                userBusinessDto = dbContext.Businesses.Where(c => c.PersonID == user.Id).Include(c => c.Status).Select(c => new UserBusinessDto()
+                {
+                    businessId = c.ID,
+                    businessStatus = c.Status.Status,
+                }).FirstOrDefault();
+            } else if (roles.Contains("businessEmployee"))
+            { 
+                userBusinessDto = dbContext.BusinessEmployeeMaps.Where(c => c.EmployeeID == user.Id).Include(c=>c.Bussiness).Include(c => c.Bussiness.Status).Select(c => new UserBusinessDto()
+				{
+					businessId = c.Bussiness.ID,
+					businessStatus = c.Bussiness.Status.Status,
+				}).FirstOrDefault();
+			}
+
+            response.Data = new LoginResult() { 
+                     UserDetails = new UserDto
+			         {
+				         Username = user.UserName,
+				         Token = await _tokenService.CreateToken(user),
+				         FirstName = user.FirstName,
+				         LastName = user.LastName,
+				         Phone = user.PhoneNumber
+			         },
+                UserBusiness = userBusinessDto
+		    };
 
 			return response;
-
         }
 
         private async Task<bool> UserExists(string username)

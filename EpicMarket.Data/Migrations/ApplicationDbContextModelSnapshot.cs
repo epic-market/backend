@@ -89,7 +89,7 @@ namespace EpicMarket.Data.Migrations
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ModifiedDate")
+                    b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
@@ -123,7 +123,7 @@ namespace EpicMarket.Data.Migrations
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ModifiedDate")
+                    b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
@@ -169,7 +169,7 @@ namespace EpicMarket.Data.Migrations
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ModifiedDate")
+                    b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Pincode")
@@ -345,7 +345,7 @@ namespace EpicMarket.Data.Migrations
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ModifiedDate")
+                    b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Title")
@@ -397,7 +397,7 @@ namespace EpicMarket.Data.Migrations
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ModifiedDate")
+                    b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
@@ -412,8 +412,8 @@ namespace EpicMarket.Data.Migrations
                     b.Property<int?>("ReviewCount")
                         .HasColumnType("int");
 
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
+                    b.Property<int?>("StatusId")
+                        .HasColumnType("int");
 
                     b.Property<double?>("Weight")
                         .HasColumnType("float");
@@ -425,6 +425,8 @@ namespace EpicMarket.Data.Migrations
                     b.HasIndex("BusinessCategoryID");
 
                     b.HasIndex("PersonID");
+
+                    b.HasIndex("StatusId");
 
                     b.ToTable("Businesses");
                 });
@@ -449,7 +451,7 @@ namespace EpicMarket.Data.Migrations
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ModifiedDate")
+                    b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
@@ -530,7 +532,7 @@ namespace EpicMarket.Data.Migrations
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ModifiedDate")
+                    b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
@@ -581,7 +583,7 @@ namespace EpicMarket.Data.Migrations
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ModifiedDate")
+                    b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Title")
@@ -614,7 +616,7 @@ namespace EpicMarket.Data.Migrations
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ModifiedDate")
+                    b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("TypeOfFAQ")
@@ -648,7 +650,7 @@ namespace EpicMarket.Data.Migrations
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ModifiedDate")
+                    b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("OrderAt")
@@ -703,7 +705,7 @@ namespace EpicMarket.Data.Migrations
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ModifiedDate")
+                    b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("OrderID")
@@ -778,7 +780,7 @@ namespace EpicMarket.Data.Migrations
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ModifiedDate")
+                    b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
@@ -874,6 +876,25 @@ namespace EpicMarket.Data.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("ProductInternals");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.StatusOptionSet", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StatusDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StatusOptionSets");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.SupportTicket", b =>
@@ -1108,11 +1129,17 @@ namespace EpicMarket.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("EpicMarket.Data.Models.StatusOptionSet", "Status")
+                        .WithMany("Businesses")
+                        .HasForeignKey("StatusId");
+
                     b.Navigation("Address");
 
                     b.Navigation("BusinessCategory");
 
                     b.Navigation("Person");
+
+                    b.Navigation("Status");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.BusinessEmployeeMap", b =>
@@ -1410,6 +1437,11 @@ namespace EpicMarket.Data.Migrations
                     b.Navigation("OutletPeople");
 
                     b.Navigation("OutletProducts");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.StatusOptionSet", b =>
+                {
+                    b.Navigation("Businesses");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.SupportTicketType", b =>

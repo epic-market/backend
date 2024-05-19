@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using Amazon.S3;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,7 @@ builder.Services.AddControllers();
 builder.Services.AddCors();
 builder.Services.AddIdentityServices(builder.Configuration);
 builder.Host.UseSerilog();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(opt =>
@@ -46,6 +48,8 @@ builder.Services.AddSwaggerGen(opt =>
         }
     });
 });
+builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
+builder.Services.AddAWSService<IAmazonS3>();
 
 var app = builder.Build();
 app.UseMiddleware<ExceptionMiddleware>();

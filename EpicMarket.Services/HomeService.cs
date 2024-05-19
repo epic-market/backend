@@ -27,7 +27,7 @@ namespace EpicMarket.Services
 
 
             //2 . Appling Searching
-            var sortedBlogs = context.Blogs.Where(row => row.Title.Contains(blogParams.searchTerm));
+            var sortedBlogs = context.Blogs.Where(row => row.Title.Contains(blogParams.searchTerm.Trim()));
 
 
             //getting the total count

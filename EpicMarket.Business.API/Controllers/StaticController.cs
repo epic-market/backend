@@ -1,4 +1,5 @@
 ﻿using EpicMarket.Contracts;
+using EpicMarket.Data.Models;
 using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
 using EpicMarket.Services;
@@ -17,15 +18,14 @@ namespace EpicMarket.Business.API.Controllers
         private readonly IBusinessService businessService;
         private readonly IStaticService staticService;
 
-        public StaticController(ILogger<StaticController> logger, IBusinessService businessService , IStaticService staticService)
-        {
+        public StaticController(ILogger<StaticController> logger, IBusinessService businessService , IStaticService staticService, ApplicationDbContext dbContext) : base(dbContext)
+		{
             this.logger = logger;
             this.businessService = businessService;
             this.staticService = staticService;
         }
 
         [HttpGet("GetBusinessCategoriesOptions")]
-        [Authorize]
         public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetBusinessCategoriesOptions()
         {
             var reponse = new OperationResult<List<DropDownOptions>>();

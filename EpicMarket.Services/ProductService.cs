@@ -26,10 +26,11 @@ namespace EpicMarket.Services
             this.addressService = addressService;
         }
 
-        public int AddOrUpdateProduct(ProductsDto productsDto, string UserName)
+        public int AddOrUpdateProduct(ProductsDto productsDto, string UserName, int businessID)
         {
             var product = mapper.Map<Catalog>(productsDto);
-            if (productsDto.Id == null)
+            product.BusinessID = businessID;
+            if (productsDto.Id == null || product.ID == 0)
             {
                 product.CreateBy = UserName;
                 product.CreateDate = DateTime.Now;
@@ -68,15 +69,15 @@ namespace EpicMarket.Services
             return _;
         }
 
-        public async Task<List<ProductResult>> GetAllProducts(ProductParams productParams)
+        public async Task<List<ProductResult>> GetAllProducts(ProductParams productParams, int businessID)
         {
             //1 . filter with BusinessID
             var Products = _context.Catalogs
-                                .Where(c => c.BusinessID == productParams.BusinessId);
+                                .Where(c => c.BusinessID == businessID);
 
 
             //2 . Appling Searching
-            var sortedProducts = Products.Where(row => row.Name.Contains(productParams.searchTerm) || row.Description.Contains(productParams.searchTerm));
+            var sortedProducts = Products.Where(row => row.Name.Contains(productParams.searchTerm.Trim()) || row.Description.Contains(productParams.searchTerm.Trim()));
 
 
             // 3 .Appying Sorting
@@ -126,11 +127,10 @@ namespace EpicMarket.Services
                 Rate = c.Rate,
                 InStock = c.InStock,
                 IsActive = c.IsActive,
-                BusinessID = c.BusinessID,
                 Category = c.Category,
                 Images = c.Images,
-                MaximumPurchaceOrder   = (int)c.MaximumOrderPurchase,
-                IsRecomended = c.IsRecommended,
+                MaximumOrderPurchase = (int)c.MaximumOrderPurchase,
+                IsRecommended = c.IsRecommended,
             }
             
             ).FirstOrDefaultAsync();

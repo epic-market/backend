@@ -34,7 +34,7 @@ namespace EpicMarket.Services
             this.addressService = addressService;
             this.communicationService = communicationService;
         }
-        public async Task<AddEmployeeResult> Register(AddEmployeeParam addEmployeeParam)
+        public async Task<AddEmployeeResult> Register(AddEmployeeParam addEmployeeParam, int businessid , int userID)
         {
             var employee = new AddEmployeeResult();
 
@@ -59,11 +59,11 @@ namespace EpicMarket.Services
 
             var EmailTemplete = applicationConfiguration.GetApplicationConfigurationValue("BusinessOwnerInvitation");
 
-            var Business = _context.Businesses.Find(addEmployeeParam.BusinessID);
+            var Business = _context.Businesses.Find(businessid);
 
-            var User = _context.Users.Find(addEmployeeParam.UserID);
+            var User = _context.Users.Find(userID);
 
-            var _ =  _context.BusinessEmployeeMaps.Add(new BusinessEmployeeMap() {  BussinessID  = addEmployeeParam.BusinessID , EmployeeID = user.Id});
+            var _ =  _context.BusinessEmployeeMaps.Add(new BusinessEmployeeMap() {  BussinessID  = businessid, EmployeeID = user.Id});
             
             await _context.SaveChangesAsync();
             
@@ -84,7 +84,11 @@ namespace EpicMarket.Services
 
             communicationService.SendEmailAsync(addEmployeeParam.EmailID, "Welcome to Epic Market", message);
 
-            return employee;
+			employee.UserID = user.Id;
+            employee.FirstName = user.FirstName;
+
+
+			return employee;
 
 
         }
@@ -118,6 +122,7 @@ namespace EpicMarket.Services
                     UserID = userId,
                     FirstName = User.FirstName,
                     BusinessName = Business.Bussiness.Name,
+                    Email = User.Email,
                     BusinessEmail = Business.Bussiness.ContactEmail,
                 };
 
@@ -130,34 +135,51 @@ namespace EpicMarket.Services
 
         public async Task<int> CreateEmployeeAccount(EmployeeDto employee)
         {
-            var address = new AddressDto()
-            {
-                Address1 =  employee.Address,
-                City = employee.City,
-                State =employee.State,
-                Pincode = employee.Pincode,
-            };
-
-            var addressId = await addressService.AddAddress(address);
 
             var User = _context.Users.Where(u => employee.ID == u.Id).FirstOrDefault();
-            User.FirstName = employee.FirstName;
-            User.LastName = employee.LastName;
-            User.Email = employee.Email;
-            User.PhoneNumber = employee.ContactNumber;
-            await userManager.AddPasswordAsync(User, employee.Password);
-            _context.Users.Update(User);
-            _context.SaveChanges();
 
-            var userAddress = new UserAddress() {
-                AddressId = addressId,
-                UserId = User.Id,
-            };
+            if (User.UniqueGuid == employee.Guid) {
+                var address = new AddressDto()
+                {
+                    Address1 = employee.Address,
+                    City = employee.City,
+                    State = employee.State,
+                    Pincode = employee.Pincode,
+                };
 
-            _context.UserAddresses.Add(userAddress);
-            _context.SaveChanges();
+                var addressId = await addressService.AddAddress(address);
 
-            return User.Id;
+
+                User.FirstName = employee.FirstName;
+                User.LastName = employee.LastName;
+                User.Email = employee.Email;
+                User.PhoneNumber = employee.ContactNumber;
+                User.UniqueGuid = null;
+                await userManager.AddPasswordAsync(User, employee.Password);
+                _context.Users.Update(User);
+                _context.SaveChanges();
+
+                var userAddress = new UserAddress()
+                {
+                    AddressId = addressId,
+                    UserId = User.Id,
+                };
+
+                await userManager.AddToRoleAsync(User, "businessEmployee");
+
+                _context.UserAddresses.Add(userAddress);
+                _context.SaveChanges();
+                return User.Id;
+
+            }
+            else
+            {
+                throw new Exception("Invalid Link");
+            }
+
+
+
+
 
         }
 
@@ -179,18 +201,18 @@ namespace EpicMarket.Services
             return _;
         }
 
-        public async Task<List<EmployeeResult>> GetAllEmployees(EmployeeParams employeeParams)
+        public async Task<List<EmployeeResult>> GetAllEmployees(EmployeeParams employeeParams, int businessid)
         {
 
             //1 . filter with BusinessID
             var Employess = _context.BusinessEmployeeMaps
-                                .Include(c=> c.Employee).Where(c => c.BussinessID == employeeParams.BusinessId);
+                                .Include(c=> c.Employee).Where(c => c.BussinessID == businessid);
 
 
             //2 . Appling Searching
             var searchedEmployees = Employess.Where(
-                row => row.Employee.FirstName.Contains(employeeParams.searchTerm) ||
-                (row.Employee.Id).ToString() == employeeParams.searchTerm);
+                row => row.Employee.FirstName.Contains(employeeParams.searchTerm.Trim()) ||
+                (row.Employee.Id).ToString() == employeeParams.searchTerm.Trim());
 
 
             var sortedEmployess = searchedEmployees;

@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class SupportTicketsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -20,6 +22,13 @@ namespace EpicMarket.Admin.MVC.Controllers
 
         // GET: SupportTickets
         public async Task<IActionResult> Index()
+        {
+            var applicationDbContext = _context.SupportTickets.Include(s => s.Person).Include(s => s.TicketType);
+            return View(await applicationDbContext.ToListAsync());
+        }
+
+        [HttpPost, ActionName("GetData")]
+        public async Task<IActionResult> GetData()
         {
             var applicationDbContext = _context.SupportTickets.Include(s => s.Person).Include(s => s.TicketType);
             return View(await applicationDbContext.ToListAsync());

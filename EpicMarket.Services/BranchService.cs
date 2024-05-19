@@ -25,7 +25,7 @@ namespace EpicMarket.Services
             this.addressService = addressService;
         }
 
-        public async Task<int> AddOrUpdateBranch(BranchDto branchDto,  string UserName)
+        public async Task<int> AddOrUpdateBranch(BranchDto branchDto,  string UserName, int BusinessID)
         {
             var addressModel = new AddressDto();
          
@@ -52,7 +52,7 @@ namespace EpicMarket.Services
 
             var outletModel = new Outlet();
             outletModel.AddressID = addressId;
-            outletModel.BussinessID = branchDto.BussinessID;
+            outletModel.BussinessID = BusinessID;
             outletModel.Name = branchDto.Name;
             outletModel.Description = branchDto.Description;
             outletModel.ContactEmail = branchDto.ContactEmail;
@@ -123,16 +123,16 @@ namespace EpicMarket.Services
             return j;
         }
 
-        public async Task<List<BranchResult>> GetAllBranches(BranchParams branchParams)
+        public async Task<List<BranchResult>> GetAllBranches(BranchParams branchParams, int BusinessID)
         {
 
             //1 . filter with BusinessID
             var Outlets = _context.Outlets
-                                .Where(c => c.BussinessID == branchParams.BusinessId);
+                                .Where(c => c.BussinessID == BusinessID);
 
 
             //2 . Appling Searching
-            var sortedOutlets = Outlets.Where(row => row.Name.Contains(branchParams.searchTerm) || row.Description.Contains(branchParams.searchTerm));
+            var sortedOutlets = Outlets.Where(row => row.Name.Contains(branchParams.searchTerm.Trim()) || row.Description.Contains(branchParams.searchTerm.Trim()));
 
 
             // 3 .Appying Sorting

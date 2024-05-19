@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [Authorize]
+    [Authorize(Roles ="Admin")]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;

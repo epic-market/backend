@@ -16,5 +16,7 @@ namespace EpicMarket.Contracts
         bool HasPermission(string username, string securable);
 
         Task<AppUser> GetUserByIdAsync(int id);
+
+        bool IsBusinessVerified(int id);
     }
 }

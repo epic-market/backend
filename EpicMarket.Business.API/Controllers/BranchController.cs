@@ -1,4 +1,5 @@
 ﻿using EpicMarket.Contracts;
+using EpicMarket.Data.Models;
 using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Authorization;
@@ -16,21 +17,22 @@ namespace EpicMarket.Business.API.Controllers
         private readonly ILogger<BranchController> logger;
         private readonly IBranchService branchService;
 
-        public BranchController(ILogger<BranchController> logger, IBranchService branchService)
-        {
+        public BranchController(ILogger<BranchController> logger, IBranchService branchService, ApplicationDbContext dbContext) : base(dbContext)
+		{
             this.logger = logger;
             this.branchService = branchService;
        
         }
 
         [HttpGet("GetAllBranches")]
-        public async Task<ActionResult<OperationResult<List<BranchResult>>>> GetAllBranches([FromQuery]BranchParams branchParams)
+		[Authorize(Roles = "businessOwner")]
+		public async Task<ActionResult<OperationResult<List<BranchResult>>>> GetAllBranches([FromQuery]BranchParams branchParams)
         {
             var response = new OperationResult<List<BranchResult>>();
 
             this.logger.LogInformation("Branch Controller -> GetAllBranches()-> params {0}", JsonConvert.SerializeObject(new { Params = branchParams }));
 
-            var results = await branchService.GetAllBranches(branchParams);
+            var results = await branchService.GetAllBranches(branchParams, this.BusinessId);
 
             this.logger.LogInformation("Branch Controller -> GetAllBranches()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
 
@@ -41,7 +43,8 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpGet("GetBranchByID")]
-        public async Task<ActionResult<OperationResult<BranchResult>>> GetBranchByID(int branchId)
+		[Authorize(Roles = "businessOwner")]
+		public async Task<ActionResult<OperationResult<BranchResult>>> GetBranchByID(int branchId)
         {
             var response = new OperationResult<BranchResult>();
 
@@ -58,7 +61,8 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpPost("AddOrUpdateBranch")]
-        public async Task<ActionResult<OperationResult<int>>> AddBranch(BranchDto branchDto)
+		[Authorize(Roles = "businessOwner")]
+		public async Task<ActionResult<OperationResult<int>>> AddBranch(BranchDto branchDto)
         {
             var response = new OperationResult<int>();
 
@@ -66,7 +70,7 @@ namespace EpicMarket.Business.API.Controllers
 
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
 
-            var id = await branchService.AddOrUpdateBranch(branchDto, UserName);
+            var id = await branchService.AddOrUpdateBranch(branchDto, UserName, this.BusinessId);
             this.logger.LogInformation("Branch Controller -> AddBranch()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
 
             response.Data = id;
@@ -76,7 +80,8 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpPost("MapBranchToPeople")]
-        public async Task<ActionResult<OperationResult<int>>> MapBranchToPeople(BranchPeopleMapParams branchPeopleMap)
+		[Authorize(Roles = "businessOwner")]
+		public async Task<ActionResult<OperationResult<int>>> MapBranchToPeople(BranchPeopleMapParams branchPeopleMap)
         {
 			var response = new OperationResult<int>();
 			this.logger.LogInformation("Branch Controller -> MapBranchToPeople()-> params {0}", JsonConvert.SerializeObject(new { Params = branchPeopleMap }));
@@ -91,7 +96,8 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpPost("MapBranchToProduct")]
-        public async Task<ActionResult<OperationResult<int>>> MapBranchToProduct(BranchProductMapParams branchProductMap)
+		[Authorize(Roles = "businessOwner")]
+		public async Task<ActionResult<OperationResult<int>>> MapBranchToProduct(BranchProductMapParams branchProductMap)
         {
 
 			var response = new OperationResult<int>();
