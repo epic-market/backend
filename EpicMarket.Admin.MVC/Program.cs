@@ -47,7 +47,18 @@ app.Use(async (context, next) =>
         {
             "/Identity/Account/Login",
             "/Identity/Account/Logout",
-            "/Identity/Account/AccessDenied"
+            "/Identity/Account/AccessDenied",
+			"/Identity/Account/Manage",
+			"/Identity/Account/Manage/ChangePassword",
+			"/Identity/Account/Manage/TwoFactorAuthentication",
+			"/Identity/Account/Manage/EnableAuthenticator",
+            "/Identity/Account/Manage/ShowRecoveryCodes",
+            "/Identity/Account/Manage/Disable2fa",
+            "/Identity/Account/Manage/GenerateRecoveryCodes",
+            "/Identity/Account/Manage/ResetAuthenticator",
+            "/Identity/Account/LoginWith2fa",
+            "/Identity/Account/LoginWithRecoveryCode"
+
         };
 
         // Check if the request path is one of the allowed Identity paths
