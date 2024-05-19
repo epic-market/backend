@@ -39,38 +39,62 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
 app.Use(async (context, next) =>
 {
+          
+    // Define public URLs
+    var publicUrls = new List<string>
+    {
+        "/Identity/Account/Login",
+        "/Identity/Account/Logout",
+        "/Identity/Account/AccessDenied",
+        "/Identity/Account/LoginWith2fa",
+        "/Identity/Account/LoginWithRecoveryCode",
+        
+    };
+
+    // Define URLs that require authentication
+    var authenticatedUrls = new List<string>
+    {
+        "/Identity/Account/Manage",
+        "/Identity/Account/Manage/ChangePassword",
+        "/Identity/Account/Manage/TwoFactorAuthentication",
+        "/Identity/Account/Manage/EnableAuthenticator",
+        "/Identity/Account/Manage/ShowRecoveryCodes",
+        "/Identity/Account/Manage/Disable2fa",
+        "/Identity/Account/Manage/GenerateRecoveryCodes",
+        "/Identity/Account/Manage/ResetAuthenticator",
+        "/Identity/Account/Register"
+    };
+
     // Check if the request path starts with the Identity segment
     if (context.Request.Path.StartsWithSegments("/Identity", StringComparison.OrdinalIgnoreCase))
     {
-        // Paths under Identity that are allowed
-        var allowedIdentityPaths = new List<string>
+        // Check if the request path is one of the public URLs
+        bool isPublicUrl = publicUrls.Any(path => context.Request.Path.Equals(path, StringComparison.OrdinalIgnoreCase));
+
+        // Check if the request path is one of the authenticated URLs
+        bool isAuthenticatedUrl = authenticatedUrls.Any(path => context.Request.Path.Equals(path, StringComparison.OrdinalIgnoreCase));
+
+        if (isPublicUrl)
         {
-            "/Identity/Account/Login",
-            "/Identity/Account/Logout",
-            "/Identity/Account/AccessDenied",
-			"/Identity/Account/Manage",
-			"/Identity/Account/Manage/ChangePassword",
-			"/Identity/Account/Manage/TwoFactorAuthentication",
-			"/Identity/Account/Manage/EnableAuthenticator",
-            "/Identity/Account/Manage/ShowRecoveryCodes",
-            "/Identity/Account/Manage/Disable2fa",
-            "/Identity/Account/Manage/GenerateRecoveryCodes",
-            "/Identity/Account/Manage/ResetAuthenticator",
-            "/Identity/Account/LoginWith2fa",
-            "/Identity/Account/LoginWithRecoveryCode",
-            "/Identity/Account/Register"
-
-        };
-
-        // Check if the request path is one of the allowed Identity paths
-        bool isAllowedIdentityPath = allowedIdentityPaths.Any(path => context.Request.Path.Equals(path, StringComparison.OrdinalIgnoreCase));
-
-        // If the request is for an allowed Identity path, proceed with the request
-        if (isAllowedIdentityPath)
-        {
+            // If the request is for a public URL, proceed with the request
             await next();
+        }
+        else if (isAuthenticatedUrl)
+        {
+            // If the request is for an authenticated URL, check if the user is logged in
+            if (context.User.Identity.IsAuthenticated)
+            {
+                // If the user is logged in, proceed with the request
+                await next();
+            }
+            else
+            {
+                // If the user is not logged in, redirect to the login page
+                context.Response.Redirect("/Identity/Account/Login");
+            }
         }
         else
         {
@@ -84,6 +108,7 @@ app.Use(async (context, next) =>
         await next();
     }
 });
+
 app.MapRazorPages();
 
 app.Run();
