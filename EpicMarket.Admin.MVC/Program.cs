@@ -13,7 +13,9 @@ builder.Services.AddDbContext<ApplicationDbContext>();
 
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(connectionString));
-builder.Services.AddDefaultIdentity<AppUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<AuthDbContext>();
+builder.Services.AddDefaultIdentity<AppUser>().AddDefaultTokenProviders().
+        AddRoles<AppRole>()
+    .AddEntityFrameworkStores<AuthDbContext>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -45,6 +47,7 @@ app.Use(async (context, next) =>
         {
             "/Identity/Account/Login",
             "/Identity/Account/Logout",
+            "/Identity/Account/AccessDenied"
         };
 
         // Check if the request path is one of the allowed Identity paths

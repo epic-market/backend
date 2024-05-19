@@ -1,0 +1,28 @@
+﻿@page
+@model AccessDeniedModel
+@{
+    ViewData["Title"] = "Access denied";
+}
+@{
+    Layout = "~/Views/Shared/_LoginPartial.cshtml";
+}
+
+<div class="section-authentication-signin d-flex align-items-center justify-content-center my-5 my-lg-4">
+    <div class="container-fluid">
+        <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-3">
+            <div class="col mx-auto">
+                <div class="card rounded-4">
+                    <div class="card-body">
+                        <div class="border p-4 rounded-4">
+                            <div class="text-center">
+                            <h1 class="text-danger">@ViewData["Title"]</h1>
+                            <p class="text-danger">You do not have access.</p>
+                                <a href="/Identity/Account/Login">Back to Login</a>
+                            </div>
+                         </div>
+                     </div>
+                 </div>
+            </div>
+        </div>
+    </div>
+</div>
