@@ -34,9 +34,9 @@ namespace EpicMarket.Business.API.Controllers
             var response = new OperationResult<AddEmployeeResult>();
 
             this.logger.LogInformation("Employee Controller -> Register()-> params {0}", JsonConvert.SerializeObject(new { Params = addEmployeeParam }));
-            addEmployeeParam.UserID = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var UserID = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-            var result = await employeeService.Register(addEmployeeParam,this.BusinessId);
+            var result = await employeeService.Register(addEmployeeParam,this.BusinessId, UserID);
             this.logger.LogInformation("Employee Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = result }));
 
             response.Data = result;

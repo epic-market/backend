@@ -34,7 +34,7 @@ namespace EpicMarket.Services
             this.addressService = addressService;
             this.communicationService = communicationService;
         }
-        public async Task<AddEmployeeResult> Register(AddEmployeeParam addEmployeeParam, int businessid)
+        public async Task<AddEmployeeResult> Register(AddEmployeeParam addEmployeeParam, int businessid , int userID)
         {
             var employee = new AddEmployeeResult();
 
@@ -61,7 +61,7 @@ namespace EpicMarket.Services
 
             var Business = _context.Businesses.Find(businessid);
 
-            var User = _context.Users.Find(addEmployeeParam.UserID);
+            var User = _context.Users.Find(userID);
 
             var _ =  _context.BusinessEmployeeMaps.Add(new BusinessEmployeeMap() {  BussinessID  = businessid, EmployeeID = user.Id});
             
@@ -122,6 +122,7 @@ namespace EpicMarket.Services
                     UserID = userId,
                     FirstName = User.FirstName,
                     BusinessName = Business.Bussiness.Name,
+                    Email = User.Email,
                     BusinessEmail = Business.Bussiness.ContactEmail,
                 };
 
@@ -134,37 +135,51 @@ namespace EpicMarket.Services
 
         public async Task<int> CreateEmployeeAccount(EmployeeDto employee)
         {
-            var address = new AddressDto()
-            {
-                Address1 =  employee.Address,
-                City = employee.City,
-                State =employee.State,
-                Pincode = employee.Pincode,
-            };
-
-            var addressId = await addressService.AddAddress(address);
 
             var User = _context.Users.Where(u => employee.ID == u.Id).FirstOrDefault();
-            User.FirstName = employee.FirstName;
-            User.LastName = employee.LastName;
-            User.Email = employee.Email;
-            User.PhoneNumber = employee.ContactNumber;
-            User.UniqueGuid = null;
-            await userManager.AddPasswordAsync(User, employee.Password);
-            _context.Users.Update(User);
-            _context.SaveChanges();
 
-            var userAddress = new UserAddress() {
-                AddressId = addressId,
-                UserId = User.Id,
-            };
+            if (User.UniqueGuid == employee.Guid) {
+                var address = new AddressDto()
+                {
+                    Address1 = employee.Address,
+                    City = employee.City,
+                    State = employee.State,
+                    Pincode = employee.Pincode,
+                };
 
-			await userManager.AddToRoleAsync(User, "businessEmployee");
+                var addressId = await addressService.AddAddress(address);
 
-			_context.UserAddresses.Add(userAddress);
-            _context.SaveChanges();
 
-            return User.Id;
+                User.FirstName = employee.FirstName;
+                User.LastName = employee.LastName;
+                User.Email = employee.Email;
+                User.PhoneNumber = employee.ContactNumber;
+                User.UniqueGuid = null;
+                await userManager.AddPasswordAsync(User, employee.Password);
+                _context.Users.Update(User);
+                _context.SaveChanges();
+
+                var userAddress = new UserAddress()
+                {
+                    AddressId = addressId,
+                    UserId = User.Id,
+                };
+
+                await userManager.AddToRoleAsync(User, "businessEmployee");
+
+                _context.UserAddresses.Add(userAddress);
+                _context.SaveChanges();
+                return User.Id;
+
+            }
+            else
+            {
+                throw new Exception("Invalid Link");
+            }
+
+
+
+
 
         }
 
@@ -196,8 +211,8 @@ namespace EpicMarket.Services
 
             //2 . Appling Searching
             var searchedEmployees = Employess.Where(
-                row => row.Employee.FirstName.Contains(employeeParams.searchTerm) ||
-                (row.Employee.Id).ToString() == employeeParams.searchTerm);
+                row => row.Employee.FirstName.Contains(employeeParams.searchTerm.Trim()) ||
+                (row.Employee.Id).ToString() == employeeParams.searchTerm.Trim());
 
 
             var sortedEmployess = searchedEmployees;

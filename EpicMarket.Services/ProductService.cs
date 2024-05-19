@@ -77,7 +77,7 @@ namespace EpicMarket.Services
 
 
             //2 . Appling Searching
-            var sortedProducts = Products.Where(row => row.Name.Contains(productParams.searchTerm) || row.Description.Contains(productParams.searchTerm));
+            var sortedProducts = Products.Where(row => row.Name.Contains(productParams.searchTerm.Trim()) || row.Description.Contains(productParams.searchTerm.Trim()));
 
 
             // 3 .Appying Sorting

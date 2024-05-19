@@ -132,7 +132,7 @@ namespace EpicMarket.Services
 
 
             //2 . Appling Searching
-            var sortedOutlets = Outlets.Where(row => row.Name.Contains(branchParams.searchTerm) || row.Description.Contains(branchParams.searchTerm));
+            var sortedOutlets = Outlets.Where(row => row.Name.Contains(branchParams.searchTerm.Trim()) || row.Description.Contains(branchParams.searchTerm.Trim()));
 
 
             // 3 .Appying Sorting

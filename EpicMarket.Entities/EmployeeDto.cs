@@ -30,13 +30,13 @@ namespace EpicMarket.Entities
 
         public string ProfilePicture { get; set; }
 
+        public string Guid { get; set; }
+
 
     }
 
     public class AddEmployeeParam 
     {
-
-        public int UserID { get; set; }
 
         public string FirstName { get; set; }
 
@@ -55,6 +55,8 @@ namespace EpicMarket.Entities
     {
         public string UserID { get; set; }
         public string FirstName { get; set; }
+
+        public string Email { get; set; }
         public string BusinessName { get; set; }
         public string BusinessEmail { get; set; }
     }

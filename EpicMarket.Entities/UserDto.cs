@@ -25,6 +25,6 @@ namespace EpicMarket.Entities
 	{
         public UserDto UserDetails { get; set; }
 
-        public UserBusinessDto UserBusinessDto  { get; set; }
+        public UserBusinessDto UserBusiness { get; set; }
     }
 }

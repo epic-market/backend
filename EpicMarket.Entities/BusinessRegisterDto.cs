@@ -9,9 +9,6 @@ namespace EpicMarket.Entities
 {
     public class BusinessRegisterDto
     {
-
-        public int UserID { get; set; }
-
         public int BusinessCategoryID { get; set; }
 
         public string BussinessName { get; set; }

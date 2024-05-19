@@ -124,7 +124,7 @@ namespace EpicMarket.Services
 
 
             //2 . Appling Searching
-            var sortedOrders = orders.Where(row => row.Person.FirstName.Contains(orderParams.searchTerm) || row.ID.ToString() == orderParams.searchTerm);
+            var sortedOrders = orders.Where(row => row.Person.FirstName.Contains(orderParams.searchTerm.Trim()) || row.ID.ToString() == orderParams.searchTerm.Trim());
 
 
             // 3 .Appying Sorting

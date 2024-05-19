@@ -22,7 +22,7 @@ namespace EpicMarket.Services
             this.mapper = mapper;
             this.addressService = addressService;
         }
-        public async Task<int> RegisterBusiness(BusinessRegisterDto businessRegisterDto, string UserName)
+        public async Task<int> RegisterBusiness(BusinessRegisterDto businessRegisterDto, string UserName , int userid)
         {
           
             var addressModel = new AddressDto();
@@ -38,7 +38,7 @@ namespace EpicMarket.Services
 
             var businessModel = new Business();
             businessModel.AddressID = addressId;
-            businessModel.PersonID  = businessRegisterDto.UserID;
+            businessModel.PersonID  = userid;
             businessModel.BusinessCategoryID = businessRegisterDto.BusinessCategoryID;
             businessModel.Name = businessRegisterDto.BussinessName;
             businessModel.Description = businessRegisterDto.Description;

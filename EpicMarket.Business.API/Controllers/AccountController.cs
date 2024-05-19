@@ -34,12 +34,12 @@ namespace EpicMarket.Business.API.Controllers
         {
             var response = new OperationResult<UserDto>();
 
-            if (await UserExists(registerDto.Username)) return BadRequest("Username is taken");
+            if (await UserExists(registerDto.Email)) return BadRequest("Username is taken");
 
             var user = _mapper.Map<AppUser>(registerDto);
 
-            user.UserName = registerDto.Username.ToLower();
-            user.Email = registerDto.Username.ToLower();
+            user.UserName = registerDto.Email.ToLower();
+            user.Email = registerDto.Email.ToLower();
             user.PhoneNumber = registerDto.Phone;
 
 
@@ -71,7 +71,7 @@ namespace EpicMarket.Business.API.Controllers
 			//communication.SendEmail("akhil@epicmarket.in", "This is test mail form code", "Its working");
 
 			var user = await _userManager.Users
-                .SingleOrDefaultAsync(x => x.UserName == loginDto.Username.ToLower());
+                .SingleOrDefaultAsync(x => x.UserName == loginDto.Email.ToLower());
 
             if (user == null) return Unauthorized("Invalid username");
 
@@ -101,8 +101,6 @@ namespace EpicMarket.Business.API.Controllers
 				}).FirstOrDefault();
 			}
 
-
-
             response.Data = new LoginResult() { 
                      UserDetails = new UserDto
 			         {
@@ -112,7 +110,7 @@ namespace EpicMarket.Business.API.Controllers
 				         LastName = user.LastName,
 				         Phone = user.PhoneNumber
 			         },
-                     UserBusinessDto = userBusinessDto
+                UserBusiness = userBusinessDto
 		    };
 
 			return response;

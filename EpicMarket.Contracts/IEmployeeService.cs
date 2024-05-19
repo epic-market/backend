@@ -10,7 +10,7 @@ namespace EpicMarket.Contracts
 {
     public interface IEmployeeService
     {
-        Task<AddEmployeeResult> Register(AddEmployeeParam addEmployeeParam, int businessid);
+        Task<AddEmployeeResult> Register(AddEmployeeParam addEmployeeParam, int businessid, int userID);
         CheckLinkResult CheckEmployeeLink(string queryParam);
 
         Task<int> CreateEmployeeAccount(EmployeeDto employee);
