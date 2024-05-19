@@ -11,6 +11,8 @@ var connectionString = builder.Configuration.GetConnectionString("AuthDbContextC
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>();
 
+
+
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDefaultIdentity<AppUser>().AddDefaultTokenProviders().
@@ -57,7 +59,8 @@ app.Use(async (context, next) =>
             "/Identity/Account/Manage/GenerateRecoveryCodes",
             "/Identity/Account/Manage/ResetAuthenticator",
             "/Identity/Account/LoginWith2fa",
-            "/Identity/Account/LoginWithRecoveryCode"
+            "/Identity/Account/LoginWithRecoveryCode",
+            "/Identity/Account/Register"
 
         };
 
