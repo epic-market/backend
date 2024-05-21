@@ -1,7 +1,9 @@
 ﻿using EpicMarket.Data.Common;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,6 +23,7 @@ namespace EpicMarket.Data.Models
         public string? Logo { get; set; }
         public long ContactNumber { get; set; }
         public string ContactEmail { get; set; }
+
         public int AddressID { get; set; }
         public int? Rating { get; set; }
         public int? ReviewCount { get; set; }

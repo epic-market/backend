@@ -4,11 +4,23 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+    <div class="breadcrumb-title pe-3">Business</div>
+    <div class="ps-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 p-0">
+                <li class="breadcrumb-item">
+                    <a asp-action="Index"><i class="bx bx-home-alt"></i></a>
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
 
-<p>
-    <a asp-action="Create">Create New</a>
+<p class="d-flex justify-content-end">
+    <a asp-action="Create" class="btn btn-primary px-5"><i class='bx bx-plus mr-1'></i>Create New</a>
 </p>
+
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
@@ -19,15 +31,6 @@
                             @Html.DisplayNameFor(model => model.Name)
                         </th>
                         <th>
-                            @Html.DisplayNameFor(model => model.Description)
-                        </th>
-                        <th>
-                            @Html.DisplayNameFor(model => model.Banner)
-                        </th>
-                        <th>
-                            @Html.DisplayNameFor(model => model.Logo)
-                        </th>
-                        <th>
                             @Html.DisplayNameFor(model => model.ContactNumber)
                         </th>
                         <th>
@@ -35,9 +38,6 @@
                         </th>
                         <th>
                             @Html.DisplayNameFor(model => model.Rating)
-                        </th>
-                        <th>
-                            @Html.DisplayNameFor(model => model.ReviewCount)
                         </th>
                         <th>
                             @Html.DisplayNameFor(model => model.IsOpen)
@@ -55,19 +55,7 @@
                             @Html.DisplayNameFor(model => model.BusinessCategory)
                         </th>
                         <th>
-                            @Html.DisplayNameFor(model => model.Address)
-                        </th>
-                        <th>
-                            @Html.DisplayNameFor(model => model.CreateDate)
-                        </th>
-                        <th>
-                            @Html.DisplayNameFor(model => model.CreateBy)
-                        </th>
-                        <th>
-                            @Html.DisplayNameFor(model => model.ModifiedDate)
-                        </th>
-                        <th>
-                            @Html.DisplayNameFor(model => model.ModifiedBy)
+                            @Html.DisplayNameFor(model => model.Address.City)
                         </th>
                         <th></th>
                     </tr>
@@ -80,15 +68,6 @@
                                 @Html.DisplayFor(modelItem => item.Name)
                             </td>
                             <td>
-                                @Html.DisplayFor(modelItem => item.Description)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.Banner)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.Logo)
-                            </td>
-                            <td>
                                 @Html.DisplayFor(modelItem => item.ContactNumber)
                             </td>
                             <td>
@@ -96,9 +75,6 @@
                             </td>
                             <td>
                                 @Html.DisplayFor(modelItem => item.Rating)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.ReviewCount)
                             </td>
                             <td>
                                 @Html.DisplayFor(modelItem => item.IsOpen)
@@ -110,25 +86,13 @@
                                 @Html.DisplayFor(modelItem => item.Status)
                             </td>
                             <td>
-                                @Html.DisplayFor(modelItem => item.Person.Id)
+                                @Html.DisplayFor(modelItem => item.Person.UserName)
                             </td>
                             <td>
-                                @Html.DisplayFor(modelItem => item.BusinessCategory.ID)
+                                @Html.DisplayFor(modelItem => item.BusinessCategory.Name)
                             </td>
                             <td>
-                                @Html.DisplayFor(modelItem => item.Address.Id)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.CreateDate)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.CreateBy)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.ModifiedDate)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.ModifiedBy)
+                                @Html.DisplayFor(modelItem => item.Address.City)
                             </td>
                             <td>
                                 <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |

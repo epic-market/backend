@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Runtime.Loader;
+using Microsoft.CodeAnalysis.Elfie.Model;
+using System.Security.Claims;
+using EpicMarket.Admin.MVC.Models;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -35,25 +39,54 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var business = await _context.Businesses
+
+            var businessDetailModel = new BusinessDetailModel();
+
+			var business = await _context.Businesses
                 .Include(b => b.Address)
                 .Include(b => b.BusinessCategory)
                 .Include(b => b.Person)
+                .Include(b=> b.Status)
                 .FirstOrDefaultAsync(m => m.ID == id);
-            if (business == null)
+
+
+
+			var braches = await _context.Outlets
+                         .Include(b => b.Address)        
+				        .Where(m => m.BussinessID == id)
+                        .ToListAsync();
+
+			var employees = await _context.BusinessEmployeeMaps
+		                    .Include(b => b.Employee)
+		                    .Where(m => m.BussinessID == id)
+		                    .ToListAsync();
+
+
+
+			var products = await _context.Catalogs
+							.Where(m => m.BusinessID == id)
+							.ToListAsync();
+
+
+			businessDetailModel.Business = business;
+			businessDetailModel.Outlets = braches;
+			businessDetailModel.employees = employees;
+			businessDetailModel.Catalogs = products;
+
+			if (business == null)
             {
                 return NotFound();
             }
 
-            return View(business);
+            return View(businessDetailModel);
         }
 
         // GET: Businesses/Create
         public IActionResult Create()
         {
-            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id");
-            ViewData["BusinessCategoryID"] = new SelectList(_context.BusinessCategories, "ID", "ID");
-            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Id");
+            ViewData["BusinessCategoryID"] = new SelectList(_context.BusinessCategories, "ID", "Name");
+            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "UserName");
+            ViewData["StatusID"] = new SelectList(_context.StatusOptionSets, "Id", "Status");
             return View();
         }
 
@@ -62,17 +95,26 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,PersonID,BusinessCategoryID,Name,Description,Banner,Logo,ContactNumber,ContactEmail,AddressID,Rating,ReviewCount,IsOpen,Weight,Status,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Business business)
+        public async Task<IActionResult> Create([Bind("ID,PersonID,BusinessCategoryID,Name,Description,Banner,Logo,ContactNumber,ContactEmail,AddressID,Rating,ReviewCount,IsOpen,Weight,Status,CreateDate,CreateBy,ModifiedDate,ModifiedBy,Address")] Business business)
         {
+
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+
+
+            business.Address.CreateBy = userName;
+            business.Address.CreateDate = DateTime.Today;
+            business.CreateBy = userName;
+            business.CreateDate = DateTime.Today;
+
             if (ModelState.IsValid)
             {
                 _context.Add(business);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", business.AddressID);
-            ViewData["BusinessCategoryID"] = new SelectList(_context.BusinessCategories, "ID", "ID", business.BusinessCategoryID);
-            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Id", business.PersonID);
+            ViewData["BusinessCategoryID"] = new SelectList(_context.BusinessCategories, "ID", "Name");
+            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "UserName");
+            ViewData["StatusID"] = new SelectList(_context.StatusOptionSets, "Id", "Status");
             return View(business);
         }
 
@@ -84,14 +126,13 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var business = await _context.Businesses.FindAsync(id);
+            var business = await _context.Businesses.Where(b=>b.ID == id).Include(c=>c.Address).FirstOrDefaultAsync();
             if (business == null)
             {
                 return NotFound();
             }
-            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", business.AddressID);
-            ViewData["BusinessCategoryID"] = new SelectList(_context.BusinessCategories, "ID", "ID", business.BusinessCategoryID);
-            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Id", business.PersonID);
+            ViewData["BusinessCategoryID"] = new SelectList(_context.BusinessCategories, "ID", "Name", business.BusinessCategoryID);
+            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "UserName", business.PersonID);
 			ViewData["StatusID"] = new SelectList(_context.StatusOptionSets, "Id", "Status", business.StatusId);
 			return View(business);
         }
@@ -101,8 +142,19 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,PersonID,BusinessCategoryID,Name,Description,Banner,Logo,ContactNumber,ContactEmail,AddressID,Rating,ReviewCount,IsOpen,Weight,Status,CreateDate,CreateBy,ModifiedDate,ModifiedBy,StatusId")] Business business)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,PersonID,BusinessCategoryID,Name,Description,Banner,Logo,ContactNumber,ContactEmail,AddressID,Rating,ReviewCount,IsOpen,Weight,CreateDate,CreateBy,ModifiedDate,ModifiedBy,StatusId,Address")] Business business)
         {
+
+
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+
+
+            business.Address.ModifiedBy = userName;
+            business.Address.ModifiedDate = DateTime.Today;
+            business.Address.Id = business.AddressID;
+            business.ModifiedBy = userName;
+            business.ModifiedDate = DateTime.Today;
+
             if (id != business.ID)
             {
                 return NotFound();
@@ -112,6 +164,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 try
                 {
+
                     _context.Update(business);
                     await _context.SaveChangesAsync();
                 }
