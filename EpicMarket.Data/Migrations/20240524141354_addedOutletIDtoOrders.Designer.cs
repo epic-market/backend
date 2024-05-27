@@ -4,6 +4,7 @@ using EpicMarket.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EpicMarket.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240524141354_addedOutletIDtoOrders")]
+    partial class addedOutletIDtoOrders
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -786,6 +789,9 @@ namespace EpicMarket.Data.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("OutletID")
+                        .HasColumnType("int");
+
                     b.Property<int?>("Rating")
                         .HasColumnType("int");
 
@@ -803,6 +809,8 @@ namespace EpicMarket.Data.Migrations
                     b.HasIndex("AddressID");
 
                     b.HasIndex("BussinessID");
+
+                    b.HasIndex("OutletID");
 
                     b.ToTable("Outlets");
                 });
@@ -1190,7 +1198,7 @@ namespace EpicMarket.Data.Migrations
                         .HasForeignKey("AddressID");
 
                     b.HasOne("EpicMarket.Data.Models.Outlet", "Outlet")
-                        .WithMany("Orders")
+                        .WithMany()
                         .HasForeignKey("OutletID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1240,6 +1248,10 @@ namespace EpicMarket.Data.Migrations
                         .HasForeignKey("BussinessID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("EpicMarket.Data.Models.Outlet", null)
+                        .WithMany("Outlets")
+                        .HasForeignKey("OutletID");
 
                     b.Navigation("Address");
 
@@ -1432,11 +1444,11 @@ namespace EpicMarket.Data.Migrations
 
             modelBuilder.Entity("EpicMarket.Data.Models.Outlet", b =>
                 {
-                    b.Navigation("Orders");
-
                     b.Navigation("OutletPeople");
 
                     b.Navigation("OutletProducts");
+
+                    b.Navigation("Outlets");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.StatusOptionSet", b =>

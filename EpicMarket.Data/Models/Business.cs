@@ -39,8 +39,6 @@ namespace EpicMarket.Data.Models
 		[ForeignKey("StatusId")]
 		public virtual StatusOptionSet? Status { get; set; }
 
-		public virtual ICollection<Outlet> Outlets { get; set; }
-
         public virtual ICollection<BusinessEmployeeMap> BusinessEmployees { get; set; }
     }
 }

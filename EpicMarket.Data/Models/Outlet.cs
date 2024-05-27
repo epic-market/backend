@@ -27,6 +27,9 @@ namespace EpicMarket.Data.Models
 
         public virtual ICollection<OutletPerson> OutletPeople { get; set; }
 
-        public virtual ICollection<OutletProduct> OutletProducts { get; set; }
+		public virtual ICollection<Order> Orders { get; set; }
+
+
+		public virtual ICollection<OutletProduct> OutletProducts { get; set; }
     }
 }

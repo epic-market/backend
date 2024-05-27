@@ -63,7 +63,6 @@ namespace EpicMarket.Data.Models
         {
             base.OnModelCreating(modelBuilder);
 
-
             modelBuilder.Entity<UserAddress>()
                     .HasOne(op => op.User)
                     .WithMany(u => u.UserAddresses)

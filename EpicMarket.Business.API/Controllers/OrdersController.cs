@@ -33,7 +33,7 @@ namespace EpicMarket.Business.API.Controllers
 
 			this.logger.LogInformation("Orders Controller -> AddOrder()-> params {0}", JsonConvert.SerializeObject(new { Params = ordersDto }));
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-            var id = orderService.CreateOrder(ordersDto , UserName,this.BusinessId);
+            var id = orderService.CreateOrder(ordersDto , UserName);
 
             this.logger.LogInformation("Orders Controller -> AddOrder()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
 

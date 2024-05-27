@@ -1,84 +1,336 @@
-﻿@model EpicMarket.Data.Models.Outlet
+﻿@model EpicMarket.Admin.MVC.Models.OutletsDetailsModel
 
 @{
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+    <div class="breadcrumb-title pe-3">Outlet</div>
+    <div class="ps-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 p-0">
+                <li class="breadcrumb-item">
+                    <a asp-action="Index"><i class="bx bx-home-alt"></i></a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Details</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<hr />
 
-<div>
-    <h4>Outlet</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ContactNumber)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ContactNumber)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ContactEmail)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ContactEmail)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Rating)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Rating)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ReviewCount)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ReviewCount)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsOpen)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsOpen)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Weight)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Weight)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Bussiness)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Bussiness.ID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Address)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Address.Id)
-        </dd>
-    </dl>
+<div class="card">
+	<div class="row g-0">
+		<div class="col-md-12">
+			<div class="card-body">
+				<div class="float-end">
+					<a asp-action="Edit" class="btn btn-primary px-5" asp-route-id="@Model?.Outlet.ID">Edit</a>
+				</div>
+				<h4 class="card-title"> @Html.DisplayFor(model => model.Outlet.Name)</h4>
+				<div class="d-flex gap-3 py-3">
+					<div>@Html.DisplayFor(model => model.Outlet.Rating) @Html.DisplayNameFor(model => model.Outlet.Rating)</div>
+					<div>@Html.DisplayFor(model => model.Outlet.ReviewCount) @Html.DisplayNameFor(model => model.Outlet.ReviewCount)</div>
+					<div>@Html.DisplayFor(model => model.Outlet.IsOpen) @Html.DisplayNameFor(model => model.Outlet.IsOpen)</div>
+					<div>@Html.DisplayFor(model => model.Outlet.Weight) @Html.DisplayNameFor(model => model.Outlet.Weight)</div>
+					<div class="text-success"> @Html.DisplayFor(model => model.Outlet.Status)</div>
+				</div>
+				<p class="card-text fs-6"> @Html.DisplayFor(model => model.Outlet.Description) </p>
+				<div class="row">
+					<dl class="row col-6">
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Outlet.Bussiness.ID)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Outlet.Bussiness.ID)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Outlet.Bussiness.Name)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Outlet.Bussiness.Name)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Outlet.ContactNumber)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Outlet.ContactNumber)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Outlet.ContactEmail)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Outlet.ContactEmail)
+						</dd>
+					</dl>
+					<dl class="row col-6">
+
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Outlet.Address)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Outlet.Address.Address1),
+							@Html.DisplayFor(model => model.Outlet.Address.City),
+							@Html.DisplayFor(model => model.Outlet.Address.State),
+							@Html.DisplayFor(model => model.Outlet.Address.Pincode)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Outlet.CreateDate)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Outlet.CreateDate)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Outlet.CreateBy)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Outlet.CreateBy)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Outlet.ModifiedDate)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Outlet.ModifiedDate)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Outlet.ModifiedBy)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Outlet.ModifiedBy)
+						</dd>
+					</dl>
+				</div>
+			</div>
+		</div>
+	</div>
+	<hr />
+	<div class="card-body">
+		<ul class="nav nav-tabs nav-primary mb-0" role="tablist">
+			<li class="nav-item" role="presentation">
+				<a class="nav-link active" data-bs-toggle="tab" href="#primaryorders" role="tab" aria-selected="true">
+					<div class="d-flex align-items-center">
+						<div class="tab-icon">
+							<i class='bx bx-comment-detail font-18 me-1'></i>
+						</div>
+						<div class="tab-title"> Orders </div>
+					</div>
+				</a>
+			</li>
+			<li class="nav-item" role="presentation">
+				<a class="nav-link" data-bs-toggle="tab" href="#primaryproducts" role="tab" aria-selected="false">
+					<div class="d-flex align-items-center">
+						<div class="tab-icon">
+							<i class='bx bx-bookmark-alt font-18 me-1'></i>
+						</div>
+						<div class="tab-title"> Products  </div>
+					</div>
+				</a>
+			</li>
+			<li class="nav-item" role="presentation">
+				<a class="nav-link" data-bs-toggle="tab" href="#primaryemployee" role="tab" aria-selected="false">
+					<div class="d-flex align-items-center">
+						<div class="tab-icon">
+							<i class='bx bx-star font-18 me-1'></i>
+						</div>
+						<div class="tab-title">Employees  </div>
+					</div>
+				</a>
+			</li>
+		</ul>
+		<div class="tab-content pt-3">
+			<div class="tab-pane fade show active" id="primaryorders" role="tabpanel">
+				<div class="card">
+					<div class="card-body">
+						<div class="table-responsive">
+							<table id="example" class="table table-striped table-bordered" style="width:100%">
+								<thead>
+									<tr>
+										<th>
+											@Html.DisplayNameFor(model => model.Order.ID)
+										</th>
+										<th>
+											@Html.DisplayNameFor(model => model.Order.OrderType)
+										</th>
+										<th>
+											@Html.DisplayNameFor(model => model.Order.OrderAt)
+										</th>
+										<th>
+											@Html.DisplayNameFor(model => model.Order.Status)
+										</th>
+										<th>
+											@Html.DisplayNameFor(model => model.Order.PaymentMode)
+										</th>
+										<th>
+											@Html.DisplayNameFor(model => model.Order.Person.UserName)
+										</th>
+										<th>
+											@Html.DisplayNameFor(model => model.Order.TotalItems)
+										</th>
+										<th>
+											@Html.DisplayNameFor(model => model.Order.TotalPrice)
+										</th>
+										<th>
+											@Html.DisplayNameFor(model => model.Order.Address.City)
+										</th>
+										<th></th>
+									</tr>
+								</thead>
+								<tbody>
+									@foreach (var item in Model.Orders)
+									{
+										<tr>
+											<td>
+												@Html.DisplayFor(modelItem => item.ID)
+											</td>
+											<td>
+												@Html.DisplayFor(modelItem => item.OrderType)
+											</td>
+											<td>
+												@Html.DisplayFor(modelItem => item.OrderAt)
+											</td>
+											<td>
+												@Html.DisplayFor(modelItem => item.Status)
+											</td>
+											<td>
+												@Html.DisplayFor(modelItem => item.PaymentMode)
+											</td>
+											<td>
+												@Html.DisplayFor(modelItem => item.Person.UserName)
+											</td>
+											<td>
+												@Html.DisplayFor(modelItem => item.TotalItems)
+											</td>
+											<td>
+												@Html.DisplayFor(modelItem => item.TotalPrice)
+											</td>
+											<td>
+												@Html.DisplayFor(modelItem => item.Address.City)
+											</td>
+											<td>
+												<a asp-controller="Orders" asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
+												<a asp-controller="Orders" asp-action="Details" asp-route-id="@item.ID">Details</a> |
+												<a asp-controller="Orders" asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="tab-pane fade" id="primaryproducts" role="tabpanel">
+				<div class="card">
+					<div class="card-body">
+						<div class="table-responsive">
+							<table id="example1" class="table table-striped table-bordered" style="width:100%">
+								<thead>
+									<tr>
+										<th>
+											@Html.DisplayNameFor(model => model.OutletProduct.ID)
+										</th>
+										<th>
+											@Html.DisplayNameFor(model => model.OutletProduct.Product.Name)
+										</th>
+										<th>
+											@Html.DisplayNameFor(model => model.OutletProduct.Product.Category)
+										</th>
+										<th>
+											@Html.DisplayNameFor(model => model.OutletProduct.Product.Rate)
+										</th>
+										<th></th>
+									</tr>
+								</thead>
+								<tbody>
+									@foreach (var item in Model.OutletProducts)
+									{
+										<tr>
+											<td>
+												@Html.DisplayFor(modelItem => item.ID)
+											</td>
+											<td>
+												@Html.DisplayFor(modelItem => item.Product.Name)
+											</td>
+											<td>
+												@Html.DisplayFor(modelItem => item.Product.Category)
+											</td>
+											<td>
+												@Html.DisplayFor(modelItem => item.Product.Rate)
+											</td>
+											<td>
+												<a asp-controller="OutletProducts" asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
+												<a asp-controller="OutletProducts" asp-action="Details" asp-route-id="@item.ID">Details</a> |
+												<a asp-controller="OutletProducts" asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="tab-pane fade" id="primaryemployee" role="tabpanel">
+				<div class="card">
+					<div class="card-body">
+						<div class="table-responsive">
+							<table id="example2" class="table table-striped table-bordered" style="width:100%">
+								<thead>
+									<tr>
+										<th>
+											@Html.DisplayNameFor(model => model.OutletEmployee.Person.Id)
+										</th>
+										<th>
+											@Html.DisplayNameFor(model => model.OutletEmployee.Person.FirstName)
+										</th>
+										<th>
+											@Html.DisplayNameFor(model => model.OutletEmployee.Person.UserName)
+										</th>
+										<th>
+											@Html.DisplayNameFor(model => model.OutletEmployee.Person.PhoneNumber)
+										</th>
+										<th></th>
+									</tr>
+								</thead>
+								<tbody>
+									@foreach (var item in Model.OutletEmployees)
+									{
+										<tr>
+											<td>
+												@Html.DisplayFor(modelItem => item.Person.Id)
+											</td>
+											<td>
+												@Html.DisplayFor(modelItem => item.Person.FirstName)
+											</td>
+											<td>
+												@Html.DisplayFor(modelItem => item.Person.UserName)
+											</td>
+											<td>
+												@Html.DisplayFor(modelItem => item.Person.PhoneNumber)
+											</td>
+
+											<td>
+												<a asp-controller="OutletPersons" asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
+												<a asp-controller="OutletPersons" asp-action="Details" asp-route-id="@item.ID">Details</a> |
+												<a asp-controller="OutletPersons" asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.ID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+@section Scripts {
+	<script>
+		$(document).ready(function () {
+			$('#example').DataTable();
+			$('#example1').DataTable();
+			$('#example2').DataTable();
+		});
+	</script>
+}

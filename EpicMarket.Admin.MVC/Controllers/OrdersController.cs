@@ -23,7 +23,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: Orders
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Orders.Include(o => o.Address).Include(o => o.Business).Include(o => o.Person);
+            var applicationDbContext = _context.Orders.Include(o => o.Address).Include(o => o.Outlet).Include(o => o.Person);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -35,9 +35,11 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
+           
+
             var order = await _context.Orders
                 .Include(o => o.Address)
-                .Include(o => o.Business)
+                .Include(o => o.Outlet)
                 .Include(o => o.Person)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (order == null)
@@ -71,7 +73,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", order.AddressID);
-            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID", order.BusinessID);
+            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID", order.OutletID);
             ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Id", order.PersonID);
             return View(order);
         }
@@ -90,7 +92,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
             ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", order.AddressID);
-            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID", order.BusinessID);
+            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID", order.OutletID);
             ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Id", order.PersonID);
             return View(order);
         }
@@ -128,7 +130,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", order.AddressID);
-            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID", order.BusinessID);
+            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID", order.OutletID);
             ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Id", order.PersonID);
             return View(order);
         }
@@ -143,7 +145,7 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             var order = await _context.Orders
                 .Include(o => o.Address)
-                .Include(o => o.Business)
+                .Include(o => o.Outlet)
                 .Include(o => o.Person)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (order == null)

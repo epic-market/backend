@@ -9,7 +9,7 @@ namespace EpicMarket.Contracts
 {
     public interface IOrderService
     {
-        int CreateOrder(OrdersDto order,string UserName,int businessId);
+        int CreateOrder(OrdersDto order,string UserName);
 
         Task<OrdersDto> GetSingleOrder(int OrderId);
 

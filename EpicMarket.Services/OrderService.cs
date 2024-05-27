@@ -35,7 +35,7 @@ namespace EpicMarket.Services
 
 
 
-        public  int CreateOrder(OrdersDto orderdto,string UserName, int businessId)
+        public  int CreateOrder(OrdersDto orderdto,string UserName)
         {
 
             var ListOfOrderDetails = JsonConvert.DeserializeObject<List<OrderDetailsDto>>(orderdto.OrderDetails);
@@ -52,7 +52,7 @@ namespace EpicMarket.Services
             var newOrder = new Order()
             {
                 PersonID = User.Id,
-                BusinessID = businessId,
+				OutletID = orderdto.OutletId,
                 OrderType = orderdto.OrderedMode,
                 OrderAt = DateTime.Now,
                 Status = orderdto.Status,
@@ -119,8 +119,8 @@ namespace EpicMarket.Services
         {
 
             //1 . filter with BusinessID
-            var orders = _context.Orders
-                                .Where(c => c.BusinessID == businessID).Include(c=> c.Person);
+            var orders = _context.Orders.Include(c=>c.Outlet).
+                Where(c => c.Outlet.BussinessID == businessID).Include(c=> c.Person);
 
 
             //2 . Appling Searching

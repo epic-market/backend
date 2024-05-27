@@ -8,6 +8,8 @@ namespace EpicMarket.Entities
 {
     public class OrdersDto
     {
+
+        public int OutletId { get; set; }
         public DateTime OrderDate { get; set; } = DateTime.Now;
 
         public string PaymentMode { get; set; }
