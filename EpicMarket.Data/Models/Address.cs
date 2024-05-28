@@ -1,6 +1,7 @@
 ﻿using EpicMarket.Data.Common;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -11,7 +12,10 @@ namespace EpicMarket.Data.Models
 {
     public class Address : BaseModel
     {
+        [DisplayName("Address ID")]
         public int Id { get; set; }
+
+        [DisplayName("Address")]
         public string Address1 { get; set; }
         public string? Address2 { get; set; }
         public string State { get; set; }

@@ -13,6 +13,8 @@ namespace EpicMarket.Data.Models
     public class AppUser :IdentityUser<int>
     {
         // Foreign key to Address table
+
+
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string UniqueGuid { get; set; }

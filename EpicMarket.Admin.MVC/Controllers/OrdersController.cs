@@ -86,14 +86,13 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var order = await _context.Orders.FindAsync(id);
+            var order = await _context.Orders.Where(o=> o.ID == id).Include(c=>c.Address).FirstOrDefaultAsync();
             if (order == null)
             {
                 return NotFound();
             }
-            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", order.AddressID);
-            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID", order.OutletID);
-            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Id", order.PersonID);
+            ViewData["BusinessID"] = new SelectList(_context.Outlets, "ID", "Name", order.OutletID);
+            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "UserName", order.PersonID);
             return View(order);
         }
 

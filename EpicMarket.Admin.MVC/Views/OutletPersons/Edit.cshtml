@@ -35,14 +35,14 @@
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <input type="hidden" asp-for="ID" />
                         <div class="row mb-3">
-                            <label asp-for="PersonId" class="control-label"></label>
+                            <label asp-for="PersonId" class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
                             <select asp-for="PersonId" class="form-control" asp-items="ViewBag.PersonId"></select>
                             <span asp-validation-for="PersonId" class="text-danger"></span>
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <label asp-for="OutletId" class="control-label"></label>
+                            <label asp-for="OutletId" class="col-sm-3 col-form-label"></label>
                                 <div class="col-sm-9">
                             <input asp-for="OutletId" class="form-control" />
                             <span asp-validation-for="OutletId" class="text-danger"></span>

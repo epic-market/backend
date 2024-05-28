@@ -28,7 +28,10 @@
                 <thead>
                     <tr>
                         <th>
-                            @Html.DisplayNameFor(model => model.OutletID)
+                            @Html.DisplayNameFor(model => model.Outlet.Name)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Outlet.Bussiness.Name)
                         </th>
                         <th>
                             @Html.DisplayNameFor(model => model.Product)
@@ -44,13 +47,16 @@
                     {
                         <tr>
                             <td>
-                                @Html.DisplayFor(modelItem => item.OutletID)
+                                @Html.DisplayFor(modelItem => item.Outlet.Name)
                             </td>
                             <td>
-                                @Html.DisplayFor(modelItem => item.Product.ID)
+                                @Html.DisplayFor(modelItem => item.Outlet.Bussiness.Name)
                             </td>
                             <td>
-                                @Html.DisplayFor(modelItem => item.Outlet.ID)
+                                @Html.DisplayFor(modelItem => item.Product.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Product.Category)
                             </td>
                             <td>
                                 <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |

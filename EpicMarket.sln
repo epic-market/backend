@@ -15,8 +15,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EpicMarket.Services", "Epic
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EpicMarket.Admin.MVC", "EpicMarket.Admin.MVC\EpicMarket.Admin.MVC.csproj", "{475BBC69-8942-4803-AD16-529B79890969}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Epicmarket.DataJob", "Epicmarket.DataJob\Epicmarket.DataJob.csproj", "{06DA60B9-F529-4609-805B-49F404F42D80}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,10 +45,6 @@ Global
 		{475BBC69-8942-4803-AD16-529B79890969}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{475BBC69-8942-4803-AD16-529B79890969}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{475BBC69-8942-4803-AD16-529B79890969}.Release|Any CPU.Build.0 = Release|Any CPU
-		{06DA60B9-F529-4609-805B-49F404F42D80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{06DA60B9-F529-4609-805B-49F404F42D80}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{06DA60B9-F529-4609-805B-49F404F42D80}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{06DA60B9-F529-4609-805B-49F404F42D80}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
