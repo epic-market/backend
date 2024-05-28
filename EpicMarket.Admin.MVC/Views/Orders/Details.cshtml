@@ -1,96 +1,232 @@
-﻿@model EpicMarket.Data.Models.Order
+﻿@model EpicMarket.Admin.MVC.Models.OrderDetailsModel
 
 @{
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
 
-<div>
-    <h4>Order</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.OrderType)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.OrderType)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TotalPrice)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TotalPrice)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TotalItems)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TotalItems)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.OrderAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.OrderAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PaymentMode)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PaymentMode)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Person)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Person.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Outlet)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Outlet.ID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Address)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Address.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreateDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreateDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreateBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreateBy)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ModifiedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ModifiedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ModifiedBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ModifiedBy)
-        </dd>
-    </dl>
+<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+	<div class="breadcrumb-title pe-3">Orders</div>
+	<div class="ps-3">
+		<nav aria-label="breadcrumb">
+			<ol class="breadcrumb mb-0 p-0">
+				<li class="breadcrumb-item">
+					<a asp-action="Index"><i class="bx bx-home-alt"></i></a>
+				</li>
+				<li class="breadcrumb-item active" aria-current="page">Details</li>
+			</ol>
+		</nav>
+	</div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.ID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+<hr />
+
+<div class="card">
+	<div class="row g-0">
+		<div class="col-md-12">
+			<div class="card-body">
+				<div class="float-end">
+					<a asp-action="Edit" class="btn btn-primary px-5" asp-route-id="@Model?.Order.ID">Edit</a>
+				</div>
+				<div class="row">
+					<dl class="row col-6">
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Order.ID)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Order.ID)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Order.OrderType)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Order.OrderType)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Order.OrderAt)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Order.OrderAt)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Order.Status)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Order.Status)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Order.PaymentMode)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Order.PaymentMode)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Order.PaymentMode)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Order.PaymentMode)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Order.TotalItems)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Order.TotalItems)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Order.TotalPrice)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Order.TotalPrice)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Order.Address)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Order.Address.Address1),
+							@Html.DisplayFor(model => model.Order.Address.City),
+							@Html.DisplayFor(model => model.Order.Address.State),
+							@Html.DisplayFor(model => model.Order.Address.Pincode)
+						</dd>
+
+					</dl>
+					<dl class="row col-6">
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Order.Outlet.Name)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Order.Outlet.Name)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Order.Outlet.Bussiness.Name)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Order.Outlet.Bussiness.Name)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Order.Person.UserName)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Order.Person.UserName)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Order.Person.PhoneNumber)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Order.Person.PhoneNumber)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Order.CreateDate)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Order.CreateDate)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Order.CreateBy)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Order.CreateBy)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Order.ModifiedDate)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Order.ModifiedDate)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Order.ModifiedBy)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Order.ModifiedBy)
+						</dd>
+					</dl>
+				</div>
+			</div>
+		</div>
+	</div>
+	<hr />
+	<div class="card-body">
+		<ul class="nav nav-tabs nav-primary mb-0" role="tablist">
+			<li class="nav-item" role="presentation">
+				<a class="nav-link active" data-bs-toggle="tab" href="#primaryorders" role="tab" aria-selected="true">
+					<div class="d-flex align-items-center">
+						<div class="tab-icon">
+							<i class='bx bx-comment-detail font-18 me-1'></i>
+						</div>
+						<div class="tab-title"> Orders </div>
+					</div>
+				</a>
+			</li>
+		</ul>
+		<div class="tab-content pt-3">
+			<div class="tab-pane fade show active" id="primaryorders" role="tabpanel">
+				<div class="card">
+					<div class="card-body">
+						<div class="table-responsive">
+							<table id="example" class="table table-striped table-bordered" style="width:100%">
+								<thead>
+									<tr>
+										<th>
+											@Html.DisplayNameFor(model => model.OrderDetail)
+										</th>
+										<th>
+											@Html.DisplayNameFor(model => model.OrderDetail.Catalog)
+										</th>
+										<th>
+											@Html.DisplayNameFor(model => model.OrderDetail.Quantity)
+										</th>
+										<th>
+											@Html.DisplayNameFor(model => model.OrderDetail.Rate)
+										</th>
+										<th>
+											@Html.DisplayNameFor(model => model.OrderDetail.TotalPrice)
+										</th>
+
+
+										<th></th>
+									</tr>
+								</thead>
+								<tbody>
+									@foreach (var item in Model.OrderDetails)
+									{
+										<tr>
+											<td>
+												  @Html.DisplayFor(modelItem => item.Order.ID) 
+											</td>
+											<td>
+												<a asp-controller="Catalogs" asp-action="Details" asp-route-id="@item.Catalog.ID"> @Html.DisplayFor(modelItem => item.Catalog.ID)</a>
+
+											</td>
+											<td>
+												@Html.DisplayFor(modelItem => item.Quantity)
+											</td>
+											<td>
+												@Html.DisplayFor(modelItem => item.Rate)
+											</td>
+											<td>
+												@Html.DisplayFor(modelItem => item.TotalPrice)
+											</td>
+											<td>
+												<a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
+												<a asp-action="Details" asp-route-id="@item.ID">Details</a> |
+												<a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
 </div>
+@section Scripts {
+	<script>
+		$(document).ready(function () {
+			$('#example').DataTable();
+			$('#example1').DataTable();
+			$('#example2').DataTable();
+		});
+	</script>
+}

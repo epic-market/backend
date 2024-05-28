@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Admin.MVC.Models;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -34,20 +35,31 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 return NotFound();
             }
-
            
-
+            var orderModel = new OrderDetailsModel(); 
             var order = await _context.Orders
                 .Include(o => o.Address)
                 .Include(o => o.Outlet)
-                .Include(o => o.Person)
+                .Include(o => o.Outlet.Bussiness)
+				.Include(o => o.Person)
                 .FirstOrDefaultAsync(m => m.ID == id);
+
+
+            var orderDetails = await _context.OrderDetails.
+                Where(o=> o.OrderID == id)
+               .Include(o => o.Catalog)
+                .ToListAsync();
+
+            orderModel.Order = order;
+            orderModel.OrderDetails = orderDetails;
+
+
             if (order == null)
             {
                 return NotFound();
             }
 
-            return View(order);
+            return View(orderModel);
         }
 
         // GET: Orders/Create
