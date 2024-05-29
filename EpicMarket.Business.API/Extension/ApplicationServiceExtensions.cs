@@ -15,7 +15,7 @@ namespace EpicMarket.Business.API.Extension
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
         {
-             services.AddDbContext<ApplicationDbContext>();
+            services.AddDbContext<ApplicationDbContext>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ITokenService, TokenService>();

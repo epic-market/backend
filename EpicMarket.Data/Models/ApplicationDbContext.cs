@@ -10,10 +10,12 @@ namespace EpicMarket.Data.Models
 {
     public class ApplicationDbContext:IdentityDbContext<AppUser, AppRole,int , IdentityUserClaim<int>,AppUserRole,IdentityUserLogin<int>,IdentityRoleClaim<int>,IdentityUserToken<int>>
     {
-        public ApplicationDbContext()
-        {
+		private readonly IConfiguration _configuration;
 
-        }
+		public ApplicationDbContext(IConfiguration configuration)
+        {
+			_configuration = configuration;
+		}
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Business> Businesses { get; set; }
         public DbSet<BusinessCategoryInternal> BusinessCategories { get; set; }
@@ -51,13 +53,9 @@ namespace EpicMarket.Data.Models
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            var configuration = new ConfigurationBuilder()
-                                .SetBasePath(Directory.GetCurrentDirectory())
-                                .AddJsonFile("appsettings.json")
-                                .Build();
-
-            optionsBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
-        }
+			var connectionString = _configuration.GetConnectionString("DefaultConnection");
+			optionsBuilder.UseSqlServer(connectionString);
+		}
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
