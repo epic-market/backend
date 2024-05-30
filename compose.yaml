@@ -1,0 +1,32 @@
+services:
+  backend.api:
+    container_name: backend.api
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - 8080:8080
+    depends_on:
+      backend.db:
+        condition: service_healthy
+
+  backend.db:
+    container_name: backend.db
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      - ACCEPT_EULA=y
+      - SA_PASSWORD=pass_123
+    ports:
+      - 1433:1433
+    volumes:
+      - epicmarket-db:/var/opt/mssql
+
+    restart: always
+    healthcheck:
+        test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P pass_123 -Q 'SELECT 1' || exit 1"]
+        interval: 10s
+        retries: 10
+        start_period: 10s
+        timeout: 3s
+volumes:
+  epicmarket-db:
