@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -33,6 +34,60 @@ namespace EpicMarket.Admin.MVC.Controllers
             var applicationDbContext = _context.SupportTickets.Include(s => s.Person).Include(s => s.TicketType);
             return View(await applicationDbContext.ToListAsync());
         }
+
+
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> LoadData()
+        {
+
+            try
+            {
+                var draw = HttpContext.Request.Form["draw"].FirstOrDefault();
+                var start = Request.Form["start"].FirstOrDefault();
+                var length = Request.Form["length"].FirstOrDefault();
+                var sortColumn = Request.Form["columns[" + Request.Form["order[0][column]"].FirstOrDefault() + "][name]"].FirstOrDefault();
+                var sortColumnDirection = Request.Form["order[0][dir]"].FirstOrDefault();
+                var searchValue = Request.Form["search[value]"].FirstOrDefault();
+
+                int pageSize = length != null ? Convert.ToInt32(length) : 0;
+                int skip = start != null ? Convert.ToInt32(start) : 0;
+                int recordsTotal = 0;
+
+                var ticketData = (from tempTicket in _context.SupportTickets.Include(s => s.Person).Include(s => s.TicketType)
+                                  select tempTicket);
+
+                if (!string.IsNullOrEmpty(searchValue))
+                {
+                    ticketData = ticketData.Where(m => m.Description.Contains(searchValue)
+                                                        || m.Person.UserName.Contains(searchValue)
+                                                        || m.TicketType.Name.Contains(searchValue));
+                }
+
+                recordsTotal = ticketData.Count();
+                var data = await ticketData.Skip(skip).Take(pageSize).ToListAsync();
+
+                var jsonData = new { draw = draw, recordsFiltered = recordsTotal, recordsTotal = recordsTotal, data = data };
+                var json_data = new JsonResult(jsonData);
+
+                return json_data;
+            } catch (Exception)
+            {
+                throw new Exception("error");
+            }
+           
+        }
+
+
+
+
+
+
+
+
+
+
 
         // GET: SupportTickets/Details/5
         public async Task<IActionResult> Details(int? id)
