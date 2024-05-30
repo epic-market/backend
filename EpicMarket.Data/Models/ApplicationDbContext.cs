@@ -56,7 +56,7 @@ namespace EpicMarket.Data.Models
                                 .AddJsonFile("appsettings.json")
                                 .Build();
 
-            optionsBuilder.UseSqlite(configuration.GetConnectionString("DefaultConnection"));
+            optionsBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
