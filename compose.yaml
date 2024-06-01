@@ -9,6 +9,19 @@ services:
     depends_on:
       backend.db:
         condition: service_healthy
+  
+  backend.mvc:
+    container_name: backend.mvc
+    build:
+      context: .
+      dockerfile: Dockerfile.mvc
+    ports:
+      - 8081:8080
+    depends_on:
+      backend.db:
+        condition: service_healthy
+    profiles:
+      - 'mvc'
 
   backend.db:
     container_name: backend.db

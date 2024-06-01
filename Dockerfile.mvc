@@ -1,10 +1,13 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
 WORKDIR /src
 
-# Copy everything
-COPY . ./
+# Copy csproj and restore as distinct layers
+COPY ./EpicMarket.Admin.MVC/EpicMarket.Admin.MVC.csproj ./EpicMarket.Admin.MVC/EpicMarket.Admin.MVC.csproj
 # Restore as distinct layers
 RUN dotnet restore ./EpicMarket.Admin.MVC/EpicMarket.Admin.MVC.csproj
+
+# Copy everything
+COPY . ./
 # Build and publish a release
 RUN dotnet publish "./EpicMarket.Admin.MVC/EpicMarket.Admin.MVC.csproj" -c Release -o out
 

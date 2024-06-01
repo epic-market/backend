@@ -4,8 +4,7 @@
 - Built using `.NET 8` and `MVC`.
 - Docker compose available for local testing.
 
-## Running API using Docker compose
-
+## Start API
 ```bash
 # clone the repo
 git clone git@github.com:epic-market/backend.git
@@ -14,16 +13,25 @@ git clone git@github.com:epic-market/backend.git
 cd backend
 
 # Start docker-desktop before running docker compose
-docker compose up
-
-# Stop the containers with ctrl + c (cmd + c on Mac)
-```
-
-## To run Docker compose in detatched mode
-```bash
-# To start
 docker compose up -d
 
-# To stop
+# Stop the containers
 docker compose down
+```
+
+## Start MVC if needed
+```bash
+# Start MVC while the API and DB are running
+docker compose up -d backend.mvc
+
+# Stop mvc without interrupting the API and DB
+docker compose down backend.mvc
+```
+
+## Start API + MVC together
+```bash
+docker compose --profile mvc up -d
+
+# To stop everything
+docker compose --profile mvc down
 ```
