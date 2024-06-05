@@ -12,7 +12,7 @@ using System.Security.Claims;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public class OutletsController : Controller
     {
         private readonly ApplicationDbContext _context;

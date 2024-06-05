@@ -14,7 +14,7 @@ using EpicMarket.Admin.MVC.Models;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public class BusinessesController : Controller
     {
         private readonly ApplicationDbContext _context;
