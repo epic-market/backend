@@ -35,9 +35,9 @@ namespace EpicMarket.Data.Common
 
             var roles = new List<AppRole>
             {
-                new AppRole{Name = "Member"},
-                new AppRole{Name = "Admin"},
-                new AppRole{Name = "Moderator"},
+                new AppRole{Name = "member"},
+                new AppRole{Name = "admin"},
+                new AppRole{Name = "moderator"},
             };
 
             foreach (var role in roles)
@@ -51,7 +51,7 @@ namespace EpicMarket.Data.Common
             };
 
             await userManager.CreateAsync(admin, "Epicmarket@2024");
-            await userManager.AddToRolesAsync(admin, new[] { "Admin" });
+            await userManager.AddToRolesAsync(admin, new[] { "admin" });
 
         }
 

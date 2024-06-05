@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public class FAQCategoriesController : Controller
     {
         private readonly ApplicationDbContext _context;
