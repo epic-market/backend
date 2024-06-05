@@ -51,7 +51,7 @@ namespace EpicMarket.Data.Common
             };
 
             await userManager.CreateAsync(admin, "Epicmarket@2024");
-            await userManager.AddToRolesAsync(admin, new[] { "Admin" });
+            await userManager.AddToRolesAsync(admin, new[] { "admin" });
 
         }
 
