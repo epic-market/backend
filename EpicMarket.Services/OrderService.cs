@@ -36,19 +36,28 @@ namespace EpicMarket.Services
 
 
         public  int CreateOrder(OrdersDto orderdto,string UserName)
-        {
-
-            var ListOfOrderDetails = JsonConvert.DeserializeObject<List<OrderDetailsDto>>(orderdto.OrderDetails);
-
+        {   
             var User = new AppUser();
-
+            var totalItems = 0;
+            double totalPrice = 0.0;
             User.FirstName = orderdto.CustomerName;
             User.UserName = orderdto.CustomerEmail;
             User.PhoneNumber = orderdto.CustomerPhone;
-
             _context.Users.Add(User);
             _context.SaveChanges();
-
+            var listoforderDetails = new List<OrderDetail>();
+            foreach(var orderDetail in orderdto.orderDetailsDtos)
+            {
+                var catelog = _context.Catalogs.FirstOrDefault(c => c.ID == orderDetail.CatalogID);
+                var singleOrderDetail = new OrderDetail();
+                singleOrderDetail.CatalogID = orderDetail.CatalogID;
+                singleOrderDetail.Quantity = orderDetail.Quantity;
+                singleOrderDetail.Rate = catelog.Rate;
+                singleOrderDetail.TotalPrice = catelog.Rate * orderDetail.Quantity;
+                listoforderDetails.Add(singleOrderDetail);
+                totalItems += orderDetail.Quantity;
+                totalPrice += (catelog.Rate * orderDetail.Quantity);
+            }
             var newOrder = new Order()
             {
                 PersonID = User.Id,
@@ -57,18 +66,14 @@ namespace EpicMarket.Services
                 OrderAt = DateTime.Now,
                 Status = orderdto.Status,
                 PaymentMode = orderdto.PaymentMode,
-                TotalItems = orderdto.TotalItems,
-                TotalPrice = orderdto.TotalPrice,
+                TotalItems = totalItems,
+                TotalPrice = totalPrice,
             };
-            
             _context.Orders.Add(newOrder);
             _context.SaveChanges();
-
-            var orderDetails = mapper.Map<List<OrderDetail>>(ListOfOrderDetails);
-            orderDetails.ForEach(od => od.OrderID = newOrder.ID);
-            _context.OrderDetails.AddRange(orderDetails);
+            listoforderDetails.ForEach(od => od.OrderID = newOrder.ID);
+            _context.OrderDetails.AddRange(listoforderDetails);
             _context.SaveChanges();
-
             return newOrder.ID;
         }
 

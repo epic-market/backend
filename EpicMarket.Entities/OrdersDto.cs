@@ -27,8 +27,8 @@ namespace EpicMarket.Entities
         public string CustomerEmail { get; set; }
 
         public string CustomerPhone { get; set; }
-
-        public string OrderDetails { get; set; } // this List<OrderDetailsDto> convert to json to string
+        public string OrderDetails { get; set; }
+        public  List<OrderDetailsDto> orderDetailsDtos { get; set; } // this List<OrderDetailsDto> convert to json to string
     }
 
     public class OrderParams

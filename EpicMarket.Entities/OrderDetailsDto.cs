@@ -11,7 +11,7 @@ namespace EpicMarket.Entities
     {
         public int CatalogID { get; set; }
         public int Quantity { get; set; }
-        public double Rate { get; set; }
-        public double TotalPrice { get; set; }
+        //public double Rate { get; set; }
+        //public double TotalPrice { get; set; }
     }
 }
