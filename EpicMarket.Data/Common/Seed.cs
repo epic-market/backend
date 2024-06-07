@@ -58,18 +58,71 @@ namespace EpicMarket.Data.Common
 
         public static async Task Seeddata(ApplicationDbContext context)
         {
-            if (await context.AccessTypes.AnyAsync()) return;
+            if (!await context.AccessTypes.AnyAsync()) {
 
-            var accessTypes = new List<AccessType>
-            {
-              new AccessType{ Name = "ReadOnly" , Priority = 2},
-              new AccessType{ Name = "ReadWrite" , Priority = 1},
-              new AccessType{ Name = "Denied" , Priority = 3}
-            };
+                var accessTypes = new List<AccessType>
+                {
+                  new AccessType{ Name = "ReadOnly" , Priority = 2},
+                  new AccessType{ Name = "ReadWrite" , Priority = 1},
+                  new AccessType{ Name = "Denied" , Priority = 3}
+                };
 
-            foreach (var accessType in accessTypes)
+                foreach (var accessType in accessTypes)
+                {
+                    await context.AccessTypes.AddAsync(accessType);
+                }
+            }
+
+            if (!await context.StatusOptionSets.AnyAsync())
             {
-                await context.AccessTypes.AddAsync(accessType);
+                var statusOptions = new List<StatusOptionSet>
+                {
+                    new StatusOptionSet{ Status = "Unverified" , StatusDescription = "Not yet been verified"},
+                    new StatusOptionSet{ Status = "Pending" , StatusDescription = "verification is in progress"},
+                    new StatusOptionSet{ Status = "Verified" , StatusDescription = "successfully verified"},
+                    new StatusOptionSet{ Status = "Rejected" , StatusDescription = "verification was unsuccessful"},
+                };
+
+                foreach (var statusOption in statusOptions)
+                {
+                    await context.StatusOptionSets.AddAsync(statusOption);
+                }
+            }
+
+            if (!await context.OrderStatusOptions.AnyAsync())
+            {
+                var orderOptions = new List<OrderStatusOptions>
+                {
+                    new OrderStatusOptions{ OrderStatus = "Order Placed" },
+                    new OrderStatusOptions{ OrderStatus = "Order Confirmed"},
+                    new OrderStatusOptions{ OrderStatus = "Order Processing" },
+                    new OrderStatusOptions{ OrderStatus = "Canceled"},
+                    new OrderStatusOptions{ OrderStatus = "Awaiting Pickup" },
+                    new OrderStatusOptions{ OrderStatus = "Delivered"},
+                };
+
+                foreach (var orderOption in orderOptions)
+                {
+                    await context.OrderStatusOptions.AddAsync(orderOption);
+                }
+            }
+
+            if (!await context.SupportTicketTypes.AnyAsync())
+            {
+                var supportTickets = new List<SupportTicketType>
+                {
+                    new SupportTicketType{ Name = "New"  , Description = "Newly Created ticket"},
+                    new SupportTicketType{ Name = "Pending",  Description = "requires additional information or action"},
+                    new SupportTicketType{ Name = "On Hold",  Description = "cannot be resolved immediately due to external dependencies"},
+                    new SupportTicketType{ Name = "Resolved",  Description = "ticket is not yet closed"},
+                    new SupportTicketType{ Name = "Closed",  Description = "it has been closed"},
+
+                };
+
+                foreach (var tickettype in supportTickets)
+                {
+                    await context.SupportTicketTypes.AddAsync(tickettype);
+                }
             }
 
             await context.SaveChangesAsync();
