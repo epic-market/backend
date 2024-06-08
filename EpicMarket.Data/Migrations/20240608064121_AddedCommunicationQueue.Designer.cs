@@ -4,6 +4,7 @@ using EpicMarket.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EpicMarket.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240608064121_AddedCommunicationQueue")]
+    partial class AddedCommunicationQueue
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -696,231 +699,6 @@ namespace EpicMarket.Data.Migrations
                     b.ToTable("ContactMethod");
                 });
 
-            modelBuilder.Entity("EpicMarket.Data.Models.Entity", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<bool?>("IsAudited")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("Entity");
-                });
-
-            modelBuilder.Entity("EpicMarket.Data.Models.Event", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<int>("EventCategoryID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("EventTypeID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("HelpText")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<bool?>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsShownOnScreen")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int?>("PriorityID")
-                        .HasColumnType("int");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("Event");
-                });
-
-            modelBuilder.Entity("EpicMarket.Data.Models.EventCategory", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<string>("AlertIcons")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EventCategoryIcon")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("EventID")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsShownInAlerts")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Sequence")
-                        .HasColumnType("int");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("EventID");
-
-                    b.ToTable("EventCategory");
-                });
-
-            modelBuilder.Entity("EpicMarket.Data.Models.EventLog", b =>
-                {
-                    b.Property<long>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
-
-                    b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Data")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<int>("EventID")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("EventTypeID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("NotificationQueueDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("SessionID")
-                        .HasMaxLength(88)
-                        .HasColumnType("nvarchar(88)");
-
-                    b.Property<string>("Source")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("EventID");
-
-                    b.HasIndex("EventTypeID");
-
-                    b.ToTable("EventLog");
-                });
-
-            modelBuilder.Entity("EpicMarket.Data.Models.EventType", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<int?>("EventID")
-                        .HasColumnType("int");
-
-                    b.Property<bool?>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int?>("Sequence")
-                        .HasColumnType("int");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("EventID");
-
-                    b.ToTable("EventType");
-                });
-
             modelBuilder.Entity("EpicMarket.Data.Models.FAQ", b =>
                 {
                     b.Property<int>("Id")
@@ -1553,37 +1331,6 @@ namespace EpicMarket.Data.Migrations
                     b.Navigation("ContactMethod");
                 });
 
-            modelBuilder.Entity("EpicMarket.Data.Models.EventCategory", b =>
-                {
-                    b.HasOne("EpicMarket.Data.Models.Event", null)
-                        .WithMany("EventCategorys")
-                        .HasForeignKey("EventID");
-                });
-
-            modelBuilder.Entity("EpicMarket.Data.Models.EventLog", b =>
-                {
-                    b.HasOne("EpicMarket.Data.Models.Event", "Event")
-                        .WithMany()
-                        .HasForeignKey("EventID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EpicMarket.Data.Models.EventType", "EventType")
-                        .WithMany()
-                        .HasForeignKey("EventTypeID");
-
-                    b.Navigation("Event");
-
-                    b.Navigation("EventType");
-                });
-
-            modelBuilder.Entity("EpicMarket.Data.Models.EventType", b =>
-                {
-                    b.HasOne("EpicMarket.Data.Models.Event", null)
-                        .WithMany("EventTypes")
-                        .HasForeignKey("EventID");
-                });
-
             modelBuilder.Entity("EpicMarket.Data.Models.FAQ", b =>
                 {
                     b.HasOne("EpicMarket.Data.Models.FAQCategory", "Category")
@@ -1840,13 +1587,6 @@ namespace EpicMarket.Data.Migrations
             modelBuilder.Entity("EpicMarket.Data.Models.ContactMethod", b =>
                 {
                     b.Navigation("CommunicationQueues");
-                });
-
-            modelBuilder.Entity("EpicMarket.Data.Models.Event", b =>
-                {
-                    b.Navigation("EventCategorys");
-
-                    b.Navigation("EventTypes");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.FAQCategory", b =>

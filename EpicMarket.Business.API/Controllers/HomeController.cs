@@ -74,6 +74,22 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(list);
         }
 
+        [HttpGet("GetAllBlogsByCategory")]
+        public async Task<ActionResult<OperationResult<List<BlogDto>>>> GetAllBlogsByCategory([FromQuery] BlogsByCategoryParams blogs)
+        {
+            var reponse = new OperationResult<List<BlogDto>>();
+
+            this.logger.LogInformation("Home Controller -> GetAllBlogsByCategory()");
+
+            var list = await homeService.GetAllBlogsByCategory(blogs);
+
+            this.logger.LogInformation("Home Controller-> GetAllBlogsByCategory()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = list }));
+
+            reponse.Data = list;
+
+            return Ok(list);
+        }
+
         [HttpGet("GetBlogDetails/{blogId}")]
         public async Task<ActionResult<OperationResult<BlogDto>>> GetBlogDetails(int blogId)
         {
