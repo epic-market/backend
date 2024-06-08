@@ -50,8 +50,8 @@ namespace EpicMarket.Data.Models
         public DbSet<OrderStatusOptions> OrderStatusOptions { get; set; }
 
 		public DbSet<StatusOptionSet> StatusOptionSets { get; set; }
-
-		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public DbSet<BlogCategory> BlogCategory { get; set; }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 			var connectionString = _configuration.GetConnectionString("DefaultConnection");
 			optionsBuilder.UseSqlServer(connectionString);

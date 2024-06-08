@@ -12,6 +12,7 @@ namespace EpicMarket.Data.Models
     {
         [DisplayName("Blog ID")]
         public int Id { get; set; }
+        public int BlogCategoryID { get; set; }
 
         [DisplayName("Blog Title")]
         public string Title { get; set; }
@@ -19,5 +20,6 @@ namespace EpicMarket.Data.Models
         public string ImageUrl { get; set; }
         public string InnerHtml { get; set; }
         public string Authour { get; set; }
+        public BlogCategory BlogCategory { get; set; }
     }
 }
