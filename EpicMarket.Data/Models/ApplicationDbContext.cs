@@ -52,7 +52,12 @@ namespace EpicMarket.Data.Models
 		public DbSet<StatusOptionSet> StatusOptionSets { get; set; }
         public DbSet<BlogCategory> BlogCategory { get; set; }
         public DbSet<ContactMethod> ContactMethod { get; set; }
-        public DbSet<CommunicationQueue> CommunicationQueue { get; set; }
+        public DbSet<CommunicationQueue> CommunicationQueue { get; set; } 
+        public DbSet<Entity> Entity { get; set; } 
+        public DbSet<EventLog> EventLog { get; set; } 
+        public DbSet<Event> Event { get; set; } 
+        public DbSet<EventCategory> EventCategory { get; set; }
+        public DbSet<EventType> EventType { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 			var connectionString = _configuration.GetConnectionString("DefaultConnection");

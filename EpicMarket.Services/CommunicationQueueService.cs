@@ -17,7 +17,7 @@ namespace EpicMarket.Services
         {
             this._context = _context;
         }
-        public void InsertCommunicationQueue(CommunicationQueueDTO communicationQueueDTO)
+        public async void InsertCommunicationQueue(CommunicationQueueDTO communicationQueueDTO)
         {
 
             var contactMethod = _context.ContactMethod.Where(row => row.Name==communicationQueueDTO.ContactMethod.Trim());
@@ -32,6 +32,7 @@ namespace EpicMarket.Services
             communicationQueueModel.CreateBy = communicationQueueDTO.CreateBy;
             communicationQueueModel.CreateDate = DateTime.Now;
             _context.CommunicationQueue.Add(communicationQueueModel);
+            await _context.SaveChangesAsync();
         }
     }
 }

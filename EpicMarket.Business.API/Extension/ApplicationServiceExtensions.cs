@@ -23,6 +23,7 @@ namespace EpicMarket.Business.API.Extension
             services.AddScoped<IApplicationConfigurationService, ApplicationConfigurationService>();
             services.AddScoped<ICommunicationService, CommunicationService>();
             services.AddScoped<ICommunicationQueueService, CommunicationQueueService>();
+            services.AddScoped<IEventLogService, EventLogService>();
             services.AddScoped<IBusinessService, BusinessService>();
             services.AddScoped<IStaticService, StaticService>();
             services.AddScoped<IAddressService, AddressService>();
