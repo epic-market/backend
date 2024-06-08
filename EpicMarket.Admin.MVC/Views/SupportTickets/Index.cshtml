@@ -43,6 +43,24 @@
                     </tr>
                 </thead>
                 <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                                @Html.DisplayFor(modelItem => item.Attachment)
+                </td>
+                <td>
+                                @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                                @Html.DisplayFor(modelItem => item.Person.UserName)
+                </td>
+                <td>
+                                @Html.DisplayFor(modelItem => item.TicketType.Name)
+                </td>
+                <td></td>
+            </tr>
+        }
                 </tbody>
             </table>
         </div>
@@ -68,31 +86,33 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            $('#example').DataTable({
-                "processing": true,
-                "serverSide": true,
-                "filter":true,
-                "ajax": {
-                    "url": "@Url.Action("LoadData", "SupportTickets")",
-                    "type": "POST",
-                    "dataType":"json"
-                },
-                "columns": [
-                    { "data": "Attachment" },
-                    { "data": "Description" },
-                    { "data": "Person.UserName" },
-                    { "data": "TicketType.Type" },
-                    {
-                        "data": "ID",
-                        "render": function (data, type, row) {
-                            debugger
-                            return `<a href='/Tickets/Edit/${data}'>Edit</a> |
-                                            <a href='/Tickets/Details/${data}'>Details</a> |
-                                            <button type='button' class='btn btn-danger delete-btn' data-bs-toggle='modal' data-target='#exampleVerticallycenteredModal' data-id='${data}'>Delete</button>`;
-                        }
-                    }
-                ]
-            });
+            $('#example').DataTable(
+            //     {
+            //     "processing": true,
+            //     "serverSide": true,
+            //     "filter":true,
+            //     "ajax": {
+            //         "url": "@Url.Action("LoadData", "SupportTickets")",
+            //         "type": "POST",
+            //         "dataType":"json"
+            //     },
+            //     "columns": [
+            //         { "data": "Attachment" },
+            //         { "data": "Description" },
+            //         { "data": "Person.UserName" },
+            //         { "data": "TicketType.Type" },
+            //         {
+            //             "data": "ID",
+            //             "render": function (data, type, row) {
+            //                 debugger
+            //                 return `<a href='/Tickets/Edit/${data}'>Edit</a> |
+            //                                 <a href='/Tickets/Details/${data}'>Details</a> |
+            //                                 <button type='button' class='btn btn-danger delete-btn' data-bs-toggle='modal' data-target='#exampleVerticallycenteredModal' data-id='${data}'>Delete</button>`;
+            //             }
+            //         }
+            //     ]
+            // }
+            );
 
 
             
