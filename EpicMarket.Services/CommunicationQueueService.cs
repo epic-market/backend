@@ -27,7 +27,6 @@ namespace EpicMarket.Services
             communicationQueueModel.MessageText = communicationQueueDTO.MessageText;
             communicationQueueModel.ScheduledDate = communicationQueueDTO.ScheduledDate;
             communicationQueueModel.NotificationRecipient = communicationQueueDTO.NotificationRecipient;
-            communicationQueueModel.EventLogID = communicationQueueDTO.EventLogID;
             communicationQueueModel.ContactMethodID = contactMethod.FirstOrDefault().ID;
             communicationQueueModel.CreateBy = communicationQueueDTO.CreateBy;
             communicationQueueModel.CreateDate = DateTime.Now;

@@ -26,9 +26,9 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpGet("GetAllBranches")]
 		[Authorize(Roles = "businessOwner")]
-		public async Task<ActionResult<OperationResult<List<BranchResult>>>> GetAllBranches([FromQuery]BranchParams branchParams)
+		public async Task<ActionResult<OperationResult<GetDataResult<List<BranchResult>>>>> GetAllBranches([FromQuery]BranchParams branchParams)
         {
-            var response = new OperationResult<List<BranchResult>>();
+            var response = new OperationResult<GetDataResult<List<BranchResult>>>();
 
             this.logger.LogInformation("Branch Controller -> GetAllBranches()-> params {0}", JsonConvert.SerializeObject(new { Params = branchParams }));
 

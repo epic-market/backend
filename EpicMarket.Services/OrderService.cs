@@ -2,6 +2,7 @@
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -120,8 +121,10 @@ namespace EpicMarket.Services
 
         }
 
-        public async Task<List<OrderResult>> GetAllOrders(OrderParams orderParams, int businessID)
+        public async Task<GetDataResult<List<OrderResult>>> GetAllOrders(OrderParams orderParams, int businessID)
         {
+
+            var getData = new GetDataResult<List<OrderResult>>();
 
             //1 . filter with BusinessID
             var orders = _context.Orders.Include(c=>c.Outlet).
@@ -166,7 +169,11 @@ namespace EpicMarket.Services
                 Count = totalCount
             }).ToListAsync();
 
-            return results;
+
+            getData.items = results;
+            getData.Count = totalCount;
+
+            return getData;
         }
 
     }

@@ -9,30 +9,31 @@ using EpicMarket.Data.Common;
 
 namespace EpicMarket.Data.Models
 {
-    public class EventLog:BaseModel
+    public class EventLog : BaseModel
     {
         [Key]
         public long ID { get; set; }
 
         [Required]
-        public int EventID { get; set; }
+        public int EventID { get; set; } // updated, Deleted , Created
 
-        [MaxLength(88)]
-        public string SessionID { get; set; }
+
+        [Required]
+        public int EntityID { get; set; } // Order, Product , Business
+
+        [Required]
+        public int? RecordID { get; set; }
 
         [MaxLength(255)]
-        public string Source { get; set; }
+        public string Source { get; set; } //which api call has been called this event
 
         [MaxLength(2000)]
-        public string Description { get; set; }
+        public string Description { get; set; } //type event desciption
 
-        public string Data { get; set; }
-
-        public DateTime? NotificationQueueDate { get; set; }
-        public int? EventTypeID { get; set; }
+        public string Data { get; set; } // its the data 
 
         public virtual Event Event { get; set; }
 
-        public virtual EventType EventType { get; set; }
+        public virtual Entity Entity { get; set; }
     }
 }

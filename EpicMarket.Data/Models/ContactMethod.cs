@@ -15,16 +15,12 @@ namespace EpicMarket.Data.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
 
-        [StringLength(50)]
+        [StringLength(50)] //email,phone,
         public string Name { get; set; }
 
         [StringLength(255)]
         public string Description { get; set; }
 
-        [StringLength(50)]
-        public string ClassName { get; set; }
-
-        public int? Sequence { get; set; }
         public virtual ICollection<CommunicationQueue>? CommunicationQueues { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace EpicMarket.Contracts
 {
     public interface IBranchService
     {
-        Task<List<BranchResult>> GetAllBranches(BranchParams branchParams, int BusinessID);
+        Task<GetDataResult<List<BranchResult>>> GetAllBranches(BranchParams branchParams, int BusinessID);
 
         Task<int> AddOrUpdateBranch(BranchDto branchDto, string UserName, int BusinessID);
 

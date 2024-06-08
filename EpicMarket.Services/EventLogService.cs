@@ -41,11 +41,11 @@ namespace EpicMarket.Services
                 eventLogRecord = new EventLog
                 {
                     EventID = eventModel.ID,
-                    //SessionID = source.SessionID,
+                    EntityID = entityModel.ID,
+                    RecordID = eVENT_LOG_SAVE_PARAMS.RecordId,
                     Source = eVENT_LOG_SAVE_PARAMS.Source,
                     Description = eVENT_LOG_SAVE_PARAMS.Description,
                     Data = eVENT_LOG_SAVE_PARAMS.Data,
-                    NotificationQueueDate = null,
                     CreateDate = DateTime.Now,
                     CreateBy = eVENT_LOG_SAVE_PARAMS.LoggedInUserName
                 };
@@ -56,11 +56,11 @@ namespace EpicMarket.Services
                 eventLogRecord = new EventLog
                 {
                     EventID = eventModel.ID,
-                    //SessionID = source.SessionID,
+                    EntityID = entityModel.ID,
+                    RecordID = eVENT_LOG_SAVE_PARAMS.RecordId,
                     Source = eVENT_LOG_SAVE_PARAMS.Source,
                     Description = eventModel.Description,
                     Data = eVENT_LOG_SAVE_PARAMS.Data,
-                    NotificationQueueDate = null,
                     CreateDate = DateTime.Now,
                     CreateBy = eVENT_LOG_SAVE_PARAMS.LoggedInUserName
                 };

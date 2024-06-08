@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace EpicMarket.Data.Models
 {
-    public class EventCategory
+    public class EventCategory //this table is to know which application is assced like bussinessowner, admin , customer app
     {
         [Key]
         public int ID { get; set; }
@@ -18,13 +18,9 @@ namespace EpicMarket.Data.Models
 
         public string Description { get; set; }
 
-        public bool IsActive { get; set; }
-
         public int Sequence { get; set; }
-        public string EventCategoryIcon { get; set; }
 
-        public string AlertIcons { get; set; }
+        public virtual ICollection<Event>? Events { get; set; }
 
-        public bool IsShownInAlerts { get; set; }
     }
 }

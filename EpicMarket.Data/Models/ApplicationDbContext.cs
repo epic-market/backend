@@ -57,7 +57,6 @@ namespace EpicMarket.Data.Models
         public DbSet<EventLog> EventLog { get; set; } 
         public DbSet<Event> Event { get; set; } 
         public DbSet<EventCategory> EventCategory { get; set; }
-        public DbSet<EventType> EventType { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 			var connectionString = _configuration.GetConnectionString("DefaultConnection");
@@ -171,7 +170,14 @@ namespace EpicMarket.Data.Models
                         .WithMany(fc => fc.FAQs)
                         .HasForeignKey(fk => fk.CategoryId)
                         .OnDelete(DeleteBehavior.Restrict);
-                        
+
+
+
+            modelBuilder.Entity<Blog>()
+                        .HasOne(c => c.BlogCategory)
+                        .WithMany(fc => fc.Blogs)
+                        .HasForeignKey(fk => fk.BlogCategoryID)
+                        .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

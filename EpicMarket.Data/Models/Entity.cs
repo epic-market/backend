@@ -14,11 +14,11 @@ namespace EpicMarket.Data.Models
         public int ID { get; set; }
 
         [MaxLength(50)]
-        public string Name { get; set; }
-
-        public bool? IsAudited { get; set; }
+        public string Name { get; set; } //order, products , Outlet , Staff
 
         [MaxLength(255)]
         public string Description { get; set; }
+
+        public virtual ICollection<EventLog>? EventLogs { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,6 @@ namespace EpicMarket.Contracts
 
         Task<List<DropDownOptions>> GetOrderStatusOptions();
 
-        Task<List<OrderResult>> GetAllOrders(OrderParams orderParams,int businessID);
+        Task<GetDataResult<List<OrderResult>>> GetAllOrders(OrderParams orderParams,int businessID);
     }
 }

@@ -9,13 +9,10 @@ using EpicMarket.Data.Common;
 
 namespace EpicMarket.Data.Models
 {
-    public class Event: BaseModel
+    public class Event: BaseModel //orders ,products , employee,braches, business
     {
         [Key]
         public int ID { get; set; }
-
-        [Required]
-        public int EventTypeID { get; set; }
 
         [Required]
         public int EventCategoryID { get; set; }
@@ -26,16 +23,11 @@ namespace EpicMarket.Data.Models
         [MaxLength(255)]
         public string Description { get; set; }
 
-        public bool? IsShownOnScreen { get; set; }
-
-        public bool? IsActive { get; set; }
-
         public int? PriorityID { get; set; }
 
-        [MaxLength(2000)]
-        public string HelpText { get; set; }
+        public virtual EventCategory EventCategorys { get; set; }
 
-        public virtual ICollection<EventCategory>? EventCategorys { get; set; } 
-        public virtual ICollection<EventType> EventTypes { get; set; } 
+        public virtual ICollection<EventLog>? EventLogs { get; set; }
+
     }
 }

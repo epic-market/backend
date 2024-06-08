@@ -2,6 +2,7 @@
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using System;
@@ -69,8 +70,13 @@ namespace EpicMarket.Services
             return _;
         }
 
-        public async Task<List<ProductResult>> GetAllProducts(ProductParams productParams, int businessID)
+        public async Task<GetDataResult<List<ProductResult>>> GetAllProducts(ProductParams productParams, int businessID)
         {
+
+
+            var getResult = new GetDataResult<List<ProductResult>>();
+
+
             //1 . filter with BusinessID
             var Products = _context.Catalogs
                                 .Where(c => c.BusinessID == businessID);
@@ -114,7 +120,10 @@ namespace EpicMarket.Services
                 Count = totalCount
             }).ToListAsync();
 
-            return results;
+            getResult.items = results;
+            getResult.Count = totalCount;
+
+            return getResult;
         }
 
         public async Task<ProductsDto> GetProductDetails(int productId)

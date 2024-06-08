@@ -101,9 +101,9 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpPost("GetAllOrders")]
 		[Authorize(Roles = "businessEmployee,businessOwner")]
-		public async Task<ActionResult<OperationResult<List<OrderResult>>>> GetAllOrders(OrderParams orderParams)
+		public async Task<ActionResult<OperationResult<GetDataResult<List<OrderResult>>>>> GetAllOrders(OrderParams orderParams)
         {
-            var response = new OperationResult<List<OrderResult>>();
+            var response = new OperationResult<GetDataResult<List<OrderResult>>>();
 
             this.logger.LogInformation("Orders Controller -> GetAllBranches()-> params {0}", JsonConvert.SerializeObject(new { Params = orderParams }));
 
