@@ -34,37 +34,33 @@
                             @Html.DisplayNameFor(model => model.Description)
                         </th>
                         <th>
-                            @Html.DisplayNameFor(model => model.Person)
+                            @Html.DisplayNameFor(model => model.Person.UserName)
                         </th>
                         <th>
-                            @Html.DisplayNameFor(model => model.TicketType)
+                            @Html.DisplayNameFor(model => model.TicketType.Name)
                         </th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
                                 @Html.DisplayFor(modelItem => item.Attachment)
-                            </td>
-                            <td>
+                </td>
+                <td>
                                 @Html.DisplayFor(modelItem => item.Description)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.Person.Id)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.TicketType.ID)
-                            </td>
-                            <td>
-                                <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-                                <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
-                                <button type="button" class="btn btn-danger delete-btn" data-bs-toggle="modal" data-bs-target="#exampleVerticallycenteredModal" data-id="@item.ID">Delete</button>
-                            </td>
-                        </tr>
-                    }
+                </td>
+                <td>
+                                @Html.DisplayFor(modelItem => item.Person.UserName)
+                </td>
+                <td>
+                                @Html.DisplayFor(modelItem => item.TicketType.Name)
+                </td>
+                <td></td>
+            </tr>
+        }
                 </tbody>
             </table>
         </div>
@@ -90,8 +86,36 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            $('#example').DataTable();
-            debugger
+            $('#example').DataTable(
+            //     {
+            //     "processing": true,
+            //     "serverSide": true,
+            //     "filter":true,
+            //     "ajax": {
+            //         "url": "@Url.Action("LoadData", "SupportTickets")",
+            //         "type": "POST",
+            //         "dataType":"json"
+            //     },
+            //     "columns": [
+            //         { "data": "Attachment" },
+            //         { "data": "Description" },
+            //         { "data": "Person.UserName" },
+            //         { "data": "TicketType.Type" },
+            //         {
+            //             "data": "ID",
+            //             "render": function (data, type, row) {
+            //                 debugger
+            //                 return `<a href='/Tickets/Edit/${data}'>Edit</a> |
+            //                                 <a href='/Tickets/Details/${data}'>Details</a> |
+            //                                 <button type='button' class='btn btn-danger delete-btn' data-bs-toggle='modal' data-target='#exampleVerticallycenteredModal' data-id='${data}'>Delete</button>`;
+            //             }
+            //         }
+            //     ]
+            // }
+            );
+
+
+            
             if (localStorage.getItem('deletionOccurred') === 'true') {
                 // Show the Lobibox notification
                 Lobibox.notify('success', {

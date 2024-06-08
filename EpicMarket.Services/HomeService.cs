@@ -47,7 +47,40 @@ namespace EpicMarket.Services
                 Description = c.Description,
                 ImageUrl = c.ImageUrl,
                 Authour = c.Authour,
-                Count = totalCount
+                Count = totalCount,
+                BlogCategoryName = c.BlogCategory.Name
+            }).ToListAsync();
+
+            return results;
+        }
+        public async Task<List<BlogDto>> GetAllBlogsByCategory(BlogsByCategoryParams blogParams)
+        {
+            //2 . Appling Searching by Category
+            var sortedcategoryNameBlogs = context.BlogCategory.Where(row => row.Name.Contains(blogParams.categoryName.Trim()));
+
+            //2 . Appling Searching
+            var sortedBlogs = context.Blogs.Where(row => row.BlogCategoryID== sortedcategoryNameBlogs.FirstOrDefault().Id);
+
+
+            //getting the total count
+            int totalCount = sortedBlogs.Count();
+
+
+            // 4. Apply pagination (skip and take)
+            var pagedBlogs = sortedBlogs
+                .Skip((blogParams.PageIndex - 1) * blogParams.pageSize) // Skip items for previous pages
+                .Take(blogParams.pageSize); // Take items for the current page
+
+            // 5. Select data and add SRNO
+            var results = await pagedBlogs.Select(c => new BlogDto()
+            {
+                Id = c.Id,
+                Title = c.Title,
+                Description = c.Description,
+                ImageUrl = c.ImageUrl,
+                Authour = c.Authour,
+                Count = totalCount,
+                BlogCategoryName = c.BlogCategory.Name
             }).ToListAsync();
 
             return results;

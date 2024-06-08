@@ -1,6 +1,7 @@
 ﻿using EpicMarket.Data.Common;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +13,9 @@ namespace EpicMarket.Data.Models
         public int ID { get; set; }
         public int BussinessID { get; set; }
         public int AddressID { get; set; }
+
+
+        [DisplayName("Outlet Name")]
         public string Name { get; set; }
         public string Description { get; set; }
         public long ContactNumber { get; set; }
@@ -27,6 +31,9 @@ namespace EpicMarket.Data.Models
 
         public virtual ICollection<OutletPerson> OutletPeople { get; set; }
 
-        public virtual ICollection<OutletProduct> OutletProducts { get; set; }
+		public virtual ICollection<Order> Orders { get; set; }
+
+
+		public virtual ICollection<OutletProduct> OutletProducts { get; set; }
     }
 }

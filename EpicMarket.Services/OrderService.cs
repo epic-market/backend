@@ -2,6 +2,7 @@
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -35,40 +36,45 @@ namespace EpicMarket.Services
 
 
 
-        public  int CreateOrder(OrdersDto orderdto,string UserName, int businessId)
-        {
-
-            var ListOfOrderDetails = JsonConvert.DeserializeObject<List<OrderDetailsDto>>(orderdto.OrderDetails);
-
+        public  int CreateOrder(OrdersDto orderdto,string UserName)
+        {   
             var User = new AppUser();
-
+            var totalItems = 0;
+            double totalPrice = 0.0;
             User.FirstName = orderdto.CustomerName;
             User.UserName = orderdto.CustomerEmail;
             User.PhoneNumber = orderdto.CustomerPhone;
-
             _context.Users.Add(User);
             _context.SaveChanges();
-
+            var listoforderDetails = new List<OrderDetail>();
+            foreach(var orderDetail in orderdto.orderDetailsDtos)
+            {
+                var catelog = _context.Catalogs.FirstOrDefault(c => c.ID == orderDetail.CatalogID);
+                var singleOrderDetail = new OrderDetail();
+                singleOrderDetail.CatalogID = orderDetail.CatalogID;
+                singleOrderDetail.Quantity = orderDetail.Quantity;
+                singleOrderDetail.Rate = catelog.Rate;
+                singleOrderDetail.TotalPrice = catelog.Rate * orderDetail.Quantity;
+                listoforderDetails.Add(singleOrderDetail);
+                totalItems += orderDetail.Quantity;
+                totalPrice += (catelog.Rate * orderDetail.Quantity);
+            }
             var newOrder = new Order()
             {
                 PersonID = User.Id,
-                BusinessID = businessId,
+				OutletID = orderdto.OutletId,
                 OrderType = orderdto.OrderedMode,
                 OrderAt = DateTime.Now,
                 Status = orderdto.Status,
                 PaymentMode = orderdto.PaymentMode,
-                TotalItems = orderdto.TotalItems,
-                TotalPrice = orderdto.TotalPrice,
+                TotalItems = totalItems,
+                TotalPrice = totalPrice,
             };
-            
             _context.Orders.Add(newOrder);
             _context.SaveChanges();
-
-            var orderDetails = mapper.Map<List<OrderDetail>>(ListOfOrderDetails);
-            orderDetails.ForEach(od => od.OrderID = newOrder.ID);
-            _context.OrderDetails.AddRange(orderDetails);
+            listoforderDetails.ForEach(od => od.OrderID = newOrder.ID);
+            _context.OrderDetails.AddRange(listoforderDetails);
             _context.SaveChanges();
-
             return newOrder.ID;
         }
 
@@ -115,12 +121,14 @@ namespace EpicMarket.Services
 
         }
 
-        public async Task<List<OrderResult>> GetAllOrders(OrderParams orderParams, int businessID)
+        public async Task<GetDataResult<List<OrderResult>>> GetAllOrders(OrderParams orderParams, int businessID)
         {
 
+            var getData = new GetDataResult<List<OrderResult>>();
+
             //1 . filter with BusinessID
-            var orders = _context.Orders
-                                .Where(c => c.BusinessID == businessID).Include(c=> c.Person);
+            var orders = _context.Orders.Include(c=>c.Outlet).
+                Where(c => c.Outlet.BussinessID == businessID).Include(c=> c.Person);
 
 
             //2 . Appling Searching
@@ -161,7 +169,11 @@ namespace EpicMarket.Services
                 Count = totalCount
             }).ToListAsync();
 
-            return results;
+
+            getData.items = results;
+            getData.Count = totalCount;
+
+            return getData;
         }
 
     }

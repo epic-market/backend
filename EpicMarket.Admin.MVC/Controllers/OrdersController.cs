@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Admin.MVC.Models;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -23,7 +24,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: Orders
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Orders.Include(o => o.Address).Include(o => o.Business).Include(o => o.Person);
+            var applicationDbContext = _context.Orders.Include(o => o.Address).Include(o => o.Outlet).Include(o => o.Person);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -34,18 +35,31 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 return NotFound();
             }
-
+           
+            var orderModel = new OrderDetailsModel(); 
             var order = await _context.Orders
                 .Include(o => o.Address)
-                .Include(o => o.Business)
-                .Include(o => o.Person)
+                .Include(o => o.Outlet)
+                .Include(o => o.Outlet.Bussiness)
+				.Include(o => o.Person)
                 .FirstOrDefaultAsync(m => m.ID == id);
+
+
+            var orderDetails = await _context.OrderDetails.
+                Where(o=> o.OrderID == id)
+               .Include(o => o.Catalog)
+                .ToListAsync();
+
+            orderModel.Order = order;
+            orderModel.OrderDetails = orderDetails;
+
+
             if (order == null)
             {
                 return NotFound();
             }
 
-            return View(order);
+            return View(orderModel);
         }
 
         // GET: Orders/Create
@@ -71,7 +85,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", order.AddressID);
-            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID", order.BusinessID);
+            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID", order.OutletID);
             ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Id", order.PersonID);
             return View(order);
         }
@@ -84,14 +98,13 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var order = await _context.Orders.FindAsync(id);
+            var order = await _context.Orders.Where(o=> o.ID == id).Include(c=>c.Address).FirstOrDefaultAsync();
             if (order == null)
             {
                 return NotFound();
             }
-            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", order.AddressID);
-            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID", order.BusinessID);
-            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Id", order.PersonID);
+            ViewData["BusinessID"] = new SelectList(_context.Outlets, "ID", "Name", order.OutletID);
+            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "UserName", order.PersonID);
             return View(order);
         }
 
@@ -128,7 +141,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", order.AddressID);
-            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID", order.BusinessID);
+            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID", order.OutletID);
             ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Id", order.PersonID);
             return View(order);
         }
@@ -143,7 +156,7 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             var order = await _context.Orders
                 .Include(o => o.Address)
-                .Include(o => o.Business)
+                .Include(o => o.Outlet)
                 .Include(o => o.Person)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (order == null)

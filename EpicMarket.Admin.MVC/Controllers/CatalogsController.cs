@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -60,6 +61,17 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,BusinessID,Barcode,Name,Description,Images,Category,Rate,IsActive,InStock,IsRecommended,MaximumOrderPurchase,Rating,ReviewCount,OrderCount,Status,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Catalog catalog)
         {
+
+
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+
+            catalog.CreateBy = userName;
+            catalog.CreateDate = DateTime.UtcNow;
+            if (ModelState.ContainsKey("CreateDate"))
+            {
+                ModelState.Remove("CreateDate");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(catalog);
@@ -94,6 +106,11 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ID,BusinessID,Barcode,Name,Description,Images,Category,Rate,IsActive,InStock,IsRecommended,MaximumOrderPurchase,Rating,ReviewCount,OrderCount,Status,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Catalog catalog)
         {
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+
+            catalog.ModifiedBy = userName;
+            catalog.ModifiedDate = DateTime.UtcNow;
+
             if (id != catalog.ID)
             {
                 return NotFound();

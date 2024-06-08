@@ -32,7 +32,14 @@
                     <hr />
                     <form asp-action="Edit">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <input type="hidden" asp-for="ID" />
+                        <input type="hidden" asp-for="ID" />
+                        <input type="hidden" asp-for="OrderCount" />
+                        <input type="hidden" asp-for="Rating" />
+                        <input type="hidden" asp-for="ReviewCount" />
+                        <input type="hidden" asp-for="CreateDate" />
+                        <input type="hidden" asp-for="CreateBy" />
+                        <input type="hidden" asp-for="ModifiedDate" />
+                        <input type="hidden" asp-for="ModifiedBy" />
                     <div class="row mb-3">
                         <label asp-for="BusinessID" class="col-sm-3 col-form-label"></label>
                          <div class="col-sm-9">

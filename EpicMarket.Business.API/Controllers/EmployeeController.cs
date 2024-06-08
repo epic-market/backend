@@ -97,9 +97,9 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpGet("GetAllEmployees")]
 		[Authorize(Roles = "businessOwner")]
-		public async Task<ActionResult<OperationResult<List<EmployeeResult>>>> GetAllEmployees([FromQuery]EmployeeParams employeeParams)
+		public async Task<ActionResult<OperationResult<GetDataResult<List<EmployeeResult>>>>> GetAllEmployees([FromQuery]EmployeeParams employeeParams)
         {
-            var response = new OperationResult<List<EmployeeResult>>();
+            var response = new OperationResult<GetDataResult<List<EmployeeResult>>>();
 
             this.logger.LogInformation("Employee Controller -> GetAllEmployees()-> params {0}", JsonConvert.SerializeObject(new { Params = employeeParams }));
 

@@ -327,6 +327,9 @@ namespace EpicMarket.Data.Migrations
                     b.Property<string>("Authour")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("BlogCategoryID")
+                        .HasColumnType("int");
+
                     b.Property<string>("CreateBy")
                         .HasColumnType("nvarchar(max)");
 
@@ -353,7 +356,40 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BlogCategoryID");
+
                     b.ToTable("Blogs");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.BlogCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CreateBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BlogCategory");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Business", b =>
@@ -560,6 +596,243 @@ namespace EpicMarket.Data.Migrations
                     b.ToTable("Catalogs");
                 });
 
+            modelBuilder.Entity("EpicMarket.Data.Models.CommunicationQueue", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int?>("Attempts")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ContactMethodID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreateBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("MessageData")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MessageText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NotificationRecipient")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ScheduledDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Subject")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime>("SysEndTime")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("SysStartTime")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("ContactMethodID");
+
+                    b.ToTable("CommunicationQueue");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.ContactMethod", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("CreateBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("ContactMethod");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.Entity", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("CreateBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Entity");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.Event", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("CreateBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("EventCategoryID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("PriorityID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("EventCategoryID");
+
+                    b.ToTable("Event");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.EventCategory", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Sequence")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("EventCategory");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.EventLog", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
+
+                    b.Property<string>("CreateBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Data")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("EntityID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EventID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("RecordID")
+                        .IsRequired()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Source")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("EntityID");
+
+                    b.HasIndex("EventID");
+
+                    b.ToTable("EventLog");
+                });
+
             modelBuilder.Entity("EpicMarket.Data.Models.FAQ", b =>
                 {
                     b.Property<int>("Id")
@@ -638,9 +911,6 @@ namespace EpicMarket.Data.Migrations
                     b.Property<int?>("AddressID")
                         .HasColumnType("int");
 
-                    b.Property<int>("BusinessID")
-                        .HasColumnType("int");
-
                     b.Property<string>("CreateBy")
                         .HasColumnType("nvarchar(max)");
 
@@ -658,6 +928,9 @@ namespace EpicMarket.Data.Migrations
 
                     b.Property<string>("OrderType")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OutletID")
+                        .HasColumnType("int");
 
                     b.Property<string>("PaymentMode")
                         .HasColumnType("nvarchar(max)");
@@ -678,7 +951,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("AddressID");
 
-                    b.HasIndex("BusinessID");
+                    b.HasIndex("OutletID");
 
                     b.HasIndex("PersonID");
 
@@ -1109,6 +1382,17 @@ namespace EpicMarket.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("EpicMarket.Data.Models.Blog", b =>
+                {
+                    b.HasOne("EpicMarket.Data.Models.BlogCategory", "BlogCategory")
+                        .WithMany("Blogs")
+                        .HasForeignKey("BlogCategoryID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("BlogCategory");
+                });
+
             modelBuilder.Entity("EpicMarket.Data.Models.Business", b =>
                 {
                     b.HasOne("EpicMarket.Data.Models.Address", "Address")
@@ -1172,6 +1456,45 @@ namespace EpicMarket.Data.Migrations
                     b.Navigation("Business");
                 });
 
+            modelBuilder.Entity("EpicMarket.Data.Models.CommunicationQueue", b =>
+                {
+                    b.HasOne("EpicMarket.Data.Models.ContactMethod", "ContactMethod")
+                        .WithMany("CommunicationQueues")
+                        .HasForeignKey("ContactMethodID");
+
+                    b.Navigation("ContactMethod");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.Event", b =>
+                {
+                    b.HasOne("EpicMarket.Data.Models.EventCategory", "EventCategorys")
+                        .WithMany("Events")
+                        .HasForeignKey("EventCategoryID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("EventCategorys");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.EventLog", b =>
+                {
+                    b.HasOne("EpicMarket.Data.Models.Entity", "Entity")
+                        .WithMany("EventLogs")
+                        .HasForeignKey("EntityID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EpicMarket.Data.Models.Event", "Event")
+                        .WithMany("EventLogs")
+                        .HasForeignKey("EventID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Entity");
+
+                    b.Navigation("Event");
+                });
+
             modelBuilder.Entity("EpicMarket.Data.Models.FAQ", b =>
                 {
                     b.HasOne("EpicMarket.Data.Models.FAQCategory", "Category")
@@ -1189,9 +1512,9 @@ namespace EpicMarket.Data.Migrations
                         .WithMany("Orders")
                         .HasForeignKey("AddressID");
 
-                    b.HasOne("EpicMarket.Data.Models.Business", "Business")
-                        .WithMany()
-                        .HasForeignKey("BusinessID")
+                    b.HasOne("EpicMarket.Data.Models.Outlet", "Outlet")
+                        .WithMany("Orders")
+                        .HasForeignKey("OutletID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1203,7 +1526,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.Navigation("Address");
 
-                    b.Navigation("Business");
+                    b.Navigation("Outlet");
 
                     b.Navigation("Person");
                 });
@@ -1236,7 +1559,7 @@ namespace EpicMarket.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("EpicMarket.Data.Models.Business", "Bussiness")
-                        .WithMany("Outlets")
+                        .WithMany()
                         .HasForeignKey("BussinessID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1405,11 +1728,14 @@ namespace EpicMarket.Data.Migrations
                     b.Navigation("UserRoles");
                 });
 
+            modelBuilder.Entity("EpicMarket.Data.Models.BlogCategory", b =>
+                {
+                    b.Navigation("Blogs");
+                });
+
             modelBuilder.Entity("EpicMarket.Data.Models.Business", b =>
                 {
                     b.Navigation("BusinessEmployees");
-
-                    b.Navigation("Outlets");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.BusinessCategoryInternal", b =>
@@ -1420,6 +1746,26 @@ namespace EpicMarket.Data.Migrations
             modelBuilder.Entity("EpicMarket.Data.Models.Catalog", b =>
                 {
                     b.Navigation("OutletProducts");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.ContactMethod", b =>
+                {
+                    b.Navigation("CommunicationQueues");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.Entity", b =>
+                {
+                    b.Navigation("EventLogs");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.Event", b =>
+                {
+                    b.Navigation("EventLogs");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.EventCategory", b =>
+                {
+                    b.Navigation("Events");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.FAQCategory", b =>
@@ -1434,6 +1780,8 @@ namespace EpicMarket.Data.Migrations
 
             modelBuilder.Entity("EpicMarket.Data.Models.Outlet", b =>
                 {
+                    b.Navigation("Orders");
+
                     b.Navigation("OutletPeople");
 
                     b.Navigation("OutletProducts");

@@ -15,6 +15,7 @@ namespace EpicMarket.Contracts
         Task<List<FaqDto>> GetAllFaqByCategoryAsync(int Category);
 
         Task<List<BlogDto>> GetAllBlogs(BlogParams blogParams);
+        Task<List<BlogDto>> GetAllBlogsByCategory(BlogsByCategoryParams blogParams);
 
         Task<BlogDto> GetBlogDetails(int blogId);
     }

@@ -1,8 +1,10 @@
-﻿using AutoMapper;
+﻿using Amazon.Runtime.Internal.Util;
+using AutoMapper;
 using EpicMarket.Contracts;
 using EpicMarket.Data.ApplicationModels;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NVelocity;
@@ -201,9 +203,11 @@ namespace EpicMarket.Services
             return _;
         }
 
-        public async Task<List<EmployeeResult>> GetAllEmployees(EmployeeParams employeeParams, int businessid)
+        public async Task<GetDataResult<List<EmployeeResult>>> GetAllEmployees(EmployeeParams employeeParams, int businessid)
         {
 
+
+            var getResult = new GetDataResult<List<EmployeeResult>>();
             //1 . filter with BusinessID
             var Employess = _context.BusinessEmployeeMaps
                                 .Include(c=> c.Employee).Where(c => c.BussinessID == businessid);
@@ -248,7 +252,10 @@ namespace EpicMarket.Services
                 Count = totalCount
             }).ToListAsync();
 
-            return results;
+            getResult.items = results;
+            getResult.Count = totalCount;
+
+            return getResult;
         }
 
         public async Task<SingleEmployeeResult> GetEmployeeDetails(int employeeId)

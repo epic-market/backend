@@ -69,6 +69,7 @@ ScaffoldingReadMe.txt
 # StyleCop
 StyleCopReport.xml
 
+
 # Files built by Visual Studio
 *_i.c
 *_p.c
@@ -361,3 +362,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/EpicMarket.Admin.MVC/appsettings.json
+/EpicMarket.Admin.MVC/appsettings.json
+/EpicMarket.Business.API/appsettings.json

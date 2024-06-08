@@ -2,6 +2,7 @@
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -123,8 +124,10 @@ namespace EpicMarket.Services
             return j;
         }
 
-        public async Task<List<BranchResult>> GetAllBranches(BranchParams branchParams, int BusinessID)
+        public async Task<GetDataResult<List<BranchResult>>> GetAllBranches(BranchParams branchParams, int BusinessID)
         {
+
+            var getResult = new GetDataResult<List<BranchResult>>();
 
             //1 . filter with BusinessID
             var Outlets = _context.Outlets
@@ -169,10 +172,13 @@ namespace EpicMarket.Services
                 City = c.Address.City,
                 Pincode = c.Address.Pincode,
                 State = c.Address.State,
-                Count = totalCount
             }).ToListAsync();
 
-            return results;
+
+            getResult.items = results;
+            getResult.Count = totalCount;
+
+            return getResult;
         }
 
         public async Task<BranchResult> GetBranchByID(int branchId)

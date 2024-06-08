@@ -63,9 +63,9 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpGet("GetAllProducts")]
 		[Authorize(Roles = "businessEmployee,businessOwner")]
-		public async Task<ActionResult<OperationResult<List<ProductResult>>>> GetAllProducts([FromQuery] ProductParams productResult)
+		public async Task<ActionResult<OperationResult<GetDataResult<List<ProductResult>>>>> GetAllProducts([FromQuery] ProductParams productResult)
         {
-            var response = new OperationResult<List<ProductResult>>();
+            var response = new OperationResult<GetDataResult<List<ProductResult>>>();
 
             this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = productResult }));
 

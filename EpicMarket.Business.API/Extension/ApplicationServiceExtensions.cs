@@ -15,13 +15,15 @@ namespace EpicMarket.Business.API.Extension
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
         {
-             services.AddDbContext<ApplicationDbContext>();
+            services.AddDbContext<ApplicationDbContext>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IApplicationConfigurationService, ApplicationConfigurationService>();
             services.AddScoped<ICommunicationService, CommunicationService>();
+            services.AddScoped<ICommunicationQueueService, CommunicationQueueService>();
+            services.AddScoped<IEventLogService, EventLogService>();
             services.AddScoped<IBusinessService, BusinessService>();
             services.AddScoped<IStaticService, StaticService>();
             services.AddScoped<IAddressService, AddressService>();

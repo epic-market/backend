@@ -38,17 +38,21 @@
                         <input type="hidden" asp-for="Rating" />
                         <input type="hidden" asp-for="ReviewCount" />
                         <input type="hidden" asp-for="Weight" />
+                        <input type="hidden" asp-for="CreateDate" />
+                        <input type="hidden" asp-for="CreateBy" />
+                        <input type="hidden" asp-for="ModifiedDate" />
+                        <input type="hidden" asp-for="ModifiedBy" />
                         <div class="row mb-3">
                             <label asp-for="PersonID" class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
-                                <select asp-for="PersonID" class="form-control" asp-items="ViewBag.PersonID"></select>
+                                <select class="single-select"  asp-for="PersonID" class="form-control" asp-items="ViewBag.PersonID"></select>
                                 <span asp-validation-for="PersonID" class="text-danger"></span>
                             </div>
                         </div>
                         <div class="row mb-3">
                                 <label asp-for="BusinessCategoryID" class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
-                                <select asp-for="BusinessCategoryID" class="form-control" asp-items="ViewBag.BusinessCategoryID"></select>
+                                <select class="single-select" asp-for="BusinessCategoryID" class="form-control" asp-items="ViewBag.BusinessCategoryID"></select>
                                 <span asp-validation-for="BusinessCategoryID" class="text-danger"></span>
                             </div>
                         </div>
@@ -159,5 +163,13 @@
 
 
 @section Scripts {
+    <script>
+        $('.single-select').select2({
+            theme: 'bootstrap4',
+            width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+            placeholder: $(this).data('placeholder'),
+            allowClear: Boolean($(this).data('allow-clear')),
+        });
+    </script>
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

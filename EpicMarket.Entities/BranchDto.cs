@@ -57,6 +57,7 @@ namespace EpicMarket.Entities
         public int AddressID { get; set; }
     }
 
+
     public class BranchParams
     {
         public int PageIndex { get; set; } = 1;

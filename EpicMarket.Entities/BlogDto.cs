@@ -15,6 +15,7 @@ namespace EpicMarket.Entities
         public string InnerHtml { get; set; }
         public string Authour { get; set; }
         public int Count { get; set; }
+        public string BlogCategoryName { get; set; }
     }
 
     public class BlogParams
@@ -24,6 +25,12 @@ namespace EpicMarket.Entities
         public string searchTerm { get; set; } = string.Empty;
 
     }
+    public class BlogsByCategoryParams
+    {
+        public int PageIndex { get; set; } = 1;
+        public int pageSize { get; set; } = 10;
+        public string categoryName { get; set; } = string.Empty;
 
+    }
 
 }

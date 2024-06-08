@@ -23,7 +23,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: OutletPersons
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.OutletPeople.Include(o => o.Outlet).Include(o => o.Person);
+            var applicationDbContext = _context.OutletPeople.Include(o => o.Outlet).Include(o => o.Outlet.Bussiness).Include(o => o.Person);
             return View(await applicationDbContext.ToListAsync());
         }
 

@@ -1,6 +1,7 @@
 ﻿using EpicMarket.Data.Common;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
@@ -12,17 +13,32 @@ namespace EpicMarket.Data.Models
 {
     public class Business : BaseModel
     {
+
+        [DisplayName("Business ID")]
         public int ID { get; set; }
         public int PersonID { get; set; }
 
 		public int? StatusId { get; set; }
 		public int BusinessCategoryID { get; set; }
+
+        [DisplayName("Business Name")]
         public string Name { get; set; }
+
+        [DisplayName("Business Description")]
         public string Description { get; set; }
+
+        [DisplayName("Business Banner")]
         public string? Banner { get; set; }
+
+        [DisplayName("Business Logo")]
         public string? Logo { get; set; }
+
+        [DisplayName("Contact Number")]
         public long ContactNumber { get; set; }
+
+        [DisplayName("Contact Email")]
         public string ContactEmail { get; set; }
+
 
         public int AddressID { get; set; }
         public int? Rating { get; set; }
@@ -38,8 +54,6 @@ namespace EpicMarket.Data.Models
 
 		[ForeignKey("StatusId")]
 		public virtual StatusOptionSet? Status { get; set; }
-
-		public virtual ICollection<Outlet> Outlets { get; set; }
 
         public virtual ICollection<BusinessEmployeeMap> BusinessEmployees { get; set; }
     }

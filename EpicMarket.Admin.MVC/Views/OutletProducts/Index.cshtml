@@ -4,11 +4,23 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+    <div class="breadcrumb-title pe-3">Oultet Products</div>
+    <div class="ps-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 p-0">
+                <li class="breadcrumb-item">
+                    <a asp-action="Index"><i class="bx bx-home-alt"></i></a>
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
 
-<p>
-    <a asp-action="Create">Create New</a>
+<p class="d-flex justify-content-end">
+    <a asp-action="Create" class="btn btn-primary px-5"><i class='bx bx-plus mr-1'></i>Create New</a>
 </p>
+
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
@@ -16,7 +28,10 @@
                 <thead>
                     <tr>
                         <th>
-                            @Html.DisplayNameFor(model => model.OutletID)
+                            @Html.DisplayNameFor(model => model.Outlet.Name)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Outlet.Bussiness.Name)
                         </th>
                         <th>
                             @Html.DisplayNameFor(model => model.Product)
@@ -32,13 +47,16 @@
                     {
                         <tr>
                             <td>
-                                @Html.DisplayFor(modelItem => item.OutletID)
+                                @Html.DisplayFor(modelItem => item.Outlet.Name)
                             </td>
                             <td>
-                                @Html.DisplayFor(modelItem => item.Product.ID)
+                                @Html.DisplayFor(modelItem => item.Outlet.Bussiness.Name)
                             </td>
                             <td>
-                                @Html.DisplayFor(modelItem => item.Outlet.ID)
+                                @Html.DisplayFor(modelItem => item.Product.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Product.Category)
                             </td>
                             <td>
                                 <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |

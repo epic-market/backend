@@ -27,7 +27,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: Businesses
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Businesses.Include(b => b.Address).Include(b => b.BusinessCategory).Include(b => b.Person);
+            var applicationDbContext = _context.Businesses.Include(b => b.Address).Include(b => b.BusinessCategory).Include(b => b.Person).Include(b=>b.Status);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -102,9 +102,9 @@ namespace EpicMarket.Admin.MVC.Controllers
 
 
             business.Address.CreateBy = userName;
-            business.Address.CreateDate = DateTime.Today;
+            business.Address.CreateDate = DateTime.UtcNow;
             business.CreateBy = userName;
-            business.CreateDate = DateTime.Today;
+            business.CreateDate = DateTime.UtcNow;
 
             if (ModelState.IsValid)
             {
@@ -150,10 +150,10 @@ namespace EpicMarket.Admin.MVC.Controllers
 
 
             business.Address.ModifiedBy = userName;
-            business.Address.ModifiedDate = DateTime.Today;
+            business.Address.ModifiedDate = DateTime.UtcNow;
             business.Address.Id = business.AddressID;
             business.ModifiedBy = userName;
-            business.ModifiedDate = DateTime.Today;
+            business.ModifiedDate = DateTime.UtcNow;
 
             if (id != business.ID)
             {

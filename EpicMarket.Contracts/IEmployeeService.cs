@@ -1,5 +1,6 @@
 ﻿using EpicMarket.Data.ApplicationModels;
 using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace EpicMarket.Contracts
 
         Task<List<EmployeeMapOptionResult>> GetAllEmployeesForMap(int businessid, int Outletid);
 
-        Task<List<EmployeeResult>> GetAllEmployees(EmployeeParams employeeParams, int businessid);
+        Task<GetDataResult<List<EmployeeResult>>> GetAllEmployees(EmployeeParams employeeParams, int businessid);
 
         Task<SingleEmployeeResult> GetEmployeeDetails(int employeeId);
     }

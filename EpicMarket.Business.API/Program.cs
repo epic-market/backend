@@ -12,6 +12,13 @@ using Amazon.S3;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Configuration
+	.SetBasePath(Directory.GetCurrentDirectory())
+	.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+	.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+	.AddEnvironmentVariables();
+
+
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddControllers();
 builder.Services.AddCors();

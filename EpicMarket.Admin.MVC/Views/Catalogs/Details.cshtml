@@ -4,129 +4,118 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
 
-<div>
-    <h4>Catalog</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Barcode)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Barcode)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Images)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Images)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Category)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Category)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Rate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Rate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsActive)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsActive)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.InStock)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.InStock)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsRecommended)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsRecommended)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MaximumOrderPurchase)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MaximumOrderPurchase)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Rating)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Rating)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ReviewCount)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ReviewCount)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.OrderCount)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.OrderCount)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Business)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Business.ID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreateDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreateDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreateBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreateBy)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ModifiedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ModifiedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ModifiedBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ModifiedBy)
-        </dd>
-    </dl>
+
+		<!--breadcrumb-->
+<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+	<div class="breadcrumb-title pe-3">Catelog</div>
+	<div class="ps-3">
+		<nav aria-label="breadcrumb">
+			<ol class="breadcrumb mb-0 p-0">
+				<li class="breadcrumb-item">
+					<a asp-action="Index"><i class="bx bx-home-alt"></i></a>
+				</li>
+				<li class="breadcrumb-item active" aria-current="page">Products Details</li>
+			</ol>
+		</nav>
+	</div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.ID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+<!--end breadcrumb-->
+
+<hr/>
+
+<div class="card">
+	<div class="row g-0">
+		<div class="col-md-4 border-end">
+			<img src="@Model.Images" alt="@Model.Images" class="img-fluid">
+		</div>
+		<div class="col-md-8">
+			<div class="card-body">
+				<div class="float-end">
+					<a asp-action="Edit" class="btn btn-primary px-5" asp-route-id="@Model?.ID">Edit</a>
+				</div>
+				<h4 class="card-title"> @Html.DisplayFor(model => model.Name)</h4>
+				<div class="d-flex gap-3 py-3">
+				<div> @Html.DisplayFor(model => model.IsActive) @Html.DisplayNameFor(model => model.IsActive)</div>
+				<div> @Html.DisplayFor(model => model.InStock) @Html.DisplayNameFor(model => model.InStock)</div>
+				<div> @Html.DisplayFor(model => model.IsRecommended) @Html.DisplayNameFor(model => model.IsRecommended)</div>
+				<div> @Html.DisplayFor(model => model.Rating) @Html.DisplayNameFor(model => model.Rating)</div>
+			<div class="text-success">  @Html.DisplayFor(model => model.Status)</div>
+				</div>
+				<div class="mb-3">
+				<span class="price h4">₹ @Html.DisplayFor(model => model.Rate)</span>
+				</div>
+				<p class="card-text fs-6"> @Html.DisplayFor(model => model.Description)</p>
+				<div class="row">
+					<dl class="row col-6">
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Barcode)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Barcode)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Category)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Category)
+						</dd>
+
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.MaximumOrderPurchase)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.MaximumOrderPurchase)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.ReviewCount)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.ReviewCount)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.OrderCount)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.OrderCount)
+						</dd>
+					</dl>
+					<dl class="row col-6">
+							<dt class="col-sm-4">
+								@Html.DisplayNameFor(model => model.Business)
+							</dt>
+							<dd class="col-sm-8">
+								@Html.DisplayFor(model => model.Business.ID)
+							</dd>
+							<dt class="col-sm-4">
+								@Html.DisplayNameFor(model => model.CreateDate)
+							</dt>
+							<dd class="col-sm-8">
+								@Html.DisplayFor(model => model.CreateDate)
+							</dd>
+							<dt class="col-sm-4">
+								@Html.DisplayNameFor(model => model.CreateBy)
+							</dt>
+							<dd class="col-sm-8">
+								@Html.DisplayFor(model => model.CreateBy)
+							</dd>
+							<dt class="col-sm-4">
+								@Html.DisplayNameFor(model => model.ModifiedDate)
+							</dt>
+							<dd class="col-sm-8">
+								@Html.DisplayFor(model => model.ModifiedDate)
+							</dd>
+							<dt class="col-sm-4">
+								@Html.DisplayNameFor(model => model.ModifiedBy)
+							</dt>
+							<dd class="col-sm-8">
+								@Html.DisplayFor(model => model.ModifiedBy)
+							</dd>
+					</dl>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
+
+
