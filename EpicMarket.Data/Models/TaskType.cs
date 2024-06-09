@@ -1,0 +1,34 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using EpicMarket.Data.Common;
+
+namespace EpicMarket.Data.Models
+{
+    public class TaskType : BaseModel
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int ID { get; set; }
+
+        [MaxLength(50)]
+        public string Name { get; set; }
+
+        [MaxLength(255)]
+        public string Description { get; set; }
+
+        public int? TaskCategoryID { get; set; }
+
+        public int? DefaultDueDateHours { get; set; }
+
+        [MaxLength(20)]
+        public string ShortDescription { get; set; }
+        [ForeignKey("TaskCategoryID")]
+        public virtual EventCategory EventCategorys { get; set; }
+        public virtual ICollection<Tasks>? Tasks { get; set; }
+    }
+}

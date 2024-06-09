@@ -57,6 +57,8 @@ namespace EpicMarket.Data.Models
         public DbSet<EventLog> EventLog { get; set; } 
         public DbSet<Event> Event { get; set; } 
         public DbSet<EventCategory> EventCategory { get; set; }
+        public DbSet<Tasks> Taskss { get; set; }
+        public DbSet<TaskType> TaskTypes { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 			var connectionString = _configuration.GetConnectionString("DefaultConnection");
