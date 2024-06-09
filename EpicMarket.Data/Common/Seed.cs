@@ -124,6 +124,23 @@ namespace EpicMarket.Data.Common
                     await context.SupportTicketTypes.AddAsync(tickettype);
                 }
             }
+            if (!await context.TaskStatusTypes.AnyAsync())
+            {
+                var taskStatuses = new List<TaskStatusType>
+                {
+                    new TaskStatusType{ Status = "New"  , StatusDescription = "Newly Created ticket"},
+                    new TaskStatusType{ Status = "Pending",  StatusDescription = "requires additional information or action"},
+                    new TaskStatusType{ Status = "On Hold",  StatusDescription = "cannot be resolved immediately due to external dependencies"},
+                    new TaskStatusType{ Status = "Resolved",  StatusDescription = "ticket is not yet closed"},
+                    new TaskStatusType{ Status = "Closed",  StatusDescription = "it has been closed"},
+
+                };
+
+                foreach (var tickettype in taskStatuses)
+                {
+                    await context.TaskStatusTypes.AddAsync(tickettype);
+                }
+            }
 
             await context.SaveChangesAsync();
 

@@ -5,24 +5,20 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using EpicMarket.Data.Common;
 
-namespace EpicMarket.Data.Models
+namespace EpicMarket.Entities
 {
-    public class Tasks: BaseModel
+    public class TasksDTO
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int ID { get; set; }
+        public int? ID { get; set; }
 
-        [MaxLength(200)]
         public string Name { get; set; }
 
         public string Description { get; set; }
 
         public int? TaskTypeID { get; set; }
         public int? ParentID { get; set; }
-        public int? TaskStatusID { get; set; }
+        public string TaskStatus { get; set; }
 
         public int? TaskPriorityID { get; set; }
 
@@ -42,10 +38,23 @@ namespace EpicMarket.Data.Models
 
         public string TaskData { get; set; }
         public DateTime? ReceivedDate { get; set; }
-        [ForeignKey("TaskTypeID")]
-        public virtual TaskType TaskTypes { get; set; }
-        [ForeignKey("TaskStatusID")]
-        public virtual TaskStatusType TaskStatusType { get; set; }
+        public DateTime? CreateDate { get; set; }
 
+        public string CreateBy { get; set; }
+
+        public DateTime? ModifiedDate { get; set; }
+
+        public string? ModifiedBy { get; set; }
+    }
+    public class CommentDTO
+    {
+        public string CommentText { get; set; }
+
+        public string Status { get; set; }
+
+        public int? RecordID { get; set; }
+        public DateTime? CreateDate { get; set; }
+
+        public string CreateBy { get; set; }
     }
 }
