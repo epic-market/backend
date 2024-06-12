@@ -1,12 +1,14 @@
 ﻿using EpicMarket.Contracts;
 using EpicMarket.Data.ApplicationModels;
 using EpicMarket.Data.Models;
+using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NVelocity.Context;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,7 +17,6 @@ namespace EpicMarket.Services
     public class UserRepository : IUserRepository
     {
         private readonly ApplicationDbContext context;
-
 
         public UserRepository(ApplicationDbContext context)
         {
@@ -28,8 +29,8 @@ namespace EpicMarket.Services
 
         public bool IsBusinessVerified(int id)
         {
-            var statusid = context.Businesses.Where(c => c.PersonID == id).Select(c => c.StatusId).FirstOrDefault();
-            return statusid == 2; 
+            var status = context.Businesses.Where(c => c.PersonID == id).Include(c => c.Status).Select(c => c.Status.Status).FirstOrDefault();
+            return status == BUSINESS_STATUS.BUSINESS_VERIFIED; 
         }
 
         public async Task<AppUser> GetUserByIdAsync(int id)

@@ -52,7 +52,7 @@ namespace EpicMarket.Services
 
             if (!result.Succeeded) return BadRequest(result.Errors.FirstOrDefault().ToString());
 
-            var roleResult = await userManager.AddToRoleAsync(user, "Member");
+            var roleResult = await userManager.AddToRoleAsync(user, ROLES.MEMBER);
 
             if (!roleResult.Succeeded) return BadRequest(result.Errors.FirstOrDefault().ToString());
 
@@ -167,7 +167,7 @@ namespace EpicMarket.Services
                     UserId = User.Id,
                 };
 
-                await userManager.AddToRoleAsync(User, "businessEmployee");
+                await userManager.AddToRoleAsync(User, ROLES.BUSINESS_EMPLOYEE);
 
                 _context.UserAddresses.Add(userAddress);
                 _context.SaveChanges();

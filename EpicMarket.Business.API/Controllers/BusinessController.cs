@@ -41,7 +41,7 @@ namespace EpicMarket.Business.API.Controllers
 
             var appuser = await userManager.Users.Where(c=>c.Id == UserID).FirstOrDefaultAsync();
 
-			await userManager.AddToRoleAsync(appuser, "businessOwner");
+			await userManager.AddToRoleAsync(appuser, ROLES.BUSINESS_OWNER);
 
             this.logger.LogInformation("Business Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
 

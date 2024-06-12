@@ -8,10 +8,11 @@ using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using EpicMarket.Admin.MVC.Models;
+using EpicMarket.Entities.CustomModels;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [Authorize(Roles = "admin")]
+    [Authorize(Roles = $"{ROLES.ADMIN}")]
     public class OrdersController : Controller
     {
         private readonly ApplicationDbContext _context;

@@ -2,10 +2,11 @@ using EpicMarket.Admin.MVC.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using EpicMarket.Entities.CustomModels;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [Authorize(Roles ="admin")]
+    [Authorize(Roles = $"{ROLES.ADMIN}")]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;

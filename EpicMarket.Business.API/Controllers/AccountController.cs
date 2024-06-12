@@ -47,7 +47,7 @@ namespace EpicMarket.Business.API.Controllers
 
             if (!result.Succeeded) return BadRequest(result.Errors);
 
-            var roleResult = await _userManager.AddToRoleAsync(user, "Member");
+            var roleResult = await _userManager.AddToRoleAsync(user, ROLES.MEMBER);
 
             if (!roleResult.Succeeded) return BadRequest(result.Errors);
 
@@ -85,14 +85,14 @@ namespace EpicMarket.Business.API.Controllers
 
             var userBusinessDto = new UserBusinessDto();
 
-            if (roles.Contains("businessOwner"))
+            if (roles.Contains(ROLES.BUSINESS_OWNER))
             {
                 userBusinessDto = dbContext.Businesses.Where(c => c.PersonID == user.Id).Include(c => c.Status).Select(c => new UserBusinessDto()
                 {
                     businessId = c.ID,
                     businessStatus = c.Status.Status,
                 }).FirstOrDefault();
-            } else if (roles.Contains("businessEmployee"))
+            } else if (roles.Contains(ROLES.BUSINESS_EMPLOYEE))
             { 
                 userBusinessDto = dbContext.BusinessEmployeeMaps.Where(c => c.EmployeeID == user.Id).Include(c=>c.Bussiness).Include(c => c.Bussiness.Status).Select(c => new UserBusinessDto()
 				{

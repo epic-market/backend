@@ -25,8 +25,8 @@ namespace EpicMarket.Business.API.Controllers
 
        
         [HttpPost("AddOrder")]
-		[Authorize(Roles = "businessEmployee,businessOwner")]
-		public async Task<ActionResult<OperationResult<int>>> AddOrder(OrdersDto ordersDto)
+        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
+        public async Task<ActionResult<OperationResult<int>>> AddOrder(OrdersDto ordersDto)
         {
             var response = new OperationResult<int>();
 
@@ -47,8 +47,8 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpGet("GetSingleOrder")]
-		[Authorize(Roles = "businessEmployee,businessOwner")]
-		public async Task<ActionResult<OperationResult<OrdersDto>>> GetSingleOrder(int OrderId)
+        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
+        public async Task<ActionResult<OperationResult<OrdersDto>>> GetSingleOrder(int OrderId)
         {
             var response = new OperationResult<OrdersDto>();
 
@@ -65,8 +65,8 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpPost("UpdateStatus")]
-		[Authorize(Roles = "businessEmployee,businessOwner")]
-		public ActionResult<OperationResult<int>> UpdateStatus(int OrderId, string OrderStatus)
+        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
+        public ActionResult<OperationResult<int>> UpdateStatus(int OrderId, string OrderStatus)
         {
             var response = new OperationResult<int>();
 
@@ -82,8 +82,8 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpPost("GetOrderStatusOptions")]
-		[Authorize(Roles = "businessEmployee,businessOwner")]
-		public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetOrderStatusOptions()
+        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
+        public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetOrderStatusOptions()
         {
             var response = new OperationResult<List<DropDownOptions>>();
 
@@ -100,8 +100,8 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpPost("GetAllOrders")]
-		[Authorize(Roles = "businessEmployee,businessOwner")]
-		public async Task<ActionResult<OperationResult<GetDataResult<List<OrderResult>>>>> GetAllOrders(OrderParams orderParams)
+        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
+        public async Task<ActionResult<OperationResult<GetDataResult<List<OrderResult>>>>> GetAllOrders(OrderParams orderParams)
         {
             var response = new OperationResult<GetDataResult<List<OrderResult>>>();
 

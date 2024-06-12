@@ -2,9 +2,11 @@
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -47,7 +49,7 @@ namespace EpicMarket.Services
             businessModel.ContactEmail = businessRegisterDto.ContactEmail;
             businessModel.CreateBy = UserName;
             businessModel.CreateDate = DateTime.Now;
-            businessModel.StatusId = 1; // hardcode to Inprogress status
+            businessModel.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == BUSINESS_STATUS.BUSINESS_UNVERIFIED).Id;
             _context.Businesses.Add(businessModel);
             await _context.SaveChangesAsync();
 
