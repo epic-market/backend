@@ -23,7 +23,7 @@ namespace EpicMarket.Services
         }
         public async Task<long> SaveTask(TasksDTO tasksDTO)
         {
-            var currentTask = _context.Taskss.Where(row => row.ID == tasksDTO.ID).FirstOrDefault();
+            var currentTask = _context.Tasks.Where(row => row.ID == tasksDTO.ID).FirstOrDefault();
             var newTaskStatus = _context.TaskStatusTypes.Where(row => row.Status == "New").FirstOrDefault();
             var updateTaskStatus = _context.TaskStatusTypes.Where(row => row.Status == tasksDTO.TaskStatus).FirstOrDefault();
             Tasks taskToSave;
@@ -48,7 +48,7 @@ namespace EpicMarket.Services
                     CreateDate = DateTime.Now,
                     CreateBy = tasksDTO.CreateBy
                 };
-                _context.Taskss.Add(taskToSave);
+                _context.Tasks.Add(taskToSave);
                 await _context.SaveChangesAsync();
                 currentTask.ID = taskToSave.ID;
             }
@@ -68,7 +68,7 @@ namespace EpicMarket.Services
                     ModifiedDate = DateTime.Now,
                     ModifiedBy = tasksDTO.ModifiedBy
                 };
-                _context.Taskss.Update(taskToSave);
+                _context.Tasks.Update(taskToSave);
                 await _context.SaveChangesAsync();
 
             }

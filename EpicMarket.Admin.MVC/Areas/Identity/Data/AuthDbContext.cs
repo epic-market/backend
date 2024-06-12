@@ -20,4 +20,19 @@ public class AuthDbContext : IdentityDbContext<AppUser, AppRole, int, IdentityUs
         // For example, you can rename the ASP.NET Identity table names and more.
         // Add your customizations after calling base.OnModelCreating(builder);
     }
+
+public DbSet<EpicMarket.Data.Models.TaskStatusType> TaskStatusType { get; set; } = default!;
+
+public DbSet<EpicMarket.Data.Models.TaskType> TaskType { get; set; } = default!;
+
+public DbSet<EpicMarket.Data.Models.CommunicationQueue> CommunicationQueue { get; set; } = default!;
+
+public DbSet<EpicMarket.Data.Models.EventLog> EventLog { get; set; } = default!;
+
+public DbSet<EpicMarket.Data.Models.Entity> Entity { get; set; } = default!;
+
+public DbSet<EpicMarket.Data.Models.EventCategory> EventCategory { get; set; } = default!;
+
+public DbSet<EpicMarket.Data.Models.BlogCategory> BlogCategory { get; set; } = default!;
+
 }

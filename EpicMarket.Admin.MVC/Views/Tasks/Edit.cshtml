@@ -1,0 +1,122 @@
+﻿@model EpicMarket.Data.Models.Tasks
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Edit</h1>
+
+<h4>Tasks</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ID" />
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="TaskTypeID" class="control-label"></label>
+                <select asp-for="TaskTypeID" class="form-control" asp-items="ViewBag.TaskTypeID"></select>
+                <span asp-validation-for="TaskTypeID" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ParentID" class="control-label"></label>
+                <input asp-for="ParentID" class="form-control" />
+                <span asp-validation-for="ParentID" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="TaskStatusID" class="control-label"></label>
+                <select asp-for="TaskStatusID" class="form-control" asp-items="ViewBag.TaskStatusID"></select>
+                <span asp-validation-for="TaskStatusID" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="TaskPriorityID" class="control-label"></label>
+                <input asp-for="TaskPriorityID" class="form-control" />
+                <span asp-validation-for="TaskPriorityID" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PrimaryAssignedToPersonID" class="control-label"></label>
+                <input asp-for="PrimaryAssignedToPersonID" class="form-control" />
+                <span asp-validation-for="PrimaryAssignedToPersonID" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DateAssigned" class="control-label"></label>
+                <input asp-for="DateAssigned" class="form-control" />
+                <span asp-validation-for="DateAssigned" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DateDue" class="control-label"></label>
+                <input asp-for="DateDue" class="form-control" />
+                <span asp-validation-for="DateDue" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DateStarted" class="control-label"></label>
+                <input asp-for="DateStarted" class="form-control" />
+                <span asp-validation-for="DateStarted" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DateCompleted" class="control-label"></label>
+                <input asp-for="DateCompleted" class="form-control" />
+                <span asp-validation-for="DateCompleted" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SubmittedByPersonID" class="control-label"></label>
+                <input asp-for="SubmittedByPersonID" class="form-control" />
+                <span asp-validation-for="SubmittedByPersonID" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="EffectiveDate" class="control-label"></label>
+                <input asp-for="EffectiveDate" class="form-control" />
+                <span asp-validation-for="EffectiveDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="TaskData" class="control-label"></label>
+                <input asp-for="TaskData" class="form-control" />
+                <span asp-validation-for="TaskData" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ReceivedDate" class="control-label"></label>
+                <input asp-for="ReceivedDate" class="form-control" />
+                <span asp-validation-for="ReceivedDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CreateDate" class="control-label"></label>
+                <input asp-for="CreateDate" class="form-control" />
+                <span asp-validation-for="CreateDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CreateBy" class="control-label"></label>
+                <input asp-for="CreateBy" class="form-control" />
+                <span asp-validation-for="CreateBy" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ModifiedDate" class="control-label"></label>
+                <input asp-for="ModifiedDate" class="form-control" />
+                <span asp-validation-for="ModifiedDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ModifiedBy" class="control-label"></label>
+                <input asp-for="ModifiedBy" class="form-control" />
+                <span asp-validation-for="ModifiedBy" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
