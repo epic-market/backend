@@ -30,7 +30,7 @@ namespace EpicMarket.Services
         public bool IsBusinessVerified(int id)
         {
             var status = context.Businesses.Where(c => c.PersonID == id).Include(c => c.Status).Select(c => c.Status.Status).FirstOrDefault();
-            return status == BUSINESS_STATUS.BUSINESS_VERIFIED; 
+            return status == Business_Status.BUSINESS_VERIFIED; 
         }
 
         public async Task<AppUser> GetUserByIdAsync(int id)

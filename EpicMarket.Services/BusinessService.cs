@@ -49,7 +49,7 @@ namespace EpicMarket.Services
             businessModel.ContactEmail = businessRegisterDto.ContactEmail;
             businessModel.CreateBy = UserName;
             businessModel.CreateDate = DateTime.Now;
-            businessModel.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == BUSINESS_STATUS.BUSINESS_UNVERIFIED).Id;
+            businessModel.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == Business_Status.BUSINESS_UNVERIFIED).Id;
             _context.Businesses.Add(businessModel);
             await _context.SaveChangesAsync();
 

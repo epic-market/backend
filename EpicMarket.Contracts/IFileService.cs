@@ -10,7 +10,7 @@ namespace EpicMarket.Contracts
 {
 	public interface IFileService
 	{
-		Task<string> UploadFileAsync(IFormFile file, string prefix);
+		Task<string> UploadFileAsync(IFormFile file, string prefix , string fileNameKey);
 
 		Task<List<S3ObjectDto>> GetAllFilesAsync(string prefix);
 
