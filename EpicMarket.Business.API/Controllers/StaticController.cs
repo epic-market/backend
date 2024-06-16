@@ -40,5 +40,46 @@ namespace EpicMarket.Business.API.Controllers
 
 			return Ok(reponse);
         }
+
+        [HttpGet("GetStatusOptions")]
+        public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetStatusOptions()
+        {
+            var reponse = new OperationResult<List<DropDownOptions>>();
+
+            this.logger.LogInformation("Static Controller -> GetStatusOptions()");
+
+            var options = await staticService.GetStatusOptions();
+            this.logger.LogInformation("Static Controller-> GetStatusOptions()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = options }));
+
+            reponse.Data = options;
+            return Ok(reponse);
+        }
+        [HttpGet("GetOderStatusOptions")]
+        public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetOderStatusOptions()
+        {
+            var reponse = new OperationResult<List<DropDownOptions>>();
+
+            this.logger.LogInformation("Static Controller -> GetOderStatusOptions()");
+
+            var options = await staticService.GetOderStatusOptions();
+            this.logger.LogInformation("Static Controller-> GetOderStatusOptions()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = options }));
+
+            reponse.Data = options;
+            return Ok(reponse);
+        }
+
+        [HttpGet("GetOderTypeOptions")]
+        public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetOderTypeOptions()
+        {
+            var reponse = new OperationResult<List<DropDownOptions>>();
+
+            this.logger.LogInformation("Static Controller -> GetOderTypeOptions()");
+
+            var options = await staticService.GetOderTypeOptions();
+            this.logger.LogInformation("Static Controller-> GetOderTypeOptions()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = options }));
+
+            reponse.Data = options;
+            return Ok(reponse);
+        }
     }
 }

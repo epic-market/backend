@@ -61,6 +61,7 @@ namespace EpicMarket.Data.Models
         public DbSet<TaskType> TaskTypes { get; set; }  
         public DbSet<TaskStatusType> TaskStatusTypes { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<OrderTypesOptions> OrderTypesOptions { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 			var connectionString = _configuration.GetConnectionString("DefaultConnection");

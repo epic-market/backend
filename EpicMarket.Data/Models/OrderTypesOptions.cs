@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace EpicMarket.Data.Models
 {
-    public class OrderStatusOptions
+    public class OrderTypesOptions
     {
         public int Id { get; set; }
 
-        public string OrderStatus { get; set; }
+        public string Ordertype { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
     }
 }

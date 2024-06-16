@@ -13,6 +13,8 @@ namespace EpicMarket.Data.Models
         public string StatusDescription { get; set; }
 
 		public virtual ICollection<Business> Businesses { get; set; }
+        public virtual ICollection<Outlet> Outlets { get; set; }
+        public virtual ICollection<Catalog> Catalogs { get; set; }
 
     }
 }

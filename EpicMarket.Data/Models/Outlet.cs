@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,7 +25,7 @@ namespace EpicMarket.Data.Models
         public int? ReviewCount { get; set; }
         public bool? IsOpen { get; set; }
         public double? Weight { get; set; }
-        public bool? Status { get; set; }
+        public int StatusId { get; set; }
 
         public virtual Business Bussiness { get; set; }
         public virtual Address Address { get; set; }
@@ -32,6 +33,8 @@ namespace EpicMarket.Data.Models
         public virtual ICollection<OutletPerson> OutletPeople { get; set; }
 
 		public virtual ICollection<Order> Orders { get; set; }
+        [ForeignKey("StatusId")]
+        public virtual ICollection<StatusOptionSet> StatusOptionSets { get; set; }
 
 
 		public virtual ICollection<OutletProduct> OutletProducts { get; set; }

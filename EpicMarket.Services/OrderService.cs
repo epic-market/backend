@@ -63,9 +63,9 @@ namespace EpicMarket.Services
             {
                 PersonID = User.Id,
 				OutletID = orderdto.OutletId,
-                OrderType = orderdto.OrderedMode,
+                OrderTypeId = orderdto.OrderedModeId,
                 OrderAt = DateTime.Now,
-                Status = orderdto.Status,
+                StatusId = orderdto.StatusId,
                 PaymentMode = orderdto.PaymentMode,
                 TotalItems = totalItems,
                 TotalPrice = totalPrice,
@@ -101,8 +101,8 @@ namespace EpicMarket.Services
                     CustomerPhone = c.Person.PhoneNumber,
                     OrderDate = c.OrderAt,
                     PaymentMode = c.PaymentMode,
-                    OrderedMode = c.OrderType,
-                    Status = c.Status,
+                    OrderedModeId = c.OrderTypeId,
+                    StatusId = c.StatusId,
                     OrderDetails = OrderDetailsString,
                 }).FirstOrDefaultAsync();
 
@@ -113,7 +113,7 @@ namespace EpicMarket.Services
         public int UpdateStatus(int OrderId, string OrderStatus)
         {
             var Order = _context.Orders.Find(OrderId);
-            Order.Status = OrderStatus;
+            //Order.Status = OrderStatus;
             _context.Orders.Update(Order);
             _context.SaveChanges();
 
@@ -130,7 +130,6 @@ namespace EpicMarket.Services
             var orders = _context.Orders.Include(c=>c.Outlet).
                 Where(c => c.Outlet.BussinessID == businessID).Include(c=> c.Person);
 
-
             //2 . Appling Searching
             var sortedOrders = orders.Where(row => row.Person.FirstName.Contains(orderParams.searchTerm.Trim()) || row.ID.ToString() == orderParams.searchTerm.Trim());
 
@@ -142,7 +141,7 @@ namespace EpicMarket.Services
                     sortedOrders = orderParams.ascending ? sortedOrders.OrderBy(c => c.ID) : sortedOrders.OrderByDescending(c => c.ID);
                     break;
                 case "Status":
-                    sortedOrders = orderParams.ascending ? sortedOrders.OrderBy(c => c.Status) : sortedOrders.OrderByDescending(c => c.Status);
+                    sortedOrders = orderParams.ascending ? sortedOrders.OrderBy(c => c.StatusId) : sortedOrders.OrderByDescending(c => c.StatusId);
                     break;
                 default:
                     break;
@@ -162,10 +161,10 @@ namespace EpicMarket.Services
             {
                 ID = c.ID,
                 CustomerName = c.Person.FirstName + "" + c.Person.LastName,
-                Status = c.Status,
+                Status = c.OrderStatusOptions.OrderStatus,
                 TotalPrice = c.TotalPrice,
                 TotalItems = c.TotalItems,
-                OrderType = c.OrderType,
+                OrderType = c.OrderTypesOptions.Ordertype,
                 Count = totalCount
             }).ToListAsync();
 

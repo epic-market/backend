@@ -185,7 +185,7 @@
 											@Html.DisplayNameFor(model => model.Outlet.Weight)
 										</th>
 										<th>
-											@Html.DisplayNameFor(model => model.Outlet.Status)
+											@* @Html.DisplayNameFor(model => model.Outlet.Status) *@
 										</th>
 										<th>
 											@Html.DisplayNameFor(model => model.Outlet.Address.City)
@@ -225,7 +225,7 @@
 												@Html.DisplayFor(modelItem => item.Weight)
 											</td>
 											<td>
-												@Html.DisplayFor(modelItem => item.Status)
+												@* @Html.DisplayFor(modelItem => item.Status) *@
 											</td>
 											<td>
 												@Html.DisplayFor(modelItem => item.Address.City)
@@ -275,7 +275,7 @@
 											@Html.DisplayNameFor(model => model.Catalog.ReviewCount)
 										</th>
 										<th>
-											@Html.DisplayNameFor(model => model.Catalog.Status)
+								@* 			@Html.DisplayNameFor(model => model.Catalog.Status) *@
 										</th>
 										<th></th>
 									</tr>
@@ -309,7 +309,7 @@
 												@Html.DisplayFor(modelItem => item.ReviewCount)
 											</td>
 											<td>
-												@Html.DisplayFor(modelItem => item.Status)
+											@* 	@Html.DisplayFor(modelItem => item.Status) *@
 											</td>
 											<td>
 												<a asp-controller="Catalogs" asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
