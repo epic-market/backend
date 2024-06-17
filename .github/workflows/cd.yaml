@@ -37,15 +37,33 @@ jobs:
       - name: Pull Docker image
         run: sudo docker pull ghcr.io/${{ github.repository }}-${{ steps.determine-application.outputs.application }}:latest
 
-      - name: Determine port based on input
+      - name: Determine port based on application
         id: determine-port
         run: |
           is_api=${{ inputs.is_api }}
+          db_conn="Server=tcp:${{ secrets.DB_HOSTNAME }};Database=${{ secrets.DB_NAME }};User Id=${{ secrets.DB_USERNAME }};Password=${{ secrets.DB_PASSWORD }};Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;"
           if [ "$is_api" = "true" ]; then
             echo "::set-output name=port::3003"
+            echo "::set-output name=conns::ConnectionStrings:DefaultConnection=${{ db_conn }}"
           else
             echo "::set-output name=port::3001"
+            echo "::set-output name=conns::ConnectionStrings:DefaultConnection=${{ db_conn }} ConnectionStrings:AuthDbContextConnection=${{ db_conn }}"
           fi
 
+        - name: Determine env based on application
+          id: determine-env-vars
+          run: |
+            is_api=${{ inputs.is_api }}
+            db_conn="Server=tcp:${{ secrets.DB_HOSTNAME }};Database=${{ secrets.DB_NAME }};User Id=${{ secrets.DB_USERNAME }};Password=${{ secrets.DB_PASSWORD }};Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;"
+            if [ "$is_api" = "true" ]; then
+              echo "::set-output name=conns::${{ db_conn }}"
+            else
+              echo "::set-output name=conns::${{ db_conn }}"
+            fi
+
       - name: Run Docker container
-        run: sudo docker run -d -p ${{ steps.determine-port.outputs.port }}:8080 ghcr.io/${{ github.repository }}-${{ steps.determine-application.outputs.application }}
+        run: sudo docker run \
+                          -d \
+                          -p ${{ steps.determine-port.outputs.port }}:8080 \
+                          --env ${{ steps.determine-env-vars.conns }}\
+                          ghcr.io/${{ github.repository }}-${{ steps.determine-application.outputs.application }}
