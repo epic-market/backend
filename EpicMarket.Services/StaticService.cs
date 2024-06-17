@@ -25,5 +25,17 @@ namespace EpicMarket.Services
         {
             return _context.BusinessCategories.Select(c => new DropDownOptions { Text = c.Name, Value = c.ID }).ToListAsync();
         }
+        public Task<List<DropDownOptions>> GetStatusOptions()
+        {
+            return _context.StatusOptionSets.Select(c => new DropDownOptions { Text = c.Status, Value = c.Id }).ToListAsync();
+        }
+        public Task<List<DropDownOptions>> GetOderStatusOptions()
+        {
+            return _context.OrderStatusOptions.Select(c => new DropDownOptions { Text = c.OrderStatus, Value = c.Id }).ToListAsync();
+        }
+        public Task<List<DropDownOptions>> GetOderTypeOptions()
+        {
+            return _context.OrderTypesOptions.Select(c => new DropDownOptions { Text = c.Ordertype, Value = c.Id }).ToListAsync();
+        }
     }
 }

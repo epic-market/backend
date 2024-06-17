@@ -64,9 +64,9 @@ namespace EpicMarket.Services
 			};
 		}
 
-		public async Task<string> UploadFileAsync(IFormFile file, string prefix)
+		public async Task<string> UploadFileAsync(IFormFile file, string prefix , string fileNameKey)
 		{
-			var fileNameKey = Guid.NewGuid().ToString();
+			
 			var request = new PutObjectRequest()
 			{
 				BucketName = _bucketName,

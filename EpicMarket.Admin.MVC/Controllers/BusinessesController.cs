@@ -11,10 +11,11 @@ using System.Runtime.Loader;
 using Microsoft.CodeAnalysis.Elfie.Model;
 using System.Security.Claims;
 using EpicMarket.Admin.MVC.Models;
+using EpicMarket.Entities.CustomModels;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [Authorize(Roles = "admin")]
+    [Authorize(Roles = $"{ROLES.ADMIN}")]
     public class BusinessesController : Controller
     {
         private readonly ApplicationDbContext _context;

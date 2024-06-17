@@ -1,6 +1,7 @@
 ﻿using EpicMarket.Data.Common;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,10 +25,12 @@ namespace EpicMarket.Data.Models
         public double? Rating { get; set; }
         public int? ReviewCount { get; set; }
         public int? OrderCount { get; set; }
-        public string Status { get; set; }
+        public int StatusId { get; set; }
 
         // Navigation property
         public virtual Business Business { get; set; }
+        [ForeignKey("StatusId")]
+        public virtual ICollection<StatusOptionSet> StatusOptionSets { get; set; }
 
         public virtual ICollection<OutletProduct> OutletProducts { get; set; }
     }

@@ -6,8 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace EpicMarket.Data.Models
-{
-    public class EventCategory //this table is to know which application is assced like bussinessowner, admin , customer app
+{//this will be used for both events and tasks
+    public class EventCategory //this table is to know which application is assced like bussinessowner, admin , customer app 
     {
         [Key]
         public int ID { get; set; }
@@ -22,5 +22,6 @@ namespace EpicMarket.Data.Models
 
         public virtual ICollection<Event>? Events { get; set; }
 
+        public virtual ICollection<TaskType>? TaskTypes { get; set; }
     }
 }

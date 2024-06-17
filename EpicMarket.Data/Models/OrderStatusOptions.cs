@@ -11,5 +11,6 @@ namespace EpicMarket.Data.Models
         public int Id { get; set; }
 
         public string OrderStatus { get; set; }
+        public virtual ICollection<Order> Orders { get; set; }
     }
 }

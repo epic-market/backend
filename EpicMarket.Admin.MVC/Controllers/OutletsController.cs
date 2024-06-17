@@ -9,10 +9,11 @@ using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using EpicMarket.Admin.MVC.Models;
 using System.Security.Claims;
+using EpicMarket.Entities.CustomModels;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [Authorize(Roles = "admin")]
+    [Authorize(Roles = $"{ROLES.ADMIN}")]
     public class OutletsController : Controller
     {
         private readonly ApplicationDbContext _context;

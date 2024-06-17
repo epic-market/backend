@@ -25,7 +25,7 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpGet("GetAllBranches")]
-		[Authorize(Roles = "businessOwner")]
+		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<GetDataResult<List<BranchResult>>>>> GetAllBranches([FromQuery]BranchParams branchParams)
         {
             var response = new OperationResult<GetDataResult<List<BranchResult>>>();
@@ -43,7 +43,7 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpGet("GetBranchByID")]
-		[Authorize(Roles = "businessOwner")]
+		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<BranchResult>>> GetBranchByID(int branchId)
         {
             var response = new OperationResult<BranchResult>();
@@ -61,7 +61,7 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpPost("AddOrUpdateBranch")]
-		[Authorize(Roles = "businessOwner")]
+		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<int>>> AddBranch(BranchDto branchDto)
         {
             var response = new OperationResult<int>();
@@ -80,7 +80,7 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpPost("MapBranchToPeople")]
-		[Authorize(Roles = "businessOwner")]
+		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<int>>> MapBranchToPeople(BranchPeopleMapParams branchPeopleMap)
         {
 			var response = new OperationResult<int>();
@@ -96,7 +96,7 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpPost("MapBranchToProduct")]
-		[Authorize(Roles = "businessOwner")]
+		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<int>>> MapBranchToProduct(BranchProductMapParams branchProductMap)
         {
 

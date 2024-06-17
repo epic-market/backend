@@ -3,6 +3,7 @@ using Amazon.S3.Model;
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,16 +14,18 @@ namespace EpicMarket.Business.API.Controllers
 	{
 
 		private readonly IFileService fileService;
+		private readonly IApplicationConfigurationService applicationConfigurationService;
 
-		public FilesController(IFileService fileService, ApplicationDbContext dbContext) : base(dbContext)
+		public FilesController(IFileService fileService, ApplicationDbContext dbContext , IApplicationConfigurationService applicationConfigurationService) : base(dbContext)
 		{
 			this.fileService = fileService;
+			this.applicationConfigurationService = applicationConfigurationService;
 		}
 
 		[HttpPost]
 		public async Task<IActionResult> UploadFileAsync(IFormFile file , string? prefix)
 		{
-			var key = await this.fileService.UploadFileAsync(file,prefix);
+			var key = await this.SaveFileGlobalAsync(file, ApplicationConfigurationConstants.Products, fileService, applicationConfigurationService);
 			return Ok($"File {prefix}/{key} uploaded to S3 successfully!");
 		}
 
