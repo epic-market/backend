@@ -18,18 +18,20 @@ namespace EpicMarket.Services
         private readonly ApplicationDbContext _context;
         private readonly IMapper mapper;
         private readonly IAddressService addressService;
+        private readonly IEventLogService eventLogService;
 
-        public BranchService(ApplicationDbContext context, IMapper mapper,IAddressService addressService)
+        public BranchService(ApplicationDbContext context, IMapper mapper,IAddressService addressService, IEventLogService eventLogService)
         {
             _context = context;
             this.mapper = mapper;
             this.addressService = addressService;
+            this.eventLogService = eventLogService;
         }
 
         public async Task<int> AddOrUpdateBranch(BranchDto branchDto,  string UserName, int BusinessID)
         {
             var addressModel = new AddressDto();
-         
+            var events="";
             addressModel.Address1 = branchDto.Address;
             addressModel.City = branchDto.City;
             addressModel.State = branchDto.State;
@@ -65,16 +67,19 @@ namespace EpicMarket.Services
                 outletModel.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == Business_Status.BUSINESS_UNVERIFIED).Id;
                 outletModel.ModifiedBy = UserName;
                 outletModel.ModifiedDate = DateTime.Now;
+                events = EventConstants.AddBranch;
                 _context.Outlets.Update(outletModel);
             }
             else
             {
                 outletModel.CreateBy = UserName;
                 outletModel.CreateDate = DateTime.Now;
+                events = EventConstants.EditBranch;
                 _context.Outlets.Add(outletModel);
             }
       
             await _context.SaveChangesAsync();
+            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = outletModel.ID, Data = null, Description = null, EventName = events, EntityName = EntityConstants.Branch });
 
             return outletModel.ID;
         }

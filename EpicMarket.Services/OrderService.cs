@@ -5,6 +5,7 @@ using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -23,8 +24,9 @@ namespace EpicMarket.Services
         private readonly UserManager<AppUser> userManager;
         private readonly IAddressService addressService;
         private readonly ICommunicationService communicationService;
+        private readonly IEventLogService eventLogService;
 
-        public OrderService(ApplicationDbContext context, IMapper mapper, IApplicationConfigurationService applicationConfiguration, ICommunicationService communicationService, UserManager<AppUser> userManager, IAddressService addressService)
+        public OrderService(ApplicationDbContext context, IMapper mapper, IApplicationConfigurationService applicationConfiguration, ICommunicationService communicationService, UserManager<AppUser> userManager, IAddressService addressService, IEventLogService eventLogService)
         {
             _context = context;
             this.mapper = mapper;
@@ -32,6 +34,7 @@ namespace EpicMarket.Services
             this.userManager = userManager;
             this.addressService = addressService;
             this.communicationService = communicationService;
+            this.eventLogService = eventLogService;
         }
 
 
@@ -75,6 +78,8 @@ namespace EpicMarket.Services
             listoforderDetails.ForEach(od => od.OrderID = newOrder.ID);
             _context.OrderDetails.AddRange(listoforderDetails);
             _context.SaveChanges();
+            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = newOrder.ID, Data = null, Description = null, EventName = EventConstants.AddOrder, EntityName = EntityConstants.Order });
+
             return newOrder.ID;
         }
 
@@ -116,6 +121,7 @@ namespace EpicMarket.Services
             //Order.Status = OrderStatus;
             _context.Orders.Update(Order);
             _context.SaveChanges();
+            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = Order.ID, Data = null, Description = null, EventName = EventConstants.EditOrder, EntityName = EntityConstants.Order });
 
             return Order.ID;
 

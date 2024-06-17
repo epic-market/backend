@@ -26,8 +26,15 @@ namespace EpicMarket.Services
         private readonly UserManager<AppUser> userManager;
         private readonly IAddressService addressService;
         private readonly ICommunicationService communicationService;
+        private readonly IEventLogService eventLogService;
 
-        public EmployeeService(ApplicationDbContext context, IMapper mapper , IApplicationConfigurationService applicationConfiguration,ICommunicationService communicationService, UserManager<AppUser> userManager,IAddressService addressService)
+        public EmployeeService(ApplicationDbContext context,
+            IMapper mapper,
+            IApplicationConfigurationService applicationConfiguration,
+            ICommunicationService communicationService,
+            UserManager<AppUser> userManager,
+            IAddressService addressService,
+            IEventLogService eventLogService)
         {
             _context = context;
             this.mapper = mapper;
@@ -35,6 +42,7 @@ namespace EpicMarket.Services
             this.userManager = userManager;
             this.addressService = addressService;
             this.communicationService = communicationService;
+            this.eventLogService = eventLogService;
         }
         public async Task<AddEmployeeResult> Register(AddEmployeeParam addEmployeeParam, int businessid , int userID)
         {
@@ -171,6 +179,8 @@ namespace EpicMarket.Services
 
                 _context.UserAddresses.Add(userAddress);
                 _context.SaveChanges();
+                this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = User.Id, Data = null, Description = null, EventName = EventConstants.AddEmployees, EntityName = EntityConstants.Employees });
+
                 return User.Id;
 
             }

@@ -36,6 +36,26 @@ namespace EpicMarket.Entities.CustomModels
 		public const string Products = "Products";
 		public const string LOGO = "LOGO";
 	}
+    public static class EntityConstants
+    {
+        public const string Catelog = "Catelog";
+        public const string Branch = "Branch";
+        public const string Employees = "Employees";
+        public const string Order = "Order";
+        public const string Business = "Business";
+    }
+    public static class EventConstants
+    {
+        public const string AddCatelog = "AddCatelog";
+        public const string EditCatelog = "EditCatelog";
+        public const string AddBranch = "AddBranch";
+        public const string EditBranch = "EditBranch";
+        public const string AddEmployees = "AddEmployees";
+        public const string EditEmployees = "EditEmployees";
+        public const string AddOrder = "AddOrder";
+        public const string EditOrder = "EditOrder"; 
+        public const string AddBusiness = "AddBusiness";
+    }
 
 
 

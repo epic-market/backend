@@ -165,8 +165,53 @@ namespace EpicMarket.Data.Common
                     await context.OrderTypesOptions.AddAsync(tickettype);
                 }
             }
-
-                await context.SaveChangesAsync();
+            if (!await context.EventCategory.AnyAsync())
+            {
+                var eventCategories = new List<EventCategory>
+                {
+                 new EventCategory { Name = "Admin",Description="Admin Website" },
+                 new EventCategory{Name="Business" ,Description="Business Website"}
+                };
+                foreach (var tickettype in eventCategories)
+                {
+                    await context.EventCategory.AddAsync(tickettype);
+                }
+            }
+            if (!await context.Event.AnyAsync())
+            {
+                var events = new List<Event>
+                {
+                 new Event { Name = "AddCatelog" ,Description="Add Catelog",EventCategoryID=1 },
+                 new Event { Name = "EditCatelog" ,Description="Edit Catelog",EventCategoryID=1 }, 
+                 new Event { Name = "AddBranch" ,Description="Add Branch",EventCategoryID=1 },
+                 new Event { Name = "EditBranch" ,Description="Edit Branch",EventCategoryID=1 },
+                 new Event { Name = "AddEmployees" ,Description="Add Employees",EventCategoryID=1 },
+                 new Event { Name = "EditEmployees" ,Description="Edit Employees",EventCategoryID=1 },
+                 new Event { Name = "AddOrder" ,Description="Add Order",EventCategoryID=1 },
+                 new Event { Name = "EditOrder" ,Description="Edit Order",EventCategoryID=1 },
+                 new Event { Name = "AddBusiness" ,Description="Add Business",EventCategoryID=1 }
+                };
+                foreach (var tickettype in events)
+                {
+                    await context.Event.AddAsync(tickettype);
+                }
+            }
+            if (!await context.Entity.AnyAsync())
+            {
+                var entities = new List<Entity>
+                {
+                 new Entity { Name = "Catelog" ,Description="Catelog" },
+                 new Entity { Name = "Branch" ,Description="Branch"},
+                 new Entity { Name = "Employees" ,Description="Employees"},
+                 new Entity { Name = "Order" ,Description="Order" },
+                 new Entity { Name = "Business" ,Description="Business"}
+                };
+                foreach (var tickettype in entities)
+                {
+                    await context.Entity.AddAsync(tickettype);
+                }
+            }
+            await context.SaveChangesAsync();
 
         }
     }
