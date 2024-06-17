@@ -72,25 +72,26 @@
 						<li>
 							<a asp-area="" asp-controller="ApplicationSecurables" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Application Securables</a>
 						</li>
+						<li>
+							<a asp-area="" asp-controller="Entities" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Entities</a>
+						</li>
 					</ul>
 				</li>
-				<li class="menu-label">Admin Functionalitys</li>
 				<li>
 					<a href="javascript:;" class="has-arrow">
 						<div class="parent-icon">
-							<i class="bx bx-help-circle"></i>
+							<i class="bx bx-cog"></i>
 						</div>
-						<div class="menu-title">FAQ's</div>
+						<div class="menu-title">Comunications</div>
 					</a>
 					<ul>
-						<li class="list-group-item">
-							<a asp-area="" asp-controller="FAQCategories" asp-action="Index"> <i class="bx bx-right-arrow-alt"></i>FAQs Categories</a>
-						</li>
-						<li class="list-group-item">
-							<a asp-area="" asp-controller="FAQs" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>FAQs</a>
+						<li>
+							<a asp-area="" asp-controller="CommunicationQueues" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Communication Queue</a>
 						</li>
 					</ul>
 				</li>
+				<li class="menu-label">Admin Functionalitys</li>
+		
 				<li>
 					<a href="javascript:;" class="has-arrow">
 						<div class="parent-icon">
@@ -134,26 +135,63 @@
 						<li class="list-group-item">
 							<a asp-area="" asp-controller="StatusOptionSets" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Status OptionSet</a>
 						</li>
-
+						<li class="list-group-item">
+							<a asp-area="" asp-controller="TaskStatusTypes" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Task Status OptionSet</a>
+						</li>
+						<li class="list-group-item">
+							<a asp-area="" asp-controller="EventCategories" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Event Categories OptionSet</a>
+						</li>
 					</ul>
 				</li>
 				<li>
-					<a asp-area="" asp-controller="Blogs" asp-action="Index">
+					<a href="javascript:;" class="has-arrow">
 						<div class="parent-icon">
-							<i class="bx bx-windows"></i>
+							<i class="bx bx-help-circle"></i>
 						</div>
 						<div class="menu-title">Blogs</div>
 					</a>
+					<ul>
+						<li class="list-group-item">
+							<a asp-area="" asp-controller="Blogs" asp-action="Index"> <i class="bx bx-right-arrow-alt"></i>Blogs</a>
+						</li>
+						<li class="list-group-item">
+							<a asp-area="" asp-controller="BlogCategories" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Blogs Category</a>
+						</li>
+					</ul>
+				</li>
+				<li>
+					<a href="javascript:;" class="has-arrow">
+						<div class="parent-icon">
+							<i class="bx bx-help-circle"></i>
+						</div>
+						<div class="menu-title">FAQ's</div>
+					</a>
+					<ul>
+						<li class="list-group-item">
+							<a asp-area="" asp-controller="FAQCategories" asp-action="Index"> <i class="bx bx-right-arrow-alt"></i>FAQs Categories</a>
+						</li>
+						<li class="list-group-item">
+							<a asp-area="" asp-controller="FAQs" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>FAQs</a>
+						</li>
+					</ul>
 				</li>
 
 				<li class="menu-label">Business Functionality</li>
 				<li>
-					<a asp-area="" asp-controller="Businesses" asp-action="Index">
+					<a class="has-arrow" href="javascript:;">
 						<div class="parent-icon">
-							<i class="bx bx-briefcase-alt-2"></i>
+							<i class="bx bx-book-bookmark"></i>
 						</div>
 						<div class="menu-title">Businesses</div>
 					</a>
+					<ul>
+						<li>
+							<a asp-area="" asp-controller="Businesses" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Businesses</a>
+						</li>
+						<li>
+							<a asp-area="" asp-controller="EventLogs" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Event Logs</a>
+						</li>
+					</ul>
 				</li>
 				<li>
 					<a asp-area="" asp-controller="Catalogs" asp-action="Index">
@@ -214,6 +252,22 @@
 						</div>
 						<div class="menu-title">Support Tickets</div>
 					</a>
+				</li>
+				<li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon">
+							<i class="bx bx-store"></i>
+						</div>
+						<div class="menu-title">Tasks</div>
+					</a>
+					<ul>
+						<li>
+							<a asp-area="" asp-controller="Tasks" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Tasks</a>
+						</li>
+						<li>
+							<a asp-area="" asp-controller="TaskTypes" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Tasks Types</a>
+						</li>
+					</ul>
 				</li>
 			</ul>
 			<!--end navigation-->

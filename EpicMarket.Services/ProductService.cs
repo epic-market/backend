@@ -5,6 +5,7 @@ using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,31 +20,38 @@ namespace EpicMarket.Services
         private readonly ApplicationDbContext _context;
         private readonly IMapper mapper;
         private readonly IAddressService addressService;
+        private readonly IEventLogService eventLogService;
 
-        public ProductService(ApplicationDbContext context, IMapper mapper, IAddressService addressService)
+        public ProductService(ApplicationDbContext context, IMapper mapper, IAddressService addressService, IEventLogService eventLogService)
         {
             _context = context;
             this.mapper = mapper;
             this.addressService = addressService;
+            this.eventLogService = eventLogService;
         }
 
         public int AddOrUpdateProduct(ProductsDto productsDto, string UserName, int businessID)
         {
             var product = mapper.Map<Catalog>(productsDto);
+            var events = "";
             product.BusinessID = businessID;
             if (productsDto.Id == null || product.ID == 0)
             {
                 product.CreateBy = UserName;
                 product.CreateDate = DateTime.Now;
+                product.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == Business_Status.BUSINESS_UNVERIFIED).Id;
+                events = EventConstants.AddCatelog;
                 _context.Catalogs.Add(product);
             }
             else 
             {
                 product.ModifiedBy = UserName;
                 product.ModifiedDate = DateTime.Now;
+                events = EventConstants.EditCatelog;
                 _context.Catalogs.Update(product);
             }
             _context.SaveChanges();
+            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = product.ID, Data = null, Description = null, EventName = events, EntityName = EntityConstants.Catelog });
 
             return product.ID;
         }
@@ -139,7 +147,7 @@ namespace EpicMarket.Services
                 Category = c.Category,
                 Images = c.Images,
                 MaximumOrderPurchase = (int)c.MaximumOrderPurchase,
-                IsRecommended = c.IsRecommended,
+                IsRecommended = c.IsRecommended
             }
             
             ).FirstOrDefaultAsync();

@@ -28,7 +28,7 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpPost("AddEmployee")]
-		[Authorize(Roles = "businessOwner")]
+		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<AddEmployeeResult>>> Register(AddEmployeeParam addEmployeeParam)
         {
             var response = new OperationResult<AddEmployeeResult>();
@@ -78,7 +78,7 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpGet("GetAllEmployeesForMap")]
-		[Authorize(Roles = "businessOwner")]
+		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<List<EmployeeMapOptionResult>>>> GetAllEmployeesForMap(int outletID)
         {
             var response = new OperationResult<List<EmployeeMapOptionResult>>();
@@ -96,7 +96,7 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpGet("GetAllEmployees")]
-		[Authorize(Roles = "businessOwner")]
+		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<GetDataResult<List<EmployeeResult>>>>> GetAllEmployees([FromQuery]EmployeeParams employeeParams)
         {
             var response = new OperationResult<GetDataResult<List<EmployeeResult>>>();
@@ -113,7 +113,7 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpGet("GetEmployeeDetails")]
-		[Authorize(Roles = "businessOwner")]
+		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<SingleEmployeeResult>>> GetEmployeeDetails(int employeeId)
         {
             var response = new OperationResult<SingleEmployeeResult>();

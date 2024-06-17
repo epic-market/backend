@@ -20,6 +20,7 @@ namespace EpicMarket.Entities
         public string Images { get; set; }
 		public bool IsRecommended { get; set; }
 		public int? MaximumOrderPurchase { get; set; }
+        public int? StatusId { get; set; }
 	}
     public class ProductsMapOptionResult 
     {

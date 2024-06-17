@@ -11,10 +11,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.AspNetCore.Razor.Language.Intermediate;
 using EpicMarket.Admin.MVC.Models;
 using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Entities.CustomModels;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [Authorize(Roles = "admin")]
+    [Authorize(Roles = $"{ROLES.ADMIN}")]
     public class FAQCategoriesController : Controller
     {
         private readonly ApplicationDbContext _context;

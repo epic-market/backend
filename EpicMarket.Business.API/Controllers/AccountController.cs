@@ -4,10 +4,13 @@ using EpicMarket.Data;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
+using EpicMarket.Entities.Entities;
+using EpicMarket.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace EpicMarket.Business.API.Controllers
 {
@@ -47,7 +50,7 @@ namespace EpicMarket.Business.API.Controllers
 
             if (!result.Succeeded) return BadRequest(result.Errors);
 
-            var roleResult = await _userManager.AddToRoleAsync(user, "Member");
+            var roleResult = await _userManager.AddToRoleAsync(user, ROLES.MEMBER);
 
             if (!roleResult.Succeeded) return BadRequest(result.Errors);
 
@@ -85,14 +88,14 @@ namespace EpicMarket.Business.API.Controllers
 
             var userBusinessDto = new UserBusinessDto();
 
-            if (roles.Contains("businessOwner"))
+            if (roles.Contains(ROLES.BUSINESS_OWNER))
             {
                 userBusinessDto = dbContext.Businesses.Where(c => c.PersonID == user.Id).Include(c => c.Status).Select(c => new UserBusinessDto()
                 {
                     businessId = c.ID,
                     businessStatus = c.Status.Status,
                 }).FirstOrDefault();
-            } else if (roles.Contains("businessEmployee"))
+            } else if (roles.Contains(ROLES.BUSINESS_EMPLOYEE))
             { 
                 userBusinessDto = dbContext.BusinessEmployeeMaps.Where(c => c.EmployeeID == user.Id).Include(c=>c.Bussiness).Include(c => c.Bussiness.Status).Select(c => new UserBusinessDto()
 				{
@@ -114,6 +117,55 @@ namespace EpicMarket.Business.API.Controllers
 		    };
 
 			return response;
+        }
+
+
+        [HttpPost("changepassword")]
+        [Authorize]
+        public async Task<ActionResult<OperationResult<string>>> changepassword(ChangePasswordParams changePasswordParams)
+        {
+
+            var response = new OperationResult<string>();
+
+            var UserID = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
+
+
+            var user = await _userManager.Users
+            .SingleOrDefaultAsync(x => x.UserName == UserName);
+            var result = await _userManager
+                .ChangePasswordAsync(user, changePasswordParams.CurrentPassword, changePasswordParams.NewPassword);
+
+            if (!result.Succeeded) return Unauthorized();
+
+            response.Data = "Password changed Succufully";
+
+            return response;
+        }
+
+
+        [HttpPost("ResetPassword")]
+        public async Task<ActionResult<OperationResult<string>>> ResetPassword(ResetPasswordParams resetPassword)
+        {
+
+            var response = new OperationResult<string>();
+
+            if (await UserExists(resetPassword.UserName))
+            {
+
+            }
+
+
+            //var user = await _userManager.Users
+            //.SingleOrDefaultAsync(x => x.UserName == UserName);
+            //var result = await _userManager
+            //    .ChangePasswordAsync(user, changePasswordParams.CurrentPassword, changePasswordParams.NewPassword);
+
+            //if (!result.Succeeded) return Unauthorized();
+
+            response.Data = "Password changed Succufully";
+
+            return response;
         }
 
         private async Task<bool> UserExists(string username)

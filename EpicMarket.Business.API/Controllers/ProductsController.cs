@@ -26,7 +26,7 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpGet("GetAllProductForMap")]
-		[Authorize(Roles = "businessOwner")]
+		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<List<ProductsMapOptionResult>>>> GetAllProductForMap(int outletID)
         {
             var response = new OperationResult<List<ProductsMapOptionResult>>();
@@ -44,7 +44,7 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpPost("AddOrUpdateProduct")]
-		[Authorize(Roles = "businessOwner")]
+		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public  ActionResult<OperationResult<int>> AddOrUpdateProduct(ProductsDto productsDto)
         {
 
@@ -62,7 +62,7 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpGet("GetAllProducts")]
-		[Authorize(Roles = "businessEmployee,businessOwner")]
+        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
 		public async Task<ActionResult<OperationResult<GetDataResult<List<ProductResult>>>>> GetAllProducts([FromQuery] ProductParams productResult)
         {
             var response = new OperationResult<GetDataResult<List<ProductResult>>>();
@@ -80,8 +80,8 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpGet("GetProductDetails")]
-		[Authorize(Roles = "businessEmployee,businessOwner")]
-		public async Task<ActionResult<OperationResult<ProductsDto>>> GetProductDetails(int productId)
+        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
+        public async Task<ActionResult<OperationResult<ProductsDto>>> GetProductDetails(int productId)
         {
             var response = new OperationResult<ProductsDto>();
 

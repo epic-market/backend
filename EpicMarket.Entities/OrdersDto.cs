@@ -14,9 +14,9 @@ namespace EpicMarket.Entities
 
         public string PaymentMode { get; set; }
 
-        public string OrderedMode { get; set; }
+        public int OrderedModeId { get; set; }
         
-        public string Status { get; set; }
+        public int StatusId { get; set; }
         
         public double TotalPrice { get; set; }
         
