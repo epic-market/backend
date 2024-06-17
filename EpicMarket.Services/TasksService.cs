@@ -2,6 +2,8 @@
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -90,5 +92,48 @@ namespace EpicMarket.Services
             await _context.SaveChangesAsync();
             return commentSave.ID;
         }
+
+        public async Task<GetDataResult<List<CommentDTO>>> GetAllComments(int taskId)
+        {
+            var comments = await _context.Comments
+                                        .Where(c => c.RecordID == taskId)
+                                        .Select(c => new CommentDTO
+                                        {
+                                            RecordID = c.RecordID,
+                                            CommentText = c.CommentText,
+                                            Status = c.Status,
+                                            CreateBy = c.CreateBy,
+                                            CreateDate = c.CreateDate
+                                        })
+                                        .ToListAsync();
+
+            return new GetDataResult<List<CommentDTO>>
+            {
+                items = comments,
+            };
+        }
+        public async Task<TasksDTO> GettaskDetails(int taskId)
+        {
+            return await _context.Tasks.Where(c => c.ID == taskId).Select(c => new TasksDTO
+            {
+                ID = c.ID,
+                Name = c.Name,
+                Description = c.Description,
+                TaskTypeID = c.TaskTypeID,
+                TaskStatus = c.TaskStatusType.Status,
+                TaskPriorityID = c.TaskPriorityID,
+                DateStarted = c.DateStarted,
+                DateCompleted = c.DateCompleted,
+                TaskData = c.TaskData,
+                ReceivedDate = c.ReceivedDate,
+                ModifiedDate = c.ModifiedDate,
+                ModifiedBy = c.ModifiedBy,
+                CreateDate = c.CreateDate,
+                CreateBy = c.CreateBy
+            }
+
+            ).FirstOrDefaultAsync();
+        }
+
     }
 }
