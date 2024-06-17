@@ -37,7 +37,7 @@ namespace EpicMarket.Services
             addressModel.Latitude = branchDto.Latitude;
             addressModel.Longitude = branchDto.Longitude;
 
-            if (branchDto.ID != null)
+            if (branchDto.ID != null || branchDto.ID > 0)
             {
                 addressModel.ModifiedBy = UserName;
                 addressModel.ModifiedDate = DateTime.Now;
@@ -48,7 +48,7 @@ namespace EpicMarket.Services
                 addressModel.CreateDate = DateTime.Now;
             }
            
-
+            
             int addressId = await addressService.AddAddress(addressModel); 
 
             var outletModel = new Outlet();
@@ -60,8 +60,9 @@ namespace EpicMarket.Services
             outletModel.ContactNumber = branchDto.ContactNumber;
             outletModel.ID = (int)branchDto.ID;
 
-            if (branchDto.ID != null)
+            if (branchDto.ID != null || branchDto.ID > 0)
             {
+                outletModel.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == Business_Status.BUSINESS_UNVERIFIED).Id;
                 outletModel.ModifiedBy = UserName;
                 outletModel.ModifiedDate = DateTime.Now;
                 _context.Outlets.Update(outletModel);

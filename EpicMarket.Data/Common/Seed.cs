@@ -153,6 +153,18 @@ namespace EpicMarket.Data.Common
                 await context.BusinessCategories.AddAsync(businessCategories);
 
             }
+            if (!await context.OrderTypesOptions.AnyAsync())
+            {
+                var orderTypesOptions = new List<OrderTypesOptions>
+                {
+                 new OrderTypesOptions { Ordertype = "Online" },
+                 new OrderTypesOptions{Ordertype="Offline"}
+                };
+                foreach (var tickettype in orderTypesOptions)
+                {
+                    await context.OrderTypesOptions.AddAsync(tickettype);
+                }
+            }
 
                 await context.SaveChangesAsync();
 

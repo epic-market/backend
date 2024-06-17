@@ -21,7 +21,7 @@ namespace EpicMarket.Services
         public void SendEmailAsync(string email, string subject, string message)
         {
             var Frommail = "gadamsattiakhil@outlook.com";//this._applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.SMTPFromEmail);
-            var pass = "Demo@1234";//this._applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.SMTPPassword);
+            var pass = "Epicmarket@2024";//this._applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.SMTPPassword);
             var server = "smtp-mail.outlook.com";//this._applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.SMTPServer);
             var port = 587;//Convert.ToInt32(this._applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.SMTPPort));
 

@@ -35,6 +35,7 @@ namespace EpicMarket.Services
             {
                 product.CreateBy = UserName;
                 product.CreateDate = DateTime.Now;
+                product.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == Business_Status.BUSINESS_UNVERIFIED).Id;
                 _context.Catalogs.Add(product);
             }
             else 
@@ -139,7 +140,7 @@ namespace EpicMarket.Services
                 Category = c.Category,
                 Images = c.Images,
                 MaximumOrderPurchase = (int)c.MaximumOrderPurchase,
-                IsRecommended = c.IsRecommended,
+                IsRecommended = c.IsRecommended
             }
             
             ).FirstOrDefaultAsync();
