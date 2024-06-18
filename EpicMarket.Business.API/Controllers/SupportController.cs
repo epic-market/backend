@@ -60,6 +60,7 @@ namespace EpicMarket.Business.API.Controllers
 
             return Ok(response);
         }
+
         [HttpGet("GettaskDetails")]
         public async Task<ActionResult<OperationResult<TasksDTO>>> GettaskDetails(int taskId)
         {
@@ -70,6 +71,22 @@ namespace EpicMarket.Business.API.Controllers
             var results = await tasksService.GettaskDetails(taskId);
 
             this.logger.LogInformation("Support Controller -> GettaskDetails()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
+
+            response.Data = results;
+
+            return Ok(response);
+        }
+
+        [HttpGet("GetSupportByPersonId")]
+        public async Task<ActionResult<OperationResult<GetDataResult<List<TasksDTO>>>>> GetSupportByPersonId([FromQuery] int personId)
+        {
+            var response = new OperationResult<GetDataResult<List<TasksDTO>>>();
+
+            this.logger.LogInformation("Support Controller -> GetSupportByPersonId()-> params {0}", JsonConvert.SerializeObject(new { Params = personId }));
+
+            var results = await tasksService.GetSupportByPersonId(personId);
+
+            this.logger.LogInformation("Support Controller -> GetSupportByPersonId()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
 
             response.Data = results;
 
