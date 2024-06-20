@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
+using EpicMarket.Data.ApplicationModels;
+using System.Security.Claims;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -56,6 +58,10 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Entity entity)
         {
+
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            entity.CreateBy = userName;
+            entity.CreateDate = DateTime.UtcNow;
             if (ModelState.IsValid)
             {
                 _context.Add(entity);
@@ -88,6 +94,9 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Entity entity)
         {
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            entity.ModifiedBy = userName;
+            entity.ModifiedDate = DateTime.UtcNow;
             if (id != entity.ID)
             {
                 return NotFound();
