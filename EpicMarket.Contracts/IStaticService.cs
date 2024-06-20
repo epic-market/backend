@@ -14,5 +14,6 @@ namespace EpicMarket.Contracts
         Task<List<DropDownOptions>> GetStatusOptions();
         Task<List<DropDownOptions>> GetOderStatusOptions();
         Task<List<DropDownOptions>> GetOderTypeOptions();
+        Task<List<DropDownOptions>> GetAllblogCategories();
     }
 }
