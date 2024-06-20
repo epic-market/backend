@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using EpicMarket.Entities.CustomModels;
+using System.Security.Claims;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -58,6 +59,9 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Status,StatusDescription")] StatusOptionSet statusOptionSet)
         {
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            statusOptionSet.CreateBy = userName;
+            statusOptionSet.CreateDate = DateTime.UtcNow;
             if (ModelState.IsValid)
             {
                 _context.Add(statusOptionSet);
@@ -88,8 +92,12 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Status,StatusDescription")] StatusOptionSet statusOptionSet)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Status,StatusDescription,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] StatusOptionSet statusOptionSet)
         {
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            statusOptionSet.ModifiedBy = userName;
+            statusOptionSet.ModifiedDate = DateTime.UtcNow;
+
             if (id != statusOptionSet.Id)
             {
                 return NotFound();

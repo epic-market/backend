@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
+using System.Security.Claims;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -56,6 +57,9 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,Name,Description,Sequence")] EventCategory eventCategory)
         {
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            eventCategory.CreateBy = userName;
+            eventCategory.CreateDate = DateTime.UtcNow;
             if (ModelState.IsValid)
             {
                 _context.Add(eventCategory);
@@ -86,8 +90,11 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,Sequence")] EventCategory eventCategory)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,Sequence,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] EventCategory eventCategory)
         {
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            eventCategory.ModifiedBy = userName;
+            eventCategory.ModifiedDate = DateTime.UtcNow;
             if (id != eventCategory.ID)
             {
                 return NotFound();
