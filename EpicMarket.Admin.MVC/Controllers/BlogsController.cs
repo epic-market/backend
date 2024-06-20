@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using EpicMarket.Entities.CustomModels;
+using EpicMarket.Data.ApplicationModels;
+using System.Security.Claims;
 namespace EpicMarket.Admin.MVC.Controllers
 {
     [Authorize(Roles = $"{ROLES.ADMIN}")]
@@ -47,6 +49,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: Blogs/Create
         public IActionResult Create()
         {
+            ViewData["BlogCategoryID"] = new SelectList(_context.BlogCategory, "Id", "Name");
             return View();
         }
 
@@ -55,8 +58,12 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Description,ImageUrl,InnerHtml,Authour,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Blog blog)
+        public async Task<IActionResult> Create([Bind("Id,Title,Description,ImageUrl,InnerHtml,Authour,BlogCategoryID,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Blog blog)
         {
+
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            blog.CreateBy = userName;
+            blog.CreateDate = DateTime.UtcNow;
             if (ModelState.IsValid)
             {
                 _context.Add(blog);
@@ -75,6 +82,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
 
             var blog = await _context.Blogs.FindAsync(id);
+            ViewData["BlogCategoryID"] = new SelectList(_context.BlogCategory, "Id", "Name");
             if (blog == null)
             {
                 return NotFound();
@@ -87,8 +95,13 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,ImageUrl,InnerHtml,Authour,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Blog blog)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,ImageUrl,InnerHtml,Authour,BlogCategoryID,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Blog blog)
         {
+
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            blog.ModifiedBy = userName;
+            blog.ModifiedDate = DateTime.UtcNow;
+
             if (id != blog.Id)
             {
                 return NotFound();

@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
+using System.Reflection.Metadata;
+using System.Security.Claims;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -56,6 +58,9 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] BlogCategory blogCategory)
         {
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            blogCategory.CreateBy = userName;
+            blogCategory.CreateDate = DateTime.UtcNow;
             if (ModelState.IsValid)
             {
                 _context.Add(blogCategory);
@@ -88,6 +93,9 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] BlogCategory blogCategory)
         {
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            blogCategory.ModifiedBy = userName;
+            blogCategory.ModifiedDate = DateTime.UtcNow;
             if (id != blogCategory.Id)
             {
                 return NotFound();
