@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EpicMarket.Data.Common;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EpicMarket.Data.Models
 {//this will be used for both events and tasks
-    public class EventCategory //this table is to know which application is assced like bussinessowner, admin , customer app 
+    public class EventCategory : BaseModel //this table is to know which application is assced like bussinessowner, admin , customer app 
     {
         [Key]
         public int ID { get; set; }

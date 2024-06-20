@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Razor.Language.Intermediate;
 using EpicMarket.Admin.MVC.Models;
 using Microsoft.AspNetCore.Authorization;
 using EpicMarket.Entities.CustomModels;
+using System.Security.Claims;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -26,24 +27,30 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: FAQCategories
-        public async Task<IActionResult> Index(string search="",string orderBy="",int currentPage=1)
+        //public async Task<IActionResult> Index(string search="",string orderBy="",int currentPage=1)
+        //{
+
+        //    var viewModel = new FAQCategoryModel();
+        //    search = string.IsNullOrEmpty(search) ? "" : search.ToLower();
+
+        //    var data =  _context.FAQCategories.Where(row => row.CategoryTitle.Contains(search));
+        //    var totalRecords = data.Count();
+        //    int pageSize = 1;
+        //    var totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
+
+        //    var pagenateddata = await data.Skip((currentPage - 1) * pageSize).Take(pageSize).ToListAsync();
+        //    viewModel.CurrentPage = currentPage;
+        //    viewModel.TotalPages = totalPages;
+        //    viewModel.PageSize = pageSize;
+        //    viewModel.Search = search;
+        //    viewModel.FAQCategory = pagenateddata;
+        //    return View(viewModel);
+        //}
+
+        public async Task<IActionResult> Index()
         {
-
-            var viewModel = new FAQCategoryModel();
-            search = string.IsNullOrEmpty(search) ? "" : search.ToLower();
-
-            var data =  _context.FAQCategories.Where(row => row.CategoryTitle.Contains(search));
-            var totalRecords = data.Count();
-            int pageSize = 1;
-            var totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
-
-            var pagenateddata = await data.Skip((currentPage - 1) * pageSize).Take(pageSize).ToListAsync();
-            viewModel.CurrentPage = currentPage;
-            viewModel.TotalPages = totalPages;
-            viewModel.PageSize = pageSize;
-            viewModel.Search = search;
-            viewModel.FAQCategory = pagenateddata;
-            return View(viewModel);
+            var faqDbContext = _context.FAQCategories;
+            return View(await faqDbContext.ToListAsync());
         }
 
         // GET: FAQCategories/Details/5
@@ -77,6 +84,9 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,CategoryTitle,TypeOfFAQ,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] FAQCategory fAQCategory)
         {
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            fAQCategory.CreateBy = userName;
+            fAQCategory.CreateDate = DateTime.UtcNow;
             if (ModelState.IsValid)
             {
                 _context.Add(fAQCategory);
@@ -89,6 +99,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: FAQCategories/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+
             if (id == null)
             {
                 return NotFound();
@@ -109,6 +120,9 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,CategoryTitle,TypeOfFAQ,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] FAQCategory fAQCategory)
         {
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            fAQCategory.ModifiedBy = userName;
+            fAQCategory.ModifiedDate = DateTime.UtcNow;
             if (id != fAQCategory.Id)
             {
                 return NotFound();

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using EpicMarket.Entities.CustomModels;
+using System.Security.Claims;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -58,6 +59,9 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,BarCode,Name,Description,Images")] ProductInternal productInternal)
         {
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            productInternal.CreateBy = userName;
+            productInternal.CreateDate = DateTime.UtcNow;
             if (ModelState.IsValid)
             {
                 _context.Add(productInternal);
@@ -88,8 +92,11 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,BarCode,Name,Description,Images")] ProductInternal productInternal)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,BarCode,Name,Description,Images,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] ProductInternal productInternal)
         {
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            productInternal.ModifiedBy = userName;
+            productInternal.ModifiedDate = DateTime.UtcNow;
             if (id != productInternal.ID)
             {
                 return NotFound();
