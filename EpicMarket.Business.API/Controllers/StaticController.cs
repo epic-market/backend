@@ -26,6 +26,7 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpGet("GetBusinessCategoriesOptions")]
+        [AllowAnonymous]
         public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetBusinessCategoriesOptions()
         {
             var reponse = new OperationResult<List<DropDownOptions>>();
@@ -42,6 +43,7 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpGet("GetStatusOptions")]
+        [AllowAnonymous]
         public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetStatusOptions()
         {
             var reponse = new OperationResult<List<DropDownOptions>>();
@@ -54,7 +56,9 @@ namespace EpicMarket.Business.API.Controllers
             reponse.Data = options;
             return Ok(reponse);
         }
+
         [HttpGet("GetOderStatusOptions")]
+        [AllowAnonymous]
         public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetOderStatusOptions()
         {
             var reponse = new OperationResult<List<DropDownOptions>>();
@@ -69,6 +73,7 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpGet("GetOderTypeOptions")]
+        [AllowAnonymous]
         public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetOderTypeOptions()
         {
             var reponse = new OperationResult<List<DropDownOptions>>();
@@ -83,6 +88,7 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpGet("GetAllblogCategories")]
+        [AllowAnonymous]
         public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetAllblogCategories()
         {
             var reponse = new OperationResult<List<DropDownOptions>>();
@@ -91,6 +97,21 @@ namespace EpicMarket.Business.API.Controllers
 
             var options = await staticService.GetAllblogCategories();
             this.logger.LogInformation("Static Controller-> GetAllblogCategories()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = options }));
+
+            reponse.Data = options;
+            return Ok(reponse);
+        }
+
+        [HttpGet("GetAllSupportCategorys")]
+        [AllowAnonymous]
+        public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetAllSupportCategorys()
+        {
+            var reponse = new OperationResult<List<DropDownOptions>>();
+
+            this.logger.LogInformation("Static Controller -> GetAllSupportCategorys()");
+
+            var options = await staticService.GetAllSupportCategorys();
+            this.logger.LogInformation("Static Controller-> GetAllSupportCategorys()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = options }));
 
             reponse.Data = options;
             return Ok(reponse);
