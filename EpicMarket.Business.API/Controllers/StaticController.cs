@@ -81,5 +81,19 @@ namespace EpicMarket.Business.API.Controllers
             reponse.Data = options;
             return Ok(reponse);
         }
+
+        [HttpGet("GetAllblogCategories")]
+        public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetAllblogCategories()
+        {
+            var reponse = new OperationResult<List<DropDownOptions>>();
+
+            this.logger.LogInformation("Static Controller -> GetAllblogCategories()");
+
+            var options = await staticService.GetAllblogCategories();
+            this.logger.LogInformation("Static Controller-> GetAllblogCategories()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = options }));
+
+            reponse.Data = options;
+            return Ok(reponse);
+        }
     }
 }

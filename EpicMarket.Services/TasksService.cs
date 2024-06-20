@@ -134,6 +134,34 @@ namespace EpicMarket.Services
 
             ).FirstOrDefaultAsync();
         }
+        public async Task<GetDataResult<List<TasksDTO>>> GetSupportByPersonId(int personId)
+        {
+            var tasksDTOs = await _context.Tasks
+                                        .Where(c => c.SubmittedByPersonID == personId)
+                                        .Select(c => new TasksDTO
+                                        {
+                                            ID = c.ID,
+                                            Name = c.Name,
+                                            Description = c.Description,
+                                            TaskTypeID = c.TaskTypeID,
+                                            TaskStatus = c.TaskStatusType.Status,
+                                            TaskPriorityID = c.TaskPriorityID,
+                                            DateStarted = c.DateStarted,
+                                            DateCompleted = c.DateCompleted,
+                                            TaskData = c.TaskData,
+                                            ReceivedDate = c.ReceivedDate,
+                                            ModifiedDate = c.ModifiedDate,
+                                            ModifiedBy = c.ModifiedBy,
+                                            CreateDate = c.CreateDate,
+                                            CreateBy = c.CreateBy
+                                        })
+                                        .ToListAsync();
+
+            return new GetDataResult<List<TasksDTO>>
+            {
+                items = tasksDTOs,
+            };
+        }
 
     }
 }

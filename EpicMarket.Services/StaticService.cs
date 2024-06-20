@@ -37,5 +37,9 @@ namespace EpicMarket.Services
         {
             return _context.OrderTypesOptions.Select(c => new DropDownOptions { Text = c.Ordertype, Value = c.Id }).ToListAsync();
         }
+        public Task<List<DropDownOptions>> GetAllblogCategories()
+        {
+            return _context.BlogCategory.Select(c => new DropDownOptions { Text = c.Name, Value = c.Id }).ToListAsync();
+        }
     }
 }
