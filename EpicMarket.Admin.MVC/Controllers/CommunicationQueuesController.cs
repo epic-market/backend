@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
+using EpicMarket.Data.ApplicationModels;
+using System.Security.Claims;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -45,82 +47,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             return View(communicationQueue);
         }
 
-        // GET: CommunicationQueues/Create
-        public IActionResult Create()
-        {
-            ViewData["ContactMethodID"] = new SelectList(_context.Set<ContactMethod>(), "ID", "ID");
-            return View();
-        }
-
-        // POST: CommunicationQueues/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,ContactMethodID,MessageData,Subject,MessageText,Attempts,ScheduledDate,NotificationRecipient,SysStartTime,SysEndTime,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] CommunicationQueue communicationQueue)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(communicationQueue);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["ContactMethodID"] = new SelectList(_context.Set<ContactMethod>(), "ID", "ID", communicationQueue.ContactMethodID);
-            return View(communicationQueue);
-        }
-
-        // GET: CommunicationQueues/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var communicationQueue = await _context.CommunicationQueue.FindAsync(id);
-            if (communicationQueue == null)
-            {
-                return NotFound();
-            }
-            ViewData["ContactMethodID"] = new SelectList(_context.Set<ContactMethod>(), "ID", "ID", communicationQueue.ContactMethodID);
-            return View(communicationQueue);
-        }
-
-        // POST: CommunicationQueues/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,ContactMethodID,MessageData,Subject,MessageText,Attempts,ScheduledDate,NotificationRecipient,SysStartTime,SysEndTime,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] CommunicationQueue communicationQueue)
-        {
-            if (id != communicationQueue.ID)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(communicationQueue);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CommunicationQueueExists(communicationQueue.ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["ContactMethodID"] = new SelectList(_context.Set<ContactMethod>(), "ID", "ID", communicationQueue.ContactMethodID);
-            return View(communicationQueue);
-        }
+      
 
         // GET: CommunicationQueues/Delete/5
         public async Task<IActionResult> Delete(int? id)

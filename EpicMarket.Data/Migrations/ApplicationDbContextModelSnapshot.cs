@@ -34,7 +34,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("StatusOptionSetsId");
 
-                    b.ToTable("CatalogStatusOptionSet");
+                    b.ToTable("CatalogStatusOptionSet", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.ApplicationModels.AccessControlList", b =>
@@ -62,7 +62,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("SecurableID");
 
-                    b.ToTable("AccessControlLists");
+                    b.ToTable("AccessControlLists", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.ApplicationModels.AccessType", b =>
@@ -81,7 +81,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AccessTypes");
+                    b.ToTable("AccessTypes", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.ApplicationModels.ApplicationConfiguration", b =>
@@ -115,7 +115,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("ApplicationConfigurations");
+                    b.ToTable("ApplicationConfigurations", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.ApplicationModels.ApplicationSecurables", b =>
@@ -146,7 +146,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ApplicationSecurables");
+                    b.ToTable("ApplicationSecurables", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Address", b =>
@@ -195,7 +195,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Addresses");
+                    b.ToTable("Addresses", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.AppRole", b =>
@@ -373,7 +373,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("BlogCategoryID");
 
-                    b.ToTable("Blogs");
+                    b.ToTable("Blogs", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.BlogCategory", b =>
@@ -404,7 +404,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("BlogCategory");
+                    b.ToTable("BlogCategory", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Business", b =>
@@ -479,7 +479,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Businesses");
+                    b.ToTable("Businesses", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.BusinessCategoryInternal", b =>
@@ -513,7 +513,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("BusinessCategories");
+                    b.ToTable("BusinessCategories", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.BusinessEmployeeMap", b =>
@@ -536,7 +536,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("EmployeeID");
 
-                    b.ToTable("BusinessEmployeeMaps");
+                    b.ToTable("BusinessEmployeeMaps", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Catalog", b =>
@@ -608,7 +608,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("BusinessID");
 
-                    b.ToTable("Catalogs");
+                    b.ToTable("Catalogs", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Comment", b =>
@@ -643,7 +643,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Comments");
+                    b.ToTable("Comments", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.CommunicationQueue", b =>
@@ -700,7 +700,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("ContactMethodID");
 
-                    b.ToTable("CommunicationQueue");
+                    b.ToTable("CommunicationQueue", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.ContactMethod", b =>
@@ -733,7 +733,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("ContactMethod");
+                    b.ToTable("ContactMethod", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Entity", b =>
@@ -766,7 +766,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Entity");
+                    b.ToTable("Entity", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Event", b =>
@@ -807,7 +807,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("EventCategoryID");
 
-                    b.ToTable("Event");
+                    b.ToTable("Event", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.EventCategory", b =>
@@ -830,7 +830,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("EventCategory");
+                    b.ToTable("EventCategory", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.EventLog", b =>
@@ -880,7 +880,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("EventID");
 
-                    b.ToTable("EventLog");
+                    b.ToTable("EventLog", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.FAQ", b =>
@@ -916,7 +916,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("FAQs");
+                    b.ToTable("FAQs", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.FAQCategory", b =>
@@ -947,7 +947,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("FAQCategories");
+                    b.ToTable("FAQCategories", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Order", b =>
@@ -1009,7 +1009,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.OrderDetail", b =>
@@ -1053,7 +1053,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("OrderID");
 
-                    b.ToTable("OrderDetails");
+                    b.ToTable("OrderDetails", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.OrderStatusOptions", b =>
@@ -1069,7 +1069,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("OrderStatusOptions");
+                    b.ToTable("OrderStatusOptions", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.OrderTypesOptions", b =>
@@ -1085,7 +1085,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("OrderTypesOptions");
+                    b.ToTable("OrderTypesOptions", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Outlet", b =>
@@ -1147,7 +1147,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("BussinessID");
 
-                    b.ToTable("Outlets");
+                    b.ToTable("Outlets", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.OutletPerson", b =>
@@ -1170,7 +1170,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("PersonId");
 
-                    b.ToTable("OutletPeople");
+                    b.ToTable("OutletPeople", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.OutletProduct", b =>
@@ -1193,7 +1193,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("ProductID");
 
-                    b.ToTable("OutletProducts");
+                    b.ToTable("OutletProducts", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.ProductInternal", b =>
@@ -1218,7 +1218,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("ProductInternals");
+                    b.ToTable("ProductInternals", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.StatusOptionSet", b =>
@@ -1237,7 +1237,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("StatusOptionSets");
+                    b.ToTable("StatusOptionSets", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.SupportTicket", b =>
@@ -1266,7 +1266,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("TicketTypeID");
 
-                    b.ToTable("SupportTickets");
+                    b.ToTable("SupportTickets", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.SupportTicketType", b =>
@@ -1285,7 +1285,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("SupportTicketTypes");
+                    b.ToTable("SupportTicketTypes", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.TaskStatusType", b =>
@@ -1316,7 +1316,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TaskStatusTypes");
+                    b.ToTable("TaskStatusTypes", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.TaskType", b =>
@@ -1361,7 +1361,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("TaskCategoryID");
 
-                    b.ToTable("TaskTypes");
+                    b.ToTable("TaskTypes", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Tasks", b =>
@@ -1436,7 +1436,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("TaskTypeID");
 
-                    b.ToTable("Tasks");
+                    b.ToTable("Tasks", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.UserAddress", b =>
@@ -1459,7 +1459,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserAddresses");
+                    b.ToTable("UserAddresses", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -1562,7 +1562,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("StatusOptionSetsId");
 
-                    b.ToTable("OutletStatusOptionSet");
+                    b.ToTable("OutletStatusOptionSet", (string)null);
                 });
 
             modelBuilder.Entity("CatalogStatusOptionSet", b =>

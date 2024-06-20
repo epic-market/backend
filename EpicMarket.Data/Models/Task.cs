@@ -16,32 +16,32 @@ namespace EpicMarket.Data.Models
         public int ID { get; set; }
 
         [MaxLength(200)]
-        public string Name { get; set; }
+        public string Name { get; set; } //grivarance
 
-        public string Description { get; set; }
+        public string Description { get; set; }//comment
 
-        public int? TaskTypeID { get; set; }
+        public int? TaskTypeID { get; set; } // support , verification , help , onboarding 
         public int? ParentID { get; set; }
-        public int? TaskStatusID { get; set; }
+        public int? TaskStatusID { get; set; } //default  new
 
-        public int? TaskPriorityID { get; set; }
+        public int? TaskPriorityID { get; set; } // default 1
 
-        public int? PrimaryAssignedToPersonID { get; set; }
+        public int? PrimaryAssignedToPersonID { get; set; } // default admin@epicmarket.in
 
-        public DateTime? DateAssigned { get; set; }
+        public DateTime? DateAssigned { get; set; } //which date
 
-        public DateTime? DateDue { get; set; }
+        public DateTime? DateDue { get; set; } //get date form the tasktype and add the days to current date
 
-        public DateTime? DateStarted { get; set; }
+        public DateTime? DateStarted { get; set; } //null
 
-        public DateTime? DateCompleted { get; set; }
+        public DateTime? DateCompleted { get; set; }// null
 
-        public int? SubmittedByPersonID { get; set; }
+        public int? SubmittedByPersonID { get; set; }// null
 
-        public DateTime? EffectiveDate { get; set; }
+        public DateTime? EffectiveDate { get; set; }// null remove this
 
-        public string TaskData { get; set; }
-        public DateTime? ReceivedDate { get; set; }
+        public string TaskData { get; set; } // null
+        public DateTime? ReceivedDate { get; set; } //todaty
         [ForeignKey("TaskTypeID")]
         public virtual TaskType TaskTypes { get; set; }
         [ForeignKey("TaskStatusID")]
