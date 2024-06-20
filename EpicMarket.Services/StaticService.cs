@@ -41,5 +41,9 @@ namespace EpicMarket.Services
         {
             return _context.BlogCategory.Select(c => new DropDownOptions { Text = c.Name, Value = c.Id }).ToListAsync();
         }
+        public Task<List<DropDownOptions>> GetAllSupportCategorys()
+        {
+            return _context.TaskTypes.Select(c => new DropDownOptions { Text = c.Name, Value = c.ID }).ToListAsync();
+        }
     }
 }

@@ -211,6 +211,19 @@ namespace EpicMarket.Data.Common
                     await context.Entity.AddAsync(tickettype);
                 }
             }
+            if (!await context.TaskTypes.AnyAsync())
+            {
+                var entities = new List<TaskType>
+                {
+                 new TaskType { Name = "Grievance" ,Description="Grievance"},
+                 new TaskType { Name = "Issues" ,Description="Issues"},
+                 new TaskType { Name = "Support" ,Description="Support" }
+                };
+                foreach (var tickettype in entities)
+                {
+                    await context.TaskTypes.AddAsync(tickettype);
+                }
+            }
             await context.SaveChangesAsync();
 
         }
