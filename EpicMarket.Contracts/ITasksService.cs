@@ -11,9 +11,9 @@ namespace EpicMarket.Contracts
     
     public interface ITasksService
     {
-        Task<long> SaveTask(TasksDTO tasksDTO);
+        long SaveTask(TasksDTO tasksDTO);
 
-        Task<int> SaveComments(CommentDTO commentDTO);
+        int SaveComments(CommentDTO commentDTO);
         Task<GetDataResult<List<CommentDTO>>> GetAllComments( int taskId); 
         Task<GetDataResult<List<TasksDTO>>> GetSupportByPersonId( int personId);
         Task<TasksDTO> GettaskDetails(int taskId);

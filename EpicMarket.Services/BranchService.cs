@@ -28,7 +28,7 @@ namespace EpicMarket.Services
             this.eventLogService = eventLogService;
         }
 
-        public async Task<int> AddOrUpdateBranch(BranchDto branchDto,  string UserName, int BusinessID)
+        public int AddOrUpdateBranch(BranchDto branchDto,  string UserName, int BusinessID, string PageSource)
         {
             var addressModel = new AddressDto();
             var events="";
@@ -51,7 +51,7 @@ namespace EpicMarket.Services
             }
            
             
-            int addressId = await addressService.AddAddress(addressModel); 
+            int addressId =  addressService.AddAddress(addressModel); 
 
             var outletModel = new Outlet();
             outletModel.AddressID = addressId;
@@ -78,8 +78,8 @@ namespace EpicMarket.Services
                 _context.Outlets.Add(outletModel);
             }
       
-            await _context.SaveChangesAsync();
-            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = outletModel.ID, Data = null, Description = null, EventName = events, EntityName = EntityConstants.Branch });
+             _context.SaveChanges();
+            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = outletModel.ID, Data = null, Description = null, EventName = events, EntityName = EntityConstants.Branch,Source=PageSource });
 
             return outletModel.ID;
         }

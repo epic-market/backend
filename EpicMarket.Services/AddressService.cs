@@ -21,7 +21,7 @@ namespace EpicMarket.Services
             this.mapper = mapper;
         }
 
-        public async Task<int> AddAddress(AddressDto addressDto)
+        public int AddAddress(AddressDto addressDto)
         {
             var addressModel = mapper.Map<Address>(addressDto);
             if (addressDto.ID != null)
@@ -33,7 +33,7 @@ namespace EpicMarket.Services
                 _context.Addresses.Add(addressModel);
             }
             
-             await _context.SaveChangesAsync();
+             _context.SaveChanges();
             return addressModel.Id;
             
         }

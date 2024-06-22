@@ -26,14 +26,14 @@ namespace EpicMarket.Business.API.Controllers
        
         [HttpPost("AddOrder")]
         [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
-        public async Task<ActionResult<OperationResult<int>>> AddOrder(OrdersDto ordersDto)
+        public ActionResult<OperationResult<int>> AddOrder(OrdersDto ordersDto)
         {
             var response = new OperationResult<int>();
 
 
 			this.logger.LogInformation("Orders Controller -> AddOrder()-> params {0}", JsonConvert.SerializeObject(new { Params = ordersDto }));
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-            var id = orderService.CreateOrder(ordersDto , UserName);
+            var id = orderService.CreateOrder(ordersDto , UserName,this.PageSource);
 
             this.logger.LogInformation("Orders Controller -> AddOrder()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
 

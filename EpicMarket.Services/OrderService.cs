@@ -39,7 +39,7 @@ namespace EpicMarket.Services
 
 
 
-        public  int CreateOrder(OrdersDto orderdto,string UserName)
+        public  int CreateOrder(OrdersDto orderdto,string UserName, string PageSource)
         {   
             var User = new AppUser();
             var totalItems = 0;
@@ -78,7 +78,7 @@ namespace EpicMarket.Services
             listoforderDetails.ForEach(od => od.OrderID = newOrder.ID);
             _context.OrderDetails.AddRange(listoforderDetails);
             _context.SaveChanges();
-            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = newOrder.ID, Data = null, Description = null, EventName = EventConstants.AddOrder, EntityName = EntityConstants.Order });
+            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = newOrder.ID, Data = null, Description = null, EventName = EventConstants.AddOrder, EntityName = EntityConstants.Order,Source=PageSource });
 
             return newOrder.ID;
         }

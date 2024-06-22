@@ -157,7 +157,7 @@ namespace EpicMarket.Services
                     Pincode = employee.Pincode,
                 };
 
-                var addressId = await addressService.AddAddress(address);
+                var addressId =  addressService.AddAddress(address);
 
 
                 User.FirstName = employee.FirstName;
