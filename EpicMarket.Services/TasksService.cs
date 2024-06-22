@@ -23,7 +23,7 @@ namespace EpicMarket.Services
             _context = context;
             this.mapper = mapper;
         }
-        public async Task<long> SaveTask(TasksDTO tasksDTO)
+        public long SaveTask(TasksDTO tasksDTO)
         {
             var currentTask = _context.Tasks.Where(row => row.ID == tasksDTO.ID).FirstOrDefault();
             var newTaskStatus = _context.TaskStatusTypes.Where(row => row.Status == "New").FirstOrDefault();
@@ -51,7 +51,7 @@ namespace EpicMarket.Services
                     CreateBy = tasksDTO.CreateBy
                 };
                 _context.Tasks.Add(taskToSave);
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
                 currentTask.ID = taskToSave.ID;
             }
             else
@@ -71,13 +71,13 @@ namespace EpicMarket.Services
                     ModifiedBy = tasksDTO.ModifiedBy
                 };
                 _context.Tasks.Update(taskToSave);
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
 
             }
             return (long)currentTask.ID;
         }
 
-        public async Task<int> SaveComments(CommentDTO commentDTO)
+        public int SaveComments(CommentDTO commentDTO)
         {
             Comment commentSave;
             commentSave = new Comment
@@ -89,7 +89,7 @@ namespace EpicMarket.Services
                 CreateBy = commentDTO.CreateBy
             };
             _context.Comments.Add(commentSave);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
             return commentSave.ID;
         }
 

@@ -53,7 +53,7 @@ namespace EpicMarket.Business.API.Controllers
 			this.logger.LogInformation("Products Controller -> AddProduct()-> params {0}", JsonConvert.SerializeObject(new { Params = productsDto }));
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
 
-            response.Data  = productService.AddOrUpdateProduct(productsDto, UserName,this.BusinessId);
+            response.Data  = productService.AddOrUpdateProduct(productsDto, UserName,this.BusinessId,this.PageSource);
 
             this.logger.LogInformation("Products Controller -> AddProduct()-> return {0}", JsonConvert.SerializeObject(new { Results = response }));
 

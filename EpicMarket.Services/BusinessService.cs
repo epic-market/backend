@@ -25,7 +25,7 @@ namespace EpicMarket.Services
             this.addressService = addressService;
             this.eventLogService = eventLogService;
         }
-        public async Task<int> RegisterBusiness(BusinessRegisterDto businessRegisterDto, string UserName , int userid)
+        public async Task<int> RegisterBusiness(BusinessRegisterDto businessRegisterDto, string UserName , int userid, string PageSource)
         {
           
             var addressModel = new AddressDto();
@@ -37,7 +37,7 @@ namespace EpicMarket.Services
             addressModel.Longitude = businessRegisterDto.Longitude;
             addressModel.CreateBy = UserName;
             addressModel.CreateDate = DateTime.Now;
-            int addressId = await addressService.AddAddress(addressModel);
+            int addressId = addressService.AddAddress(addressModel);
 
             var businessModel = new Business();
             businessModel.AddressID = addressId;
@@ -53,7 +53,7 @@ namespace EpicMarket.Services
             businessModel.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == Business_Status.BUSINESS_UNVERIFIED).Id;
             _context.Businesses.Add(businessModel);
             await _context.SaveChangesAsync();
-            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = businessModel.ID, Data = null, Description = null, EventName = EventConstants.AddBusiness, EntityName = EntityConstants.Business });
+            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = businessModel.ID, Data = null, Description = null, EventName = EventConstants.AddBusiness, EntityName = EntityConstants.Business ,Source=PageSource});
             return businessModel.ID;
         }
     }

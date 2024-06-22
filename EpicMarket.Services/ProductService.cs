@@ -30,7 +30,7 @@ namespace EpicMarket.Services
             this.eventLogService = eventLogService;
         }
 
-        public int AddOrUpdateProduct(ProductsDto productsDto, string UserName, int businessID)
+        public int AddOrUpdateProduct(ProductsDto productsDto, string UserName, int businessID, string PageSource)
         {
             var product = mapper.Map<Catalog>(productsDto);
             var events = "";
@@ -51,7 +51,7 @@ namespace EpicMarket.Services
                 _context.Catalogs.Update(product);
             }
             _context.SaveChanges();
-            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = product.ID, Data = null, Description = null, EventName = events, EntityName = EntityConstants.Catelog });
+            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = product.ID, Data = null, Description = null, EventName = events, EntityName = EntityConstants.Catelog,Source=PageSource });
 
             return product.ID;
         }

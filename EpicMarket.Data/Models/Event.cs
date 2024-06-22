@@ -15,6 +15,7 @@ namespace EpicMarket.Data.Models
         public int ID { get; set; }
 
         [Required]
+        [ForeignKey("EventCategorys")]
         public int EventCategoryID { get; set; }
 
         [MaxLength(50)]
@@ -24,7 +25,7 @@ namespace EpicMarket.Data.Models
         public string Description { get; set; }
 
         public int? PriorityID { get; set; }
-
+        
         public virtual EventCategory EventCategorys { get; set; }
 
         public virtual ICollection<EventLog>? EventLogs { get; set; }

@@ -62,19 +62,14 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpPost("AddOrUpdateBranch")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
-		public async Task<ActionResult<OperationResult<int>>> AddBranch(BranchDto branchDto)
+		public ActionResult<OperationResult<int>> AddBranch(BranchDto branchDto)
         {
             var response = new OperationResult<int>();
-
 			this.logger.LogInformation("Branch Controller -> AddBranch()-> params {0}", JsonConvert.SerializeObject(new { Params = branchDto }));
-
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-
-            var id = await branchService.AddOrUpdateBranch(branchDto, UserName, this.BusinessId);
+            var id =  branchService.AddOrUpdateBranch(branchDto, UserName, this.BusinessId,this.PageSource);
             this.logger.LogInformation("Branch Controller -> AddBranch()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
-
             response.Data = id;
-
 			return Ok(response);
         }
 
