@@ -9,7 +9,7 @@ using EpicMarket.Data.Common;
 
 namespace EpicMarket.Data.Models
 {
-    public class Tasks: BaseModel
+    public class Tasks : BaseModel
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -25,6 +25,8 @@ namespace EpicMarket.Data.Models
         public int? TaskStatusID { get; set; } //default  new
 
         public int? TaskPriorityID { get; set; } // default 1
+        [ForeignKey("Entity")]
+        public int? TaskEntityID { get; set; }
 
         public int? PrimaryAssignedToPersonID { get; set; } // default admin@epicmarket.in
 
@@ -38,14 +40,13 @@ namespace EpicMarket.Data.Models
 
         public int? SubmittedByPersonID { get; set; }// null
 
-        public DateTime? EffectiveDate { get; set; }// null remove this
-
         public string TaskData { get; set; } // null
         public DateTime? ReceivedDate { get; set; } //todaty
         [ForeignKey("TaskTypeID")]
         public virtual TaskType TaskTypes { get; set; }
         [ForeignKey("TaskStatusID")]
         public virtual TaskStatusType TaskStatusType { get; set; }
+        public virtual Entity Entity { get; set; }
 
     }
 }

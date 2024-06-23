@@ -37,9 +37,9 @@ namespace EpicMarket.Business.API.Controllers
 			this.logger.LogInformation("Business Controller -> Register()-> params {0}", JsonConvert.SerializeObject(new { Params = businessRegisterDto }));
             var UserID = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value) ;
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-            var id = await businessService.RegisterBusiness(businessRegisterDto, UserName , UserID,this.PageSource);
+            var id =  businessService.RegisterBusiness(businessRegisterDto, UserName , UserID,this.PageSource);
 
-            var appuser = await userManager.Users.Where(c=>c.Id == UserID).FirstOrDefaultAsync();
+            var appuser =  userManager.Users.Where(c=>c.Id == UserID).FirstOrDefault();
 
 			await userManager.AddToRoleAsync(appuser, ROLES.BUSINESS_OWNER);
 
