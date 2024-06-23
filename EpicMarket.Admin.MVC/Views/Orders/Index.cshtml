@@ -28,7 +28,7 @@
                 <thead>
                     <tr>
                         <th>
-                          @*   @Html.DisplayNameFor(model => model.OrderType) *@
+                            @Html.DisplayNameFor(model => model.OrderTypeId)
                         </th>
                         <th>
                             @Html.DisplayNameFor(model => model.TotalPrice)
@@ -40,7 +40,7 @@
                             @Html.DisplayNameFor(model => model.OrderAt)
                         </th>
                         <th>
-                            @* @Html.DisplayNameFor(model => model.Status) *@
+                            @Html.DisplayNameFor(model => model.StatusId)
                         </th>
                         <th>
                             @Html.DisplayNameFor(model => model.PaymentMode)
@@ -62,7 +62,7 @@
                     {
                         <tr>
                             <td>
-                           @*      @Html.DisplayFor(modelItem => item.OrderType) *@
+                                @Html.DisplayFor(modelItem => item.OrderTypesOptions.Ordertype)
                             </td>
                             <td>
                                 @Html.DisplayFor(modelItem => item.TotalPrice)
@@ -74,7 +74,7 @@
                                 @Html.DisplayFor(modelItem => item.OrderAt)
                             </td>
                             <td>
-                               @*  @Html.DisplayFor(modelItem => item.Status) *@
+                                @Html.DisplayFor(modelItem => item.OrderStatusOptions.OrderStatus)
                             </td>
                             <td>
                                 @Html.DisplayFor(modelItem => item.PaymentMode)

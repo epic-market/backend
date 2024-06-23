@@ -32,7 +32,7 @@
 					<div>@Html.DisplayFor(model => model.Outlet.ReviewCount) @Html.DisplayNameFor(model => model.Outlet.ReviewCount)</div>
 					<div>@Html.DisplayFor(model => model.Outlet.IsOpen) @Html.DisplayNameFor(model => model.Outlet.IsOpen)</div>
 					<div>@Html.DisplayFor(model => model.Outlet.Weight) @Html.DisplayNameFor(model => model.Outlet.Weight)</div>
-					@* <div class="text-success"> @Html.DisplayFor(model => model.Outlet.Status)</div> *@
+					<div class="text-success"> @Html.DisplayFor(model => model.Outlet.StatusOptionSets.Status)</div>
 				</div>
 				<p class="card-text fs-6"> @Html.DisplayFor(model => model.Outlet.Description) </p>
 				<div class="row">

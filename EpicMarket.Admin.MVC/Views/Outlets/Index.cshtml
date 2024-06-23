@@ -49,7 +49,7 @@
                             @Html.DisplayNameFor(model => model.Weight)
                         </th>
                         <th>
-                           @*  @Html.DisplayNameFor(model => model.Status) *@
+                            @Html.DisplayNameFor(model => model.StatusOptionSets)
                         </th>
                         <th>
                             @Html.DisplayNameFor(model => model.Bussiness.Name)
@@ -86,7 +86,7 @@
                                 @Html.DisplayFor(modelItem => item.Weight)
                             </td>
                             <td>
-                           @*      @Html.DisplayFor(modelItem => item.Status) *@
+                                @Html.DisplayFor(modelItem => item.StatusOptionSets.Status)
                             </td>
                             <td>
                                 @Html.DisplayFor(modelItem => item.Bussiness.Name)

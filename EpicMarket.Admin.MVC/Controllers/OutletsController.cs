@@ -26,7 +26,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: Outlets
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Outlets.Include(o => o.Address).Include(o => o.Bussiness);
+            var applicationDbContext = _context.Outlets.Include(o => o.Address).Include(o => o.Bussiness).Include(o => o.StatusOptionSets);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -44,6 +44,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             var outlet = await _context.Outlets
                 .Include(o => o.Address)
                 .Include(o => o.Bussiness)
+                .Include(o=> o.StatusOptionSets)
                 .FirstOrDefaultAsync(m => m.ID == id);
 
             var orders = await _context.Orders.Where(c => c.OutletID == id).Include(o => o.Address).ToListAsync();
@@ -68,6 +69,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         {
             ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id");
             ViewData["BussinessID"] = new SelectList(_context.Businesses, "ID", "ID");
+            ViewData["StatusId"] = new SelectList(_context.StatusOptionSets, "Id", "Status");
             return View();
         }
 
@@ -76,7 +78,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,BussinessID,AddressID,Name,Description,ContactNumber,ContactEmail,Rating,ReviewCount,IsOpen,Weight,Status,CreateDate,CreateBy,ModifiedDate,ModifiedBy,Address")] Outlet outlet)
+        public async Task<IActionResult> Create([Bind("ID,BussinessID,AddressID,Name,Description,ContactNumber,ContactEmail,Rating,ReviewCount,IsOpen,Weight,StatusId,CreateDate,CreateBy,ModifiedDate,ModifiedBy,Address")] Outlet outlet)
         {
 
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -94,6 +96,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
             ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", outlet.AddressID);
             ViewData["BussinessID"] = new SelectList(_context.Businesses, "ID", "ID", outlet.BussinessID);
+            ViewData["StatusId"] = new SelectList(_context.StatusOptionSets, "Id", "Status",outlet.StatusId);
             return View(outlet);
         }
 
@@ -106,13 +109,14 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var outlet = await _context.Outlets.Where(b => b.ID == id).Include(c => c.Address).FirstOrDefaultAsync();
+            var outlet = await _context.Outlets.Where(b => b.ID == id).Include(c => c.Address).Include(c => c.StatusOptionSets).FirstOrDefaultAsync();
             if (outlet == null)
             {
                 return NotFound();
             }
             ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", outlet.AddressID);
             ViewData["BussinessID"] = new SelectList(_context.Businesses, "ID", "ID", outlet.BussinessID);
+            ViewData["StatusId"] = new SelectList(_context.StatusOptionSets, "Id", "Status", outlet.StatusId);
             return View(outlet);
         }
 
@@ -121,7 +125,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,BussinessID,AddressID,Name,Description,ContactNumber,ContactEmail,Rating,ReviewCount,IsOpen,Weight,Status,CreateDate,CreateBy,ModifiedDate,ModifiedBy,Address")] Outlet outlet)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,BussinessID,AddressID,Name,Description,ContactNumber,ContactEmail,Rating,ReviewCount,IsOpen,Weight,StatusId,CreateDate,CreateBy,ModifiedDate,ModifiedBy,Address")] Outlet outlet)
         {
 
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -160,6 +164,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
             ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", outlet.AddressID);
             ViewData["BussinessID"] = new SelectList(_context.Businesses, "ID", "ID", outlet.BussinessID);
+            ViewData["StatusId"] = new SelectList(_context.StatusOptionSets, "Id", "Status", outlet.StatusId);
             return View(outlet);
         }
 

@@ -9,7 +9,8 @@ namespace EpicMarket.Entities.CustomModels
 
 	public static class Constants
     {
-       
+
+        public const string ADMIN_USERID = "admin@epicmarket.in";
     }
 
 	public static class Business_Status

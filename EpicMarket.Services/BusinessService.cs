@@ -54,6 +54,12 @@ namespace EpicMarket.Services
             _context.Businesses.Add(businessModel);
             await _context.SaveChangesAsync();
             this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = businessModel.ID, Data = null, Description = null, EventName = EventConstants.AddBusiness, EntityName = EntityConstants.Business ,Source=PageSource});
+            
+
+            //
+            //create task for person admin@epicmarket.in
+
+
             return businessModel.ID;
         }
     }
