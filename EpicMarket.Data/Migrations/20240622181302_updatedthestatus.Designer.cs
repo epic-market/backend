@@ -4,6 +4,7 @@ using EpicMarket.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EpicMarket.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240622181302_updatedthestatus")]
+    partial class updatedthestatus
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1418,6 +1421,9 @@ namespace EpicMarket.Data.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("EffectiveDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
@@ -1443,9 +1449,6 @@ namespace EpicMarket.Data.Migrations
                     b.Property<string>("TaskData")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("TaskEntityID")
-                        .HasColumnType("int");
-
                     b.Property<int?>("TaskPriorityID")
                         .HasColumnType("int");
 
@@ -1456,8 +1459,6 @@ namespace EpicMarket.Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("ID");
-
-                    b.HasIndex("TaskEntityID");
 
                     b.HasIndex("TaskStatusID");
 
@@ -1917,10 +1918,6 @@ namespace EpicMarket.Data.Migrations
 
             modelBuilder.Entity("EpicMarket.Data.Models.Tasks", b =>
                 {
-                    b.HasOne("EpicMarket.Data.Models.Entity", "Entity")
-                        .WithMany("Taskss")
-                        .HasForeignKey("TaskEntityID");
-
                     b.HasOne("EpicMarket.Data.Models.TaskStatusType", "TaskStatusType")
                         .WithMany("Tasks")
                         .HasForeignKey("TaskStatusID");
@@ -1928,8 +1925,6 @@ namespace EpicMarket.Data.Migrations
                     b.HasOne("EpicMarket.Data.Models.TaskType", "TaskTypes")
                         .WithMany("Tasks")
                         .HasForeignKey("TaskTypeID");
-
-                    b.Navigation("Entity");
 
                     b.Navigation("TaskStatusType");
 
@@ -2066,8 +2061,6 @@ namespace EpicMarket.Data.Migrations
             modelBuilder.Entity("EpicMarket.Data.Models.Entity", b =>
                 {
                     b.Navigation("EventLogs");
-
-                    b.Navigation("Taskss");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Event", b =>

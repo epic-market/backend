@@ -16,7 +16,7 @@ namespace EpicMarket.Data.Models
         public int ID { get; set; }
 
         [MaxLength(200)]
-        public string Name { get; set; } //grivarance
+        public string Name { get; set; } //grivarance 
 
         public string Description { get; set; }//comment
 
@@ -38,9 +38,11 @@ namespace EpicMarket.Data.Models
 
         public DateTime? DateCompleted { get; set; }// null
 
-        public int? SubmittedByPersonID { get; set; }// null
+        public int? SubmittedByPersonID { get; set; }// null in case support //but in case the business registration add the person id of the business user
 
         public string TaskData { get; set; } // null
+
+        //add the column entityid
         public DateTime? ReceivedDate { get; set; } //todaty
         [ForeignKey("TaskTypeID")]
         public virtual TaskType TaskTypes { get; set; }

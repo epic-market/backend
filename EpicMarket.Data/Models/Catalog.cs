@@ -25,12 +25,14 @@ namespace EpicMarket.Data.Models
         public double? Rating { get; set; }
         public int? ReviewCount { get; set; }
         public int? OrderCount { get; set; }
+        
+        [ForeignKey("StatusOptionSets")]
         public int StatusId { get; set; }
 
         // Navigation property
         public virtual Business Business { get; set; }
-        [ForeignKey("StatusId")]
-        public virtual ICollection<StatusOptionSet> StatusOptionSets { get; set; }
+
+        public virtual StatusOptionSet StatusOptionSets { get; set; }
 
         public virtual ICollection<OutletProduct> OutletProducts { get; set; }
     }
