@@ -20,8 +20,8 @@ namespace EpicMarket.Business.API.Controllers
 		private readonly UserManager<AppUser> userManager;
 		private readonly IBusinessService businessService;
 
-        public BusinessController(ILogger<BusinessController> logger , UserManager<AppUser> _userManager, IBusinessService businessService, ApplicationDbContext dbContext) : base(dbContext)
-		{
+        public BusinessController(ILogger<BusinessController> logger , UserManager<AppUser> _userManager, IBusinessService businessService, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
+        {
             this.logger = logger;
 			userManager = _userManager;
 			this.businessService = businessService;

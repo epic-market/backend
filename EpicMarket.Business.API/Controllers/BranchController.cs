@@ -16,12 +16,13 @@ namespace EpicMarket.Business.API.Controllers
     {
         private readonly ILogger<BranchController> logger;
         private readonly IBranchService branchService;
+        private readonly IHttpContextAccessor httpContextAccessor;
 
-        public BranchController(ILogger<BranchController> logger, IBranchService branchService, ApplicationDbContext dbContext) : base(dbContext)
+        public BranchController(ILogger<BranchController> logger, IBranchService branchService, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
 		{
             this.logger = logger;
             this.branchService = branchService;
-       
+            this.httpContextAccessor = httpContextAccessor;
         }
 
         [HttpGet("GetAllBranches")]

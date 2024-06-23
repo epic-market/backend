@@ -22,17 +22,12 @@ namespace EpicMarket.Business.API.Controllers
 		private readonly IHttpContextAccessor httpContextAccessor;
 		protected readonly ApplicationDbContext dbContext;
 
-		public BaseApiController(IHttpContextAccessor httpContextAccessor,
-			ApplicationDbContext dbContext)
+		public BaseApiController(ApplicationDbContext dbContext,IHttpContextAccessor httpContextAccessor
+			)
         {
 			this.httpContextAccessor = httpContextAccessor;
 			this.dbContext = dbContext;
         }
-
-		public BaseApiController(ApplicationDbContext dbContext)
-		{
-			this.dbContext = dbContext;
-		}
 
 		public int BusinessId
         {

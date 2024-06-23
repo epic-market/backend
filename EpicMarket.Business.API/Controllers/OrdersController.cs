@@ -17,7 +17,7 @@ namespace EpicMarket.Business.API.Controllers
         private readonly ILogger<OrdersController> logger;
         private readonly IOrderService orderService;
 
-        public OrdersController(ILogger<OrdersController> logger, IOrderService orderService,ApplicationDbContext dbContext):base(dbContext)
+        public OrdersController(ILogger<OrdersController> logger, IOrderService orderService, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
         {
             this.logger = logger;
             this.orderService = orderService;
