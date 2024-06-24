@@ -110,12 +110,10 @@
                         </div>
 
                         <div class="row mb-3">
-                            <label class="col-sm-3 col-form-label"></label>
+                            <label asp-for="StatusId" class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
-                                @* <div class="form-check">
-                                    <input class="form-check-input" asp-for="Status" />
-                                    <label class="form-check-label" for="gridCheck4">@Html.DisplayNameFor(model => model.Status)</label>
-                                </div> *@
+                                <select class="single-select" asp-for="StatusId" asp-items="ViewBag.StatusId"></select>
+                                <span asp-validation-for="StatusId" class="text-danger"></span>
                             </div>
                         </div>
                         <div class="row">
@@ -135,5 +133,6 @@
 </div>
 
 @section Scripts {
+
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

@@ -19,8 +19,8 @@ namespace EpicMarket.Business.API.Controllers
         private readonly IProductService productService;
         private readonly IBranchService branchService;
 
-        public ProductsController(ILogger<ProductsController> logger, IProductService productService, ApplicationDbContext dbContext) : base(dbContext)
-		{
+        public ProductsController(ILogger<ProductsController> logger, IProductService productService, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
+        {
             this.logger = logger;
             this.productService = productService;
         }

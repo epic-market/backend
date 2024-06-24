@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace EpicMarket.Services
 {
@@ -25,7 +26,7 @@ namespace EpicMarket.Services
             this.addressService = addressService;
             this.eventLogService = eventLogService;
         }
-        public async Task<int> RegisterBusiness(BusinessRegisterDto businessRegisterDto, string UserName , int userid, string PageSource)
+        public int RegisterBusiness(BusinessRegisterDto businessRegisterDto, string UserName , int userid, string PageSource)
         {
           
             var addressModel = new AddressDto();
@@ -52,7 +53,7 @@ namespace EpicMarket.Services
             businessModel.CreateDate = DateTime.Now;
             businessModel.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == Business_Status.BUSINESS_UNVERIFIED).Id;
             _context.Businesses.Add(businessModel);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
             this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = businessModel.ID, Data = null, Description = null, EventName = EventConstants.AddBusiness, EntityName = EntityConstants.Business ,Source=PageSource});
             return businessModel.ID;
         }

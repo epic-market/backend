@@ -17,7 +17,7 @@ namespace EpicMarket.Business.API.Controllers
         private readonly IBusinessService businessService;
         private readonly IHomeService homeService;
 
-        public HomeController(ILogger<HomeController> logger, IBusinessService businessService, IHomeService homeService, ApplicationDbContext dbContext) : base(dbContext)
+        public HomeController(ILogger<HomeController> logger, IBusinessService businessService, IHomeService homeService, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
 		{
             this.logger = logger;
             this.businessService = businessService;

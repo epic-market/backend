@@ -22,17 +22,12 @@ namespace EpicMarket.Business.API.Controllers
 		private readonly IHttpContextAccessor httpContextAccessor;
 		protected readonly ApplicationDbContext dbContext;
 
-		public BaseApiController(IHttpContextAccessor httpContextAccessor,
-			ApplicationDbContext dbContext)
+		public BaseApiController(ApplicationDbContext dbContext,IHttpContextAccessor httpContextAccessor
+			)
         {
 			this.httpContextAccessor = httpContextAccessor;
 			this.dbContext = dbContext;
         }
-
-		public BaseApiController(ApplicationDbContext dbContext)
-		{
-			this.dbContext = dbContext;
-		}
 
 		public int BusinessId
         {
@@ -71,8 +66,17 @@ namespace EpicMarket.Business.API.Controllers
 			}
 		}
 
+        protected int AdminPersonID
+        {
+            get
+            {
+               return dbContext.Users.FirstOrDefault(u => u.UserName == Constants.ADMIN_USERID).Id;
+            }
+        }
 
-		protected async Task<string> SaveFileGlobalAsync(IFormFile file, string entityName, IFileService fileStoreService, IApplicationConfigurationService applicationConfigurationService)
+
+
+        protected async Task<string> SaveFileGlobalAsync(IFormFile file, string entityName, IFileService fileStoreService, IApplicationConfigurationService applicationConfigurationService)
 		{
 			string filePath = " ";
 			if (file != null && file.Length > 0)

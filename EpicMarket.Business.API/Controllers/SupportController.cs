@@ -16,7 +16,7 @@ namespace EpicMarket.Business.API.Controllers
         private readonly ILogger<SupportController> logger;
         private readonly ITasksService tasksService;
 
-        public SupportController(ILogger<SupportController> logger, ITasksService tasksService, ApplicationDbContext dbContext) : base(dbContext)
+        public SupportController(ILogger<SupportController> logger, ITasksService tasksService, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
         {
             this.logger = logger;
             this.tasksService = tasksService;

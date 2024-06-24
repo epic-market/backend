@@ -18,7 +18,7 @@ namespace EpicMarket.Business.API.Controllers
         private readonly IBusinessService businessService;
         private readonly IStaticService staticService;
 
-        public StaticController(ILogger<StaticController> logger, IBusinessService businessService , IStaticService staticService, ApplicationDbContext dbContext) : base(dbContext)
+        public StaticController(ILogger<StaticController> logger, IBusinessService businessService , IStaticService staticService, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
 		{
             this.logger = logger;
             this.businessService = businessService;

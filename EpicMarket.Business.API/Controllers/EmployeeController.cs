@@ -19,7 +19,7 @@ namespace EpicMarket.Business.API.Controllers
         private readonly ILogger<EmployeeController> logger;
         private readonly IEmployeeService employeeService;
 
-        public EmployeeController(ILogger<EmployeeController> logger, IEmployeeService employeeService, ApplicationDbContext dbContext) : base(dbContext)
+        public EmployeeController(ILogger<EmployeeController> logger, IEmployeeService employeeService, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
 		{
             this.logger = logger;
             this.employeeService = employeeService;

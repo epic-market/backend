@@ -16,7 +16,7 @@ namespace EpicMarket.Business.API.Controllers
 		private readonly IFileService fileService;
 		private readonly IApplicationConfigurationService applicationConfigurationService;
 
-		public FilesController(IFileService fileService, ApplicationDbContext dbContext , IApplicationConfigurationService applicationConfigurationService) : base(dbContext)
+		public FilesController(IFileService fileService, ApplicationDbContext dbContext , IApplicationConfigurationService applicationConfigurationService, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
 		{
 			this.fileService = fileService;
 			this.applicationConfigurationService = applicationConfigurationService;

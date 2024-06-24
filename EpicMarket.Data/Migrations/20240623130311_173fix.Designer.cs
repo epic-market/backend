@@ -4,6 +4,7 @@ using EpicMarket.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EpicMarket.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240623130311_173fix")]
+    partial class _173fix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,21 @@ namespace EpicMarket.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("CatalogStatusOptionSet", b =>
+                {
+                    b.Property<int>("StatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StatusOptionSetsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("StatusId", "StatusOptionSetsId");
+
+                    b.HasIndex("StatusOptionSetsId");
+
+                    b.ToTable("CatalogStatusOptionSet");
+                });
 
             modelBuilder.Entity("EpicMarket.Data.ApplicationModels.AccessControlList", b =>
                 {
@@ -593,8 +611,6 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("BusinessID");
 
-                    b.HasIndex("StatusId");
-
                     b.ToTable("Catalogs");
                 });
 
@@ -1146,8 +1162,6 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("BussinessID");
 
-                    b.HasIndex("StatusId");
-
                     b.ToTable("Outlets");
                 });
 
@@ -1577,6 +1591,36 @@ namespace EpicMarket.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("OutletStatusOptionSet", b =>
+                {
+                    b.Property<int>("StatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StatusOptionSetsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("StatusId", "StatusOptionSetsId");
+
+                    b.HasIndex("StatusOptionSetsId");
+
+                    b.ToTable("OutletStatusOptionSet");
+                });
+
+            modelBuilder.Entity("CatalogStatusOptionSet", b =>
+                {
+                    b.HasOne("EpicMarket.Data.Models.Catalog", null)
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EpicMarket.Data.Models.StatusOptionSet", null)
+                        .WithMany()
+                        .HasForeignKey("StatusOptionSetsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("EpicMarket.Data.ApplicationModels.AccessControlList", b =>
                 {
                     b.HasOne("EpicMarket.Data.ApplicationModels.AccessType", "AccessType")
@@ -1701,15 +1745,7 @@ namespace EpicMarket.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("EpicMarket.Data.Models.StatusOptionSet", "StatusOptionSets")
-                        .WithMany("Catalogs")
-                        .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Business");
-
-                    b.Navigation("StatusOptionSets");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.CommunicationQueue", b =>
@@ -1836,17 +1872,9 @@ namespace EpicMarket.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("EpicMarket.Data.Models.StatusOptionSet", "StatusOptionSets")
-                        .WithMany("Outlets")
-                        .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Address");
 
                     b.Navigation("Bussiness");
-
-                    b.Navigation("StatusOptionSets");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.OutletPerson", b =>
@@ -1991,6 +2019,21 @@ namespace EpicMarket.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("OutletStatusOptionSet", b =>
+                {
+                    b.HasOne("EpicMarket.Data.Models.Outlet", null)
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EpicMarket.Data.Models.StatusOptionSet", null)
+                        .WithMany()
+                        .HasForeignKey("StatusOptionSetsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("EpicMarket.Data.ApplicationModels.AccessType", b =>
                 {
                     b.Navigation("AccessControlLists");
@@ -2114,10 +2157,6 @@ namespace EpicMarket.Data.Migrations
             modelBuilder.Entity("EpicMarket.Data.Models.StatusOptionSet", b =>
                 {
                     b.Navigation("Businesses");
-
-                    b.Navigation("Catalogs");
-
-                    b.Navigation("Outlets");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.SupportTicketType", b =>
