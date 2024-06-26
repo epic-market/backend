@@ -33,6 +33,7 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpPost("register")]
+        [AllowAnonymous]
         public async Task<ActionResult<OperationResult<UserDto>>> Register(RegisterDto registerDto)
         {
             var response = new OperationResult<UserDto>();
@@ -67,6 +68,7 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<ActionResult<OperationResult<LoginResult>>> Login(LoginDto loginDto)
         {
 
