@@ -2,6 +2,7 @@
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -44,6 +45,21 @@ namespace EpicMarket.Services
         public Task<List<DropDownOptions>> GetAllSupportCategorys()
         {
             return _context.TaskTypes.Select(c => new DropDownOptions { Text = c.Name, Value = c.ID }).ToListAsync();
+        }
+        public int SubscribeforOffers( string gmail)
+        {
+            var newLead = new PromotionalLeads
+            {
+                Gmail = gmail,
+                CreateDate = DateTime.Now,
+                Time = DateTime.Now.TimeOfDay,
+                WhichApplication = "userface application" // For now hardcoded
+            };
+
+            _context.PromotionalLeads.Add(newLead);
+            _context.SaveChanges();
+            return newLead.Id;
+
         }
     }
 }

@@ -116,5 +116,21 @@ namespace EpicMarket.Business.API.Controllers
             reponse.Data = options;
             return Ok(reponse);
         }
+        [HttpPost("subscribeforOffers")]
+        [AllowAnonymous]
+        public ActionResult<OperationResult<int>> SubscribeforOffers( string gmail)
+        {
+            var response = new OperationResult<int>();
+
+            this.logger.LogInformation("Static Controller -> UpdateStatus()-> params {0}", JsonConvert.SerializeObject(new { Params = gmail }));
+
+            var id = staticService.SubscribeforOffers(gmail);
+
+            this.logger.LogInformation("Static Controller -> UpdateStatus()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
+
+            response.Data = id;
+
+            return Ok(response);
+        }
     }
 }
