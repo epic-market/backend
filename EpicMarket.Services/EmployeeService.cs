@@ -213,7 +213,7 @@ namespace EpicMarket.Services
                               Id = singleEmployee.EmployeeID,
                               Name = singleEmployee.Employee.FirstName,
                               Email = singleEmployee.Employee.Email,
-                              Selected = matchedEmployee == null ? 0 : 1,
+                              Selected = matchedEmployee == null ? false : true,
                           }).ToListAsync();
 
             return _;

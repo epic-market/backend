@@ -69,7 +69,7 @@ namespace EpicMarket.Entities
 
         public string Email { get; set; }
 
-        public int Selected { get; set; }
+        public bool Selected { get; set; }
     }
 
 

@@ -78,7 +78,7 @@ namespace EpicMarket.Services
                         Description = catalogItem.Description,
                         ImageURL = catalogItem.Images,
                         Rate = catalogItem.Rate,
-                        Selected = matchedProduct == null ? 0 : 1,
+                        Selected = matchedProduct == null ? false : true,
                     }).ToListAsync();
 
             return _;
