@@ -4,6 +4,7 @@ using EpicMarket.Data.Models;
 using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,19 +68,24 @@ namespace EpicMarket.Services
                 outletModel.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == Business_Status.BUSINESS_UNVERIFIED).Id;
                 outletModel.ModifiedBy = UserName;
                 outletModel.ModifiedDate = DateTime.Now;
-                events = EventConstants.AddBranch;
+                events = EventConstants.EditBranch;
                 _context.Outlets.Update(outletModel);
             }
             else
             {
                 outletModel.CreateBy = UserName;
                 outletModel.CreateDate = DateTime.Now;
-                events = EventConstants.EditBranch;
+                events = EventConstants.AddBranch;
                 _context.Outlets.Add(outletModel);
             }
       
              _context.SaveChanges();
-            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = outletModel.ID, Data = null, Description = null, EventName = events, EntityName = EntityConstants.Branch,Source=PageSource });
+            var savedOutletModel = _context.Outlets.FirstOrDefault(o => o.ID == outletModel.ID);
+            string outletModelJson = JsonConvert.SerializeObject(savedOutletModel, new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            });
+            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = outletModel.ID, Data = outletModelJson, Description = null, EventName = events, EntityName = EntityConstants.Branch,Source=PageSource });
 
             return outletModel.ID;
         }
