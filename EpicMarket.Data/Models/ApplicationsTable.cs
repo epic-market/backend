@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EpicMarket.Data.Models
 {//this will be used for both events and tasks
-    public class EventCategory : BaseModel //this table is to know which application is assced like bussinessowner, admin , customer app 
+    public class ApplicationsTable : BaseModel //this table is to know which application is assced like bussinessowner, admin , customer app 
     {
         [Key]
         public int ID { get; set; }
@@ -22,7 +22,7 @@ namespace EpicMarket.Data.Models
         public int Sequence { get; set; }
 
         public virtual ICollection<Event>? Events { get; set; }
-
+        public virtual ICollection<Page>? Pages { get; set; }
         public virtual ICollection<TaskType>? TaskTypes { get; set; }
     }
 }

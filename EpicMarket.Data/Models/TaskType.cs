@@ -29,7 +29,7 @@ namespace EpicMarket.Data.Models
         public string ShortDescription { get; set; }
 
         [ForeignKey("TaskCategoryID")]
-        public virtual EventCategory EventCategorys { get; set; }
+        public virtual ApplicationsTable EventCategorys { get; set; }
         public virtual ICollection<Tasks>? Tasks { get; set; }
     }
 }

@@ -31,7 +31,7 @@ public DbSet<EpicMarket.Data.Models.EventLog> EventLog { get; set; } = default!;
 
 public DbSet<EpicMarket.Data.Models.Entity> Entity { get; set; } = default!;
 
-public DbSet<EpicMarket.Data.Models.EventCategory> EventCategory { get; set; } = default!;
+public DbSet<EpicMarket.Data.Models.ApplicationsTable> ApplicationsTable { get; set; } = default!;
 
 public DbSet<EpicMarket.Data.Models.BlogCategory> BlogCategory { get; set; } = default!;
 

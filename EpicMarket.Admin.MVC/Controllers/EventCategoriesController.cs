@@ -23,7 +23,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: EventCategories
         public async Task<IActionResult> Index()
         {
-            return View(await _context.EventCategory.ToListAsync());
+            return View(await _context.ApplicationsTable.ToListAsync());
         }
 
         // GET: EventCategories/Details/5
@@ -34,7 +34,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var eventCategory = await _context.EventCategory
+            var eventCategory = await _context.ApplicationsTable
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (eventCategory == null)
             {
@@ -55,7 +55,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Name,Description,Sequence")] EventCategory eventCategory)
+        public async Task<IActionResult> Create([Bind("ID,Name,Description,Sequence")] ApplicationsTable eventCategory)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             eventCategory.CreateBy = userName;
@@ -77,7 +77,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var eventCategory = await _context.EventCategory.FindAsync(id);
+            var eventCategory = await _context.ApplicationsTable.FindAsync(id);
             if (eventCategory == null)
             {
                 return NotFound();
@@ -90,7 +90,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,Sequence,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] EventCategory eventCategory)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,Sequence,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] ApplicationsTable eventCategory)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             eventCategory.ModifiedBy = userName;
@@ -131,7 +131,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var eventCategory = await _context.EventCategory
+            var eventCategory = await _context.ApplicationsTable
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (eventCategory == null)
             {
@@ -146,10 +146,10 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var eventCategory = await _context.EventCategory.FindAsync(id);
+            var eventCategory = await _context.ApplicationsTable.FindAsync(id);
             if (eventCategory != null)
             {
-                _context.EventCategory.Remove(eventCategory);
+                _context.ApplicationsTable.Remove(eventCategory);
             }
 
             await _context.SaveChangesAsync();
@@ -158,7 +158,7 @@ namespace EpicMarket.Admin.MVC.Controllers
 
         private bool EventCategoryExists(int id)
         {
-            return _context.EventCategory.Any(e => e.ID == id);
+            return _context.ApplicationsTable.Any(e => e.ID == id);
         }
     }
 }

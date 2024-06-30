@@ -172,16 +172,16 @@ namespace EpicMarket.Data.Common
                 }
                 await context.SaveChangesAsync();
             }
-            if (!await context.EventCategory.AnyAsync())
+            if (!await context.ApplicationsTable.AnyAsync())
             {
-                var eventCategories = new List<EventCategory>
+                var eventCategories = new List<ApplicationsTable>
                 {
-                 new EventCategory { Name = "Admin",Description="Admin Website" },
-                 new EventCategory{Name="Business" ,Description="Business Website"}
+                 new ApplicationsTable { Name = "Admin",Description="Admin Website" },
+                 new ApplicationsTable{Name="Business" ,Description="Business Website"}
                 };
                 foreach (var tickettype in eventCategories)
                 {
-                    await context.EventCategory.AddAsync(tickettype);
+                    await context.ApplicationsTable.AddAsync(tickettype);
                 }
                 await context.SaveChangesAsync();
             }

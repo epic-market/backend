@@ -56,13 +56,15 @@ namespace EpicMarket.Data.Models
         public DbSet<Entity> Entity { get; set; } 
         public DbSet<EventLog> EventLog { get; set; } 
         public DbSet<Event> Event { get; set; } 
-        public DbSet<EventCategory> EventCategory { get; set; }
+        public DbSet<ApplicationsTable> ApplicationsTable { get; set; }
         public DbSet<Tasks> Tasks { get; set; }
         public DbSet<TaskType> TaskTypes { get; set; }  
         public DbSet<TaskStatusType> TaskStatusTypes { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<OrderTypesOptions> OrderTypesOptions { get; set; }
         public DbSet<PromotionalLeads> PromotionalLeads { get; set; }
+        public DbSet<HelpItem> HelpItems { get; set; }
+        public DbSet<Page> Pages { get; set; }
 
         public DbSet<DatabaseVersion> DatabaseVersions { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

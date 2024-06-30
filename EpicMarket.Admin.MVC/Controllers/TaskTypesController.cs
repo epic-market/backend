@@ -48,7 +48,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: TaskTypes/Create
         public IActionResult Create()
         {
-            ViewData["TaskCategoryID"] = new SelectList(_context.Set<EventCategory>(), "ID", "Name");
+            ViewData["TaskCategoryID"] = new SelectList(_context.Set<ApplicationsTable>(), "ID", "Name");
             return View();
         }
 
@@ -65,7 +65,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["TaskCategoryID"] = new SelectList(_context.Set<EventCategory>(), "ID", "Name", taskType.TaskCategoryID);
+            ViewData["TaskCategoryID"] = new SelectList(_context.Set<ApplicationsTable>(), "ID", "Name", taskType.TaskCategoryID);
             return View(taskType);
         }
 
@@ -82,7 +82,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 return NotFound();
             }
-            ViewData["TaskCategoryID"] = new SelectList(_context.Set<EventCategory>(), "ID", "Name", taskType.TaskCategoryID);
+            ViewData["TaskCategoryID"] = new SelectList(_context.Set<ApplicationsTable>(), "ID", "Name", taskType.TaskCategoryID);
             return View(taskType);
         }
 
@@ -118,7 +118,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["TaskCategoryID"] = new SelectList(_context.Set<EventCategory>(), "ID", "Name", taskType.TaskCategoryID);
+            ViewData["TaskCategoryID"] = new SelectList(_context.Set<ApplicationsTable>(), "ID", "Name", taskType.TaskCategoryID);
             return View(taskType);
         }
 
