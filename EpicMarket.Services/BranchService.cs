@@ -206,7 +206,9 @@ namespace EpicMarket.Services
                City = o.Address.City,
                Pincode = o.Address.Pincode,
                State = o.Address.State,
-               AddressID = o.AddressID
+               AddressID = o.AddressID,
+               Latitude=o.Address.Latitude,
+               Longitude=o.Address.Longitude,
            }).FirstOrDefaultAsync();
         }
 
