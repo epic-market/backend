@@ -63,6 +63,8 @@ namespace EpicMarket.Data.Models
         public DbSet<Comment> Comments { get; set; }
         public DbSet<OrderTypesOptions> OrderTypesOptions { get; set; }
         public DbSet<PromotionalLeads> PromotionalLeads { get; set; }
+
+        public DbSet<DatabaseVersion> DatabaseVersions { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 			var connectionString = _configuration.GetConnectionString("DefaultConnection");
