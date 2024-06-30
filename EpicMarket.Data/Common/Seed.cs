@@ -110,25 +110,25 @@ namespace EpicMarket.Data.Common
                 }
                 await context.SaveChangesAsync();
             }
+            // NO need instaed we gone use staus which is being used for task table.
+            //if (!await context.SupportTicketTypes.AnyAsync())
+            //{
+            //    var supportTickets = new List<PersonType>
+            //    {
+            //        new PersonType{ Name = "New"  , Description = "Newly Created ticket"},
+            //        new PersonType{ Name = "Pending",  Description = "requires additional information or action"},
+            //        new PersonType{ Name = "On Hold",  Description = "cannot be resolved immediately due to external dependencies"},
+            //        new PersonType{ Name = "Resolved",  Description = "ticket is not yet closed"},
+            //        new PersonType{ Name = "Closed",  Description = "it has been closed"},
 
-            if (!await context.SupportTicketTypes.AnyAsync())
-            {
-                var supportTickets = new List<SupportTicketType>
-                {
-                    new SupportTicketType{ Name = "New"  , Description = "Newly Created ticket"},
-                    new SupportTicketType{ Name = "Pending",  Description = "requires additional information or action"},
-                    new SupportTicketType{ Name = "On Hold",  Description = "cannot be resolved immediately due to external dependencies"},
-                    new SupportTicketType{ Name = "Resolved",  Description = "ticket is not yet closed"},
-                    new SupportTicketType{ Name = "Closed",  Description = "it has been closed"},
+            //    };
 
-                };
-
-                foreach (var tickettype in supportTickets)
-                {
-                    await context.SupportTicketTypes.AddAsync(tickettype);
-                }
-                await context.SaveChangesAsync();
-            }
+            //    foreach (var tickettype in supportTickets)
+            //    {
+            //        await context.SupportTicketTypes.AddAsync(tickettype);
+            //    }
+            //    await context.SaveChangesAsync();
+            //}
             if (!await context.TaskStatusTypes.AnyAsync())
             {
                 var taskStatuses = new List<TaskStatusType>
@@ -235,7 +235,7 @@ namespace EpicMarket.Data.Common
                 }
                 await context.SaveChangesAsync();
             }
-           
+        
 
         }
     }

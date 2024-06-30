@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -18,8 +19,11 @@ namespace EpicMarket.Data.Models
         [DisplayName("Address")]
         public string Address1 { get; set; }
         public string? Address2 { get; set; }
+        [StringLength(50)]
         public string State { get; set; }
+        [StringLength(50)]
         public string City { get; set; }
+        [RegularExpression(@"^\d{5}(-\d{4})?$", ErrorMessage = "Invalid pincode format.")]
         public int Pincode { get; set; }
         public double Latitude { get; set; }
         public double Longitude { get; set; }

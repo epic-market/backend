@@ -34,7 +34,7 @@ namespace EpicMarket.Entities
 
         public double Rate { get; set; }
 
-        public int Selected { get; set; }
+        public bool Selected { get; set; }
     }
 
     public class ProductParams

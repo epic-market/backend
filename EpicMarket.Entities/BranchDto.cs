@@ -55,6 +55,9 @@ namespace EpicMarket.Entities
         public int Count { get; set; }
 
         public int AddressID { get; set; }
+        public double? Latitude { get; set; }
+
+        public double? Longitude { get; set; }
     }
 
 

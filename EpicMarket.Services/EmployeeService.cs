@@ -7,6 +7,7 @@ using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using NVelocity;
 using NVelocity.App;
 using System;
@@ -179,7 +180,12 @@ namespace EpicMarket.Services
 
                 _context.UserAddresses.Add(userAddress);
                 _context.SaveChanges();
-                this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = User.Id, Data = null, Description = null, EventName = EventConstants.AddEmployees, EntityName = EntityConstants.Employees });
+                var saved = _context.Users.FirstOrDefault(o => o.Id == User.Id);
+                string savedJson = JsonConvert.SerializeObject(saved, new JsonSerializerSettings
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                });
+                this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = User.Id, Data = savedJson, Description = null, EventName = EventConstants.AddEmployees, EntityName = EntityConstants.Employees });
 
                 return User.Id;
 
@@ -207,7 +213,7 @@ namespace EpicMarket.Services
                               Id = singleEmployee.EmployeeID,
                               Name = singleEmployee.Employee.FirstName,
                               Email = singleEmployee.Employee.Email,
-                              Selected = matchedEmployee == null ? 0 : 1,
+                              Selected = matchedEmployee == null ? false : true,
                           }).ToListAsync();
 
             return _;

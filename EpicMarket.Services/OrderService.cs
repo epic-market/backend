@@ -78,7 +78,12 @@ namespace EpicMarket.Services
             listoforderDetails.ForEach(od => od.OrderID = newOrder.ID);
             _context.OrderDetails.AddRange(listoforderDetails);
             _context.SaveChanges();
-            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = newOrder.ID, Data = null, Description = null, EventName = EventConstants.AddOrder, EntityName = EntityConstants.Order,Source=PageSource });
+            var saved = _context.Orders.FirstOrDefault(o => o.ID == newOrder.ID);
+            string saveJson = JsonConvert.SerializeObject(saved, new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            });
+            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = newOrder.ID, Data = saveJson, Description = null, EventName = EventConstants.AddOrder, EntityName = EntityConstants.Order,Source=PageSource });
 
             return newOrder.ID;
         }
@@ -121,7 +126,7 @@ namespace EpicMarket.Services
             //Order.Status = OrderStatus;
             _context.Orders.Update(Order);
             _context.SaveChanges();
-            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = Order.ID, Data = null, Description = null, EventName = EventConstants.EditOrder, EntityName = EntityConstants.Order });
+            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = Order.ID, Data = OrderStatus, Description = null, EventName = EventConstants.EditOrder, EntityName = EntityConstants.Order });
 
             return Order.ID;
 

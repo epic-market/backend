@@ -10,6 +10,7 @@ using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json;
+using Newtonsoft.Json;
 
 namespace EpicMarket.Services
 {
@@ -54,7 +55,12 @@ namespace EpicMarket.Services
             businessModel.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == Business_Status.BUSINESS_UNVERIFIED).Id;
             _context.Businesses.Add(businessModel);
             _context.SaveChanges();
-            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = businessModel.ID, Data = null, Description = null, EventName = EventConstants.AddBusiness, EntityName = EntityConstants.Business ,Source=PageSource});
+            var saved = _context.Businesses.FirstOrDefault(o => o.ID == businessModel.ID);
+            string savedJson = JsonConvert.SerializeObject(saved, new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            });
+            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = businessModel.ID, Data = savedJson, Description = null, EventName = EventConstants.AddBusiness, EntityName = EntityConstants.Business ,Source=PageSource});
             return businessModel.ID;
         }
     }

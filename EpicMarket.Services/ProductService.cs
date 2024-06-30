@@ -6,6 +6,7 @@ using EpicMarket.Entities.CustomModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,7 +52,12 @@ namespace EpicMarket.Services
                 _context.Catalogs.Update(product);
             }
             _context.SaveChanges();
-            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = product.ID, Data = null, Description = null, EventName = events, EntityName = EntityConstants.Catelog,Source=PageSource });
+            var saved = _context.Catalogs.FirstOrDefault(o => o.ID == product.ID);
+            string savedJson = JsonConvert.SerializeObject(saved, new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            });
+            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = product.ID, Data = savedJson, Description = null, EventName = events, EntityName = EntityConstants.Catelog,Source=PageSource });
 
             return product.ID;
         }
@@ -72,7 +78,7 @@ namespace EpicMarket.Services
                         Description = catalogItem.Description,
                         ImageURL = catalogItem.Images,
                         Rate = catalogItem.Rate,
-                        Selected = matchedProduct == null ? 0 : 1,
+                        Selected = matchedProduct == null ? false : true,
                     }).ToListAsync();
 
             return _;

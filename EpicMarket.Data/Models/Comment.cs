@@ -17,7 +17,7 @@ namespace EpicMarket.Data.Models
 
         [Required]
         public string CommentText { get; set; }
-
+        [StringLength(50)]
         public string Status { get; set; }
 
         public int? RecordID{ get; set; }

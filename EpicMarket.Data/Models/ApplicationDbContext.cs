@@ -33,7 +33,7 @@ namespace EpicMarket.Data.Models
 
         public DbSet<ProductInternal> ProductInternals { get; set; }
 
-        public DbSet<SupportTicketType> SupportTicketTypes { get; set; }
+        public DbSet<PersonType> PersonTypes { get; set; }
 
         public DbSet<SupportTicket> SupportTickets { get; set; }
 
@@ -62,6 +62,9 @@ namespace EpicMarket.Data.Models
         public DbSet<TaskStatusType> TaskStatusTypes { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<OrderTypesOptions> OrderTypesOptions { get; set; }
+        public DbSet<PromotionalLeads> PromotionalLeads { get; set; }
+
+        public DbSet<DatabaseVersion> DatabaseVersions { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 			var connectionString = _configuration.GetConnectionString("DefaultConnection");
