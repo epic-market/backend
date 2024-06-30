@@ -46,6 +46,22 @@ namespace EpicMarket.Services
         {
             return _context.TaskTypes.Select(c => new DropDownOptions { Text = c.Name, Value = c.ID }).ToListAsync();
         }
+        public Task<List<HelpItemDTO>> GetHelpItemsforBypage(string pagename)
+        {
+            return _context.HelpItems
+                   .Where(h => h.Pages != null && h.Pages.Name == pagename)
+                   .Select(c => new HelpItemDTO
+                   {
+                       ID = c.ID,
+                       Name = c.Name,
+                       Title = c.Title,
+                       PageID= c.PageID,
+                       IsShownOnPage = c.IsShownOnPage,
+                       Description = c.Description,
+
+                   })
+                   .ToListAsync();
+        }
         public int SubscribeforOffers( string gmail)
         {
             var newLead = new PromotionalLeads
