@@ -92,5 +92,17 @@ namespace EpicMarket.Business.API.Controllers
 
             return Ok(response);
         }
+
+        [HttpPost("AddSupportTask")]
+        public ActionResult<OperationResult<int>> AddSupportTask(SupportDTO supportDTO)
+        {
+            var response = new OperationResult<int>();
+
+            this.logger.LogInformation("Support Controller -> AddSupportTask()-> params {0}", JsonConvert.SerializeObject(new { Params = supportDTO }));
+
+            var results = tasksService.AddSupportTask(supportDTO,this.AdminPersonID);
+            this.logger.LogInformation("Support Controller -> AddSupportTask()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
+            return Ok(response);
+        }
     }
 }
