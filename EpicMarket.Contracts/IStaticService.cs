@@ -15,7 +15,8 @@ namespace EpicMarket.Contracts
         Task<List<DropDownOptions>> GetOderStatusOptions();
         Task<List<DropDownOptions>> GetOderTypeOptions();
         Task<List<DropDownOptions>> GetAllblogCategories();
-        Task<List<DropDownOptions>> GetAllSupportCategorys();
+        Task<List<DropDownOptions>> GetAllSupportCategorys(); 
+        Task<List<HelpItemDTO>> GetHelpItemsforBypage(string pagename);
         int SubscribeforOffers( string gmail);
 
     }

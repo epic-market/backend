@@ -132,5 +132,20 @@ namespace EpicMarket.Business.API.Controllers
 
             return Ok(response);
         }
+
+        [HttpGet("GetHelpItemsforBypage")]
+        [AllowAnonymous]
+        public async Task<ActionResult<OperationResult<List<HelpItemDTO>>>> GetHelpItemsforBypage(string pagename)
+        {
+            var reponse = new OperationResult<List<HelpItemDTO>>();
+
+            this.logger.LogInformation("Static Controller -> GetHelpItemsforBypage()");
+
+            var options = await staticService.GetHelpItemsforBypage(pagename);
+            this.logger.LogInformation("Static Controller-> GetHelpItemsforBypage()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = options }));
+
+            reponse.Data = options;
+            return Ok(reponse);
+        }
     }
 }

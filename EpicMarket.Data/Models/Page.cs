@@ -1,34 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using EpicMarket.Data.Common;
 
 namespace EpicMarket.Data.Models
 {
-    public class Event: BaseModel //orders ,products , employee,braches, business
+    public class Page
     {
         [Key]
         public int ID { get; set; }
 
         [Required]
-        [ForeignKey("EventCategorys")]
-        public int EventCategoryID { get; set; }
-
-        [MaxLength(50)]
+        [StringLength(100)]
         public string Name { get; set; }
 
-        [MaxLength(255)]
+        [StringLength(500)]
         public string Description { get; set; }
 
-        public int? PriorityID { get; set; }
-        
+        [Required]
+        public int ApplicationId { get; set; }
+        public virtual ICollection<HelpItem> HelpItems { get; set; }
+        [ForeignKey("ApplicationId")]
         public virtual ApplicationsTable EventCategorys { get; set; }
-
-        public virtual ICollection<EventLog>? EventLogs { get; set; }
-
     }
 }

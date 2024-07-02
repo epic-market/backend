@@ -17,5 +17,6 @@ namespace EpicMarket.Contracts
         Task<GetDataResult<List<CommentDTO>>> GetAllComments( int taskId); 
         Task<GetDataResult<List<TasksDTO>>> GetSupportByPersonId( int personId);
         Task<TasksDTO> GettaskDetails(int taskId);
+        long AddSupportTask(SupportDTO supportDTO, int AdminPersonID);
     }
 }

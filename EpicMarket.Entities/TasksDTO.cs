@@ -57,4 +57,20 @@ namespace EpicMarket.Entities
 
         public string CreateBy { get; set; }
     }
+    public class SupportDTO
+    {
+
+        public string Email { get; set; }
+
+        public string Phonenumber { get; set; }
+        public string Fullname { get; set; }
+        public int TypeofPersonid { get; set; }
+ 
+        public int? TaskStatusID { get; set; }
+        public string SelectQuery { get; set; }
+        public string Comment { get; set; }
+
+
+    }
+
 }

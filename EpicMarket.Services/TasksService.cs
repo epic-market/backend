@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -161,6 +162,42 @@ namespace EpicMarket.Services
             {
                 items = tasksDTOs,
             };
+        }
+        public long AddSupportTask(SupportDTO supportDTO, int AdminPersonID)
+        {
+            var newTaskStatus = _context.TaskStatusTypes.Where(row => row.Status == "New").FirstOrDefault();
+            SupportTicket supportTicket;
+            supportTicket = new SupportTicket
+            {
+                Email = supportDTO.Email,
+                Phonenumber = supportDTO.Phonenumber,
+                TypeofPersonid = supportDTO.TypeofPersonid,
+                Fullname = supportDTO.Fullname,
+                TaskStatusID = newTaskStatus.Id
+
+            };
+            _context.SupportTickets.Add(supportTicket);
+            _context.SaveChanges();
+            var supportTicketId = supportTicket.ID;
+            Tasks taskToSave;
+
+                taskToSave = new Tasks
+                {
+                    Name = "Support Query",
+                    Description = supportDTO.SelectQuery,
+                    TaskTypeID = newTaskStatus.Id,
+                    TaskStatusID = newTaskStatus.Id,
+                    PrimaryAssignedToPersonID = AdminPersonID,
+                    DateAssigned = DateTime.Now,
+                    TaskData = supportDTO.Comment,
+                    ReceivedDate = DateTime.Now,
+                    CreateDate = DateTime.Now,
+                    CreateBy = supportDTO.Email
+                };
+                _context.Tasks.Add(taskToSave);
+                _context.SaveChanges();
+
+            return (long)taskToSave.ID;
         }
 
     }
