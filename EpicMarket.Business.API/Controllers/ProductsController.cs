@@ -96,7 +96,18 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
-
+        [HttpPost("verifyCatalog")]
+        [Authorize(Roles = ROLES.BUSINESS_OWNER)]
+        public ActionResult<OperationResult<int>> VerifyCatalog(VerifyDto verifyBranchDto)
+        {
+            var response = new OperationResult<int>();
+            this.logger.LogInformation("Products Controller -> VerifyCatalog()-> params {0}", JsonConvert.SerializeObject(new { Params = verifyBranchDto }));
+            var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
+            var id = productService.VerifyCatalog(verifyBranchDto, UserName, this.AdminPersonID, this.PageSource);
+            this.logger.LogInformation("Products Controller -> VerifyCatalog()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
+            response.Data = id;
+            return Ok(response);
+        }
 
 
 

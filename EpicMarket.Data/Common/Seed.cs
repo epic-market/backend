@@ -227,7 +227,8 @@ namespace EpicMarket.Data.Common
                 {
                  new TaskType { Name = "Grievance" ,Description="Grievance"},
                  new TaskType { Name = "Issues" ,Description="Issues"},
-                 new TaskType { Name = "Support" ,Description="Support" }
+                 new TaskType { Name = "Support" ,Description="Support" },
+                 new TaskType { Name = "Verification" ,Description="Verification" }
                 };
                 foreach (var tickettype in entities)
                 {

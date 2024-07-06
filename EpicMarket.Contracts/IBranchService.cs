@@ -19,5 +19,6 @@ namespace EpicMarket.Contracts
         Task<int> MapBranchToProducts(BranchProductMapParams branchProductMap);
 
         Task<BranchResult> GetBranchByID(int branchId);
+        int VerifyBranchs(VerifyDto verifyBranchDto, string UserName, int AdminPersonID, string PageSource);
     }
 }
