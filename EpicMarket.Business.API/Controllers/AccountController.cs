@@ -74,8 +74,9 @@ namespace EpicMarket.Business.API.Controllers
 
 			var response = new OperationResult<String>();
 			//communication.SendEmail("akhil@epicmarket.in", "This is test mail form code", "Its working");
+            
 
-			var user = await _userManager.Users
+            var user = await _userManager.Users
                 .SingleOrDefaultAsync(x => x.UserName == loginDto.Email.ToLower());
 
             if (user == null) return Unauthorized("Invalid username");
@@ -85,43 +86,57 @@ namespace EpicMarket.Business.API.Controllers
 
             if (!result.Succeeded) return Unauthorized() ;
 
-
-            //         var roles = await _userManager.GetRolesAsync(user);
-
-            //         var userBusinessDto = new UserBusinessDto();
-
-            //         if (roles.Contains(ROLES.BUSINESS_OWNER))
-            //         {
-            //             userBusinessDto = dbContext.Businesses.Where(c => c.PersonID == user.Id).Include(c => c.Status).Select(c => new UserBusinessDto()
-            //             {
-            //                 businessId = c.ID,
-            //                 businessStatus = c.Status.Status,
-            //             }).FirstOrDefault();
-            //         } else if (roles.Contains(ROLES.BUSINESS_EMPLOYEE))
-            //         { 
-            //             userBusinessDto = dbContext.BusinessEmployeeMaps.Where(c => c.EmployeeID == user.Id).Include(c=>c.Bussiness).Include(c => c.Bussiness.Status).Select(c => new UserBusinessDto()
-            //	{
-            //		businessId = c.Bussiness.ID,
-            //		businessStatus = c.Bussiness.Status.Status,
-            //	}).FirstOrDefault();
-            //}
-
-            //      response.Data = new LoginResult() { 
-            //               UserDetails = new UserDto
-            //      {
-            //       Username = user.UserName,
-            //       Token = await _tokenService.CreateToken(user),
-            //       FirstName = user.FirstName,
-            //       LastName = user.LastName,
-            //       Phone = user.PhoneNumber
-            //      },
-            //          UserBusiness = userBusinessDto
-            //};
             response.Data = await _tokenService.CreateToken(user);
 
             return response;
         }
+        [HttpPost("info")]
+        [Authorize]
+        public async Task<ActionResult<OperationResult<LoginResult>>> Info()
+        {
 
+            var response = new OperationResult<LoginResult>();
+            var user = await _userManager.Users
+                .SingleOrDefaultAsync(x => x.UserName == this.LoggedInUserName);
+
+            if (user == null) return Unauthorized("Invalid username");
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var userBusinessDto = new UserBusinessDto();
+
+            if (roles.Contains(ROLES.BUSINESS_OWNER))
+            {
+                userBusinessDto = dbContext.Businesses.Where(c => c.PersonID == user.Id).Include(c => c.Status).Select(c => new UserBusinessDto()
+                {
+                    businessId = c.ID,
+                    businessStatus = c.Status.Status,
+                }).FirstOrDefault();
+            }
+            else if (roles.Contains(ROLES.BUSINESS_EMPLOYEE))
+            {
+                userBusinessDto = dbContext.BusinessEmployeeMaps.Where(c => c.EmployeeID == user.Id).Include(c => c.Bussiness).Include(c => c.Bussiness.Status).Select(c => new UserBusinessDto()
+                {
+                    businessId = c.Bussiness.ID,
+                    businessStatus = c.Bussiness.Status.Status,
+                }).FirstOrDefault();
+            }
+
+            response.Data = new LoginResult()
+            {
+                UserDetails = new UserDto
+                {
+                    Username = user.UserName,
+                    //Token = await _tokenService.CreateToken(user),
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Phone = user.PhoneNumber
+                },
+                UserBusiness = userBusinessDto
+            };
+
+            return response;
+        }
 
         [HttpPost("changepassword")]
         [Authorize]
