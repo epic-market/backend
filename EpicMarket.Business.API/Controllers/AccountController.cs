@@ -124,10 +124,9 @@ namespace EpicMarket.Business.API.Controllers
 
             response.Data = new LoginResult()
             {
-                UserDetails = new UserDto
+                UserDetails = new UserLoginDto
                 {
                     Username = user.UserName,
-                    //Token = await _tokenService.CreateToken(user),
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     Phone = user.PhoneNumber
