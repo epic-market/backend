@@ -69,13 +69,10 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpPost("login")]
         [AllowAnonymous]
-        public async Task<ActionResult<OperationResult<String>>> Login(LoginDto loginDto)
+        public async Task<ActionResult<OperationResult<TokenDto>>> Login(LoginDto loginDto)
         {
 
-			var response = new OperationResult<String>();
-			//communication.SendEmail("akhil@epicmarket.in", "This is test mail form code", "Its working");
-            
-
+			var response = new OperationResult<TokenDto>();
             var user = await _userManager.Users
                 .SingleOrDefaultAsync(x => x.UserName == loginDto.Email.ToLower());
 
@@ -86,7 +83,10 @@ namespace EpicMarket.Business.API.Controllers
 
             if (!result.Succeeded) return Unauthorized() ;
 
-            response.Data = await _tokenService.CreateToken(user);
+            response.Data = new TokenDto
+            {
+                Token = await _tokenService.CreateToken(user)
+            };
 
             return response;
         }

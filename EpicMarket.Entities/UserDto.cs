@@ -27,4 +27,8 @@ namespace EpicMarket.Entities
 
         public UserBusinessDto UserBusiness { get; set; }
     }
+    public class TokenDto
+    {
+        public string Token { get; set; }
+    }
 }
