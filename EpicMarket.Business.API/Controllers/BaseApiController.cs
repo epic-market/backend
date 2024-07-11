@@ -46,7 +46,13 @@ namespace EpicMarket.Business.API.Controllers
                 }
 			}
 		}
-
+		public string LoggedInUserName
+        {
+			get
+			{
+				return this.User.FindFirst(ClaimTypes.Name).Value;
+			}
+		}
 		protected string PageSource
 		{
 			get

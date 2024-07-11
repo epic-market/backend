@@ -69,13 +69,11 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpPost("login")]
         [AllowAnonymous]
-        public async Task<ActionResult<OperationResult<LoginResult>>> Login(LoginDto loginDto)
+        public async Task<ActionResult<OperationResult<TokenDto>>> Login(LoginDto loginDto)
         {
 
-			var response = new OperationResult<LoginResult>();
-			//communication.SendEmail("akhil@epicmarket.in", "This is test mail form code", "Its working");
-
-			var user = await _userManager.Users
+			var response = new OperationResult<TokenDto>();
+            var user = await _userManager.Users
                 .SingleOrDefaultAsync(x => x.UserName == loginDto.Email.ToLower());
 
             if (user == null) return Unauthorized("Invalid username");
@@ -85,6 +83,23 @@ namespace EpicMarket.Business.API.Controllers
 
             if (!result.Succeeded) return Unauthorized() ;
 
+            response.Data = new TokenDto
+            {
+                Token = await _tokenService.CreateToken(user)
+            };
+
+            return response;
+        }
+        [HttpPost("info")]
+        [Authorize]
+        public async Task<ActionResult<OperationResult<LoginResult>>> Info()
+        {
+
+            var response = new OperationResult<LoginResult>();
+            var user = await _userManager.Users
+                .SingleOrDefaultAsync(x => x.UserName == this.LoggedInUserName);
+
+            if (user == null) return Unauthorized("Invalid username");
 
             var roles = await _userManager.GetRolesAsync(user);
 
@@ -97,30 +112,30 @@ namespace EpicMarket.Business.API.Controllers
                     businessId = c.ID,
                     businessStatus = c.Status.Status,
                 }).FirstOrDefault();
-            } else if (roles.Contains(ROLES.BUSINESS_EMPLOYEE))
-            { 
-                userBusinessDto = dbContext.BusinessEmployeeMaps.Where(c => c.EmployeeID == user.Id).Include(c=>c.Bussiness).Include(c => c.Bussiness.Status).Select(c => new UserBusinessDto()
-				{
-					businessId = c.Bussiness.ID,
-					businessStatus = c.Bussiness.Status.Status,
-				}).FirstOrDefault();
-			}
+            }
+            else if (roles.Contains(ROLES.BUSINESS_EMPLOYEE))
+            {
+                userBusinessDto = dbContext.BusinessEmployeeMaps.Where(c => c.EmployeeID == user.Id).Include(c => c.Bussiness).Include(c => c.Bussiness.Status).Select(c => new UserBusinessDto()
+                {
+                    businessId = c.Bussiness.ID,
+                    businessStatus = c.Bussiness.Status.Status,
+                }).FirstOrDefault();
+            }
 
-            response.Data = new LoginResult() { 
-                     UserDetails = new UserDto
-			         {
-				         Username = user.UserName,
-				         Token = await _tokenService.CreateToken(user),
-				         FirstName = user.FirstName,
-				         LastName = user.LastName,
-				         Phone = user.PhoneNumber
-			         },
+            response.Data = new LoginResult()
+            {
+                UserDetails = new UserLoginDto
+                {
+                    Username = user.UserName,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Phone = user.PhoneNumber
+                },
                 UserBusiness = userBusinessDto
-		    };
+            };
 
-			return response;
+            return response;
         }
-
 
         [HttpPost("changepassword")]
         [Authorize]

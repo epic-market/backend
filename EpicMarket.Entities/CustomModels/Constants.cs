@@ -58,7 +58,14 @@ namespace EpicMarket.Entities.CustomModels
         public const string AddBusiness = "AddBusiness";
     }
 
+    public static class VerificationConstants
+    {
+        public const string BranchName = "Branches";
+        public const string BranchDescription = "List of branchs to be verified";
+        public const string CatelogName = "Catelogs";
+        public const string CatelogDescription = "List of Catelog to be verified";
 
+    }
 
 }
 

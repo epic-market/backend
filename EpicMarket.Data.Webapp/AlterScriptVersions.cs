@@ -20,6 +20,7 @@ namespace EpicMarket.Data.Webapp
         {
             AddDatabaseVersion("AlterScript1", "This is Test Description", "Gadamsetti Akhil" , new AlterScript1(this.dbContext));
             AddDatabaseVersion("AlterScript2", "This is Test Description2", "Gadamsetti Akhil", new AlterScript2(this.dbContext));
+            AddDatabaseVersion("AlterScriptseedMigration", "This is for migarting the seed data", "Vinay", new AlterScriptseedMigration(this.dbContext));
         }
 
         public void AddDatabaseVersion(string versionClass, string description, string createBy , IAlterScript alterScriptClass)

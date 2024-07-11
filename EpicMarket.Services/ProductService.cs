@@ -158,5 +158,31 @@ namespace EpicMarket.Services
             
             ).FirstOrDefaultAsync();
         }
+        public int VerifyCatalog(VerifyDto verifyBranchDto, string UserName, int AdminPersonID, string PageSource)
+        {
+            var newTaskStatus = _context.TaskStatusTypes.Where(row => row.Status == "New").FirstOrDefault();
+            var taskTypeID = _context.TaskTypes.Where(row => row.Name == "Verification").FirstOrDefault();
+            var userName = _context.Users.Where(row => row.UserName == UserName).FirstOrDefault();
+            Tasks taskToSave;
+            taskToSave = new Tasks
+            {
+                Name = VerificationConstants.CatelogName,
+                Description = VerificationConstants.CatelogDescription,
+                TaskTypeID = taskTypeID.ID,
+                ParentID = null,
+                TaskStatusID = newTaskStatus.Id,
+                TaskPriorityID = 1,
+                PrimaryAssignedToPersonID = AdminPersonID,
+                DateAssigned = DateTime.Now,
+                SubmittedByPersonID = userName.Id,
+                TaskData = verifyBranchDto.Data,
+                ReceivedDate = DateTime.Now,
+                CreateDate = DateTime.Now,
+                CreateBy = userName.Email
+            };
+            _context.Tasks.Add(taskToSave);
+            _context.SaveChanges();
+            return taskToSave.ID;
+        }
     }
 }

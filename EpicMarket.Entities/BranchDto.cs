@@ -99,4 +99,10 @@ namespace EpicMarket.Entities
 
         public List<int> RemovedBranchProductMapID { get; set; }
     }
+    public class VerifyDto
+    {
+
+        public string Data { get; set; }
+
+    }
 }
