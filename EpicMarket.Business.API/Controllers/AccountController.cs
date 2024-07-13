@@ -109,7 +109,7 @@ namespace EpicMarket.Business.API.Controllers
             {
                 userBusinessDto = dbContext.Businesses.Where(c => c.PersonID == user.Id).Include(c => c.Status).Select(c => new UserBusinessDto()
                 {
-                    businessId = c.ID,
+                    businessId = c.ID == 0 ? null : c.ID,
                     businessStatus = c.Status.Status,
                 }).FirstOrDefault();
             }
@@ -117,7 +117,7 @@ namespace EpicMarket.Business.API.Controllers
             {
                 userBusinessDto = dbContext.BusinessEmployeeMaps.Where(c => c.EmployeeID == user.Id).Include(c => c.Bussiness).Include(c => c.Bussiness.Status).Select(c => new UserBusinessDto()
                 {
-                    businessId = c.Bussiness.ID,
+                    businessId = c.Bussiness.ID == 0 ? null : c.Bussiness.ID,
                     businessStatus = c.Bussiness.Status.Status,
                 }).FirstOrDefault();
             }

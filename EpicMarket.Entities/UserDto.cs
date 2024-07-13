@@ -23,7 +23,7 @@ namespace EpicMarket.Entities
     }
     public class UserBusinessDto
 	{
-		public int businessId { get; set; }
+		public int? businessId { get; set; }
 
         public string businessStatus { get; set; }
     }
