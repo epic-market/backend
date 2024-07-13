@@ -90,7 +90,7 @@ namespace EpicMarket.Business.API.Controllers
 
             return response;
         }
-        [HttpPost("info")]
+        [HttpGet("info")]
         [Authorize]
         public async Task<ActionResult<OperationResult<LoginResult>>> Info()
         {
