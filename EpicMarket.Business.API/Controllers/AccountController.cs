@@ -34,9 +34,9 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpPost("register")]
         [AllowAnonymous]
-        public async Task<ActionResult<OperationResult<UserDto>>> Register(RegisterDto registerDto)
+        public async Task<ActionResult<OperationResult<TokenDto>>> Register(RegisterDto registerDto)
         {
-            var response = new OperationResult<UserDto>();
+            var response = new OperationResult<TokenDto>();
 
             if (await UserExists(registerDto.Email)) return BadRequest("Username is taken");
 
@@ -55,13 +55,9 @@ namespace EpicMarket.Business.API.Controllers
 
             if (!roleResult.Succeeded) return BadRequest(result.Errors);
 
-			response.Data =  new UserDto
+			response.Data =  new TokenDto
             {
-                Username = user.UserName,
-                Token = await _tokenService.CreateToken(user),
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Phone  = user.PhoneNumber
+                Token = await _tokenService.CreateToken(user)
             };
 
             return response;
