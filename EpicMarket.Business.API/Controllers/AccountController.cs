@@ -34,9 +34,9 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpPost("register")]
         [AllowAnonymous]
-        public async Task<ActionResult<OperationResult<UserDto>>> Register(RegisterDto registerDto)
+        public async Task<ActionResult<OperationResult<TokenDto>>> Register(RegisterDto registerDto)
         {
-            var response = new OperationResult<UserDto>();
+            var response = new OperationResult<TokenDto>();
 
             if (await UserExists(registerDto.Email)) return BadRequest("Username is taken");
 
@@ -55,13 +55,9 @@ namespace EpicMarket.Business.API.Controllers
 
             if (!roleResult.Succeeded) return BadRequest(result.Errors);
 
-			response.Data =  new UserDto
+			response.Data =  new TokenDto
             {
-                Username = user.UserName,
-                Token = await _tokenService.CreateToken(user),
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Phone  = user.PhoneNumber
+                Token = await _tokenService.CreateToken(user)
             };
 
             return response;
@@ -90,7 +86,7 @@ namespace EpicMarket.Business.API.Controllers
 
             return response;
         }
-        [HttpPost("info")]
+        [HttpGet("info")]
         [Authorize]
         public async Task<ActionResult<OperationResult<LoginResult>>> Info()
         {
@@ -109,7 +105,7 @@ namespace EpicMarket.Business.API.Controllers
             {
                 userBusinessDto = dbContext.Businesses.Where(c => c.PersonID == user.Id).Include(c => c.Status).Select(c => new UserBusinessDto()
                 {
-                    businessId = c.ID,
+                    businessId = c.ID == 0 ? null : c.ID,
                     businessStatus = c.Status.Status,
                 }).FirstOrDefault();
             }
@@ -117,7 +113,7 @@ namespace EpicMarket.Business.API.Controllers
             {
                 userBusinessDto = dbContext.BusinessEmployeeMaps.Where(c => c.EmployeeID == user.Id).Include(c => c.Bussiness).Include(c => c.Bussiness.Status).Select(c => new UserBusinessDto()
                 {
-                    businessId = c.Bussiness.ID,
+                    businessId = c.Bussiness.ID == 0 ? null : c.Bussiness.ID,
                     businessStatus = c.Bussiness.Status.Status,
                 }).FirstOrDefault();
             }
