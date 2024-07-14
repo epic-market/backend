@@ -34,6 +34,7 @@ namespace EpicMarket.Business.API.Extension
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IHomeService, HomeService>();
             services.AddScoped<IFileService,FileService>();
+            services.AddScoped<IAttachmentService, AttachmentService>();
             services.AddScoped<LogUserActivity>();
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
             Serilog.Log.Logger = new LoggerConfiguration()
