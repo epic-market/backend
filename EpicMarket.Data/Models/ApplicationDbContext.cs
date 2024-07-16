@@ -67,7 +67,8 @@ namespace EpicMarket.Data.Models
         public DbSet<Page> Pages { get; set; }
         public DbSet<AttachmentLink> AttachmentLinks { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
-        public DbSet<AttachmentType> AttachmentTypes { get; set; }
+        public DbSet<AttachmentType> AttachmentTypes { get; set; } 
+        public DbSet<SupportQuerys> SupportQuerys { get; set; }
 
         public DbSet<DatabaseVersion> DatabaseVersions { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

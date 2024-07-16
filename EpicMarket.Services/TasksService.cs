@@ -173,19 +173,20 @@ namespace EpicMarket.Services
                 Phonenumber = supportDTO.Phonenumber,
                 TypeofPersonid = supportDTO.TypeofPersonid,
                 Fullname = supportDTO.Fullname,
-                TaskStatusID = newTaskStatus.Id
+                //TaskStatusID = newTaskStatus.Id
 
             };
             _context.SupportTickets.Add(supportTicket);
             _context.SaveChanges();
             var supportTicketId = supportTicket.ID;
+            //TODO :NEED TO REMOVE REDUNTENT CODE
             Tasks taskToSave;
 
                 taskToSave = new Tasks
                 {
                     Name = "Support Query",
                     Description = supportDTO.SelectQuery,
-                    TaskTypeID = newTaskStatus.Id,
+                    TaskTypeID = newTaskStatus.Id,//new tasktype id will be genarted by the new table,Data need to be inserted.
                     TaskStatusID = newTaskStatus.Id,
                     PrimaryAssignedToPersonID = AdminPersonID,
                     DateAssigned = DateTime.Now,

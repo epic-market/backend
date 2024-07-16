@@ -9,21 +9,18 @@ using System.Threading.Tasks;
 
 namespace EpicMarket.Data.Models
 {
-    public class SupportTicket:BaseModel
+    public class SupportQuerys:BaseModel
     {
+
         [Key]
         public int ID { get; set; }
 
-        public string Email { get; set; }
+        public string Query { get; set; }
 
-        public string Phonenumber { get; set; }
-        public string Fullname { get; set; }
+        public int? TaskTypeID { get; set; }
         [ForeignKey("PersonType")]
-        public int TypeofPersonid { get; set; }
-        [ForeignKey("Tasks")]
-        public int? Taskid { get; set; }
-   
-        public virtual Tasks Tasks { get; set; }
+        public int? TypeofPersonid { get; set; }
         public virtual PersonType PersonType { get; set; }
+        public virtual TaskType TaskTypes { get; set; }
     }
 }
