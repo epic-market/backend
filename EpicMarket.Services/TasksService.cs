@@ -165,7 +165,19 @@ namespace EpicMarket.Services
         }
         public long AddSupportTask(SupportDTO supportDTO, int AdminPersonID)
         {
-            var newTaskStatus = _context.TaskStatusTypes.Where(row => row.Status == "New").FirstOrDefault();
+            var supportQuery = _context.SupportQuerys.Where(row => row.ID == supportDTO.QueryId).FirstOrDefault();
+            var taskID = this.SaveTask(new TasksDTO
+            {
+                ID = 0,
+                Name= "Support Query",
+                Description= supportQuery.Query,
+                TaskTypeID=supportQuery.TaskTypeID,
+                PrimaryAssignedToPersonID= AdminPersonID,
+                TaskData = supportDTO.Comment,
+                CreateBy = supportDTO.Email,
+                ReceivedDate = DateTime.Now
+            });
+
             SupportTicket supportTicket;
             supportTicket = new SupportTicket
             {
@@ -173,31 +185,11 @@ namespace EpicMarket.Services
                 Phonenumber = supportDTO.Phonenumber,
                 TypeofPersonid = supportDTO.TypeofPersonid,
                 Fullname = supportDTO.Fullname,
-                TaskStatusID = newTaskStatus.Id
-
+                Taskid= (int)taskID
             };
             _context.SupportTickets.Add(supportTicket);
             _context.SaveChanges();
-            var supportTicketId = supportTicket.ID;
-            Tasks taskToSave;
-
-                taskToSave = new Tasks
-                {
-                    Name = "Support Query",
-                    Description = supportDTO.SelectQuery,
-                    TaskTypeID = newTaskStatus.Id,
-                    TaskStatusID = newTaskStatus.Id,
-                    PrimaryAssignedToPersonID = AdminPersonID,
-                    DateAssigned = DateTime.Now,
-                    TaskData = supportDTO.Comment,
-                    ReceivedDate = DateTime.Now,
-                    CreateDate = DateTime.Now,
-                    CreateBy = supportDTO.Email
-                };
-                _context.Tasks.Add(taskToSave);
-                _context.SaveChanges();
-
-            return (long)taskToSave.ID;
+            return (long)supportTicket.ID;
         }
 
     }

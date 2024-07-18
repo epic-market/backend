@@ -4,6 +4,7 @@ using EpicMarket.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EpicMarket.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240716051517_YourMigrationName")]
+    partial class YourMigrationName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1558,14 +1561,9 @@ namespace EpicMarket.Data.Migrations
                     b.Property<int?>("TaskTypeID")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TypeofPersonid")
-                        .HasColumnType("int");
-
                     b.HasKey("ID");
 
                     b.HasIndex("TaskTypeID");
-
-                    b.HasIndex("TypeofPersonid");
 
                     b.ToTable("SupportQuerys");
                 });
@@ -2250,12 +2248,6 @@ namespace EpicMarket.Data.Migrations
                         .WithMany("SupportQuerys")
                         .HasForeignKey("TaskTypeID");
 
-                    b.HasOne("EpicMarket.Data.Models.PersonType", "PersonType")
-                        .WithMany("SupportQuerys")
-                        .HasForeignKey("TypeofPersonid");
-
-                    b.Navigation("PersonType");
-
                     b.Navigation("TaskTypes");
                 });
 
@@ -2501,8 +2493,6 @@ namespace EpicMarket.Data.Migrations
 
             modelBuilder.Entity("EpicMarket.Data.Models.PersonType", b =>
                 {
-                    b.Navigation("SupportQuerys");
-
                     b.Navigation("SupportTickets");
                 });
 

@@ -66,7 +66,7 @@ namespace EpicMarket.Entities
         public string Fullname { get; set; }
         public int TypeofPersonid { get; set; }
  
-        public int? TaskStatusID { get; set; }
+        public int? QueryId { get; set; }
         public string SelectQuery { get; set; }
         public string Comment { get; set; }
 

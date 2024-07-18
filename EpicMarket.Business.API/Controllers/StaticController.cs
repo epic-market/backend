@@ -147,5 +147,33 @@ namespace EpicMarket.Business.API.Controllers
             reponse.Data = options;
             return Ok(reponse);
         }
+        [HttpGet("GetAllSupportQuery")]
+        [AllowAnonymous]
+        public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetAllSupportQuery(int personTypeId)
+        {
+            var reponse = new OperationResult<List<DropDownOptions>>();
+
+            this.logger.LogInformation("Static Controller -> GetAllSupportQuery()");
+
+            var options = await staticService.GetAllSupportQuery(personTypeId);
+            this.logger.LogInformation("Static Controller-> GetAllSupportQuery()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = options }));
+
+            reponse.Data = options;
+            return Ok(reponse);
+        }
+        [HttpGet("GetAllPersonTypes")]
+        [AllowAnonymous]
+        public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetAllPersonTypes()
+        {
+            var reponse = new OperationResult<List<DropDownOptions>>();
+
+            this.logger.LogInformation("Static Controller -> GetAllPersonTypes()");
+
+            var options = await staticService.GetAllPersonTypes();
+            this.logger.LogInformation("Static Controller-> GetAllPersonTypes()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = options }));
+
+            reponse.Data = options;
+            return Ok(reponse);
+        }
     }
 }
