@@ -13,7 +13,9 @@ namespace EpicMarket.Contracts
     {
         List<AccessControlList_Result> Permissions { get; }
 
-        bool HasPermission(string username, string securable);
+		string LoggedInUsername { get; }
+
+		bool HasPermission(string username, string securable);
 
         Task<AppUser> GetUserByIdAsync(int id);
 

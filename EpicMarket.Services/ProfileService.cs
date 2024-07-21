@@ -1,4 +1,5 @@
 ﻿using EpicMarket.Contracts;
+using EpicMarket.Data.ApplicationModels;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
@@ -21,19 +22,25 @@ namespace EpicMarket.Services
         }
         public List<AccessControlList_Result> GetAccessControlList(Profile_SearchParams searchParams)
         {
-           var roleID = context.Roles.FirstOrDefault(r => r.Name == searchParams.UserRole).Id;
-           var AccessControlList = context.AccessControlLists.
-                Include(a=> a.Securable).
-                Include(a => a.AccessType).
-                Where(a => a.AccessType.Name ==  Constants.ACCESSTYPE_READWRITE && a.RoleID == roleID).
-                Select(a => new AccessControlList_Result()
-                 {
-                     ID = a.ID,
-                     AccessType = a.AccessType.Name,
-                     SecurableName = a.Securable.Name,
-                 }).ToList();
+           var roles = context.UserRoles.Include(c=>c.User).Where(c=> c.User.UserName == searchParams.LoggedInUserName).Select(c=> c.RoleId).ToList();
+			var accessControlList = context.AccessControlLists
+								.Include(a => a.Securable)
+								.Include(a => a.AccessType)
+								.Where(a => a.AccessType.Name == Constants.ACCESSTYPE_READWRITE && roles.Contains(a.RoleID))
+								.Select(a => new
+								{
+									securable = a.Securable.Name,
+									accessType = a.AccessType.Name
+								})
+								.Distinct()
+								.Select(a => new AccessControlList_Result
+								{
+									SecurableName = a.securable,
+									AccessType = a.accessType
+								})
+								.ToList();
 
-            return AccessControlList;
+			return accessControlList;
         }
     }
 }

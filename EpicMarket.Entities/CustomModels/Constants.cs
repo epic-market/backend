@@ -11,7 +11,7 @@ namespace EpicMarket.Entities.CustomModels
     {
 
         public const string ADMIN_USERID = "admin@epicmarket.in";
-        public const string ACCESSTYPE_READWRITE = "readwrite";
+        public const string ACCESSTYPE_READWRITE = "ReadWrite";
     }
 
 	public static class Business_Status

@@ -28,7 +28,16 @@ namespace EpicMarket.Services
             this.profileService = profileService;
         }
 
-        private List<AccessControlList_Result> permissions;
+		public UserRepository(string loggedInUsername, ApplicationDbContext context,
+			IProfileService profileService)
+		{
+	        this.loggedInUsername = loggedInUsername;
+			this.context = context;
+			this.profileService = profileService;
+		}
+
+            
+		private List<AccessControlList_Result> permissions;
         private string loggedInUsername;
 
         public IConfiguration Configuration;
