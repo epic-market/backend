@@ -8,8 +8,20 @@ namespace EpicMarket.Entities.Entities
 {
     public class ResetPasswordParams
     {
-        public string UserName { get; set; } 
+        public string email { get; set; }
+        public string path { get; set; }
     }
+    public class SetNewPasswordParams
+    {
+        public string password { get; set; }
+        public string token { get; set; }
+    }
+    public class CheckResetLinkResult
+    {
+        public string UserID { get; set; }
+        public string FirstName { get; set; }
 
+        public string Email { get; set; }
+    }
 
 }

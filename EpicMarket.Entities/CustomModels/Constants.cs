@@ -57,6 +57,10 @@ namespace EpicMarket.Entities.CustomModels
         public const string EditOrder = "EditOrder"; 
         public const string AddBusiness = "AddBusiness";
     }
+    public static class ContactMethodConstants
+    {
+        public const string EMAIL = "Email";
+    }
 
     public static class VerificationConstants
     {
