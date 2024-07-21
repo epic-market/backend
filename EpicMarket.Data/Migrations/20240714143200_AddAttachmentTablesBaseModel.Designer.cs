@@ -4,6 +4,7 @@ using EpicMarket.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EpicMarket.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240714143200_AddAttachmentTablesBaseModel")]
+    partial class AddAttachmentTablesBaseModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1532,44 +1535,6 @@ namespace EpicMarket.Data.Migrations
                     b.ToTable("StatusOptionSets");
                 });
 
-            modelBuilder.Entity("EpicMarket.Data.Models.SupportQuerys", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Query")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("TaskTypeID")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TypeofPersonid")
-                        .HasColumnType("int");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("TaskTypeID");
-
-                    b.HasIndex("TypeofPersonid");
-
-                    b.ToTable("SupportQuerys");
-                });
-
             modelBuilder.Entity("EpicMarket.Data.Models.SupportTicket", b =>
                 {
                     b.Property<int>("ID")
@@ -1581,28 +1546,16 @@ namespace EpicMarket.Data.Migrations
                     b.Property<int?>("AppUserId")
                         .HasColumnType("int");
 
-                    b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Fullname")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Phonenumber")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("Taskid")
+                    b.Property<int?>("TaskStatusID")
                         .HasColumnType("int");
 
                     b.Property<int>("TypeofPersonid")
@@ -1612,7 +1565,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("AppUserId");
 
-                    b.HasIndex("Taskid");
+                    b.HasIndex("TaskStatusID");
 
                     b.HasIndex("TypeofPersonid");
 
@@ -2244,30 +2197,15 @@ namespace EpicMarket.Data.Migrations
                     b.Navigation("EventCategorys");
                 });
 
-            modelBuilder.Entity("EpicMarket.Data.Models.SupportQuerys", b =>
-                {
-                    b.HasOne("EpicMarket.Data.Models.TaskType", "TaskTypes")
-                        .WithMany("SupportQuerys")
-                        .HasForeignKey("TaskTypeID");
-
-                    b.HasOne("EpicMarket.Data.Models.PersonType", "PersonType")
-                        .WithMany("SupportQuerys")
-                        .HasForeignKey("TypeofPersonid");
-
-                    b.Navigation("PersonType");
-
-                    b.Navigation("TaskTypes");
-                });
-
             modelBuilder.Entity("EpicMarket.Data.Models.SupportTicket", b =>
                 {
                     b.HasOne("EpicMarket.Data.Models.AppUser", null)
                         .WithMany("SupportTickets")
                         .HasForeignKey("AppUserId");
 
-                    b.HasOne("EpicMarket.Data.Models.Tasks", "Tasks")
-                        .WithMany("SupportTickets")
-                        .HasForeignKey("Taskid");
+                    b.HasOne("EpicMarket.Data.Models.TaskStatusType", "TaskStatusType")
+                        .WithMany()
+                        .HasForeignKey("TaskStatusID");
 
                     b.HasOne("EpicMarket.Data.Models.PersonType", "PersonType")
                         .WithMany("SupportTickets")
@@ -2277,7 +2215,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.Navigation("PersonType");
 
-                    b.Navigation("Tasks");
+                    b.Navigation("TaskStatusType");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.TaskType", b =>
@@ -2501,8 +2439,6 @@ namespace EpicMarket.Data.Migrations
 
             modelBuilder.Entity("EpicMarket.Data.Models.PersonType", b =>
                 {
-                    b.Navigation("SupportQuerys");
-
                     b.Navigation("SupportTickets");
                 });
 
@@ -2522,14 +2458,7 @@ namespace EpicMarket.Data.Migrations
 
             modelBuilder.Entity("EpicMarket.Data.Models.TaskType", b =>
                 {
-                    b.Navigation("SupportQuerys");
-
                     b.Navigation("Tasks");
-                });
-
-            modelBuilder.Entity("EpicMarket.Data.Models.Tasks", b =>
-                {
-                    b.Navigation("SupportTickets");
                 });
 #pragma warning restore 612, 618
         }

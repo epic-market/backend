@@ -21,5 +21,6 @@ namespace EpicMarket.Data.Models
 
         public virtual ICollection<EventLog>? EventLogs { get; set; } 
         public virtual ICollection<Tasks>? Taskss { get; set; }
+        public virtual ICollection<AttachmentLink>? AttachmentLinks { get; set; }
     }
 }

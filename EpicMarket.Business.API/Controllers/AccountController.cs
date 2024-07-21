@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using EpicMarket.Services;
+using Newtonsoft.Json;
 
 namespace EpicMarket.Business.API.Controllers
 {
@@ -158,26 +160,46 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpPost("ResetPassword")]
+        [AllowAnonymous]
         public async Task<ActionResult<OperationResult<string>>> ResetPassword(ResetPasswordParams resetPassword)
         {
 
             var response = new OperationResult<string>();
 
-            if (await UserExists(resetPassword.UserName))
+            if (await UserExists(resetPassword.email))
             {
-
+                response.Data = this._tokenService.ResetPassword(resetPassword);
             }
+            else
+            {
+                response.Status = "ERROR";
+                response.Data = "Invalid User Name";
+            }
+            return response;
+        }
+        [HttpGet("CheckResetPasswordLink")]
+        [AllowAnonymous]
+        public async Task<ActionResult<OperationResult<CheckResetLinkResult>>> CheckResetPasswordLink(string queryParam)
+        {
+            var response = new OperationResult<CheckResetLinkResult>();
 
 
-            //var user = await _userManager.Users
-            //.SingleOrDefaultAsync(x => x.UserName == UserName);
-            //var result = await _userManager
-            //    .ChangePasswordAsync(user, changePasswordParams.CurrentPassword, changePasswordParams.NewPassword);
+           var result = _tokenService.CheckResetPasswordLink(queryParam);
+            
+            response.Data = result;
 
-            //if (!result.Succeeded) return Unauthorized();
+            return Ok(response);
+        }
+        [HttpPost("setNewPassword")]
+        [Authorize]
+        public async Task<ActionResult<OperationResult<string>>> setNewPassword(SetNewPasswordParams setNewPasswordParams)
+        {
 
-            response.Data = "Password changed Succufully";
+            var response = new OperationResult<string>();
 
+            
+            response.Data = this._tokenService.setNewPassword(setNewPasswordParams);
+            
             return response;
         }
 
