@@ -42,4 +42,6 @@ public DbSet<EpicMarket.Data.ApplicationModels.AccessType> AccessType { get; set
 
 public DbSet<EpicMarket.Data.Models.AttachmentType> AttachmentType { get; set; } = default!;
 
+public DbSet<EpicMarket.Data.Models.ContactMethod> ContactMethod { get; set; } = default!;
+
 }
