@@ -40,4 +40,6 @@ public DbSet<EpicMarket.Data.ApplicationModels.AccessControlList> AccessControlL
 
 public DbSet<EpicMarket.Data.ApplicationModels.AccessType> AccessType { get; set; } = default!;
 
+public DbSet<EpicMarket.Data.Models.AttachmentType> AttachmentType { get; set; } = default!;
+
 }
