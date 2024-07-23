@@ -1,5 +1,6 @@
 ﻿using EpicMarket.Data.ApplicationModels;
 using EpicMarket.Data.Models;
+using EpicMarket.Entities.CustomModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,10 +11,11 @@ namespace EpicMarket.Contracts
 {
     public interface IUserRepository
     {
-        string LoggedInUsername { get; }
-        List<AccessControlList> Permissions { get; }
+        List<AccessControlList_Result> Permissions { get; }
 
-        bool HasPermission(string username, string securable);
+		string LoggedInUsername { get; }
+
+		bool HasPermission(string username, string securable);
 
         Task<AppUser> GetUserByIdAsync(int id);
 

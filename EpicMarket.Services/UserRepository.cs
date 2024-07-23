@@ -1,9 +1,11 @@
 ﻿using EpicMarket.Contracts;
 using EpicMarket.Data.ApplicationModels;
 using EpicMarket.Data.Models;
+using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using NVelocity.Context;
 using System;
 using System.Collections.Generic;
@@ -17,15 +19,48 @@ namespace EpicMarket.Services
     public class UserRepository : IUserRepository
     {
         private readonly ApplicationDbContext context;
+        private readonly IProfileService profileService;
 
-        public UserRepository(ApplicationDbContext context)
+        public UserRepository(ApplicationDbContext context,
+            IProfileService profileService)
         {
             this.context = context;
+            this.profileService = profileService;
         }
 
-        public string LoggedInUsername => throw new NotImplementedException();
+		public UserRepository(string loggedInUsername, ApplicationDbContext context,
+			IProfileService profileService)
+		{
+	        this.loggedInUsername = loggedInUsername;
+			this.context = context;
+			this.profileService = profileService;
+		}
 
-        public List<AccessControlList> Permissions => throw new NotImplementedException();
+            
+		private List<AccessControlList_Result> permissions;
+        private string loggedInUsername;
+
+        public IConfiguration Configuration;
+
+        public List<AccessControlList_Result> Permissions
+        {
+            get
+            {
+                if (this.permissions == null)
+                {
+                    this.permissions = this.profileService.GetAccessControlList(new Profile_SearchParams() { ApplicationName = null, LoggedInUserName = this.loggedInUsername, UserRole = null });
+                }
+
+                return this.permissions;
+            }
+        }
+        public string LoggedInUsername
+        {
+            get
+            {
+                return this.loggedInUsername;
+            }
+        }
 
         public bool IsBusinessVerified(int id)
         {
@@ -40,7 +75,9 @@ namespace EpicMarket.Services
 
         public bool HasPermission(string username, string securable)
         {
-            throw new NotImplementedException();
+            this.loggedInUsername = username;
+            this.permissions = this.Permissions;
+            return this.permissions.Any(x => x.SecurableName.Equals(securable, System.StringComparison.InvariantCultureIgnoreCase) && (x.AccessType == Constants.ACCESSTYPE_READWRITE));
         }
     }
 }

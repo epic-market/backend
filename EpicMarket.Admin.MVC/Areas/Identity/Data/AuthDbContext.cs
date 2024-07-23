@@ -3,6 +3,7 @@ using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using EpicMarket.Data.ApplicationModels;
 
 namespace EpicMarket.Admin.MVC.Data;
 
@@ -34,5 +35,17 @@ public DbSet<EpicMarket.Data.Models.Entity> Entity { get; set; } = default!;
 public DbSet<EpicMarket.Data.Models.ApplicationsTable> ApplicationsTable { get; set; } = default!;
 
 public DbSet<EpicMarket.Data.Models.BlogCategory> BlogCategory { get; set; } = default!;
+
+public DbSet<EpicMarket.Data.ApplicationModels.AccessControlList> AccessControlList { get; set; } = default!;
+
+public DbSet<EpicMarket.Data.ApplicationModels.AccessType> AccessType { get; set; } = default!;
+
+public DbSet<EpicMarket.Data.Models.AttachmentType> AttachmentType { get; set; } = default!;
+
+public DbSet<EpicMarket.Data.Models.ContactMethod> ContactMethod { get; set; } = default!;
+
+public DbSet<EpicMarket.Data.Models.Attachment> Attachment { get; set; } = default!;
+
+public DbSet<EpicMarket.Data.Models.PersonType> PersonType { get; set; } = default!;
 
 }

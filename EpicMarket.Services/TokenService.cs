@@ -1,5 +1,9 @@
 ﻿using EpicMarket.Contracts;
+using EpicMarket.Data.ApplicationModels;
 using EpicMarket.Data.Models;
+using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
+using EpicMarket.Entities.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -19,12 +23,20 @@ namespace EpicMarket.Services
         private readonly SymmetricSecurityKey _key;
         private readonly UserManager<AppUser> _userManager;
         private readonly ApplicationDbContext dbContext;
+        private readonly IApplicationConfigurationService applicationConfiguration;
+        private readonly ICommunicationQueueService communicationQueueService;
 
-        public TokenService(IConfiguration config, UserManager<AppUser> userManager,ApplicationDbContext dbContext)
+        public TokenService(IConfiguration config,
+                            UserManager<AppUser> userManager,
+                            ApplicationDbContext dbContext, 
+                            IApplicationConfigurationService applicationConfiguration,
+                            ICommunicationQueueService communicationQueueService)
         {
             _userManager = userManager;
             this.dbContext = dbContext;
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
+            this.applicationConfiguration = applicationConfiguration;
+            this.communicationQueueService = communicationQueueService;
         }
 
         public async Task<string> CreateToken(AppUser user)
@@ -55,5 +67,87 @@ namespace EpicMarket.Services
 
             return tokenHandler.WriteToken(token);
         }
+
+        public string ResetPassword(ResetPasswordParams resetPassword)
+        {
+            try
+            {
+                var User = dbContext.Users.Where(u => resetPassword.email == u.UserName).FirstOrDefault();
+                var UniqueGuid = Guid.NewGuid();
+                User.UniqueGuid = UniqueGuid.ToString();
+                dbContext.Users.Update(User);
+                var intialURL = applicationConfiguration.GetApplicationConfigurationValue("BusinessOwnerBaseURL");
+                string queryToken = intialURL+ resetPassword.path + "/"+ User.Id+"." + UniqueGuid;
+                this.communicationQueueService.InsertCommunicationQueue(
+                    new Entities.CommunicationQueueDTO()
+                    {
+                        MessageData= queryToken,
+                        Subject="Password Reset",
+                        NotificationRecipient= resetPassword.email,
+                        ContactMethod= ContactMethodConstants.EMAIL,
+                        CreateBy= resetPassword.email
+                    });
+
+                return "Reset Link sent to registered Email";
+
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+            
+        }
+        public string setNewPassword(SetNewPasswordParams setNewPasswordParams)
+        {
+                var User = dbContext.Users.Where(u => setNewPasswordParams.token == u.UniqueGuid).FirstOrDefault();
+                if (User == null)
+                {
+                    var result = _userManager.ResetPasswordAsync(User, setNewPasswordParams.token, setNewPasswordParams.password);
+                    if (!result.IsCompletedSuccessfully)
+                {
+                    throw new Exception("Failed try again after some time");
+                }
+                else
+                {
+                        var UniqueGuid = Guid.NewGuid();
+                        User.UniqueGuid = null;
+                        dbContext.Users.Update(User);
+                        return "Succesfully";
+                    }
+                }
+                else
+                {
+                    throw new Exception("Something went worng try again after some time");
+                   
+                }
+        }
+        public CheckResetLinkResult CheckResetPasswordLink(string queryParam)
+        {
+            string[] tokenParts = queryParam.Split('.');
+
+            string userId = tokenParts[0];
+            string uniqueGuid = tokenParts[1];
+            int UserID;
+            int.TryParse(userId, out UserID);
+            var User = dbContext.Users.Find(UserID);
+
+            if (User.UniqueGuid == uniqueGuid)
+            {
+               var result = new CheckResetLinkResult()
+                {
+
+                    UserID = userId,
+                    FirstName = User.FirstName,
+                    Email = User.Email,
+                };
+
+                return result;
+            }
+            else
+            {
+                throw new Exception("Link is Not correct");
+            }
+        }
+
     }
 }

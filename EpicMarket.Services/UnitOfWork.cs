@@ -12,13 +12,16 @@ namespace EpicMarket.Services
     {
 
         private readonly ApplicationDbContext _context;
-        public UnitOfWork(ApplicationDbContext context)
+		private readonly IProfileService profileService;
+		private readonly string loggedInUserName;
+
+		public UnitOfWork(ApplicationDbContext context,IProfileService profileService)
         {
             _context = context;
+			this.profileService = profileService;
+		}
 
-        }
-
-        public IUserRepository UserRepository => new UserRepository(_context);
+        public IUserRepository UserRepository => new UserRepository(_context, profileService);
 
         public async Task<bool> Complete()
         {

@@ -3,7 +3,10 @@ using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Services;
 using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.ApplicationInsights.Extensibility.Implementation;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
@@ -20,7 +23,15 @@ namespace EpicMarket.Business.API.Extension
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IApplicationConfigurationService, ApplicationConfigurationService>();
+
+			services.AddScoped<IUserRepository, UserRepository>((provider) =>
+			{
+				var loggedInUsername = provider.GetService<IHttpContextAccessor>().HttpContext.User.Identity.Name;
+				return new UserRepository(loggedInUsername,provider.GetService<ApplicationDbContext>(),
+					provider.GetService<IProfileService>()
+				);
+			});
+			services.AddScoped<IApplicationConfigurationService, ApplicationConfigurationService>();
             services.AddScoped<ICommunicationService, CommunicationService>();
             services.AddScoped<ICommunicationQueueService, CommunicationQueueService>();
             services.AddScoped<ITasksService, TasksService>();
@@ -33,7 +44,8 @@ namespace EpicMarket.Business.API.Extension
             services.AddScoped<IEmployeeService, EmployeeService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IHomeService, HomeService>();
-            services.AddScoped<IFileService,FileService>();
+			services.AddScoped<IProfileService, ProfileService>();
+			services.AddScoped<IFileService,FileService>();
             services.AddScoped<IAttachmentService, AttachmentService>();
             services.AddScoped<LogUserActivity>();
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);

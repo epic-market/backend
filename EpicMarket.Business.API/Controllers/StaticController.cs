@@ -1,4 +1,5 @@
-﻿using EpicMarket.Contracts;
+﻿using EpicMarket.Business.API.Extension;
+using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
@@ -43,7 +44,7 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpGet("GetStatusOptions")]
-        [AllowAnonymous]
+        [CustomAuthorize(Securable = Securables.STATUS_OPTIONS)]
         public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetStatusOptions()
         {
             var reponse = new OperationResult<List<DropDownOptions>>();

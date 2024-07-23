@@ -15,6 +15,7 @@ namespace EpicMarket.Business.API.Extension
         /// </value>
         public string Securable { get; set; }
 
+
         /// <summary>
         /// On Authorization
         /// </summary>

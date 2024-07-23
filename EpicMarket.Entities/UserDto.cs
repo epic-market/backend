@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EpicMarket.Entities.CustomModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -33,9 +34,11 @@ namespace EpicMarket.Entities
         public UserLoginDto UserDetails { get; set; }
 
         public UserBusinessDto UserBusiness { get; set; }
+        public List<AccessControlList_Result> Securables { get; set; }
     }
     public class TokenDto
     {
         public string Token { get; set; }
     }
+    
 }

@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using EpicMarket.Services;
+using Newtonsoft.Json;
 
 namespace EpicMarket.Business.API.Controllers
 {
@@ -22,7 +24,18 @@ namespace EpicMarket.Business.API.Controllers
         private readonly ICommunicationService communication;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
-        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, IMapper mapper, ILogger<AccountController> logger, ICommunicationService communication, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
+        private readonly IProfileService profileService;
+        public AccountController(
+                                    UserManager<AppUser> userManager,
+                                    SignInManager<AppUser> signInManager,
+                                    ITokenService tokenService,
+                                    IMapper mapper,
+                                    ILogger<AccountController> logger,
+                                    ICommunicationService communication,
+                                    ApplicationDbContext dbContext,
+                                    IHttpContextAccessor httpContextAccessor,
+                                    IProfileService profileService
+                                    ) : base(dbContext, httpContextAccessor)
 		{
             _signInManager = signInManager;
             _userManager = userManager;
@@ -30,6 +43,7 @@ namespace EpicMarket.Business.API.Controllers
             this.logger = logger;
             this.communication = communication;
             _tokenService = tokenService;
+            this.profileService = profileService;
         }
 
         [HttpPost("register")]
@@ -117,6 +131,7 @@ namespace EpicMarket.Business.API.Controllers
                     businessStatus = c.Bussiness.Status.Status,
                 }).FirstOrDefault();
             }
+            List<AccessControlList_Result> permissions= this.profileService.GetAccessControlList(new Profile_SearchParams() { ApplicationName = null, LoggedInUserName = this.LoggedInUserName, UserRole = null });
 
             response.Data = new LoginResult()
             {
@@ -127,7 +142,8 @@ namespace EpicMarket.Business.API.Controllers
                     LastName = user.LastName,
                     Phone = user.PhoneNumber
                 },
-                UserBusiness = userBusinessDto
+                UserBusiness = userBusinessDto,
+                Securables=permissions
             };
 
             return response;
@@ -158,26 +174,46 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpPost("ResetPassword")]
+        [AllowAnonymous]
         public async Task<ActionResult<OperationResult<string>>> ResetPassword(ResetPasswordParams resetPassword)
         {
 
             var response = new OperationResult<string>();
 
-            if (await UserExists(resetPassword.UserName))
+            if (await UserExists(resetPassword.email))
             {
-
+                response.Data = this._tokenService.ResetPassword(resetPassword);
             }
+            else
+            {
+                response.Status = "ERROR";
+                response.Data = "Invalid User Name";
+            }
+            return response;
+        }
+        [HttpGet("CheckResetPasswordLink")]
+        [AllowAnonymous]
+        public async Task<ActionResult<OperationResult<CheckResetLinkResult>>> CheckResetPasswordLink(string queryParam)
+        {
+            var response = new OperationResult<CheckResetLinkResult>();
 
 
-            //var user = await _userManager.Users
-            //.SingleOrDefaultAsync(x => x.UserName == UserName);
-            //var result = await _userManager
-            //    .ChangePasswordAsync(user, changePasswordParams.CurrentPassword, changePasswordParams.NewPassword);
+           var result = _tokenService.CheckResetPasswordLink(queryParam);
+            
+            response.Data = result;
 
-            //if (!result.Succeeded) return Unauthorized();
+            return Ok(response);
+        }
+        [HttpPost("setNewPassword")]
+        [Authorize]
+        public async Task<ActionResult<OperationResult<string>>> setNewPassword(SetNewPasswordParams setNewPasswordParams)
+        {
 
-            response.Data = "Password changed Succufully";
+            var response = new OperationResult<string>();
 
+            
+            response.Data = this._tokenService.setNewPassword(setNewPasswordParams);
+            
             return response;
         }
 
