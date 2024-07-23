@@ -18,49 +18,51 @@ namespace EpicMarket.Services
             _context = context;
         }
 
-        public void InsertOrUpdateAttachment(AttachmentDTO attachmentDTO)
+        public int InsertOrUpdateAttachment(AttachmentDTO attachmentDTO)
         {
-            var existingAttachment = _context.Attachments
+            var attachment = _context.Attachments
                 .FirstOrDefault(a => a.ID == attachmentDTO.ID);
-
-            if (existingAttachment != null)
+            var attachmentTypeID=_context.AttachmentTypes.FirstOrDefault(a => a.Name == attachmentDTO.AttachmentTypeName).ID;
+            if (attachment != null)
             {
-                existingAttachment.AttachmentTypeID = attachmentDTO.AttachmentTypeID;
-                existingAttachment.Name = attachmentDTO.Name;
-                existingAttachment.Comment = attachmentDTO.Comment;
-                existingAttachment.DocumentType = attachmentDTO.DocumentType;
-                existingAttachment.DocumentFileType = attachmentDTO.DocumentFileType;
-                existingAttachment.DocumentFolderPath = attachmentDTO.DocumentFolderPath;
-                existingAttachment.DocumentFile = attachmentDTO.DocumentFile;
+                attachment.AttachmentTypeID = attachmentTypeID;
+                attachment.Name = attachmentDTO.Name;
+                attachment.Comment = attachmentDTO.Comment;
+                attachment.DocumentType = attachmentDTO.DocumentType;
+                attachment.DocumentFileType = attachmentDTO.DocumentFileType;
+                attachment.DocumentFolderPath = attachmentDTO.DocumentFolderPath;
+                attachment.DocumentFile = attachmentDTO.DocumentFile;
 
-                _context.Attachments.Update(existingAttachment);
+                _context.Attachments.Update(attachment);
             }
             else
             {
-                var newAttachment = new Attachment
+                 attachment = new Attachment
                 {
-                    AttachmentTypeID = attachmentDTO.AttachmentTypeID,
+                    AttachmentTypeID = attachmentTypeID,
                     Name = attachmentDTO.Name,
                     Comment = attachmentDTO.Comment,
-                    DocumentType = attachmentDTO.DocumentType,
+                    DocumentType = attachmentDTO.DocumentType,//File
                     DocumentFileType = attachmentDTO.DocumentFileType,
                     DocumentFolderPath = attachmentDTO.DocumentFolderPath,
                     DocumentFile = attachmentDTO.DocumentFile
                 };
 
-                _context.Attachments.Add(newAttachment);
+                _context.Attachments.Add(attachment);
             }
 
             _context.SaveChanges();
+            return attachment.ID;
         }
 
 
         public void InsertAttachmentLink(AttachmentLinkDTO attachmentLinkDTO)
         {
+            var entityID = _context.Entity.FirstOrDefault(a => a.Name == attachmentLinkDTO.Entity).ID;
             var attachmentLink = new AttachmentLink
             {
                 AttachmentID = attachmentLinkDTO.AttachmentID,
-                EntityID = attachmentLinkDTO.EntityID,
+                EntityID = entityID,
                 RecordID = attachmentLinkDTO.RecordID
             };
 

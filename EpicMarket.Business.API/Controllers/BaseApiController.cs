@@ -82,15 +82,21 @@ namespace EpicMarket.Business.API.Controllers
 
 
 
-        protected async Task<string> SaveFileGlobalAsync(IFormFile file, string entityName, IFileService fileStoreService, IApplicationConfigurationService applicationConfigurationService)
+        protected async Task<SaveFileDTO> SaveFileGlobalAsync(IFormFile file, string entityName, IFileService fileStoreService, IApplicationConfigurationService applicationConfigurationService,int RecordID = 0)
 		{
 			string filePath = " ";
 			if (file != null && file.Length > 0)
 			{
 				string fullPathLocation = null;
-				if (!string.IsNullOrWhiteSpace(entityName))
+				string subPathLocation = null;
+
+                if (!string.IsNullOrWhiteSpace(entityName))
 				{
-					fullPathLocation = this.GetFolderPathFromConfiguration(entityName, applicationConfigurationService);
+					fullPathLocation = applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.BasePath);
+                    subPathLocation = this.GetFolderPathFromConfiguration(entityName, applicationConfigurationService);
+                    if (RecordID != 0) {
+                        fullPathLocation = fullPathLocation + "\\" + RecordID +"\\"+ subPathLocation;
+                    }
 					if (!fullPathLocation.EndsWith("\\"))
 					{
 						fullPathLocation = fullPathLocation + "\\";
@@ -107,7 +113,11 @@ namespace EpicMarket.Business.API.Controllers
 				fileName = fileName.SanitizeFile();
 				filePath = await fileStoreService.UploadFileAsync(uploadedFile, fullPathLocation, fileName);
 
-				return fileName;
+				return new SaveFileDTO()
+				{
+					FileName = fileName,
+					FullPathLocation = fullPathLocation.ToString()
+				};
 			}
 
 			return null;
@@ -176,8 +186,12 @@ namespace EpicMarket.Business.API.Controllers
 			{
 				path = applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.LOGO);
 			}
-			
-			return path;
+            else if (ApplicationConfigurationConstants.Business.Equals(entityNameOrAppConfig))
+            {
+                path = applicationConfigurationService.GetApplicationConfigurationValue(FilePathConstants.Business);
+            }
+
+            return path;
 		}
 
 

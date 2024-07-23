@@ -37,7 +37,13 @@ namespace EpicMarket.Entities.CustomModels
 	{
 		public const string Products = "Products";
 		public const string LOGO = "LOGO";
-	}
+        public const string BasePath = "BASEPATH";
+        public const string Business = "BUSINESS";
+    }
+    public static class FilePathConstants
+    {
+        public const string Business = "BUSINESSPATH";
+    }
     public static class EntityConstants
     {
         public const string Catelog = "Catelog";
@@ -45,6 +51,14 @@ namespace EpicMarket.Entities.CustomModels
         public const string Employees = "Employees";
         public const string Order = "Order";
         public const string Business = "Business";
+    }
+    public static class AttachmentTypeConstants
+    {
+        public const string LOGO = "Logo";
+    }
+    public static class DocumentTypeConstants
+    {
+        public const string FILE = "File";
     }
     public static class EventConstants
     {
