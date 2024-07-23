@@ -46,4 +46,6 @@ public DbSet<EpicMarket.Data.Models.ContactMethod> ContactMethod { get; set; } =
 
 public DbSet<EpicMarket.Data.Models.Attachment> Attachment { get; set; } = default!;
 
+public DbSet<EpicMarket.Data.Models.PersonType> PersonType { get; set; } = default!;
+
 }
