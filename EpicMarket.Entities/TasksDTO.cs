@@ -67,7 +67,6 @@ namespace EpicMarket.Entities
         public int TypeofPersonid { get; set; }
  
         public int? QueryId { get; set; }
-        public string SelectQuery { get; set; }
         public string Comment { get; set; }
 
 

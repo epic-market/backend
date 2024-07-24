@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -42,6 +43,6 @@ namespace EpicMarket.Entities
 
         public string proofURL { get; set; }
 
-
+        public IFormFile LOGOFile { get; set; }
     }
 }

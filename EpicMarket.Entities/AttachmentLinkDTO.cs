@@ -10,7 +10,7 @@ namespace EpicMarket.Entities
     {
         public int ID { get; set; }
         public int AttachmentID { get; set; }
-        public int EntityID { get; set; }
+        public string Entity { get; set; }
         public int RecordID { get; set; }
     }
 

@@ -9,7 +9,7 @@ namespace EpicMarket.Entities
     public class AttachmentDTO
     {
         public int ID { get; set; }  
-        public int AttachmentTypeID { get; set; }
+        public String AttachmentTypeName { get; set; }
         public string Name { get; set; }
         public string Comment { get; set; }
         public string DocumentType { get; set; }
@@ -17,5 +17,9 @@ namespace EpicMarket.Entities
         public string DocumentFolderPath { get; set; }
         public string DocumentFile { get; set; }
     }
-
+    public class SaveFileDTO
+    {
+        public string FileName { get; set; }
+        public string FullPathLocation { get; set; }
+    }
 }
