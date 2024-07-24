@@ -30,7 +30,7 @@ namespace EpicMarket.Services
             var newTaskStatus = _context.TaskStatusTypes.Where(row => row.Status == "New").FirstOrDefault();
             var updateTaskStatus = _context.TaskStatusTypes.Where(row => row.Status == tasksDTO.TaskStatus).FirstOrDefault();
             Tasks taskToSave;
-            if (currentTask != null)
+            if (currentTask == null)
             {
                 taskToSave = new Tasks
                 {
@@ -53,7 +53,7 @@ namespace EpicMarket.Services
                 };
                 _context.Tasks.Add(taskToSave);
                 _context.SaveChanges();
-                currentTask.ID = taskToSave.ID;
+                return (long)taskToSave.ID;
             }
             else
             {
@@ -73,9 +73,8 @@ namespace EpicMarket.Services
                 };
                 _context.Tasks.Update(taskToSave);
                 _context.SaveChanges();
-
+                return (long)currentTask.ID;
             }
-            return (long)currentTask.ID;
         }
 
         public int SaveComments(CommentDTO commentDTO)
@@ -168,7 +167,6 @@ namespace EpicMarket.Services
             var supportQuery = _context.SupportQuerys.Where(row => row.ID == supportDTO.QueryId).FirstOrDefault();
             var taskID = this.SaveTask(new TasksDTO
             {
-                ID = 0,
                 Name= "Support Query",
                 Description= supportQuery.Query,
                 TaskTypeID=supportQuery.TaskTypeID,

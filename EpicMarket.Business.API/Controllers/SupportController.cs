@@ -94,9 +94,9 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpPost("AddSupportTask")]
-        public ActionResult<OperationResult<int>> AddSupportTask(SupportDTO supportDTO)
+        public ActionResult<OperationResult<long>> AddSupportTask(SupportDTO supportDTO)
         {
-            var response = new OperationResult<int>();
+            var response = new OperationResult<long>();
 
             this.logger.LogInformation("Support Controller -> AddSupportTask()-> params {0}", JsonConvert.SerializeObject(new { Params = supportDTO }));
 

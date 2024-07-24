@@ -60,14 +60,14 @@ namespace EpicMarket.Business.API.Controllers
 			await userManager.AddToRoleAsync(appuser, ROLES.BUSINESS_OWNER);
 
             this.logger.LogInformation("Business Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
-            var filinsertOutput = this.SaveFileGlobalAsync(businessRegisterDto.File, EntityConstants.Business, this.fileStoreService, this.applicationConfigurationService, id).Result;
+            var filinsertOutput = this.SaveFileGlobalAsync(businessRegisterDto.LOGOFile, EntityConstants.Business, this.fileStoreService, this.applicationConfigurationService, id).Result;
             var attachmentId=this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
             {
                 AttachmentTypeName = AttachmentTypeConstants.LOGO,
                 Name = EntityConstants.Business + AttachmentTypeConstants.LOGO,
                 Comment = null,
                 DocumentType=DocumentTypeConstants.FILE,
-                DocumentFileType= businessRegisterDto.File.ContentType,
+                DocumentFileType= businessRegisterDto.LOGOFile.ContentType,
                 DocumentFolderPath= filinsertOutput.FullPathLocation,
                 DocumentFile= filinsertOutput.FileName,
             });

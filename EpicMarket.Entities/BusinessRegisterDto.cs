@@ -43,7 +43,6 @@ namespace EpicMarket.Entities
 
         public string proofURL { get; set; }
 
-        public IFormFile File { get; set; }
-        public string FileName { get; set; }
+        public IFormFile LOGOFile { get; set; }
     }
 }
