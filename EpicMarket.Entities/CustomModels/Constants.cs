@@ -55,6 +55,7 @@ namespace EpicMarket.Entities.CustomModels
     public static class AttachmentTypeConstants
     {
         public const string LOGO = "Logo";
+        public const string PROOF = "Proof";
     }
     public static class DocumentTypeConstants
     {

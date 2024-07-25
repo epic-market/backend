@@ -60,23 +60,46 @@ namespace EpicMarket.Business.API.Controllers
 			await userManager.AddToRoleAsync(appuser, ROLES.BUSINESS_OWNER);
 
             this.logger.LogInformation("Business Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
-            var filinsertOutput = this.SaveFileGlobalAsync(businessRegisterDto.LOGOFile, EntityConstants.Business, this.fileStoreService, this.applicationConfigurationService, id).Result;
-            var attachmentId=this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
+            if (businessRegisterDto.LOGOFile.Length>0)
             {
-                AttachmentTypeName = AttachmentTypeConstants.LOGO,
-                Name = EntityConstants.Business + AttachmentTypeConstants.LOGO,
-                Comment = null,
-                DocumentType=DocumentTypeConstants.FILE,
-                DocumentFileType= businessRegisterDto.LOGOFile.ContentType,
-                DocumentFolderPath= filinsertOutput.FullPathLocation,
-                DocumentFile= filinsertOutput.FileName,
-            });
-            this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
+                var filinsertOutput = this.SaveFileGlobalAsync(businessRegisterDto.LOGOFile, EntityConstants.Business, this.fileStoreService, this.applicationConfigurationService, id).Result;
+                var attachmentId = this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
+                {
+                    AttachmentTypeName = AttachmentTypeConstants.LOGO,
+                    Name = EntityConstants.Business + AttachmentTypeConstants.LOGO,
+                    Comment = null,
+                    DocumentType = DocumentTypeConstants.FILE,
+                    DocumentFileType = businessRegisterDto.LOGOFile.ContentType,
+                    DocumentFolderPath = filinsertOutput.FullPathLocation,
+                    DocumentFile = filinsertOutput.FileName,
+                });
+                this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
+                {
+                    AttachmentID = attachmentId,
+                    Entity = EntityConstants.Business,
+                    RecordID = id
+                });
+            }
+            if (businessRegisterDto.ProofFile.Length>0)
             {
-                AttachmentID = attachmentId,
-                Entity= EntityConstants.Business,
-                RecordID=id
-            });
+                var filinsertOutput = this.SaveFileGlobalAsync(businessRegisterDto.ProofFile, EntityConstants.Business, this.fileStoreService, this.applicationConfigurationService, id).Result;
+                var attachmentId = this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
+                {
+                    AttachmentTypeName = AttachmentTypeConstants.PROOF,
+                    Name = EntityConstants.Business + AttachmentTypeConstants.PROOF,
+                    Comment = null,
+                    DocumentType = DocumentTypeConstants.FILE,
+                    DocumentFileType = businessRegisterDto.ProofFile.ContentType,
+                    DocumentFolderPath = filinsertOutput.FullPathLocation,
+                    DocumentFile = filinsertOutput.FileName,
+                });
+                this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
+                {
+                    AttachmentID = attachmentId,
+                    Entity = EntityConstants.Business,
+                    RecordID = id
+                });
+            }
             response.Data = id;
 
 

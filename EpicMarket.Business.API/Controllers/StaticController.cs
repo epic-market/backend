@@ -176,5 +176,25 @@ namespace EpicMarket.Business.API.Controllers
             reponse.Data = options;
             return Ok(reponse);
         }
+
+        [HttpGet("proofType")]
+        [AllowAnonymous]
+        public ActionResult<OperationResult<List<DropDownOptions>>> GetProofTypes()
+        {
+            var response = new OperationResult<List<DropDownOptions>>();
+            this.logger.LogInformation("Static Controller -> GetProofTypes()");
+
+            var options = new List<DropDownOptions>
+            {
+                 new DropDownOptions { Value = 1, Text = "PAN" },
+                 new DropDownOptions { Value = 2, Text = "Aadhaar" }
+            };
+
+            this.logger.LogInformation("Static Controller-> GetProofTypes()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = options }));
+
+            response.Data = options;
+            return Ok(response);
+        }
+
     }
 }
