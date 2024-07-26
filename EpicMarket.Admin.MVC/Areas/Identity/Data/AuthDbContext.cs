@@ -50,4 +50,6 @@ public DbSet<EpicMarket.Data.Models.PersonType> PersonType { get; set; } = defau
 
 public DbSet<EpicMarket.Data.Models.SupportQuerys> SupportQuerys { get; set; } = default!;
 
+public DbSet<EpicMarket.Data.Models.Event> Event { get; set; } = default!;
+
 }
