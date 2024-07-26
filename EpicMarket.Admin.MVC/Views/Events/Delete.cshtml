@@ -1,32 +1,16 @@
-﻿@model EpicMarket.Data.Models.TaskType
+﻿@model EpicMarket.Data.Models.Event
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Delete";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<h1>Delete</h1>
 
-<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-    <div class="breadcrumb-title pe-3">Blog</div>
-    <div class="ps-3">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0 p-0">
-                <li class="breadcrumb-item">
-                    <a asp-action="Index"><i class="bx bx-home-alt"></i></a>
-                </li>
-                <li class="breadcrumb-item active" aria-current="page">Details</li>
-            </ol>
-        </nav>
-    </div>
-</div>
-<hr />
-
-
-<div class="card mb-4">
-    <div class="card-body">
-        <div class="d-flex justify-content-end mb-3">
-            <a asp-action="Edit" class="btn btn-primary px-5" asp-route-id="@Model?.ID">Edit</a>
-        </div>
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Event</h4>
+    <hr />
     <dl class="row">
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Name)
@@ -41,16 +25,10 @@
             @Html.DisplayFor(model => model.Description)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DefaultDueDateHours)
+            @Html.DisplayNameFor(model => model.PriorityID)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DefaultDueDateHours)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ShortDescription)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ShortDescription)
+            @Html.DisplayFor(model => model.PriorityID)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.EventCategorys)
@@ -83,8 +61,10 @@
             @Html.DisplayFor(model => model.ModifiedBy)
         </dd>
     </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.ID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="ID" />
+        <input type="submit" value="Delete" class="btn btn-danger" /> |
+        <a asp-action="Index">Back to List</a>
+    </form>
 </div>

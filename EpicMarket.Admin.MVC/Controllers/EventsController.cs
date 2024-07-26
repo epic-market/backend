@@ -12,23 +12,23 @@ using System.Security.Claims;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    public class TaskTypesController : Controller
+    public class EventsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly AuthDbContext _context;
 
-        public TaskTypesController(ApplicationDbContext context)
+        public EventsController(AuthDbContext context)
         {
             _context = context;
         }
 
-        // GET: TaskTypes
+        // GET: Events
         public async Task<IActionResult> Index()
         {
-            var authDbContext = _context.TaskTypes.Include(t => t.EventCategorys);
+            var authDbContext = _context.Event.Include(c=> c.EventCategorys);
             return View(await authDbContext.ToListAsync());
         }
 
-        // GET: TaskTypes/Details/5
+        // GET: Events/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -36,46 +36,46 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var taskType = await _context.TaskTypes
-                .Include(t => t.EventCategorys)
+            var @event = await _context.Event
+                .Include(c => c.EventCategorys)
                 .FirstOrDefaultAsync(m => m.ID == id);
-            if (taskType == null)
+            if (@event == null)
             {
                 return NotFound();
             }
 
-            return View(taskType);
+            return View(@event);
         }
 
-        // GET: TaskTypes/Create
+        // GET: Events/Create
         public IActionResult Create()
         {
-            ViewData["TaskCategoryID"] = new SelectList(_context.Set<ApplicationsTable>(), "ID", "Name");
+            ViewData["EventCategoryID"] = new SelectList(_context.ApplicationsTable, "ID", "Name");
             return View();
         }
 
-        // POST: TaskTypes/Create
+        // POST: Events/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Name,Description,TaskCategoryID,DefaultDueDateHours,ShortDescription,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] TaskType taskType)
+        public async Task<IActionResult> Create([Bind("ID,EventCategoryID,Name,Description,PriorityID,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Event @event)
         {
 
-            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
-            taskType.CreateBy = userName;
-            taskType.CreateDate = DateTime.UtcNow;
-            if (ModelState.IsValid)
+			var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+			@event.CreateBy = userName;
+			@event.CreateDate = DateTime.UtcNow;
+			if (ModelState.IsValid)
             {
-                _context.Add(taskType);
+                _context.Add(@event);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["TaskCategoryID"] = new SelectList(_context.Set<ApplicationsTable>(), "ID", "Name", taskType.TaskCategoryID);
-            return View(taskType);
+            ViewData["EventCategoryID"] = new SelectList(_context.ApplicationsTable, "ID", "Name", @event.EventCategoryID);
+            return View(@event);
         }
 
-        // GET: TaskTypes/Edit/5
+        // GET: Events/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -83,26 +83,26 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var taskType = await _context.TaskTypes.FindAsync(id);
-            if (taskType == null)
+            var @event = await _context.Event.FindAsync(id);
+            if (@event == null)
             {
                 return NotFound();
             }
-            ViewData["TaskCategoryID"] = new SelectList(_context.Set<ApplicationsTable>(), "ID", "Name", taskType.TaskCategoryID);
-            return View(taskType);
+            ViewData["EventCategoryID"] = new SelectList(_context.ApplicationsTable, "ID", "Name", @event.EventCategoryID);
+            return View(@event);
         }
 
-        // POST: TaskTypes/Edit/5
+        // POST: Events/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,TaskCategoryID,DefaultDueDateHours,ShortDescription,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] TaskType taskType)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,EventCategoryID,Name,Description,PriorityID,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Event @event)
         {
-            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
-            taskType.ModifiedBy = userName;
-            taskType.ModifiedDate = DateTime.UtcNow;
-            if (id != taskType.ID)
+			var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+			@event.ModifiedBy = userName;
+			@event.ModifiedDate = DateTime.UtcNow;
+			if (id != @event.ID)
             {
                 return NotFound();
             }
@@ -111,12 +111,12 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 try
                 {
-                    _context.Update(taskType);
+                    _context.Update(@event);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TaskTypeExists(taskType.ID))
+                    if (!EventExists(@event.ID))
                     {
                         return NotFound();
                     }
@@ -127,11 +127,11 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["TaskCategoryID"] = new SelectList(_context.Set<ApplicationsTable>(), "ID", "Name", taskType.TaskCategoryID);
-            return View(taskType);
+            ViewData["EventCategoryID"] = new SelectList(_context.ApplicationsTable, "ID", "Name", @event.EventCategoryID);
+            return View(@event);
         }
 
-        // GET: TaskTypes/Delete/5
+        // GET: Events/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -139,35 +139,35 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var taskType = await _context.TaskTypes
-                .Include(t => t.EventCategorys)
+            var @event = await _context.Event
+                .Include(c => c.EventCategorys)
                 .FirstOrDefaultAsync(m => m.ID == id);
-            if (taskType == null)
+            if (@event == null)
             {
                 return NotFound();
             }
 
-            return View(taskType);
+            return View(@event);
         }
 
-        // POST: TaskTypes/Delete/5
+        // POST: Events/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var taskType = await _context.TaskTypes.FindAsync(id);
-            if (taskType != null)
+            var @event = await _context.Event.FindAsync(id);
+            if (@event != null)
             {
-                _context.TaskTypes.Remove(taskType);
+                _context.Event.Remove(@event);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool TaskTypeExists(int id)
+        private bool EventExists(int id)
         {
-            return _context.TaskTypes.Any(e => e.ID == id);
+            return _context.Event.Any(e => e.ID == id);
         }
     }
 }

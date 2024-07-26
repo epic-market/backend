@@ -4,6 +4,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.api
+    volumes:
+    - $HOME/.aws:/root/.aws:ro
     ports:
       - 8080:8080
     depends_on:
@@ -15,6 +17,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.mvc
+    volumes:
+    - $HOME/.aws:/root/.aws:ro
     ports:
       - 8081:8080
     depends_on:

@@ -1,12 +1,13 @@
-﻿@model IEnumerable<EpicMarket.Data.Models.TaskType>
+﻿@model IEnumerable<EpicMarket.Data.Models.Event>
 
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+
 <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-    <div class="breadcrumb-title pe-3">Task Type</div>
+    <div class="breadcrumb-title pe-3">Blog</div>
     <div class="ps-3">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0 p-0">
@@ -21,6 +22,7 @@
 <p class="d-flex justify-content-end">
     <a asp-action="Create" class="btn btn-primary px-5"><i class='bx bx-plus mr-1'></i>Create New</a>
 </p>
+
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
@@ -34,10 +36,7 @@
                 @Html.DisplayNameFor(model => model.Description)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DefaultDueDateHours)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ShortDescription)
+                @Html.DisplayNameFor(model => model.PriorityID)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.EventCategorys)
@@ -55,10 +54,7 @@
                 @Html.DisplayFor(modelItem => item.Description)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.DefaultDueDateHours)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ShortDescription)
+                @Html.DisplayFor(modelItem => item.PriorityID)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.EventCategorys.Name)
@@ -72,13 +68,10 @@
 }
     </tbody>
 </table>
-        </div>
-    </div>
-</div>
-@section Scripts {
-    <script>
-        $(document).ready(function () {
-            $('#example').DataTable();
-        });
-    </script>
-}
+            @section Scripts {
+                <script>
+                    $(document).ready(function () {
+                        $('#example').DataTable();
+                    });
+                </script>
+            }
