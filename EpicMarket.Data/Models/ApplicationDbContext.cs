@@ -8,14 +8,14 @@ using System.Security.Principal;
 
 namespace EpicMarket.Data.Models
 {
-    public class ApplicationDbContext:IdentityDbContext<AppUser, AppRole,int , IdentityUserClaim<int>,AppUserRole,IdentityUserLogin<int>,IdentityRoleClaim<int>,IdentityUserToken<int>>
+    public class ApplicationDbContext : IdentityDbContext<AppUser, AppRole, int, IdentityUserClaim<int>, AppUserRole, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>
     {
-		private readonly IConfiguration _configuration;
+        private readonly IConfiguration _configuration;
 
-		public ApplicationDbContext(IConfiguration configuration)
+        public ApplicationDbContext(IConfiguration configuration)
         {
-			_configuration = configuration;
-		}
+            _configuration = configuration;
+        }
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Business> Businesses { get; set; }
         public DbSet<BusinessCategoryInternal> BusinessCategories { get; set; }
@@ -49,16 +49,16 @@ namespace EpicMarket.Data.Models
 
         public DbSet<OrderStatusOptions> OrderStatusOptions { get; set; }
 
-		public DbSet<StatusOptionSet> StatusOptionSets { get; set; }
+        public DbSet<StatusOptionSet> StatusOptionSets { get; set; }
         public DbSet<BlogCategory> BlogCategory { get; set; }
         public DbSet<ContactMethod> ContactMethod { get; set; }
-        public DbSet<CommunicationQueue> CommunicationQueue { get; set; } 
-        public DbSet<Entity> Entity { get; set; } 
-        public DbSet<EventLog> EventLog { get; set; } 
-        public DbSet<Event> Event { get; set; } 
+        public DbSet<CommunicationQueue> CommunicationQueue { get; set; }
+        public DbSet<Entity> Entity { get; set; }
+        public DbSet<EventLog> EventLog { get; set; }
+        public DbSet<Event> Event { get; set; }
         public DbSet<ApplicationsTable> ApplicationsTable { get; set; }
         public DbSet<Tasks> Tasks { get; set; }
-        public DbSet<TaskType> TaskTypes { get; set; }  
+        public DbSet<TaskType> TaskTypes { get; set; }
         public DbSet<TaskStatusType> TaskStatusTypes { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<OrderTypesOptions> OrderTypesOptions { get; set; }
@@ -67,19 +67,24 @@ namespace EpicMarket.Data.Models
         public DbSet<Page> Pages { get; set; }
         public DbSet<AttachmentLink> AttachmentLinks { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
-        public DbSet<AttachmentType> AttachmentTypes { get; set; } 
+        public DbSet<AttachmentType> AttachmentTypes { get; set; }
         public DbSet<SupportQuerys> SupportQuerys { get; set; }
 
         public DbSet<DatabaseVersion> DatabaseVersions { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-			var connectionString = _configuration.GetConnectionString("DefaultConnection");
-			optionsBuilder.UseSqlServer(connectionString);
-		}
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+            optionsBuilder.UseSqlServer(connectionString);
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+			base.OnModelCreating(modelBuilder);
+
+			modelBuilder.Entity<AppUser>()
+                         .HasIndex(op => op.UserName)
+                         .IsUnique();
+
 
             modelBuilder.Entity<UserAddress>()
                     .HasOne(op => op.User)
@@ -88,7 +93,7 @@ namespace EpicMarket.Data.Models
                     .OnDelete(DeleteBehavior.Restrict);
 
 
-			modelBuilder.Entity<UserAddress>()
+            modelBuilder.Entity<UserAddress>()
                        .HasOne(op => op.Address)
                        .WithMany(u => u.UserAddresses)
                        .HasForeignKey(op => op.AddressId)
@@ -100,7 +105,7 @@ namespace EpicMarket.Data.Models
                       .HasOne(op => op.Person)
                       .WithMany(u => u.OutletPeople)
                       .HasForeignKey(op => op.PersonId)
-                      .OnDelete(DeleteBehavior.Restrict); 
+                      .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<OutletPerson>()
                       .HasOne(op => op.Outlet)
@@ -192,6 +197,52 @@ namespace EpicMarket.Data.Models
                         .WithMany(fc => fc.Blogs)
                         .HasForeignKey(fk => fk.BlogCategoryID)
                         .OnDelete(DeleteBehavior.Restrict);
-        }
-    }
+
+
+			modelBuilder.AddIsActiveDefaultValue(
+				 typeof(TaskType),
+				 typeof(TaskStatusType),
+				 typeof(Tasks),
+				 typeof(SupportTicket),
+				 typeof(SupportQuerys),
+				 typeof(StatusOptionSet),
+				 typeof(ProductInternal),
+				 typeof(Outlet),
+				 typeof(Order),
+				 typeof(OrderDetail),
+				 typeof(HelpItem),
+				 typeof(FAQ),
+				 typeof(FAQCategory),
+				 typeof(EventLog),
+				 typeof(Event),
+				 typeof(Entity),
+				 typeof(ContactMethod),
+				 typeof(CommunicationQueue),
+				 typeof(Comment),
+				 typeof(Business),
+				 typeof(BusinessCategoryInternal),
+				 typeof(Blog),
+				 typeof(BlogCategory),
+				 typeof(Attachment),
+				 typeof(AttachmentLink),
+				 typeof(ApplicationsTable),
+				 typeof(ApplicationSecurables),
+				 typeof(ApplicationConfiguration),
+				 typeof(Address)
+			 );
+
+		}
+	}
+}
+public static class ModelBuilderExtensions
+{
+	public static void AddIsActiveDefaultValue(this ModelBuilder modelBuilder, params Type[] entityTypes)
+	{
+		foreach (var entityType in entityTypes)
+		{
+			modelBuilder.Entity(entityType)
+				.Property<bool>("IsActive")
+				.HasDefaultValueSql("1");
+		}
+	}
 }
