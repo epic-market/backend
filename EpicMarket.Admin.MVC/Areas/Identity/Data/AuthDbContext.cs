@@ -54,4 +54,6 @@ public DbSet<EpicMarket.Data.Models.Event> Event { get; set; } = default!;
 
 public DbSet<EpicMarket.Data.Models.OrderStatusOptions> OrderStatusOptions { get; set; } = default!;
 
+public DbSet<EpicMarket.Data.Models.OrderTypesOptions> OrderTypesOptions { get; set; } = default!;
+
 }
