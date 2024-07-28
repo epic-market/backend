@@ -140,6 +140,28 @@ namespace EpicMarket.Data.Webapp.AlterScripts
                 context.ApplicationConfigurations.Add(personType);
                 context.SaveChanges();
             }
+            if (!context.ApplicationConfigurations.Any(cm => cm.Name == "LogoPATH"))
+            {
+                var personType = new ApplicationConfiguration
+                {
+                    Name = "LogoPATH",
+                    Value = "Logo",
+                };
+
+                context.ApplicationConfigurations.Add(personType);
+                context.SaveChanges();
+            }
+            if (!context.ApplicationConfigurations.Any(cm => cm.Name == "ProofPATH"))
+            {
+                var personType = new ApplicationConfiguration
+                {
+                    Name = "ProofPATH",
+                    Value = "Proof",
+                };
+
+                context.ApplicationConfigurations.Add(personType);
+                context.SaveChanges();
+            }
 
             this.updateDatabaseVersion(this.GetType().Name);
         }

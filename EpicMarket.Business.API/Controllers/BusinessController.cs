@@ -3,6 +3,7 @@ using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
+using EpicMarket.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -12,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
 namespace EpicMarket.Business.API.Controllers
 {
@@ -62,7 +64,7 @@ namespace EpicMarket.Business.API.Controllers
             this.logger.LogInformation("Business Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
             if (businessRegisterDto.LogoFile.Length>0)
             {
-                var filinsertOutput = this.SaveFileGlobalAsync(businessRegisterDto.LogoFile, EntityConstants.Business, this.fileStoreService, this.applicationConfigurationService, id);
+                var filinsertOutput = await this.SaveFileGlobalAsync(businessRegisterDto.LogoFile, FilePathConstants.LOGOPATH, this.fileStoreService, this.applicationConfigurationService, id);
                 var attachmentId = this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
                 {
                     AttachmentTypeName = AttachmentTypeConstants.LOGO,
@@ -82,7 +84,7 @@ namespace EpicMarket.Business.API.Controllers
             }
             if (businessRegisterDto.ProofFile.Length>0)
             {
-                var filinsertOutput = this.SaveFileGlobalAsync(businessRegisterDto.ProofFile, EntityConstants.Business, this.fileStoreService, this.applicationConfigurationService, id);
+                var filinsertOutput = await  this.SaveFileGlobalAsync(businessRegisterDto.ProofFile, FilePathConstants.ProofPATH, this.fileStoreService, this.applicationConfigurationService, id);
                 var attachmentId = this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
                 {
                     AttachmentTypeName = AttachmentTypeConstants.PROOF,
@@ -100,7 +102,10 @@ namespace EpicMarket.Business.API.Controllers
                     RecordID = id
                 });
             }
-            response.Data.BusinessId = id;
+            response.Data = new BusinessDTO_Result
+            {
+                BusinessId = id
+            };
 
 
 			return Ok(response);

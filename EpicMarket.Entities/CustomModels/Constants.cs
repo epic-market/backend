@@ -43,6 +43,9 @@ namespace EpicMarket.Entities.CustomModels
     public static class FilePathConstants
     {
         public const string Business = "BUSINESSPATH";
+        public const string LOGOPATH = "LOGOPATH";
+        public const string ProofPATH = "ProofPATH";
+
     }
     public static class EntityConstants
     {
