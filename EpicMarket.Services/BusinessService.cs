@@ -47,7 +47,7 @@ namespace EpicMarket.Services
             businessModel.BusinessCategoryID = businessRegisterDto.BusinessCategoryID;
             businessModel.Name = businessRegisterDto.BussinessName;
             businessModel.Description = businessRegisterDto.Description;
-            businessModel.Logo = businessRegisterDto.LogoURL;
+           // businessModel.Logo = businessRegisterDto.LogoURL;
             businessModel.ContactNumber = businessRegisterDto.ContactNumber;
             businessModel.ContactEmail = businessRegisterDto.ContactEmail;
             businessModel.CreateBy = UserName;
