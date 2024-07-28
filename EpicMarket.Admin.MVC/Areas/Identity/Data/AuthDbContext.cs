@@ -52,4 +52,12 @@ public DbSet<EpicMarket.Data.Models.SupportQuerys> SupportQuerys { get; set; } =
 
 public DbSet<EpicMarket.Data.Models.Event> Event { get; set; } = default!;
 
+public DbSet<EpicMarket.Data.Models.OrderStatusOptions> OrderStatusOptions { get; set; } = default!;
+
+public DbSet<EpicMarket.Data.Models.OrderTypesOptions> OrderTypesOptions { get; set; } = default!;
+
+public DbSet<EpicMarket.Data.Models.PromotionalLeads> PromotionalLeads { get; set; } = default!;
+
+public DbSet<EpicMarket.Data.Models.Page> Page { get; set; } = default!;
+
 }

@@ -12,7 +12,6 @@ namespace EpicMarket.Data.Models
     public class Tasks : BaseModel
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
 
         [MaxLength(200)]

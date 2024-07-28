@@ -46,9 +46,9 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpPost("RegisterDetails")]
         [Authorize]
-        public async Task<ActionResult<OperationResult<int>>> Register([FromForm] BusinessRegisterDto businessRegisterDto)
+        public async Task<ActionResult<OperationResult<BusinessDTO_Result>>> Register([FromForm] BusinessRegisterDto businessRegisterDto)
         {
-            var response = new OperationResult<int>();
+            var response = new OperationResult<BusinessDTO_Result>();
 
 			this.logger.LogInformation("Business Controller -> Register()-> params {0}", JsonConvert.SerializeObject(new { Params = businessRegisterDto }));
             var UserID = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value) ;
@@ -60,16 +60,16 @@ namespace EpicMarket.Business.API.Controllers
 			await userManager.AddToRoleAsync(appuser, ROLES.BUSINESS_OWNER);
 
             this.logger.LogInformation("Business Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
-            if (businessRegisterDto.LOGOFile.Length>0)
+            if (businessRegisterDto.LogoFile.Length>0)
             {
-                var filinsertOutput = this.SaveFileGlobalAsync(businessRegisterDto.LOGOFile, EntityConstants.Business, this.fileStoreService, this.applicationConfigurationService, id).Result;
+                var filinsertOutput = this.SaveFileGlobalAsync(businessRegisterDto.LogoFile, EntityConstants.Business, this.fileStoreService, this.applicationConfigurationService, id);
                 var attachmentId = this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
                 {
                     AttachmentTypeName = AttachmentTypeConstants.LOGO,
                     Name = EntityConstants.Business + AttachmentTypeConstants.LOGO,
                     Comment = null,
                     DocumentType = DocumentTypeConstants.FILE,
-                    DocumentFileType = businessRegisterDto.LOGOFile.ContentType,
+                    DocumentFileType = businessRegisterDto.LogoFile.ContentType,
                     DocumentFolderPath = filinsertOutput.FullPathLocation,
                     DocumentFile = filinsertOutput.FileName,
                 });
@@ -82,7 +82,7 @@ namespace EpicMarket.Business.API.Controllers
             }
             if (businessRegisterDto.ProofFile.Length>0)
             {
-                var filinsertOutput = this.SaveFileGlobalAsync(businessRegisterDto.ProofFile, EntityConstants.Business, this.fileStoreService, this.applicationConfigurationService, id).Result;
+                var filinsertOutput = this.SaveFileGlobalAsync(businessRegisterDto.ProofFile, EntityConstants.Business, this.fileStoreService, this.applicationConfigurationService, id);
                 var attachmentId = this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
                 {
                     AttachmentTypeName = AttachmentTypeConstants.PROOF,
@@ -100,7 +100,7 @@ namespace EpicMarket.Business.API.Controllers
                     RecordID = id
                 });
             }
-            response.Data = id;
+            response.Data.BusinessId = id;
 
 
 			return Ok(response);

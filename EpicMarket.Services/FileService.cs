@@ -64,7 +64,7 @@ namespace EpicMarket.Services
 			};
 		}
 
-		public async Task<string> UploadFileAsync(IFormFile file, string prefix , string fileNameKey)
+		public string UploadFileAsync(IFormFile file, string prefix , string fileNameKey)
 		{
 			
 			var request = new PutObjectRequest()
@@ -74,7 +74,7 @@ namespace EpicMarket.Services
 				InputStream = file.OpenReadStream()
 			};
 			request.Metadata.Add("Content-Type", file.ContentType);
-			await _s3Client.PutObjectAsync(request);
+			 _s3Client.PutObjectAsync(request);
 			return fileNameKey;
 		}
 
