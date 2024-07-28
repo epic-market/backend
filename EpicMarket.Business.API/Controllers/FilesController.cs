@@ -23,9 +23,9 @@ namespace EpicMarket.Business.API.Controllers
 		}
 
 		[HttpPost]
-		public IActionResult UploadFileAsync(IFormFile file , string? prefix)
+		public async Task<IActionResult> UploadFileAsync(IFormFile file , string? prefix)
 		{
-			var key =  this.SaveFileGlobalAsync(file, ApplicationConfigurationConstants.Products, fileService, applicationConfigurationService);
+			var key =  await this.SaveFileGlobalAsync(file, ApplicationConfigurationConstants.Products, fileService, applicationConfigurationService);
 			return Ok($"File {prefix}/{key} uploaded to S3 successfully!");
 		}
 

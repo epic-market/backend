@@ -82,7 +82,7 @@ namespace EpicMarket.Business.API.Controllers
 
 
 
-        protected SaveFileDTO SaveFileGlobalAsync(IFormFile file, string entityName, IFileService fileStoreService, IApplicationConfigurationService applicationConfigurationService,int RecordID = 0)
+        protected async Task<SaveFileDTO> SaveFileGlobalAsync(IFormFile file, string entityName, IFileService fileStoreService, IApplicationConfigurationService applicationConfigurationService,int RecordID = 0)
 		{
 			string filePath = " ";
 			if (file != null && file.Length > 0)
@@ -95,14 +95,14 @@ namespace EpicMarket.Business.API.Controllers
 					fullPathLocation = applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.BasePath);
                     subPathLocation = this.GetFolderPathFromConfiguration(entityName, applicationConfigurationService);
                     if (RecordID != 0) {
-                        fullPathLocation = fullPathLocation + "\\" + RecordID +"\\"+ subPathLocation;
+                        fullPathLocation = fullPathLocation + "/" + RecordID +"/"+ subPathLocation;
                     }
-					if (!fullPathLocation.EndsWith("\\"))
+					if (!fullPathLocation.EndsWith("/"))
 					{
-						fullPathLocation = fullPathLocation + "\\";
+						fullPathLocation = fullPathLocation + "/";
 					}
 				}
-
+				// Made fitting based on AWS
 				var uploadedFile = file;
 
 				var fileName = Path.GetFileNameWithoutExtension(uploadedFile.FileName);
@@ -111,7 +111,7 @@ namespace EpicMarket.Business.API.Controllers
 
 				fileName = fileName.Replace('&', '_').Replace('<', '_').Replace('>', '_');
 				fileName = fileName.SanitizeFile();
-				filePath =  fileStoreService.UploadFileAsync(uploadedFile, fullPathLocation, fileName);
+				filePath =  await fileStoreService.UploadFileAsync(uploadedFile, fullPathLocation, fileName);
 
 				return new SaveFileDTO()
 				{
@@ -182,10 +182,14 @@ namespace EpicMarket.Business.API.Controllers
 			{
 				path = applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.Products);
 			}
-			else if (ApplicationConfigurationConstants.LOGO.Equals(entityNameOrAppConfig))
-			{
-				path = applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.LOGO);
-			}
+            else if (FilePathConstants.LOGOPATH.Equals(entityNameOrAppConfig))
+            {
+                path = applicationConfigurationService.GetApplicationConfigurationValue(FilePathConstants.LOGOPATH);
+            }
+            else if (FilePathConstants.ProofPATH.Equals(entityNameOrAppConfig))
+            {
+                path = applicationConfigurationService.GetApplicationConfigurationValue(FilePathConstants.ProofPATH);
+            }
             else if (ApplicationConfigurationConstants.Business.Equals(entityNameOrAppConfig))
             {
                 path = applicationConfigurationService.GetApplicationConfigurationValue(FilePathConstants.Business);

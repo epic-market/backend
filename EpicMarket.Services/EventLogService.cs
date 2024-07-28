@@ -18,7 +18,7 @@ namespace EpicMarket.Services
         {
             this._context = _context;
         }
-        public async Task<long> LogEvent(EVENT_LOG_SAVE_PARAMS eVENT_LOG_SAVE_PARAMS)
+        public long LogEvent(EVENT_LOG_SAVE_PARAMS eVENT_LOG_SAVE_PARAMS)
         {
 
             var entityModel = _context.Entity.Where(row => row.Name == eVENT_LOG_SAVE_PARAMS.EntityName.Trim()).FirstOrDefault();
@@ -66,7 +66,7 @@ namespace EpicMarket.Services
                 };
             }
             _context.EventLog.Add(eventLogRecord);
-            await _context.SaveChangesAsync();
+            _context.SaveChangesAsync();
             return eventLogRecord.ID;
 
         }

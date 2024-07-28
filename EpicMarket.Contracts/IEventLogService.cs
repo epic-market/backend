@@ -10,6 +10,6 @@ namespace EpicMarket.Contracts
 {
     public interface IEventLogService
     {
-        Task<long> LogEvent(EVENT_LOG_SAVE_PARAMS eVENT_LOG_SAVE_PARAMS);
+       long LogEvent(EVENT_LOG_SAVE_PARAMS eVENT_LOG_SAVE_PARAMS);
     }
 }
