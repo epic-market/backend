@@ -31,8 +31,6 @@ namespace EpicMarket.Entities
 
         public int PinCode { get; set; }
 
-        public string LogoURL { get; set; }
-
         public string Description { get; set; }
 
         public DateTime EstablishedOn { get; set; }
@@ -41,9 +39,11 @@ namespace EpicMarket.Entities
 
         public string ProofNumber { get; set; }
 
-        public string proofURL { get; set; }
-
-        public IFormFile LOGOFile { get; set; } 
+        public IFormFile LogoFile { get; set; }
         public IFormFile ProofFile { get; set; }
+    }
+    public class BusinessDTO_Result 
+        {
+        public int BusinessId { get; set; }
     }
 }
