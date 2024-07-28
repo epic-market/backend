@@ -58,4 +58,6 @@ public DbSet<EpicMarket.Data.Models.OrderTypesOptions> OrderTypesOptions { get; 
 
 public DbSet<EpicMarket.Data.Models.PromotionalLeads> PromotionalLeads { get; set; } = default!;
 
+public DbSet<EpicMarket.Data.Models.Page> Page { get; set; } = default!;
+
 }
