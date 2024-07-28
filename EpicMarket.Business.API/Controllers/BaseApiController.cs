@@ -82,7 +82,7 @@ namespace EpicMarket.Business.API.Controllers
 
 
 
-        protected async Task<SaveFileDTO> SaveFileGlobalAsync(IFormFile file, string entityName, IFileService fileStoreService, IApplicationConfigurationService applicationConfigurationService,int RecordID = 0)
+        protected SaveFileDTO SaveFileGlobalAsync(IFormFile file, string entityName, IFileService fileStoreService, IApplicationConfigurationService applicationConfigurationService,int RecordID = 0)
 		{
 			string filePath = " ";
 			if (file != null && file.Length > 0)
@@ -111,7 +111,7 @@ namespace EpicMarket.Business.API.Controllers
 
 				fileName = fileName.Replace('&', '_').Replace('<', '_').Replace('>', '_');
 				fileName = fileName.SanitizeFile();
-				filePath = await fileStoreService.UploadFileAsync(uploadedFile, fullPathLocation, fileName);
+				filePath =  fileStoreService.UploadFileAsync(uploadedFile, fullPathLocation, fileName);
 
 				return new SaveFileDTO()
 				{

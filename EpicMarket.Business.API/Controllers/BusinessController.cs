@@ -62,7 +62,7 @@ namespace EpicMarket.Business.API.Controllers
             this.logger.LogInformation("Business Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
             if (businessRegisterDto.LOGOFile.Length>0)
             {
-                var filinsertOutput = this.SaveFileGlobalAsync(businessRegisterDto.LOGOFile, EntityConstants.Business, this.fileStoreService, this.applicationConfigurationService, id).Result;
+                var filinsertOutput = this.SaveFileGlobalAsync(businessRegisterDto.LOGOFile, EntityConstants.Business, this.fileStoreService, this.applicationConfigurationService, id);
                 var attachmentId = this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
                 {
                     AttachmentTypeName = AttachmentTypeConstants.LOGO,
@@ -82,7 +82,7 @@ namespace EpicMarket.Business.API.Controllers
             }
             if (businessRegisterDto.ProofFile.Length>0)
             {
-                var filinsertOutput = this.SaveFileGlobalAsync(businessRegisterDto.ProofFile, EntityConstants.Business, this.fileStoreService, this.applicationConfigurationService, id).Result;
+                var filinsertOutput = this.SaveFileGlobalAsync(businessRegisterDto.ProofFile, EntityConstants.Business, this.fileStoreService, this.applicationConfigurationService, id);
                 var attachmentId = this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
                 {
                     AttachmentTypeName = AttachmentTypeConstants.PROOF,
