@@ -22,19 +22,27 @@ namespace EpicMarket.Services
         private readonly IMapper mapper;
         private readonly IAddressService addressService;
         private readonly IEventLogService eventLogService;
+        private readonly ICommunicationQueueService communicationQueueService;
 
-        public ProductService(ApplicationDbContext context, IMapper mapper, IAddressService addressService, IEventLogService eventLogService)
+        public ProductService(
+                                ApplicationDbContext context,
+                                IMapper mapper, 
+                                IAddressService addressService,
+                                IEventLogService eventLogService,
+                                ICommunicationQueueService communicationQueueService)
         {
             _context = context;
             this.mapper = mapper;
             this.addressService = addressService;
             this.eventLogService = eventLogService;
+            this.communicationQueueService = communicationQueueService;
         }
 
         public int AddOrUpdateProduct(ProductsDto productsDto, string UserName, int businessID, string PageSource)
         {
             var product = mapper.Map<Catalog>(productsDto);
             var events = "";
+            var mailevent = "";
             product.BusinessID = businessID;
             if (productsDto.Id == null || product.ID == 0)
             {
@@ -42,6 +50,7 @@ namespace EpicMarket.Services
                 product.CreateDate = DateTime.Now;
                 product.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == Business_Status.BUSINESS_UNVERIFIED).Id;
                 events = EventConstants.AddCatelog;
+                mailevent = MessageDataConstants.AddCatelog;
                 _context.Catalogs.Add(product);
             }
             else 
@@ -49,6 +58,7 @@ namespace EpicMarket.Services
                 product.ModifiedBy = UserName;
                 product.ModifiedDate = DateTime.Now;
                 events = EventConstants.EditCatelog;
+                mailevent = MessageDataConstants.EditCatelog;
                 _context.Catalogs.Update(product);
             }
             _context.SaveChanges();
@@ -58,7 +68,15 @@ namespace EpicMarket.Services
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             });
             this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = product.ID, Data = savedJson, Description = null, EventName = events, EntityName = EntityConstants.Catelog,Source=PageSource });
-
+            this.communicationQueueService.InsertCommunicationQueue(
+                    new Entities.CommunicationQueueDTO()
+                    {
+                        MessageData = null,//TODO
+                        Subject = mailevent,
+                        NotificationRecipient = UserName,
+                        ContactMethod = ContactMethodConstants.EMAIL,
+                        CreateBy = UserName
+                    });
             return product.ID;
         }
 

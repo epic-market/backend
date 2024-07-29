@@ -89,6 +89,14 @@ namespace EpicMarket.Entities.CustomModels
         public const string CatelogDescription = "List of Catelog to be verified";
 
     }
+    public static class MessageDataConstants
+    {
+        public const string AddBusiness = "Business added sucessfully";
+        public const string AddBranch = "Branch added sucessfully";
+        public const string EditBranch = "Branch updated sucessfully";
+        public const string AddCatelog = "Catelog added sucessfully ";
+        public const string EditCatelog = "Catelog  updated sucessfully";
+    }
 
 }
 
