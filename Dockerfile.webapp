@@ -1,0 +1,18 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
+WORKDIR /src
+
+# Copy csproj and restore as distinct layers
+COPY ./EpicMarket.Data.Webapp/EpicMarket.Data.Webapp.csproj ./EpicMarket.Data.Webapp/EpicMarket.Data.Webapp.csproj
+# Restore as distinct layers
+RUN dotnet restore ./EpicMarket.Data.Webapp/EpicMarket.Data.Webapp.csproj
+
+# Copy everything else and build
+COPY . .
+# Build and publish a release
+RUN dotnet publish "./EpicMarket.Data.Webapp/EpicMarket.Data.Webapp.csproj" -c Release -o out
+
+# Build runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /webapp
+COPY --from=build-env /src/out .
+ENTRYPOINT ["dotnet", "EpicMarket.Data.Webapp.dll"]

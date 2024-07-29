@@ -1,32 +1,4 @@
 services:
-  backend.api:
-    container_name: backend.api
-    build:
-      context: .
-      dockerfile: Dockerfile.api
-    volumes:
-    - $HOME/.aws:/root/.aws:ro
-    ports:
-      - 8080:8080
-    depends_on:
-      backend.db:
-        condition: service_healthy
-  
-  backend.mvc:
-    container_name: backend.mvc
-    build:
-      context: .
-      dockerfile: Dockerfile.mvc
-    volumes:
-    - $HOME/.aws:/root/.aws:ro
-    ports:
-      - 8081:8080
-    depends_on:
-      backend.db:
-        condition: service_healthy
-    profiles:
-      - 'mvc'
-
   backend.db:
     container_name: backend.db
     image: mcr.microsoft.com/mssql/server:2019-latest
@@ -48,5 +20,43 @@ services:
         retries: 10
         start_period: 10s
         timeout: 3s
+
+  backend.webapp:
+    container_name: backend.webapp
+    build: 
+      context: .
+      dockerfile: Dockerfile.webapp
+    depends_on:
+      backend.db:
+        condition: service_healthy
+
+  backend.api:
+    container_name: backend.api
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    volumes:
+    - $HOME/.aws:/root/.aws:ro
+    ports:
+      - 8080:8080
+    depends_on:
+      backend.webapp:
+        condition: service_completed_successfully
+  
+  backend.mvc:
+    container_name: backend.mvc
+    build:
+      context: .
+      dockerfile: Dockerfile.mvc
+    volumes:
+    - $HOME/.aws:/root/.aws:ro
+    ports:
+      - 8081:8080
+    depends_on:
+      backend.webapp:
+        condition: service_completed_successfully
+    profiles:
+      - 'mvc'
+
 volumes:
   epicmarket-db:
