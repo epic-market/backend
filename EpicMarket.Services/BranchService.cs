@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,19 +21,27 @@ namespace EpicMarket.Services
         private readonly IMapper mapper;
         private readonly IAddressService addressService;
         private readonly IEventLogService eventLogService;
+        private readonly ICommunicationQueueService communicationQueueService;
 
-        public BranchService(ApplicationDbContext context, IMapper mapper,IAddressService addressService, IEventLogService eventLogService)
+        public BranchService(
+                                ApplicationDbContext context,
+                                IMapper mapper,
+                                IAddressService addressService,
+                                IEventLogService eventLogService,
+                                ICommunicationQueueService communicationQueueService)
         {
             _context = context;
             this.mapper = mapper;
             this.addressService = addressService;
             this.eventLogService = eventLogService;
+            this.communicationQueueService = communicationQueueService;
         }
 
         public int AddOrUpdateBranch(BranchDto branchDto,  string UserName, int BusinessID, string PageSource)
         {
             var addressModel = new AddressDto();
             var events="";
+            var mailevent = "";
             addressModel.Address1 = branchDto.Address;
             addressModel.City = branchDto.City;
             addressModel.State = branchDto.State;
@@ -69,6 +78,7 @@ namespace EpicMarket.Services
                 outletModel.ModifiedBy = UserName;
                 outletModel.ModifiedDate = DateTime.Now;
                 events = EventConstants.EditBranch;
+                mailevent = MessageDataConstants.AddBranch;
                 _context.Outlets.Update(outletModel);
             }
             else
@@ -76,6 +86,7 @@ namespace EpicMarket.Services
                 outletModel.CreateBy = UserName;
                 outletModel.CreateDate = DateTime.Now;
                 events = EventConstants.AddBranch;
+                mailevent = MessageDataConstants.EditBranch;
                 _context.Outlets.Add(outletModel);
             }
       
@@ -86,7 +97,15 @@ namespace EpicMarket.Services
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             });
             this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = outletModel.ID, Data = outletModelJson, Description = null, EventName = events, EntityName = EntityConstants.Branch,Source=PageSource });
-
+            this.communicationQueueService.InsertCommunicationQueue(
+                    new Entities.CommunicationQueueDTO()
+                    {
+                        MessageData = null,//TODO
+                        Subject = mailevent,
+                        NotificationRecipient = UserName,
+                        ContactMethod = ContactMethodConstants.EMAIL,
+                        CreateBy = UserName
+                    });
             return outletModel.ID;
         }
 

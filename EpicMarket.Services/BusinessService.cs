@@ -20,12 +20,19 @@ namespace EpicMarket.Services
         private readonly IMapper mapper;
         private readonly IAddressService addressService;
         private readonly IEventLogService eventLogService;
-        public BusinessService(ApplicationDbContext context, IMapper mapper , IAddressService addressService, IEventLogService eventLogService)
+        private readonly ICommunicationQueueService communicationQueueService;
+        public BusinessService(
+                                ApplicationDbContext context,
+                                IMapper mapper ,
+                                IAddressService addressService,
+                                IEventLogService eventLogService,
+                                ICommunicationQueueService communicationQueueService)
         {
             _context = context;
             this.mapper = mapper;
             this.addressService = addressService;
             this.eventLogService = eventLogService;
+            this.communicationQueueService = communicationQueueService;
         }
         public int RegisterBusiness(BusinessRegisterDto businessRegisterDto, string UserName , int userid, string PageSource)
         {
@@ -61,6 +68,16 @@ namespace EpicMarket.Services
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             });
             this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = businessModel.ID, Data = savedJson, Description = null, EventName = EventConstants.AddBusiness, EntityName = EntityConstants.Business ,Source=PageSource});
+            this.communicationQueueService.InsertCommunicationQueue(
+                    new Entities.CommunicationQueueDTO()
+                    {
+                        MessageData = null,//TODO
+                        Subject = MessageDataConstants.AddBusiness,
+                        NotificationRecipient = UserName,
+                        ContactMethod = ContactMethodConstants.EMAIL,
+                        CreateBy = UserName
+                    });
+
             return businessModel.ID;
         }
     }
