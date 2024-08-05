@@ -32,12 +32,10 @@ namespace EpicMarket.Data.Models
 
 
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-        [Column(TypeName = "datetime2")]
-        public DateTime SysStartTime { get; set; }
+        public DateTime? SysStartTime { get; set; }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-        [Column(TypeName = "datetime2")]
-        public DateTime SysEndTime { get; set; }
+        public DateTime? SysEndTime { get; set; }
 
 
         public ContactMethod ContactMethod { get; set; }
