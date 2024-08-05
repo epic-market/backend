@@ -17,21 +17,21 @@ namespace EpicMarket.Services
         {
             this._context = _context;
         }
-        public async void InsertCommunicationQueue(CommunicationQueueDTO communicationQueueDTO)
+        public void InsertCommunicationQueue(CommunicationQueueDTO communicationQueueDTO)
         {
 
-            var contactMethod = _context.ContactMethod.Where(row => row.Name==communicationQueueDTO.ContactMethod.Trim());
+            var contactMethod = _context.ContactMethod.Where(row => row.Name==communicationQueueDTO.ContactMethod.Trim()).FirstOrDefault();
             var communicationQueueModel = new CommunicationQueue();
             communicationQueueModel.MessageData = communicationQueueDTO.MessageData;
             communicationQueueModel.Subject = communicationQueueDTO.Subject;
             communicationQueueModel.MessageText = communicationQueueDTO.MessageText;
             communicationQueueModel.ScheduledDate = communicationQueueDTO.ScheduledDate;
             communicationQueueModel.NotificationRecipient = communicationQueueDTO.NotificationRecipient;
-            communicationQueueModel.ContactMethodID = contactMethod.FirstOrDefault().ID;
+            communicationQueueModel.ContactMethodID = contactMethod.ID;
             communicationQueueModel.CreateBy = communicationQueueDTO.CreateBy;
             communicationQueueModel.CreateDate = DateTime.Now;
             _context.CommunicationQueue.Add(communicationQueueModel);
-            await _context.SaveChangesAsync();
+             _context.SaveChanges();
         }
     }
 }
