@@ -1,7 +1,7 @@
 services:
   backend.db:
     container_name: backend.db
-    image: mcr.microsoft.com/mssql/server:2019-latest
+    image: mcr.microsoft.com/mssql/server:2019-CU26-ubuntu-20.04
     environment:
       - ACCEPT_EULA=y
       - SA_PASSWORD=pass_123
