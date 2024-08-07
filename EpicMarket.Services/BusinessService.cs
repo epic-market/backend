@@ -21,7 +21,8 @@ namespace EpicMarket.Services
         private readonly IAddressService addressService;
         private readonly IEventLogService eventLogService;
         private readonly ICommunicationQueueService communicationQueueService;
-        public BusinessService(
+		private static readonly object _lock = new object();
+		public BusinessService(
                                 ApplicationDbContext context,
                                 IMapper mapper ,
                                 IAddressService addressService,
@@ -59,11 +60,11 @@ namespace EpicMarket.Services
             businessModel.ContactEmail = businessRegisterDto.ContactEmail;
             businessModel.CreateBy = UserName;
             businessModel.CreateDate = DateTime.Now;
-            businessModel.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == Business_Status.BUSINESS_UNVERIFIED).Id;
+			businessModel.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == Business_Status.BUSINESS_UNVERIFIED).Id;
             _context.Businesses.Add(businessModel);
             _context.SaveChanges();
-            var saved = _context.Businesses.FirstOrDefault(o => o.ID == businessModel.ID);
-            string savedJson = JsonConvert.SerializeObject(saved, new JsonSerializerSettings
+
+            string savedJson = JsonConvert.SerializeObject(businessModel, new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             });
