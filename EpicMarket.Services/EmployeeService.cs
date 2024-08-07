@@ -123,7 +123,7 @@ namespace EpicMarket.Services
             int UserID;
             int.TryParse(userId, out UserID);
             var User = _context.Users.Find(UserID);
-
+             
             if (User.UniqueGuid == uniqueGuid)
             {
                 var Business = _context.BusinessEmployeeMaps.Where(a => a.EmployeeID == User.Id).Include(a => a.Bussiness).FirstOrDefault();

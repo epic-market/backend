@@ -205,14 +205,14 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
         [HttpPost("setNewPassword")]
-        [Authorize]
-        public async Task<ActionResult<OperationResult<string>>> setNewPassword(SetNewPasswordParams setNewPasswordParams)
+		[AllowAnonymous]
+		public async Task<ActionResult<OperationResult<string>>> setNewPassword(SetNewPasswordParams setNewPasswordParams)
         {
 
             var response = new OperationResult<string>();
 
             
-            response.Data = this._tokenService.setNewPassword(setNewPasswordParams);
+            response.Data = await this._tokenService.setNewPassword(setNewPasswordParams);
             
             return response;
         }

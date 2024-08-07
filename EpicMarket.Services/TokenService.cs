@@ -97,23 +97,34 @@ namespace EpicMarket.Services
             }
             
         }
-        public string setNewPassword(SetNewPasswordParams setNewPasswordParams)
+        public async Task<string> setNewPassword(SetNewPasswordParams setNewPasswordParams)
         {
-                var User = dbContext.Users.Where(u => setNewPasswordParams.token == u.UniqueGuid).FirstOrDefault();
-                if (User == null)
+
+		    	string[] tokenParts = setNewPasswordParams.token.Split('.');
+			    string uniqueGuid = tokenParts[1];
+			    var User = dbContext.Users.Where(u => uniqueGuid == u.UniqueGuid).FirstOrDefault();
+                if (User != null)
                 {
-                    var result = _userManager.ResetPasswordAsync(User, setNewPasswordParams.token, setNewPasswordParams.password);
-                    if (!result.IsCompletedSuccessfully)
+				var result = await _userManager.RemovePasswordAsync(User);
+				if (!result.Succeeded)
                 {
                     throw new Exception("Failed try again after some time");
                 }
                 else
-                {
-                        var UniqueGuid = Guid.NewGuid();
-                        User.UniqueGuid = null;
-                        dbContext.Users.Update(User);
-                        return "Succesfully";
+				{
+					result = await _userManager.AddPasswordAsync(User, setNewPasswordParams.password);
+                    if (!result.Succeeded)
+                    {
+                        throw new Exception("Failed try again after some time");
                     }
+                    else {
+						var UniqueGuid = Guid.NewGuid();
+						User.UniqueGuid = null;
+						dbContext.Users.Update(User);
+						return "Succesfully";
+					}
+				}
+					
                 }
                 else
                 {
