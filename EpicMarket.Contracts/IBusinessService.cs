@@ -10,6 +10,6 @@ namespace EpicMarket.Contracts
 {
     public interface IBusinessService
     {
-        int RegisterBusiness(BusinessRegisterDto businessRegisterDto , string UserName , int userID,string PageSource);
+        Task<int> RegisterBusiness(BusinessRegisterDto businessRegisterDto , string UserName , int userID,string PageSource);
     }
 }
