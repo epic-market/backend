@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json;
 using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace EpicMarket.Services
 {
@@ -35,10 +36,10 @@ namespace EpicMarket.Services
             this.eventLogService = eventLogService;
             this.communicationQueueService = communicationQueueService;
         }
-        public int RegisterBusiness(BusinessRegisterDto businessRegisterDto, string UserName , int userid, string PageSource)
+        public async Task<int> RegisterBusiness(BusinessRegisterDto businessRegisterDto, string UserName , int userid, string PageSource)
         {
-          
-            var addressModel = new AddressDto();
+			var statusid = await _context.StatusOptionSets.FirstOrDefaultAsync(c => c.Status == Business_Status.BUSINESS_UNVERIFIED);
+			var addressModel = new AddressDto();
             addressModel.Address1 = businessRegisterDto.Address;
             addressModel.City  = businessRegisterDto.City;
             addressModel.State = businessRegisterDto.State;
@@ -60,9 +61,10 @@ namespace EpicMarket.Services
             businessModel.ContactEmail = businessRegisterDto.ContactEmail;
             businessModel.CreateBy = UserName;
             businessModel.CreateDate = DateTime.Now;
-			businessModel.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == Business_Status.BUSINESS_UNVERIFIED).Id;
-            _context.Businesses.Add(businessModel);
-            _context.SaveChanges();
+			businessModel.StatusId = statusid.Id;
+                 
+			await _context.Businesses.AddAsync(businessModel);
+			await _context.SaveChangesAsync();
 
             string savedJson = JsonConvert.SerializeObject(businessModel, new JsonSerializerSettings
             {
