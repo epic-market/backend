@@ -19,7 +19,7 @@ namespace EpicMarket.Contracts
         Task<List<DropDownOptions>> GetAllPersonTypes();
         Task<List<DropDownOptions>> GetAllSupportQuery(int personTypeId); 
         Task<List<HelpItemDTO>> GetHelpItemsforBypage(string pagename);
-        int SubscribeforOffers( string gmail);
+		Task<int> SubscribeforOffers( string gmail);
 
     }
 }

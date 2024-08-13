@@ -71,7 +71,7 @@ namespace EpicMarket.Services
 
             _context.AttachmentLinks.Add(attachmentLink);
 
-            _context.SaveChanges();
-        }
+			await unitOfWork.Complete();
+		}
     }
 }

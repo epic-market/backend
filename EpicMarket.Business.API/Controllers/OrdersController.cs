@@ -26,14 +26,14 @@ namespace EpicMarket.Business.API.Controllers
        
         [HttpPost("AddOrder")]
         [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
-        public ActionResult<OperationResult<int>> AddOrder(OrdersDto ordersDto)
+        public async Task<ActionResult<OperationResult<int>>> AddOrder(OrdersDto ordersDto)
         {
             var response = new OperationResult<int>();
 
 
 			this.logger.LogInformation("Orders Controller -> AddOrder()-> params {0}", JsonConvert.SerializeObject(new { Params = ordersDto }));
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-            var id = orderService.CreateOrder(ordersDto , UserName,this.PageSource);
+            var id = await orderService.CreateOrder(ordersDto , UserName,this.PageSource);
 
             this.logger.LogInformation("Orders Controller -> AddOrder()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
 
@@ -66,13 +66,13 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpPost("UpdateStatus")]
         [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
-        public ActionResult<OperationResult<int>> UpdateStatus(int OrderId, string OrderStatus)
+        public async Task<ActionResult<OperationResult<int>>> UpdateStatus(int OrderId, string OrderStatus)
         {
             var response = new OperationResult<int>();
 
             this.logger.LogInformation("Orders Controller -> UpdateStatus()-> params {0}", JsonConvert.SerializeObject(new { Params = OrderId }));
 
-            var id =  orderService.UpdateStatus(OrderId, OrderStatus);
+            var id =  await orderService.UpdateStatus(OrderId, OrderStatus);
 
             this.logger.LogInformation("Orders Controller -> UpdateStatus()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
 

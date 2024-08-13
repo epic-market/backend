@@ -13,12 +13,14 @@ namespace EpicMarket.Services
     public class EventLogService : IEventLogService
     {
         private readonly ApplicationDbContext _context;
+		private readonly IUnitOfWork unitOfWork;
 
-        public EventLogService(ApplicationDbContext _context)
+		public EventLogService(ApplicationDbContext _context,IUnitOfWork unitOfWork)
         {
             this._context = _context;
-        }
-        public long LogEvent(EVENT_LOG_SAVE_PARAMS eVENT_LOG_SAVE_PARAMS)
+			this.unitOfWork = unitOfWork;
+		}
+        public async Task<long> LogEvent(EVENT_LOG_SAVE_PARAMS eVENT_LOG_SAVE_PARAMS)
         {
 
             var entityModel = _context.Entity.Where(row => row.Name == eVENT_LOG_SAVE_PARAMS.EntityName.Trim()).FirstOrDefault();
@@ -66,7 +68,7 @@ namespace EpicMarket.Services
                 };
             }
             _context.EventLog.Add(eventLogRecord);
-            _context.SaveChangesAsync();
+			 await unitOfWork.Complete(); ;
             return eventLogRecord.ID;
 
         }

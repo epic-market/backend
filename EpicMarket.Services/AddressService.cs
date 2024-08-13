@@ -14,14 +14,16 @@ namespace EpicMarket.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper mapper;
+		private readonly IUnitOfWork unitOfWork;
 
-        public AddressService(ApplicationDbContext context, IMapper mapper)
+		public AddressService(ApplicationDbContext context, IMapper mapper,IUnitOfWork unitOfWork)
         {
             _context = context;
             this.mapper = mapper;
-        }
+			this.unitOfWork = unitOfWork;
+		}
 
-        public int AddAddress(AddressDto addressDto)
+        public async Task<int> AddAddress(AddressDto addressDto)
         {
             var addressModel = mapper.Map<Address>(addressDto);
             if (addressDto.ID != null)
@@ -32,9 +34,10 @@ namespace EpicMarket.Services
             {
                 _context.Addresses.Add(addressModel);
             }
-            
-             _context.SaveChanges();
-            return addressModel.Id;
+
+            await unitOfWork.Complete();
+
+			return addressModel.Id;
             
         }
     }
