@@ -18,11 +18,10 @@ namespace EpicMarket.Data.Webapp
         }
         public void Execute()
         {
-            AddDatabaseVersion("AlterScript1", "This is Test Description", "Gadamsetti Akhil" , new AlterScript1(this.dbContext));
-            AddDatabaseVersion("AlterScript2", "This is Test Description2", "Gadamsetti Akhil", new AlterScript2(this.dbContext));
             AddDatabaseVersion("AlterScriptseedMigration", "This is for migarting the seed data", "Vinay", new AlterScriptseedMigration(this.dbContext));
             AddDatabaseVersion("AlterScript3", "This is seed data FOR ATTACHMENTTYPE AND PersonType", "Vinay", new AlterScript3(this.dbContext));
-        }
+			AddDatabaseVersion("AlterScript4", "This is seed data adding data for ApplicationConfiguration in products", "Gadamsetti Akhil", new AlterScript4(this.dbContext));
+		}
 
         public void AddDatabaseVersion(string versionClass, string description, string createBy , IAlterScript alterScriptClass)
         {

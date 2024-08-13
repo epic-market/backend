@@ -17,13 +17,26 @@ namespace EpicMarket.Business.API.Controllers
 
         private readonly ILogger<ProductsController> logger;
         private readonly IProductService productService;
-        private readonly IBranchService branchService;
+		private readonly IApplicationConfigurationService applicationConfigurationService;
+		private readonly IAttachmentService attachmentService;
+		private readonly IFileService fileStoreService;
+		private readonly ApplicationDbContext dbContext;
+		private readonly IHttpContextAccessor httpContextAccessor;
+		private readonly IBranchService branchService;
 
-        public ProductsController(ILogger<ProductsController> logger, IProductService productService, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
+        public ProductsController(ILogger<ProductsController> logger, IProductService productService,IApplicationConfigurationService applicationConfigurationService,
+
+			IAttachmentService attachmentService, IFileService fileStoreService, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
+
         {
             this.logger = logger;
             this.productService = productService;
-        }
+			this.applicationConfigurationService = applicationConfigurationService;
+			this.attachmentService = attachmentService;
+			this.fileStoreService = fileStoreService;
+			this.dbContext = dbContext;
+			this.httpContextAccessor = httpContextAccessor;
+		}
 
         [HttpGet("GetAllProductForMap")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
@@ -45,7 +58,7 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpPost("AddOrUpdateProduct")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
-		public  ActionResult<OperationResult<int>> AddOrUpdateProduct(ProductsDto productsDto)
+		public async  Task<ActionResult<OperationResult<int>>> AddOrUpdateProduct([FromForm]ProductsDto productsDto)
         {
 
 			var response = new OperationResult<int>();
@@ -53,9 +66,38 @@ namespace EpicMarket.Business.API.Controllers
 			this.logger.LogInformation("Products Controller -> AddProduct()-> params {0}", JsonConvert.SerializeObject(new { Params = productsDto }));
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
 
-            response.Data  = productService.AddOrUpdateProduct(productsDto, UserName,this.BusinessId,this.PageSource);
+            response.Data  =  await productService.AddOrUpdateProduct(productsDto, UserName,this.BusinessId,this.PageSource);
 
-            this.logger.LogInformation("Products Controller -> AddProduct()-> return {0}", JsonConvert.SerializeObject(new { Results = response }));
+			if (productsDto.Products.Length > 0)
+			{
+
+
+                foreach (var product in productsDto.Products) {
+
+					var filinsertOutput = await this.SaveFileGlobalAsync(product, ApplicationConfigurationConstants.Products, this.fileStoreService, this.applicationConfigurationService,this.BusinessId);
+					var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
+					{
+						AttachmentTypeName = AttachmentTypeConstants.LOGO,
+						Name = EntityConstants.Business + AttachmentTypeConstants.LOGO,
+						Comment = null,
+						DocumentType = DocumentTypeConstants.FILE,
+						DocumentFileType = product.ContentType,
+						DocumentFolderPath = filinsertOutput.FullPathLocation,
+						DocumentFile = filinsertOutput.FileName,
+					});
+					this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
+					{
+						AttachmentID = attachmentId,
+						Entity = EntityConstants.Business,
+						RecordID = response.Data
+					});
+
+				}
+
+				
+			}
+
+			this.logger.LogInformation("Products Controller -> AddProduct()-> return {0}", JsonConvert.SerializeObject(new { Results = response }));
 
             return Ok(response);
         }

@@ -23,22 +23,25 @@ namespace EpicMarket.Services
         private readonly IAddressService addressService;
         private readonly IEventLogService eventLogService;
         private readonly ICommunicationQueueService communicationQueueService;
+		private readonly IUnitOfWork unitOfWork;
 
-        public ProductService(
+		public ProductService(
                                 ApplicationDbContext context,
                                 IMapper mapper, 
                                 IAddressService addressService,
                                 IEventLogService eventLogService,
-                                ICommunicationQueueService communicationQueueService)
+                                ICommunicationQueueService communicationQueueService,
+                                IUnitOfWork unitOfWork)
         {
             _context = context;
             this.mapper = mapper;
             this.addressService = addressService;
             this.eventLogService = eventLogService;
             this.communicationQueueService = communicationQueueService;
-        }
+			this.unitOfWork = unitOfWork;
+		}
 
-        public int AddOrUpdateProduct(ProductsDto productsDto, string UserName, int businessID, string PageSource)
+        public async Task<int> AddOrUpdateProduct(ProductsDto productsDto, string UserName, int businessID, string PageSource)
         {
             var product = mapper.Map<Catalog>(productsDto);
             var events = "";
@@ -61,8 +64,8 @@ namespace EpicMarket.Services
                 mailevent = MessageDataConstants.EditCatelog;
                 _context.Catalogs.Update(product);
             }
-            _context.SaveChanges();
-            var saved = _context.Catalogs.FirstOrDefault(o => o.ID == product.ID);
+            await unitOfWork.Complete();
+			var saved = _context.Catalogs.FirstOrDefault(o => o.ID == product.ID);
             string savedJson = JsonConvert.SerializeObject(saved, new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore

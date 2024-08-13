@@ -45,8 +45,9 @@ namespace EpicMarket.Entities.CustomModels
         public const string Business = "BUSINESSPATH";
         public const string LOGOPATH = "LOGOPATH";
         public const string ProofPATH = "ProofPATH";
+		public const string PRODUCTPATH = "ProductPath";
 
-    }
+	}
     public static class EntityConstants
     {
         public const string Catelog = "Catelog";

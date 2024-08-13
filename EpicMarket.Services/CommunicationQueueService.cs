@@ -12,12 +12,14 @@ namespace EpicMarket.Services
     public class CommunicationQueueService : ICommunicationQueueService
     {
         private readonly ApplicationDbContext _context;
+		private readonly IUnitOfWork unitOfWork;
 
-        public CommunicationQueueService(ApplicationDbContext _context)
+		public CommunicationQueueService(ApplicationDbContext _context,IUnitOfWork unitOfWork)
         {
             this._context = _context;
-        }
-        public void InsertCommunicationQueue(CommunicationQueueDTO communicationQueueDTO)
+			this.unitOfWork = unitOfWork;
+		}
+        public async void InsertCommunicationQueue(CommunicationQueueDTO communicationQueueDTO)
         {
 
             var contactMethod = _context.ContactMethod.Where(row => row.Name==communicationQueueDTO.ContactMethod.Trim()).FirstOrDefault();
@@ -31,7 +33,7 @@ namespace EpicMarket.Services
             communicationQueueModel.CreateBy = communicationQueueDTO.CreateBy;
             communicationQueueModel.CreateDate = DateTime.Now;
             _context.CommunicationQueue.Add(communicationQueueModel);
-             _context.SaveChanges();
+			await unitOfWork.Complete();
         }
     }
 }

@@ -178,11 +178,7 @@ namespace EpicMarket.Business.API.Controllers
 		protected string GetFolderPathFromConfiguration(string entityNameOrAppConfig, IApplicationConfigurationService applicationConfigurationService = null)
 		{
 			var path = string.Empty;
-			if (ApplicationConfigurationConstants.Products.Equals(entityNameOrAppConfig))
-			{
-				path = applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.Products);
-			}
-            else if (FilePathConstants.LOGOPATH.Equals(entityNameOrAppConfig))
+            if (FilePathConstants.LOGOPATH.Equals(entityNameOrAppConfig))
             {
                 path = applicationConfigurationService.GetApplicationConfigurationValue(FilePathConstants.LOGOPATH);
             }
@@ -194,8 +190,13 @@ namespace EpicMarket.Business.API.Controllers
             {
                 path = applicationConfigurationService.GetApplicationConfigurationValue(FilePathConstants.Business);
             }
+			else if (ApplicationConfigurationConstants.Products.Equals(entityNameOrAppConfig))
+			{
+				path = applicationConfigurationService.GetApplicationConfigurationValue(FilePathConstants.PRODUCTPATH);
+			}
 
-            return path;
+
+			return path;
 		}
 
 

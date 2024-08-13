@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
@@ -21,6 +22,9 @@ namespace EpicMarket.Entities
 		public bool IsRecommended { get; set; }
 		public int? MaximumOrderPurchase { get; set; }
         public int? StatusId { get; set; }
+		public IFormFile[] Products { get; set; }
+
+
 	}
     public class ProductsMapOptionResult 
     {

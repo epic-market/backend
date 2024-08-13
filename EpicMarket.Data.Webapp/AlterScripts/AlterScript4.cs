@@ -9,18 +9,30 @@ using System.Threading.Tasks;
 
 namespace EpicMarket.Data.Webapp.AlterScripts
 {
-    public class AlterScript1 : BaseAlterScript,IAlterScript
+    public class AlterScript4 : BaseAlterScript,IAlterScript
     {
         private readonly ApplicationDbContext dbContext;
 
-        public AlterScript1(ApplicationDbContext dbContext):base(dbContext)
+        public AlterScript4(ApplicationDbContext dbContext):base(dbContext)
         {
             this.dbContext = dbContext;
         }
 
         public void Execute()
         {
-            this.updateDatabaseVersion(this.GetType().Name);
+			if (!dbContext.ApplicationConfigurations.Any(cm => cm.Name == "ProductPath"))
+			{
+				var personType = new ApplicationConfiguration
+				{
+					Name = "ProductPath",
+					Value = "Products",
+				};
+
+				dbContext.ApplicationConfigurations.Add(personType);
+				dbContext.SaveChanges();
+			}
+
+			this.updateDatabaseVersion(this.GetType().Name);
         }
 
         //update the same row that it is complete the running 
