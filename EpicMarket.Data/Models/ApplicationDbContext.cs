@@ -199,6 +199,12 @@ namespace EpicMarket.Data.Models
                         .OnDelete(DeleteBehavior.Restrict);
 
 
+			modelBuilder.Entity<AttachmentLink>()
+					.HasOne(c => c.Attachments)
+					.WithMany(fc => fc.AttachmentLinks)
+					.HasForeignKey(fk => fk.AttachmentID)
+					.OnDelete(DeleteBehavior.Cascade);
+
 			modelBuilder.AddIsActiveDefaultValue(
 				 typeof(TaskType),
 				 typeof(TaskStatusType),
@@ -219,6 +225,7 @@ namespace EpicMarket.Data.Models
 				 typeof(ContactMethod),
 				 typeof(CommunicationQueue),
 				 typeof(Comment),
+		        typeof(Catalog),
 				 typeof(Business),
 				 typeof(BusinessCategoryInternal),
 				 typeof(Blog),

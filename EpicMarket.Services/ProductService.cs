@@ -5,6 +5,7 @@ using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
@@ -25,6 +26,7 @@ namespace EpicMarket.Services
         private readonly IEventLogService eventLogService;
         private readonly ICommunicationQueueService communicationQueueService;
 		private readonly IApplicationConfigurationService applicationConfigurationService;
+		private readonly IFileService fileService;
 		private readonly IUnitOfWork unitOfWork;
 
 		public ProductService(
@@ -34,6 +36,7 @@ namespace EpicMarket.Services
                                 IEventLogService eventLogService,
                                 ICommunicationQueueService communicationQueueService,
                                 IApplicationConfigurationService applicationConfigurationService,
+                                IFileService fileService,
                                 IUnitOfWork unitOfWork)
         {
             _context = context;
@@ -42,6 +45,7 @@ namespace EpicMarket.Services
             this.eventLogService = eventLogService;
             this.communicationQueueService = communicationQueueService;
 			this.applicationConfigurationService = applicationConfigurationService;
+			this.fileService = fileService;
 			this.unitOfWork = unitOfWork;
 		}
 
@@ -88,10 +92,9 @@ namespace EpicMarket.Services
             return product.ID;
         }
 
-        public async Task<List<ProductsMapOptionResult>> GetAllProductForMap(int BusinessID,int BranchId)
+	
+		public async Task<List<ProductsMapOptionResult>> GetAllProductForMap(int BusinessID,int BranchId)
         {
-
-
             var _ = await (from catalogItem in _context.Catalogs
                     join outletProduct in (_context.OutletProducts.Where(a => a.OutletID == BranchId))
                     on catalogItem.ID equals outletProduct.ProductID into joinedProducts
@@ -102,7 +105,6 @@ namespace EpicMarket.Services
                         Id = catalogItem.ID,
                         Name = catalogItem.Name,
                         Description = catalogItem.Description,
-                        ImageURL = catalogItem.Images,
                         Rate = catalogItem.Rate,
                         Selected = matchedProduct == null ? false : true,
                     }).ToListAsync();
@@ -121,7 +123,7 @@ namespace EpicMarket.Services
 
             //1 . filter with BusinessID
             var Products = _context.Catalogs
-                                .Where(c => c.BusinessID == businessID);
+                                .Where(c => c.BusinessID == businessID && c.IsActive == true);
 
 
             //2 . Appling Searching
@@ -158,8 +160,8 @@ namespace EpicMarket.Services
                 Description = c.Description,
                 Rate = c.Rate,
                 InStock = c.InStock,
-                IsActive = c.IsActive,  
-                Thumbnail = ((from attachment in _context.Attachments
+                Status = _context.StatusOptionSets.FirstOrDefault(s => s.Id == c.StatusId).Status,
+				Thumbnail = ((from attachment in _context.Attachments
 						   join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
 						   join entity in _context.Entity on link.EntityID equals entity.ID
 						   where entity.Name == EntityConstants.Catelog && link.RecordID == c.ID && link.AttachmentTypeID == attachmentTypeID.ID
@@ -176,10 +178,8 @@ namespace EpicMarket.Services
         public async Task<ProductsDto> GetProductDetails(int productId)
 		{
 
-
 			var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
 			var attachmentTypeID_Product = await  _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.PRODUCTIMAGES);
-
 
 			var baseURL = applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.APIROUTE) + applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.FILEURL);
 
@@ -201,28 +201,32 @@ namespace EpicMarket.Services
 								  ImagePath = $"{baseURL}{attachment.DocumentFolderPath}{attachment.DocumentFile}"
 							  };
 
-			return await _context.Catalogs.Where(c => c.ID == productId).Select(c => new ProductsDto
+
+
+
+			return await _context.Catalogs.Where(c => c.ID == productId && c.IsActive == true).Select(c =>  
+			new ProductsDto
 			{
 				Id = c.ID,
 				Name = c.Name,
 				Description = c.Description,
 				Rate = c.Rate,
 				InStock = c.InStock,
-				IsActive = c.IsActive,
 				Category = c.Category,
+				Status = _context.StatusOptionSets.FirstOrDefault(s => s.Id == c.StatusId).Status,
 				Images = attachments.Select(a => a.ImagePath).ToList(),
-                Thumbnail = thumbnail.Select(a => a.ImagePath).FirstOrDefault(),
+				Thumbnail = thumbnail.Select(a => a.ImagePath).FirstOrDefault(),
 				MaximumOrderPurchase = (int)c.MaximumOrderPurchase,
 				IsRecommended = c.IsRecommended
 			}).FirstOrDefaultAsync();
+
 		}
-        public int VerifyCatalog(VerifyDto verifyBranchDto, string UserName, int AdminPersonID, string PageSource)
+        public async Task<int> VerifyCatalog(VerifyDto verifyBranchDto, string UserName, int AdminPersonID, string PageSource)
         {
-            var newTaskStatus = _context.TaskStatusTypes.Where(row => row.Status == "New").FirstOrDefault();
-            var taskTypeID = _context.TaskTypes.Where(row => row.Name == "Verification").FirstOrDefault();
-            var userName = _context.Users.Where(row => row.UserName == UserName).FirstOrDefault();
-            Tasks taskToSave;
-            taskToSave = new Tasks
+            var newTaskStatus = await _context.TaskStatusTypes.Where(row => row.Status == "New").FirstOrDefaultAsync();
+            var taskTypeID = await _context.TaskTypes.Where(row => row.Name == "Verification").FirstOrDefaultAsync();
+            var userName = await _context.Users.Where(row => row.UserName == UserName).FirstOrDefaultAsync();
+            var taskToSave = new Tasks
             {
                 Name = VerificationConstants.CatelogName,
                 Description = VerificationConstants.CatelogDescription,
@@ -233,14 +237,54 @@ namespace EpicMarket.Services
                 PrimaryAssignedToPersonID = AdminPersonID,
                 DateAssigned = DateTime.Now,
                 SubmittedByPersonID = userName.Id,
-                TaskData = verifyBranchDto.Data,
+                TaskData = string.Join(",", verifyBranchDto.ListOfProductIDs),
                 ReceivedDate = DateTime.Now,
                 CreateDate = DateTime.Now,
                 CreateBy = userName.Email
             };
-            _context.Tasks.Add(taskToSave);
-            _context.SaveChanges();
+            await _context.Tasks.AddAsync(taskToSave);
+            await unitOfWork.Complete();
             return taskToSave.ID;
         }
+
+		public async Task<bool> deleteImage(string key, string UserName)
+		{
+			int lastSlashIndex = key.LastIndexOf('/');
+			string fileName = key.Substring(lastSlashIndex + 1);
+
+            var attachment = await _context.Attachments.Where(c => c.DocumentFile == fileName).FirstOrDefaultAsync();
+
+            if (attachment != null)
+            {
+                _context.Attachments.Remove(attachment);
+                var status = await this.fileService.DeleteFileAsync(key);
+                await unitOfWork.Complete();
+				return status;
+			}
+            else {
+                throw new Exception("File Not Found");
+            }
+
+		}
+
+
+        public async Task deleteCatelog(int id, string UserName)
+        {
+            var catalog = await _context.Catalogs.FindAsync(id);
+			if (catalog != null)
+			{
+				catalog.IsActive = false;
+				_context.Catalogs.Update(catalog);
+				await unitOfWork.Complete();
+			}
+			else
+			{
+				throw new Exception("Product Not Found");
+			}
+			
+
+        }
     }
+
+
 }

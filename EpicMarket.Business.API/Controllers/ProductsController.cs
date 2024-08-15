@@ -6,6 +6,7 @@ using EpicMarket.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
 using System.Security.Claims;
 
@@ -25,9 +26,7 @@ namespace EpicMarket.Business.API.Controllers
 		private readonly IBranchService branchService;
 
         public ProductsController(ILogger<ProductsController> logger, IProductService productService,IApplicationConfigurationService applicationConfigurationService,
-
 			IAttachmentService attachmentService, IFileService fileStoreService, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
-
         {
             this.logger = logger;
             this.productService = productService;
@@ -43,15 +42,10 @@ namespace EpicMarket.Business.API.Controllers
 		public async Task<ActionResult<OperationResult<List<ProductsMapOptionResult>>>> GetAllProductForMap(int outletID)
         {
             var response = new OperationResult<List<ProductsMapOptionResult>>();
-
 			this.logger.LogInformation("Products Controller -> GetAllProductForMap()-> params {0}", JsonConvert.SerializeObject(new { Params = outletID }));
-
             var results = await productService.GetAllProductForMap(this.BusinessId, outletID);
-
             this.logger.LogInformation("Products Controller -> GetAllProductForMap()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
-
 			response.Data = results;
-
 			return Ok(response);
         }
 
@@ -62,10 +56,8 @@ namespace EpicMarket.Business.API.Controllers
         {
 
 			var response = new OperationResult<int>();
-
 			this.logger.LogInformation("Products Controller -> AddProduct()-> params {0}", JsonConvert.SerializeObject(new { Params = productsDto }));
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-
             response.Data  =  await productService.AddOrUpdateProduct(productsDto, UserName,this.BusinessId,this.PageSource);
 
 			if (productsDto.Products.Length > 0)
@@ -74,7 +66,6 @@ namespace EpicMarket.Business.API.Controllers
 					var filinsertOutput = await this.SaveFileGlobalAsync(product, ApplicationConfigurationConstants.Products, this.fileStoreService, this.applicationConfigurationService,this.BusinessId);
 					var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
 					{
-						
 						Name = EntityConstants.Catelog + AttachmentTypeConstants.PRODUCTIMAGES,
 						Comment = null,
 						DocumentType = DocumentTypeConstants.FILE,
@@ -114,10 +105,7 @@ namespace EpicMarket.Business.API.Controllers
 
 					}
 
-
-
 				}
-
 				this.logger.LogInformation("Products Controller -> AddProduct()-> return {0}", JsonConvert.SerializeObject(new { Results = response }));
 
             return Ok(response);
@@ -129,13 +117,9 @@ namespace EpicMarket.Business.API.Controllers
 		public async Task<ActionResult<OperationResult<GetDataResult<List<ProductResult>>>>> GetAllProducts([FromQuery] ProductParams productResult)
         {
             var response = new OperationResult<GetDataResult<List<ProductResult>>>();
-
             this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = productResult }));
-
             var results = await productService.GetAllProducts(productResult,this.BusinessId);
-
             this.logger.LogInformation("Products Controller -> GetAllProducts()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
-
             response.Data = results;
 
             return Ok(response);
@@ -147,13 +131,9 @@ namespace EpicMarket.Business.API.Controllers
         public async Task<ActionResult<OperationResult<ProductsDto>>> GetProductDetails(int productId)
         {
             var response = new OperationResult<ProductsDto>();
-
             this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = productId }));
-
             var results = await productService.GetProductDetails(productId);
-
             this.logger.LogInformation("Products Controller -> GetAllProducts()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
-
             response.Data = results;
 
             return Ok(response);
@@ -161,18 +141,43 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpPost("verifyCatalog")]
         [Authorize(Roles = ROLES.BUSINESS_OWNER)]
-        public ActionResult<OperationResult<int>> VerifyCatalog(VerifyDto verifyBranchDto)
+        public async Task<ActionResult<OperationResult<int>>> VerifyCatalog(VerifyDto verifyBranchDto)
         {
             var response = new OperationResult<int>();
             this.logger.LogInformation("Products Controller -> VerifyCatalog()-> params {0}", JsonConvert.SerializeObject(new { Params = verifyBranchDto }));
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-            var id = productService.VerifyCatalog(verifyBranchDto, UserName, this.AdminPersonID, this.PageSource);
+            var id = await productService.VerifyCatalog(verifyBranchDto, UserName, this.AdminPersonID, this.PageSource);
             this.logger.LogInformation("Products Controller -> VerifyCatalog()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
             response.Data = id;
             return Ok(response);
         }
 
 
+		[HttpDelete("deleteImage")]
+		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
+		public async Task<ActionResult<OperationResult<bool>>> DeleteImage(string Key)
+		{
+			var response = new OperationResult<bool>();
+			this.logger.LogInformation("Products Controller -> deleteImage()-> params {0}", Key);
+			var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
+			var status = await productService.deleteImage(Key, UserName);
+			response.Data = status;
+			this.logger.LogInformation("Products Controller -> deleteImage()-> return {0}", status);
+			return Ok(response);
+		}
 
-    }
+
+		[HttpDelete]
+		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
+		public async Task<ActionResult<OperationResult<bool>>> Delete(int id)
+		{
+			var response = new OperationResult<bool>();
+			this.logger.LogInformation("Products Controller -> deleteImage()-> params {0}", id);
+			var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
+			 await productService.deleteCatelog(id, UserName);
+			return Ok(response);
+		}
+
+
+	}
 }
