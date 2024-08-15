@@ -23,13 +23,13 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpPost("AddEditTask")]
-        public  ActionResult<OperationResult<int>> AddEditTask(TasksDTO tasksDTO)
+        public async Task<ActionResult<OperationResult<int>>> AddEditTask(TasksDTO tasksDTO)
         {
             var response = new OperationResult<int>();
 
             this.logger.LogInformation("Support Controller -> AddEditTask()-> params {0}", JsonConvert.SerializeObject(new { Params = tasksDTO }));
 
-            var results = tasksService.SaveTask(tasksDTO);
+            var results = await tasksService.SaveTask(tasksDTO);
             this.logger.LogInformation("Support Controller -> AddEditTask()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
             return Ok(response);
         }

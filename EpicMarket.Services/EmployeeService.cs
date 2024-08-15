@@ -26,7 +26,9 @@ namespace EpicMarket.Services
         private readonly IApplicationConfigurationService applicationConfiguration;
         private readonly UserManager<AppUser> userManager;
         private readonly IAddressService addressService;
-        private readonly ICommunicationService communicationService;
+		private readonly ICommunicationQueueService communicationQueueService;
+		private readonly IUnitOfWork unitOfWork;
+		private readonly ICommunicationService communicationService;
         private readonly IEventLogService eventLogService;
 
         public EmployeeService(ApplicationDbContext context,
@@ -35,6 +37,8 @@ namespace EpicMarket.Services
             ICommunicationService communicationService,
             UserManager<AppUser> userManager,
             IAddressService addressService,
+            ICommunicationQueueService communicationQueueService,
+            IUnitOfWork unitOfWork,
             IEventLogService eventLogService)
         {
             _context = context;
@@ -42,7 +46,9 @@ namespace EpicMarket.Services
             this.applicationConfiguration = applicationConfiguration;
             this.userManager = userManager;
             this.addressService = addressService;
-            this.communicationService = communicationService;
+			this.communicationQueueService = communicationQueueService;
+			this.unitOfWork = unitOfWork;
+			this.communicationService = communicationService;
             this.eventLogService = eventLogService;
         }
         public async Task<AddEmployeeResult> Register(AddEmployeeParam addEmployeeParam, int businessid , int userID)
@@ -93,7 +99,17 @@ namespace EpicMarket.Services
             v.Evaluate(context, writer, string.Empty, EmailTemplete);
             var message = writer.ToString();
 
-            communicationService.SendEmailAsync(addEmployeeParam.EmailID, "Welcome to Epic Market", message);
+			this.communicationQueueService.InsertCommunicationQueue(
+				  new Entities.CommunicationQueueDTO()
+				  {
+					  MessageData = message,
+					  Subject = "Welcome to Epic Market",
+					  NotificationRecipient = addEmployeeParam.EmailID,
+					  ContactMethod = ContactMethodConstants.EMAIL,
+					  CreateBy = addEmployeeParam.EmailID
+				  });
+
+			//communicationService.SendEmailAsync(addEmployeeParam.EmailID, "Welcome to Epic Market", message);
 
 			employee.UserID = user.Id;
             employee.FirstName = user.FirstName;
@@ -158,7 +174,7 @@ namespace EpicMarket.Services
                     Pincode = employee.Pincode,
                 };
 
-                var addressId =  addressService.AddAddress(address);
+                var addressId = await addressService.AddAddress(address);
 
 
                 User.FirstName = employee.FirstName;
@@ -168,9 +184,9 @@ namespace EpicMarket.Services
                 User.UniqueGuid = null;
                 await userManager.AddPasswordAsync(User, employee.Password);
                 _context.Users.Update(User);
-                _context.SaveChanges();
+				await unitOfWork.Complete();
 
-                var userAddress = new UserAddress()
+				var userAddress = new UserAddress()
                 {
                     AddressId = addressId,
                     UserId = User.Id,
@@ -179,13 +195,13 @@ namespace EpicMarket.Services
                 await userManager.AddToRoleAsync(User, ROLES.BUSINESS_EMPLOYEE);
 
                 _context.UserAddresses.Add(userAddress);
-                _context.SaveChanges();
-                var saved = _context.Users.FirstOrDefault(o => o.Id == User.Id);
+				await unitOfWork.Complete();
+				var saved = _context.Users.FirstOrDefault(o => o.Id == User.Id);
                 string savedJson = JsonConvert.SerializeObject(saved, new JsonSerializerSettings
                 {
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore
                 });
-                this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = User.Id, Data = savedJson, Description = null, EventName = EventConstants.AddEmployees, EntityName = EntityConstants.Employees });
+                await this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = User.Id, Data = savedJson, Description = null, EventName = EventConstants.AddEmployees, EntityName = EntityConstants.Employees });
 
                 return User.Id;
 

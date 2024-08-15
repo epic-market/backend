@@ -119,13 +119,13 @@ namespace EpicMarket.Business.API.Controllers
         }
         [HttpPost("subscribeforOffers")]
         [AllowAnonymous]
-        public ActionResult<OperationResult<int>> SubscribeforOffers( string gmail)
+        public async Task<ActionResult<OperationResult<int>>> SubscribeforOffers( string gmail)
         {
             var response = new OperationResult<int>();
 
             this.logger.LogInformation("Static Controller -> UpdateStatus()-> params {0}", JsonConvert.SerializeObject(new { Params = gmail }));
 
-            var id = staticService.SubscribeforOffers(gmail);
+            var id = await staticService.SubscribeforOffers(gmail);
 
             this.logger.LogInformation("Static Controller -> UpdateStatus()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
 

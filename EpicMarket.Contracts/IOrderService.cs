@@ -10,11 +10,11 @@ namespace EpicMarket.Contracts
 {
     public interface IOrderService
     {
-        int CreateOrder(OrdersDto order,string UserName,string PageSource);
+        Task<int> CreateOrder(OrdersDto order,string UserName,string PageSource);
 
         Task<OrdersDto> GetSingleOrder(int OrderId);
 
-        int UpdateStatus(int OrderId, string OrderStatus);
+        Task<int> UpdateStatus(int OrderId, string OrderStatus);
 
         Task<List<DropDownOptions>> GetOrderStatusOptions();
 

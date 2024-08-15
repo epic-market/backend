@@ -12,13 +12,15 @@ namespace EpicMarket.Services
     public class AttachmentService : IAttachmentService
     {
         private readonly ApplicationDbContext _context;
+		private readonly IUnitOfWork unitOfWork;
 
-        public AttachmentService(ApplicationDbContext context)
+		public AttachmentService(ApplicationDbContext context,IUnitOfWork unitOfWork)
         {
             _context = context;
-        }
+			this.unitOfWork = unitOfWork;
+		}
 
-        public int InsertOrUpdateAttachment(AttachmentDTO attachmentDTO)
+        public async  Task<int> InsertOrUpdateAttachment(AttachmentDTO attachmentDTO)
         {
             var attachment = _context.Attachments
                 .FirstOrDefault(a => a.ID == attachmentDTO.ID);
@@ -51,12 +53,13 @@ namespace EpicMarket.Services
                 _context.Attachments.Add(attachment);
             }
 
-            _context.SaveChanges();
-            return attachment.ID;
+			await unitOfWork.Complete();
+
+			return attachment.ID;
         }
 
 
-        public void InsertAttachmentLink(AttachmentLinkDTO attachmentLinkDTO)
+        public async void InsertAttachmentLink(AttachmentLinkDTO attachmentLinkDTO)
         {
             var entityID = _context.Entity.FirstOrDefault(a => a.Name == attachmentLinkDTO.Entity).ID;
             var attachmentLink = new AttachmentLink
@@ -68,7 +71,7 @@ namespace EpicMarket.Services
 
             _context.AttachmentLinks.Add(attachmentLink);
 
-            _context.SaveChanges();
-        }
+			await unitOfWork.Complete();
+		}
     }
 }

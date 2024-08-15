@@ -65,7 +65,7 @@ namespace EpicMarket.Business.API.Controllers
             if (businessRegisterDto.LogoFile.Length>0)
             {
                 var filinsertOutput = await this.SaveFileGlobalAsync(businessRegisterDto.LogoFile, FilePathConstants.LOGOPATH, this.fileStoreService, this.applicationConfigurationService, id);
-                var attachmentId = this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
+                var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
                 {
                     AttachmentTypeName = AttachmentTypeConstants.LOGO,
                     Name = EntityConstants.Business + AttachmentTypeConstants.LOGO,
@@ -85,7 +85,7 @@ namespace EpicMarket.Business.API.Controllers
             if (businessRegisterDto.ProofFile.Length>0)
             {
                 var filinsertOutput = await  this.SaveFileGlobalAsync(businessRegisterDto.ProofFile, FilePathConstants.ProofPATH, this.fileStoreService, this.applicationConfigurationService, id);
-                var attachmentId = this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
+                var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
                 {
                     AttachmentTypeName = AttachmentTypeConstants.PROOF,
                     Name = EntityConstants.Business + AttachmentTypeConstants.PROOF,

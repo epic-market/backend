@@ -63,12 +63,12 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpPost("AddOrUpdateBranch")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
-		public ActionResult<OperationResult<int>> AddBranch(BranchDto branchDto)
+		public async Task<ActionResult<OperationResult<int>>> AddBranch(BranchDto branchDto)
         {
             var response = new OperationResult<int>();
 			this.logger.LogInformation("Branch Controller -> AddBranch()-> params {0}", JsonConvert.SerializeObject(new { Params = branchDto }));
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-            var id =  branchService.AddOrUpdateBranch(branchDto, UserName, this.BusinessId,this.PageSource);
+            var id =  await branchService.AddOrUpdateBranch(branchDto, UserName, this.BusinessId,this.PageSource);
             this.logger.LogInformation("Branch Controller -> AddBranch()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
             response.Data = id;
 			return Ok(response);
@@ -109,12 +109,12 @@ namespace EpicMarket.Business.API.Controllers
         }
         [HttpPost("verifyBranchs")]
         [Authorize(Roles = ROLES.BUSINESS_OWNER)]
-        public ActionResult<OperationResult<int>> VerifyBranchs(VerifyDto verifyBranchDto)
+        public async Task<ActionResult<OperationResult<int>>> VerifyBranchs(VerifyDto verifyBranchDto)
         {
             var response = new OperationResult<int>();
             this.logger.LogInformation("Branch Controller -> verifyBranchs()-> params {0}", JsonConvert.SerializeObject(new { Params = verifyBranchDto }));
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-            var id = branchService.VerifyBranchs(verifyBranchDto, UserName, this.AdminPersonID, this.PageSource);
+            var id =await  branchService.VerifyBranchs(verifyBranchDto, UserName, this.AdminPersonID, this.PageSource);
             this.logger.LogInformation("Branch Controller -> verifyBranchs()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
             response.Data = id;
             return Ok(response);

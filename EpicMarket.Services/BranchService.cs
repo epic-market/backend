@@ -22,22 +22,25 @@ namespace EpicMarket.Services
         private readonly IAddressService addressService;
         private readonly IEventLogService eventLogService;
         private readonly ICommunicationQueueService communicationQueueService;
+		private readonly IUnitOfWork unitOfWork;
 
-        public BranchService(
+		public BranchService(
                                 ApplicationDbContext context,
                                 IMapper mapper,
                                 IAddressService addressService,
                                 IEventLogService eventLogService,
-                                ICommunicationQueueService communicationQueueService)
+                                ICommunicationQueueService communicationQueueService,
+                                IUnitOfWork unitOfWork)
         {
             _context = context;
             this.mapper = mapper;
             this.addressService = addressService;
             this.eventLogService = eventLogService;
             this.communicationQueueService = communicationQueueService;
-        }
+			this.unitOfWork = unitOfWork;
+		}
 
-        public int AddOrUpdateBranch(BranchDto branchDto,  string UserName, int BusinessID, string PageSource)
+        public async Task<int> AddOrUpdateBranch(BranchDto branchDto,  string UserName, int BusinessID, string PageSource)
         {
             var addressModel = new AddressDto();
             var events="";
@@ -61,7 +64,7 @@ namespace EpicMarket.Services
             }
            
             
-            int addressId =  addressService.AddAddress(addressModel); 
+            int addressId =  await addressService.AddAddress(addressModel); 
 
             var outletModel = new Outlet();
             outletModel.AddressID = addressId;
@@ -89,14 +92,14 @@ namespace EpicMarket.Services
                 mailevent = MessageDataConstants.EditBranch;
                 _context.Outlets.Add(outletModel);
             }
-      
-             _context.SaveChanges();
-            var savedOutletModel = _context.Outlets.FirstOrDefault(o => o.ID == outletModel.ID);
+
+			await unitOfWork.Complete();
+			var savedOutletModel = _context.Outlets.FirstOrDefault(o => o.ID == outletModel.ID);
             string outletModelJson = JsonConvert.SerializeObject(savedOutletModel, new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             });
-            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = outletModel.ID, Data = outletModelJson, Description = null, EventName = events, EntityName = EntityConstants.Branch,Source=PageSource });
+            await this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = outletModel.ID, Data = outletModelJson, Description = null, EventName = events, EntityName = EntityConstants.Branch,Source=PageSource });
             this.communicationQueueService.InsertCommunicationQueue(
                     new Entities.CommunicationQueueDTO()
                     {
@@ -231,7 +234,7 @@ namespace EpicMarket.Services
            }).FirstOrDefaultAsync();
         }
 
-        public int VerifyBranchs (VerifyDto verifyBranchDto, string UserName, int AdminPersonID, string PageSource)
+        public async Task<int> VerifyBranchs (VerifyDto verifyBranchDto, string UserName, int AdminPersonID, string PageSource)
         {
             var newTaskStatus = _context.TaskStatusTypes.Where(row => row.Status == "New").FirstOrDefault();
             var taskTypeID = _context.TaskTypes.Where(row => row.Name == "Verification").FirstOrDefault();
@@ -254,7 +257,7 @@ namespace EpicMarket.Services
                     CreateBy = userName.Email
                 };
                 _context.Tasks.Add(taskToSave);
-                _context.SaveChanges();
+			await unitOfWork.Complete(); ;
             return taskToSave.ID;
                
         }

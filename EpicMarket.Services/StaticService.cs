@@ -16,12 +16,14 @@ namespace EpicMarket.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper mapper;
+		private readonly IUnitOfWork unitOfWork;
 
-        public StaticService(ApplicationDbContext context, IMapper mapper)
+		public StaticService(ApplicationDbContext context, IMapper mapper, IUnitOfWork unitOfWork)
         {
             _context = context;
             this.mapper = mapper;
-        }
+			this.unitOfWork = unitOfWork;
+		}
         public Task<List<DropDownOptions>> BusinessCategoriesOptions()
         {
             return _context.BusinessCategories.Select(c => new DropDownOptions { Text = c.Name, Value = c.ID }).ToListAsync();
@@ -70,7 +72,7 @@ namespace EpicMarket.Services
                    })
                    .ToListAsync();
         }
-        public int SubscribeforOffers( string gmail)
+        public async Task<int> SubscribeforOffers( string gmail)
         {
             var newLead = new PromotionalLeads
             {
@@ -81,8 +83,8 @@ namespace EpicMarket.Services
             };
 
             _context.PromotionalLeads.Add(newLead);
-            _context.SaveChanges();
-            return newLead.Id;
+			await unitOfWork.Complete();
+			return newLead.Id;
 
         }
     }

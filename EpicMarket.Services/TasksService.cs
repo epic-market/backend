@@ -18,13 +18,15 @@ namespace EpicMarket.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper mapper;
+		private readonly IUnitOfWork unitOfWork;
 
-        public TasksService(ApplicationDbContext context, IMapper mapper)
+		public TasksService(ApplicationDbContext context, IMapper mapper,IUnitOfWork unitOfWork)
         {
             _context = context;
             this.mapper = mapper;
-        }
-        public long SaveTask(TasksDTO tasksDTO)
+			this.unitOfWork = unitOfWork;
+		}
+        public async Task<long> SaveTask(TasksDTO tasksDTO)
         {
             var currentTask = _context.Tasks.Where(row => row.ID == tasksDTO.ID).FirstOrDefault();
             var newTaskStatus = _context.TaskStatusTypes.Where(row => row.Status == "New").FirstOrDefault();
@@ -52,8 +54,8 @@ namespace EpicMarket.Services
                     CreateBy = tasksDTO.CreateBy
                 };
                 _context.Tasks.Add(taskToSave);
-                _context.SaveChanges();
-                return (long)taskToSave.ID;
+				await unitOfWork.Complete();
+				return (long)taskToSave.ID;
             }
             else
             {
@@ -72,12 +74,12 @@ namespace EpicMarket.Services
                     ModifiedBy = tasksDTO.ModifiedBy
                 };
                 _context.Tasks.Update(taskToSave);
-                _context.SaveChanges();
-                return (long)currentTask.ID;
+				await unitOfWork.Complete();
+				return (long)currentTask.ID;
             }
         }
 
-        public int SaveComments(CommentDTO commentDTO)
+        public async Task<int> SaveComments(CommentDTO commentDTO)
         {
             Comment commentSave;
             commentSave = new Comment
@@ -89,8 +91,8 @@ namespace EpicMarket.Services
                 CreateBy = commentDTO.CreateBy
             };
             _context.Comments.Add(commentSave);
-            _context.SaveChanges();
-            return commentSave.ID;
+			await unitOfWork.Complete();
+			return commentSave.ID;
         }
 
         public async Task<GetDataResult<List<CommentDTO>>> GetAllComments(int taskId)
@@ -162,10 +164,10 @@ namespace EpicMarket.Services
                 items = tasksDTOs,
             };
         }
-        public long AddSupportTask(SupportDTO supportDTO, int AdminPersonID)
+        public async Task<long> AddSupportTask(SupportDTO supportDTO, int AdminPersonID)
         {
             var supportQuery = _context.SupportQuerys.Where(row => row.ID == supportDTO.QueryId).FirstOrDefault();
-            var taskID = this.SaveTask(new TasksDTO
+            var taskID = await this.SaveTask(new TasksDTO
             {
                 Name= "Support Query",
                 Description= supportQuery.Query,
@@ -186,8 +188,8 @@ namespace EpicMarket.Services
                 Taskid= (int)taskID
             };
             _context.SupportTickets.Add(supportTicket);
-            _context.SaveChanges();
-            return (long)supportTicket.ID;
+			await unitOfWork.Complete();
+			return (long)supportTicket.ID;
         }
 
     }

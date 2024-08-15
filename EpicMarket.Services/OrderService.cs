@@ -25,8 +25,9 @@ namespace EpicMarket.Services
         private readonly IAddressService addressService;
         private readonly ICommunicationService communicationService;
         private readonly IEventLogService eventLogService;
+		private readonly IUnitOfWork unitOfWork;
 
-        public OrderService(ApplicationDbContext context, IMapper mapper, IApplicationConfigurationService applicationConfiguration, ICommunicationService communicationService, UserManager<AppUser> userManager, IAddressService addressService, IEventLogService eventLogService)
+		public OrderService(ApplicationDbContext context, IMapper mapper, IApplicationConfigurationService applicationConfiguration, ICommunicationService communicationService, UserManager<AppUser> userManager, IAddressService addressService, IEventLogService eventLogService,IUnitOfWork unitOfWork)
         {
             _context = context;
             this.mapper = mapper;
@@ -35,11 +36,12 @@ namespace EpicMarket.Services
             this.addressService = addressService;
             this.communicationService = communicationService;
             this.eventLogService = eventLogService;
-        }
+			this.unitOfWork = unitOfWork;
+		}
 
 
 
-        public  int CreateOrder(OrdersDto orderdto,string UserName, string PageSource)
+        public async Task<int> CreateOrder(OrdersDto orderdto,string UserName, string PageSource)
         {   
             var User = new AppUser();
             var totalItems = 0;
@@ -48,8 +50,8 @@ namespace EpicMarket.Services
             User.UserName = orderdto.CustomerEmail;
             User.PhoneNumber = orderdto.CustomerPhone;
             _context.Users.Add(User);
-            _context.SaveChanges();
-            var listoforderDetails = new List<OrderDetail>();
+			await unitOfWork.Complete();
+			var listoforderDetails = new List<OrderDetail>();
             foreach(var orderDetail in orderdto.orderDetailsDtos)
             {
                 var catelog = _context.Catalogs.FirstOrDefault(c => c.ID == orderDetail.CatalogID);
@@ -74,16 +76,16 @@ namespace EpicMarket.Services
                 TotalPrice = totalPrice,
             };
             _context.Orders.Add(newOrder);
-            _context.SaveChanges();
-            listoforderDetails.ForEach(od => od.OrderID = newOrder.ID);
+			await unitOfWork.Complete();
+			listoforderDetails.ForEach(od => od.OrderID = newOrder.ID);
             _context.OrderDetails.AddRange(listoforderDetails);
-            _context.SaveChanges();
-            var saved = _context.Orders.FirstOrDefault(o => o.ID == newOrder.ID);
+			await unitOfWork.Complete();
+			var saved = _context.Orders.FirstOrDefault(o => o.ID == newOrder.ID);
             string saveJson = JsonConvert.SerializeObject(saved, new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             });
-            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = newOrder.ID, Data = saveJson, Description = null, EventName = EventConstants.AddOrder, EntityName = EntityConstants.Order,Source=PageSource });
+            await this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = newOrder.ID, Data = saveJson, Description = null, EventName = EventConstants.AddOrder, EntityName = EntityConstants.Order,Source=PageSource });
 
             return newOrder.ID;
         }
@@ -120,13 +122,13 @@ namespace EpicMarket.Services
 
         }
 
-        public int UpdateStatus(int OrderId, string OrderStatus)
+        public async Task<int> UpdateStatus(int OrderId, string OrderStatus)
         {
             var Order = _context.Orders.Find(OrderId);
             //Order.Status = OrderStatus;
             _context.Orders.Update(Order);
-            _context.SaveChanges();
-            this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = Order.ID, Data = OrderStatus, Description = null, EventName = EventConstants.EditOrder, EntityName = EntityConstants.Order });
+			await unitOfWork.Complete();
+			await this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = Order.ID, Data = OrderStatus, Description = null, EventName = EventConstants.EditOrder, EntityName = EntityConstants.Order });
 
             return Order.ID;
 
