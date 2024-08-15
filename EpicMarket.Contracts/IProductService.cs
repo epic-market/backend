@@ -11,7 +11,7 @@ namespace EpicMarket.Contracts
     public interface IProductService
     {
         Task<List<ProductsMapOptionResult>> GetAllProductForMap(int businessID, int outletID);
-        Task<int> AddOrUpdateProduct(ProductsDto productsDto,string UserName, int businessID,string PageSource);
+        Task<int> AddOrUpdateProduct(AddProductsDto productsDto,string UserName, int businessID,string PageSource);
 
         Task<GetDataResult<List<ProductResult>>> GetAllProducts(ProductParams productResult, int businessID);
 

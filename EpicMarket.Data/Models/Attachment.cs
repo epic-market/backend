@@ -14,10 +14,6 @@ namespace EpicMarket.Data.Models
         [Key]
         public int ID { get; set; }
 
-        [ForeignKey("AttachmentType")]
-        public int AttachmentTypeID { get; set; }
-        public virtual AttachmentType AttachmentType { get; set; }
-
         [Required]
         [MaxLength(255)]
         public string Name { get; set; }

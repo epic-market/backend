@@ -9,6 +9,6 @@ namespace EpicMarket.Contracts
 {
     public interface ICommunicationQueueService
     {
-        public void InsertCommunicationQueue(CommunicationQueueDTO communicationQueueDTO);
+        public Task InsertCommunicationQueue(CommunicationQueueDTO communicationQueueDTO);
     }
 }

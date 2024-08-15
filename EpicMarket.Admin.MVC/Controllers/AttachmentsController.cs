@@ -24,7 +24,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: Attachments
         public async Task<IActionResult> Index()
         {
-            var authDbContext = _context.Attachments.Include(a => a.AttachmentType);
+            var authDbContext = _context.Attachments;
             return View(await authDbContext.ToListAsync());
         }
 
@@ -37,7 +37,6 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
 
             var attachment = await _context.Attachments
-				.Include(a => a.AttachmentType)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (attachment == null)
             {
@@ -70,7 +69,6 @@ namespace EpicMarket.Admin.MVC.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AttachmentTypeID"] = new SelectList(_context.AttachmentTypes, "ID", "Name", attachment.AttachmentTypeID);
             return View(attachment);
         }
 
@@ -87,7 +85,6 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 return NotFound();
             }
-            ViewData["AttachmentTypeID"] = new SelectList(_context.AttachmentTypes, "ID", "Name", attachment.AttachmentTypeID);
             return View(attachment);
         }
 
@@ -126,7 +123,6 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AttachmentTypeID"] = new SelectList(_context.AttachmentTypes, "ID", "Name", attachment.AttachmentTypeID);
             return View(attachment);
         }
 
@@ -139,7 +135,6 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
 
             var attachment = await _context.Attachments
-				.Include(a => a.AttachmentType)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (attachment == null)
             {

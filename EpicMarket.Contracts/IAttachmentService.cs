@@ -11,6 +11,6 @@ namespace EpicMarket.Contracts
     public interface IAttachmentService
     {
         Task<int> InsertOrUpdateAttachment(AttachmentDTO attachment);
-        void InsertAttachmentLink(AttachmentLinkDTO attachmentLinkDTO);
+		Task InsertAttachmentLink(AttachmentLinkDTO attachmentLinkDTO);
     }
 }

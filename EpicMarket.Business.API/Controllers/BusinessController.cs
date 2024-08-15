@@ -67,7 +67,7 @@ namespace EpicMarket.Business.API.Controllers
                 var filinsertOutput = await this.SaveFileGlobalAsync(businessRegisterDto.LogoFile, FilePathConstants.LOGOPATH, this.fileStoreService, this.applicationConfigurationService, id);
                 var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
                 {
-                    AttachmentTypeName = AttachmentTypeConstants.LOGO,
+                   
                     Name = EntityConstants.Business + AttachmentTypeConstants.LOGO,
                     Comment = null,
                     DocumentType = DocumentTypeConstants.FILE,
@@ -75,9 +75,10 @@ namespace EpicMarket.Business.API.Controllers
                     DocumentFolderPath = filinsertOutput.FullPathLocation,
                     DocumentFile = filinsertOutput.FileName,
                 });
-                this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
-                {
-                    AttachmentID = attachmentId,
+                await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
+				{
+					AttachmentTypeName = AttachmentTypeConstants.LOGO,
+					AttachmentID = attachmentId,
                     Entity = EntityConstants.Business,
                     RecordID = id
                 });
@@ -87,7 +88,7 @@ namespace EpicMarket.Business.API.Controllers
                 var filinsertOutput = await  this.SaveFileGlobalAsync(businessRegisterDto.ProofFile, FilePathConstants.ProofPATH, this.fileStoreService, this.applicationConfigurationService, id);
                 var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
                 {
-                    AttachmentTypeName = AttachmentTypeConstants.PROOF,
+              
                     Name = EntityConstants.Business + AttachmentTypeConstants.PROOF,
                     Comment = null,
                     DocumentType = DocumentTypeConstants.FILE,
@@ -95,9 +96,10 @@ namespace EpicMarket.Business.API.Controllers
                     DocumentFolderPath = filinsertOutput.FullPathLocation,
                     DocumentFile = filinsertOutput.FileName,
                 });
-                this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
+				await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
                 {
-                    AttachmentID = attachmentId,
+					AttachmentTypeName = AttachmentTypeConstants.PROOF,
+					AttachmentID = attachmentId,
                     Entity = EntityConstants.Business,
                     RecordID = id
                 });

@@ -44,6 +44,30 @@ namespace EpicMarket.Data.Webapp.AlterScripts
 				dbContext.SaveChanges();
 			}
 
+			if (!dbContext.AttachmentTypes.Any(cm => cm.Name == "THUMBNAIL"))
+			{
+				var personType = new AttachmentType
+				{
+					Name = "THUMBNAIL",
+					Description = "Thumbnail",
+				};
+
+				dbContext.AttachmentTypes.Add(personType);
+				dbContext.SaveChanges();
+			}
+
+			if (!dbContext.ApplicationConfigurations.Any(cm => cm.Name == "THUMBNAILPATH"))
+			{
+				var applicationConfiguration = new ApplicationConfiguration
+				{
+					Name = "THUMBNAILPATH",
+					Value = "Thumbnail",
+				};
+
+				dbContext.ApplicationConfigurations.Add(applicationConfiguration);
+				dbContext.SaveChanges();
+			}
+
 
 			if (!dbContext.ApplicationConfigurations.Any(cm => cm.Name == "APIROUTE"))
 			{

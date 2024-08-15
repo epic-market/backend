@@ -23,6 +23,11 @@ namespace EpicMarket.Data.Models
         public int EntityID { get; set; }
         public virtual Entity Entity { get; set; }
 
-        public int RecordID { get; set; }
+
+		[ForeignKey("AttachmentType")]
+		public int AttachmentTypeID { get; set; }
+		public virtual AttachmentType AttachmentType { get; set; }
+
+		public int RecordID { get; set; }
     }
 }
