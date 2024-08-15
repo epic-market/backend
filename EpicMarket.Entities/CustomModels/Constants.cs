@@ -12,7 +12,7 @@ namespace EpicMarket.Entities.CustomModels
 
         public const string ADMIN_USERID = "admin@epicmarket.in";
         public const string ACCESSTYPE_READWRITE = "ReadWrite";
-    }
+	}
 
 	public static class Business_Status
 	{
@@ -39,7 +39,9 @@ namespace EpicMarket.Entities.CustomModels
 		public const string LOGO = "LOGO";
         public const string BasePath = "BASEPATH";
         public const string Business = "BUSINESS";
-    }
+        public const string APIROUTE = "APIROUTE";
+		public const string FILEURL = "FILEURL";
+	}
     public static class FilePathConstants
     {
         public const string Business = "BUSINESSPATH";
@@ -60,7 +62,8 @@ namespace EpicMarket.Entities.CustomModels
     {
         public const string LOGO = "Logo";
         public const string PROOF = "Proof";
-    }
+		public const string PRODUCTIMAGES = "Products";
+	}
     public static class DocumentTypeConstants
     {
         public const string FILE = "File";

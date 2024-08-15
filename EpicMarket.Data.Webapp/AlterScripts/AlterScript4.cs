@@ -32,6 +32,43 @@ namespace EpicMarket.Data.Webapp.AlterScripts
 				dbContext.SaveChanges();
 			}
 
+			if (!dbContext.AttachmentTypes.Any(cm => cm.Name == "Products"))
+			{
+				var personType = new AttachmentType
+				{
+					Name = "Products",
+					Description = "Products",
+				};
+
+				dbContext.AttachmentTypes.Add(personType);
+				dbContext.SaveChanges();
+			}
+
+
+			if (!dbContext.ApplicationConfigurations.Any(cm => cm.Name == "APIROUTE"))
+			{
+				var applicationConfiguration = new ApplicationConfiguration
+				{
+					Name = "APIROUTE",
+					Value = "https://localhost:44372/",
+				};
+
+				dbContext.ApplicationConfigurations.Add(applicationConfiguration);
+				dbContext.SaveChanges();
+			}
+
+			if (!dbContext.ApplicationConfigurations.Any(cm => cm.Name == "FILEURL"))
+			{
+				var applicationConfiguration = new ApplicationConfiguration
+				{
+					Name = "FILEURL",
+					Value = "/api/Files/preview?key=",
+				};
+
+				dbContext.ApplicationConfigurations.Add(applicationConfiguration);
+				dbContext.SaveChanges();
+			}
+
 			this.updateDatabaseVersion(this.GetType().Name);
         }
 

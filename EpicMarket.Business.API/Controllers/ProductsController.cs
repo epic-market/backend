@@ -77,8 +77,8 @@ namespace EpicMarket.Business.API.Controllers
 					var filinsertOutput = await this.SaveFileGlobalAsync(product, ApplicationConfigurationConstants.Products, this.fileStoreService, this.applicationConfigurationService,this.BusinessId);
 					var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
 					{
-						AttachmentTypeName = AttachmentTypeConstants.LOGO,
-						Name = EntityConstants.Business + AttachmentTypeConstants.LOGO,
+						AttachmentTypeName = AttachmentTypeConstants.PRODUCTIMAGES,
+						Name = EntityConstants.Catelog + AttachmentTypeConstants.PRODUCTIMAGES,
 						Comment = null,
 						DocumentType = DocumentTypeConstants.FILE,
 						DocumentFileType = product.ContentType,
@@ -88,7 +88,7 @@ namespace EpicMarket.Business.API.Controllers
 					this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
 					{
 						AttachmentID = attachmentId,
-						Entity = EntityConstants.Business,
+						Entity = EntityConstants.Catelog,
 						RecordID = response.Data
 					});
 

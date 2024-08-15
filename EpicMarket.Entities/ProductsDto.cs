@@ -18,7 +18,7 @@ namespace EpicMarket.Entities
         public double Rate { get; set; }
         public bool IsActive { get; set; }
         public bool InStock { get; set; }
-        public string Images { get; set; }
+        public List<string> Images { get; set; } 
 		public bool IsRecommended { get; set; }
 		public int? MaximumOrderPurchase { get; set; }
         public int? StatusId { get; set; }
@@ -60,5 +60,6 @@ namespace EpicMarket.Entities
         public bool IsActive { get; set; }
         public bool InStock { get; set; }
         public int Count { get; set; }
+        public List<string> Images { get; set; }
     }
 }

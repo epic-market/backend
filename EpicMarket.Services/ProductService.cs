@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,6 +24,7 @@ namespace EpicMarket.Services
         private readonly IAddressService addressService;
         private readonly IEventLogService eventLogService;
         private readonly ICommunicationQueueService communicationQueueService;
+		private readonly IApplicationConfigurationService applicationConfigurationService;
 		private readonly IUnitOfWork unitOfWork;
 
 		public ProductService(
@@ -31,6 +33,7 @@ namespace EpicMarket.Services
                                 IAddressService addressService,
                                 IEventLogService eventLogService,
                                 ICommunicationQueueService communicationQueueService,
+                                IApplicationConfigurationService applicationConfigurationService,
                                 IUnitOfWork unitOfWork)
         {
             _context = context;
@@ -38,6 +41,7 @@ namespace EpicMarket.Services
             this.addressService = addressService;
             this.eventLogService = eventLogService;
             this.communicationQueueService = communicationQueueService;
+			this.applicationConfigurationService = applicationConfigurationService;
 			this.unitOfWork = unitOfWork;
 		}
 
@@ -107,9 +111,9 @@ namespace EpicMarket.Services
 
         public async Task<GetDataResult<List<ProductResult>>> GetAllProducts(ProductParams productParams, int businessID)
         {
+            var baseURL = applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.APIROUTE) + applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.FILEURL);
 
-
-            var getResult = new GetDataResult<List<ProductResult>>();
+			var getResult = new GetDataResult<List<ProductResult>>();
 
 
             //1 . filter with BusinessID
@@ -152,7 +156,12 @@ namespace EpicMarket.Services
                 Rate = c.Rate,
                 InStock = c.InStock,
                 IsActive = c.IsActive,  
-                Count = totalCount
+                Images = ((from attachment in _context.Attachments
+						   join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+						   join entity in _context.Entity on link.EntityID equals entity.ID
+						   where entity.Name == EntityConstants.Catelog && link.RecordID == c.ID
+						   select $"{baseURL}{attachment.DocumentFolderPath}{attachment.DocumentFile}").ToList()),
+                Count = totalCount,
             }).ToListAsync();
 
             getResult.items = results;
@@ -162,23 +171,32 @@ namespace EpicMarket.Services
         }
 
         public async Task<ProductsDto> GetProductDetails(int productId)
-        {
-            return await _context.Catalogs.Where(c=> c.ID == productId).Select(c => new ProductsDto
-            { 
-                Id=c.ID,
-                Name = c.Name,
-                Description = c.Description,
-                Rate = c.Rate,
-                InStock = c.InStock,
-                IsActive = c.IsActive,
-                Category = c.Category,
-                Images = c.Images,
-                MaximumOrderPurchase = (int)c.MaximumOrderPurchase,
-                IsRecommended = c.IsRecommended
-            }
-            
-            ).FirstOrDefaultAsync();
-        }
+		{
+			var baseURL = applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.APIROUTE) + applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.FILEURL);
+
+			var attachments = from attachment in _context.Attachments
+							  join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+							  join entity in _context.Entity on link.EntityID equals entity.ID
+							  where entity.Name == EntityConstants.Catelog && link.RecordID == productId
+							  select new
+							  {
+								  ImagePath = $"{baseURL}{attachment.DocumentFolderPath}{attachment.DocumentFile}"
+							  };
+
+			return await _context.Catalogs.Where(c => c.ID == productId).Select(c => new ProductsDto
+			{
+				Id = c.ID,
+				Name = c.Name,
+				Description = c.Description,
+				Rate = c.Rate,
+				InStock = c.InStock,
+				IsActive = c.IsActive,
+				Category = c.Category,
+				Images = attachments.Select(a => a.ImagePath).ToList(),
+				MaximumOrderPurchase = (int)c.MaximumOrderPurchase,
+				IsRecommended = c.IsRecommended
+			}).FirstOrDefaultAsync();
+		}
         public int VerifyCatalog(VerifyDto verifyBranchDto, string UserName, int AdminPersonID, string PageSource)
         {
             var newTaskStatus = _context.TaskStatusTypes.Where(row => row.Status == "New").FirstOrDefault();
