@@ -182,7 +182,7 @@ namespace EpicMarket.Business.API.Controllers
 
             if (await UserExists(resetPassword.email))
             {
-                response.Data = this._tokenService.ResetPassword(resetPassword);
+                response.Data = await this._tokenService.ResetPassword(resetPassword);
             }
             else
             {

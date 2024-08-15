@@ -41,6 +41,7 @@ namespace EpicMarket.Entities.CustomModels
         public const string Business = "BUSINESS";
         public const string APIROUTE = "APIROUTE";
 		public const string FILEURL = "FILEURL";
+		public const string THUMBNAIL = "THUMBNAIL";
 	}
     public static class FilePathConstants
     {
@@ -48,12 +49,13 @@ namespace EpicMarket.Entities.CustomModels
         public const string LOGOPATH = "LOGOPATH";
         public const string ProofPATH = "ProofPATH";
 		public const string PRODUCTPATH = "ProductPath";
+		public const string THUMBNAILPATH = "THUMBNAILPATH";
 
 	}
     public static class EntityConstants
     {
         public const string Catelog = "Catelog";
-        public const string Branch = "Branch";
+		public const string Branch = "Branch";
         public const string Employees = "Employees";
         public const string Order = "Order";
         public const string Business = "Business";
@@ -63,6 +65,7 @@ namespace EpicMarket.Entities.CustomModels
         public const string LOGO = "Logo";
         public const string PROOF = "Proof";
 		public const string PRODUCTIMAGES = "Products";
+		public const string THUMBNAIL = "Thumbnail";
 	}
     public static class DocumentTypeConstants
     {

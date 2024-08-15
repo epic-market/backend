@@ -12,6 +12,7 @@ namespace EpicMarket.Entities
         public int AttachmentID { get; set; }
         public string Entity { get; set; }
         public int RecordID { get; set; }
-    }
+		public string AttachmentTypeName { get; set; }
+	}
 
 }

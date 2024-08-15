@@ -1,6 +1,7 @@
 ﻿using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,10 +20,10 @@ namespace EpicMarket.Services
             this._context = _context;
 			this.unitOfWork = unitOfWork;
 		}
-        public async void InsertCommunicationQueue(CommunicationQueueDTO communicationQueueDTO)
+        public async Task InsertCommunicationQueue(CommunicationQueueDTO communicationQueueDTO)
         {
 
-            var contactMethod = _context.ContactMethod.Where(row => row.Name==communicationQueueDTO.ContactMethod.Trim()).FirstOrDefault();
+            var contactMethod = await _context.ContactMethod.Where(row => row.Name==communicationQueueDTO.ContactMethod.Trim()).FirstOrDefaultAsync();
             var communicationQueueModel = new CommunicationQueue();
             communicationQueueModel.MessageData = communicationQueueDTO.MessageData;
             communicationQueueModel.Subject = communicationQueueDTO.Subject;
@@ -32,7 +33,7 @@ namespace EpicMarket.Services
             communicationQueueModel.ContactMethodID = contactMethod.ID;
             communicationQueueModel.CreateBy = communicationQueueDTO.CreateBy;
             communicationQueueModel.CreateDate = DateTime.Now;
-            _context.CommunicationQueue.Add(communicationQueueModel);
+            await _context.CommunicationQueue.AddAsync(communicationQueueModel);
 			await unitOfWork.Complete();
         }
     }

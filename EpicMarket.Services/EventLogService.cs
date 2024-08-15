@@ -1,6 +1,7 @@
 ﻿using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
@@ -23,13 +24,13 @@ namespace EpicMarket.Services
         public async Task<long> LogEvent(EVENT_LOG_SAVE_PARAMS eVENT_LOG_SAVE_PARAMS)
         {
 
-            var entityModel = _context.Entity.Where(row => row.Name == eVENT_LOG_SAVE_PARAMS.EntityName.Trim()).FirstOrDefault();
+            var entityModel = await _context.Entity.Where(row => row.Name == eVENT_LOG_SAVE_PARAMS.EntityName.Trim()).FirstOrDefaultAsync();
             if (entityModel == null)
             {
                 throw new Exception(string.Format("Unable to retrieve Entity by Name {0}", eVENT_LOG_SAVE_PARAMS.EntityName));
             }
 
-            var eventModel = _context.Event.Where(row => row.Name == eVENT_LOG_SAVE_PARAMS.EventName.Trim()).FirstOrDefault();
+            var eventModel = await _context.Event.Where(row => row.Name == eVENT_LOG_SAVE_PARAMS.EventName.Trim()).FirstOrDefaultAsync();
 
             if (eventModel == null)
             {
@@ -67,8 +68,8 @@ namespace EpicMarket.Services
                     CreateBy = eVENT_LOG_SAVE_PARAMS.LoggedInUserName
                 };
             }
-            _context.EventLog.Add(eventLogRecord);
-			 await unitOfWork.Complete(); ;
+            await _context.EventLog.AddAsync(eventLogRecord);
+			await unitOfWork.Complete(); 
             return eventLogRecord.ID;
 
         }

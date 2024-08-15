@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -17,6 +18,7 @@ namespace EpicMarket.Data.Models
         public string Name { get; set; }
 
         public string Description { get; set; }
-        public virtual ICollection<Attachment>? Attachments { get; set; }
-    }
+
+		public virtual ICollection<AttachmentLink>? AttachmentLinks { get; set; }
+	}
 }

@@ -99,7 +99,7 @@ namespace EpicMarket.Services
             v.Evaluate(context, writer, string.Empty, EmailTemplete);
             var message = writer.ToString();
 
-			this.communicationQueueService.InsertCommunicationQueue(
+			await this.communicationQueueService.InsertCommunicationQueue(
 				  new Entities.CommunicationQueueDTO()
 				  {
 					  MessageData = message,

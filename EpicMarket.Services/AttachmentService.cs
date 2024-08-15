@@ -24,10 +24,8 @@ namespace EpicMarket.Services
         {
             var attachment = _context.Attachments
                 .FirstOrDefault(a => a.ID == attachmentDTO.ID);
-            var attachmentTypeID=_context.AttachmentTypes.FirstOrDefault(a => a.Name == attachmentDTO.AttachmentTypeName).ID;
             if (attachment != null)
             {
-                attachment.AttachmentTypeID = attachmentTypeID;
                 attachment.Name = attachmentDTO.Name;
                 attachment.Comment = attachmentDTO.Comment;
                 attachment.DocumentType = attachmentDTO.DocumentType;
@@ -41,7 +39,6 @@ namespace EpicMarket.Services
             {
                  attachment = new Attachment
                 {
-                    AttachmentTypeID = attachmentTypeID,
                     Name = attachmentDTO.Name,
                     Comment = attachmentDTO.Comment,
                     DocumentType = attachmentDTO.DocumentType,//File
@@ -50,7 +47,7 @@ namespace EpicMarket.Services
                     DocumentFile = attachmentDTO.DocumentFile
                 };
 
-                _context.Attachments.Add(attachment);
+               await _context.Attachments.AddAsync(attachment);
             }
 
 			await unitOfWork.Complete();
@@ -59,17 +56,19 @@ namespace EpicMarket.Services
         }
 
 
-        public async void InsertAttachmentLink(AttachmentLinkDTO attachmentLinkDTO)
+        public async Task InsertAttachmentLink(AttachmentLinkDTO attachmentLinkDTO)
         {
-            var entityID = _context.Entity.FirstOrDefault(a => a.Name == attachmentLinkDTO.Entity).ID;
+			var attachmentTypeID = _context.AttachmentTypes.FirstOrDefault(a => a.Name == attachmentLinkDTO.AttachmentTypeName).ID;
+			var entityID = _context.Entity.FirstOrDefault(a => a.Name == attachmentLinkDTO.Entity).ID;
             var attachmentLink = new AttachmentLink
             {
                 AttachmentID = attachmentLinkDTO.AttachmentID,
                 EntityID = entityID,
-                RecordID = attachmentLinkDTO.RecordID
+                RecordID = attachmentLinkDTO.RecordID,
+                AttachmentTypeID = attachmentTypeID,
             };
 
-            _context.AttachmentLinks.Add(attachmentLink);
+            await _context.AttachmentLinks.AddAsync(attachmentLink);
 
 			await unitOfWork.Complete();
 		}

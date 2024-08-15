@@ -58,7 +58,7 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpPost("AddOrUpdateProduct")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
-		public async  Task<ActionResult<OperationResult<int>>> AddOrUpdateProduct([FromForm]ProductsDto productsDto)
+		public async  Task<ActionResult<OperationResult<int>>> AddOrUpdateProduct([FromForm]AddProductsDto productsDto)
         {
 
 			var response = new OperationResult<int>();
@@ -70,14 +70,11 @@ namespace EpicMarket.Business.API.Controllers
 
 			if (productsDto.Products.Length > 0)
 			{
-
-
                 foreach (var product in productsDto.Products) {
-
 					var filinsertOutput = await this.SaveFileGlobalAsync(product, ApplicationConfigurationConstants.Products, this.fileStoreService, this.applicationConfigurationService,this.BusinessId);
 					var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
 					{
-						AttachmentTypeName = AttachmentTypeConstants.PRODUCTIMAGES,
+						
 						Name = EntityConstants.Catelog + AttachmentTypeConstants.PRODUCTIMAGES,
 						Comment = null,
 						DocumentType = DocumentTypeConstants.FILE,
@@ -85,8 +82,9 @@ namespace EpicMarket.Business.API.Controllers
 						DocumentFolderPath = filinsertOutput.FullPathLocation,
 						DocumentFile = filinsertOutput.FileName,
 					});
-					this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
+					await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
 					{
+						AttachmentTypeName = AttachmentTypeConstants.PRODUCTIMAGES,
 						AttachmentID = attachmentId,
 						Entity = EntityConstants.Catelog,
 						RecordID = response.Data
@@ -94,10 +92,33 @@ namespace EpicMarket.Business.API.Controllers
 
 				}
 
-				
-			}
+				if (productsDto.Thumbnail.Length > 0)
+				{ 
+						var filinsertOutput = await this.SaveFileGlobalAsync(productsDto.Thumbnail, ApplicationConfigurationConstants.THUMBNAIL, this.fileStoreService, this.applicationConfigurationService, this.BusinessId);
+						var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
+						{
+							Name = EntityConstants.Catelog + AttachmentTypeConstants.THUMBNAIL,
+							Comment = null,
+							DocumentType = DocumentTypeConstants.FILE,
+							DocumentFileType = productsDto.Thumbnail.ContentType,
+							DocumentFolderPath = filinsertOutput.FullPathLocation,
+							DocumentFile = filinsertOutput.FileName,
+						});
+					await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
+						{
+							AttachmentTypeName = AttachmentTypeConstants.THUMBNAIL,
+							AttachmentID = attachmentId,
+							Entity = EntityConstants.Catelog,
+							RecordID = response.Data
+						});
 
-			this.logger.LogInformation("Products Controller -> AddProduct()-> return {0}", JsonConvert.SerializeObject(new { Results = response }));
+					}
+
+
+
+				}
+
+				this.logger.LogInformation("Products Controller -> AddProduct()-> return {0}", JsonConvert.SerializeObject(new { Results = response }));
 
             return Ok(response);
         }

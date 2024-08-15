@@ -35,12 +35,6 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="row mb-3">
-                <label asp-for="AttachmentTypeID" class="col-sm-3 col-form-label"></label>
-                <div class="col-sm-9">
-                <select asp-for="AttachmentTypeID" class ="form-control" asp-items="ViewBag.AttachmentTypeID"></select>
-            </div>
-            </div>
-            <div class="row mb-3">
                 <label asp-for="Name" class="col-sm-3 col-form-label"></label>
                     <div class="col-sm-9">
                 <input asp-for="Name" class="form-control" />

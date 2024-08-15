@@ -8,7 +8,30 @@ using System.Threading.Tasks;
 
 namespace EpicMarket.Entities
 {
-    public class ProductsDto
+
+
+
+
+
+
+	public class AddProductsDto
+	{
+		public int? Id { get; set; }
+		public long? Barcode { get; set; }
+		public string Name { get; set; }
+		public string Description { get; set; }
+		public string Category { get; set; }
+		public double Rate { get; set; }
+		public bool IsActive { get; set; }
+		public bool InStock { get; set; }
+		public bool IsRecommended { get; set; }
+		public int? MaximumOrderPurchase { get; set; }
+		public int? StatusId { get; set; }
+		public IFormFile[] Products { get; set; }
+		public IFormFile Thumbnail { get; set; }
+	}
+
+	public class ProductsDto
     {
         public int? Id { get; set; }
 		public long? Barcode { get; set; }
@@ -22,8 +45,7 @@ namespace EpicMarket.Entities
 		public bool IsRecommended { get; set; }
 		public int? MaximumOrderPurchase { get; set; }
         public int? StatusId { get; set; }
-		public IFormFile[] Products { get; set; }
-
+		public string Thumbnail { get; set; }
 
 	}
     public class ProductsMapOptionResult 
@@ -60,6 +82,7 @@ namespace EpicMarket.Entities
         public bool IsActive { get; set; }
         public bool InStock { get; set; }
         public int Count { get; set; }
-        public List<string> Images { get; set; }
+		public string Thumbnail { get; set; }
+
     }
 }

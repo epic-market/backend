@@ -9,7 +9,7 @@ namespace EpicMarket.Entities
     public class AttachmentDTO
     {
         public int ID { get; set; }  
-        public String AttachmentTypeName { get; set; }
+      
         public string Name { get; set; }
         public string Comment { get; set; }
         public string DocumentType { get; set; }

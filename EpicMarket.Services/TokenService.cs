@@ -68,7 +68,7 @@ namespace EpicMarket.Services
             return tokenHandler.WriteToken(token);
         }
 
-        public string ResetPassword(ResetPasswordParams resetPassword)
+        public async Task<string> ResetPassword(ResetPasswordParams resetPassword)
         {
             try
             {
@@ -78,7 +78,7 @@ namespace EpicMarket.Services
                 dbContext.Users.Update(User);
                 var intialURL = applicationConfiguration.GetApplicationConfigurationValue("BusinessOwnerBaseURL");
                 string queryToken = intialURL+ resetPassword.path + "/"+ User.Id+"." + UniqueGuid;
-                this.communicationQueueService.InsertCommunicationQueue(
+                await this.communicationQueueService.InsertCommunicationQueue(
                     new Entities.CommunicationQueueDTO()
                     {
                         MessageData= queryToken,

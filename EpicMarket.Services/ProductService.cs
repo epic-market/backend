@@ -45,7 +45,7 @@ namespace EpicMarket.Services
 			this.unitOfWork = unitOfWork;
 		}
 
-        public async Task<int> AddOrUpdateProduct(ProductsDto productsDto, string UserName, int businessID, string PageSource)
+        public async Task<int> AddOrUpdateProduct(AddProductsDto productsDto, string UserName, int businessID, string PageSource)
         {
             var product = mapper.Map<Catalog>(productsDto);
             var events = "";
@@ -55,10 +55,11 @@ namespace EpicMarket.Services
             {
                 product.CreateBy = UserName;
                 product.CreateDate = DateTime.Now;
-                product.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == Business_Status.BUSINESS_UNVERIFIED).Id;
+                var status = await _context.StatusOptionSets.FirstOrDefaultAsync(c => c.Status == Business_Status.BUSINESS_UNVERIFIED);
+				product.StatusId = status.Id;
                 events = EventConstants.AddCatelog;
                 mailevent = MessageDataConstants.AddCatelog;
-                _context.Catalogs.Add(product);
+                await _context.Catalogs.AddAsync(product);
             }
             else 
             {
@@ -69,13 +70,13 @@ namespace EpicMarket.Services
                 _context.Catalogs.Update(product);
             }
             await unitOfWork.Complete();
-			var saved = _context.Catalogs.FirstOrDefault(o => o.ID == product.ID);
+			var saved = await _context.Catalogs.FirstOrDefaultAsync(o => o.ID == product.ID);
             string savedJson = JsonConvert.SerializeObject(saved, new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             });
             await this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = product.ID, Data = savedJson, Description = null, EventName = events, EntityName = EntityConstants.Catelog,Source=PageSource });
-            this.communicationQueueService.InsertCommunicationQueue(
+			await this.communicationQueueService.InsertCommunicationQueue(
                     new Entities.CommunicationQueueDTO()
                     {
                         MessageData = null,//TODO
@@ -112,6 +113,8 @@ namespace EpicMarket.Services
         public async Task<GetDataResult<List<ProductResult>>> GetAllProducts(ProductParams productParams, int businessID)
         {
             var baseURL = applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.APIROUTE) + applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.FILEURL);
+
+            var attachmentTypeID = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
 
 			var getResult = new GetDataResult<List<ProductResult>>();
 
@@ -156,11 +159,11 @@ namespace EpicMarket.Services
                 Rate = c.Rate,
                 InStock = c.InStock,
                 IsActive = c.IsActive,  
-                Images = ((from attachment in _context.Attachments
+                Thumbnail = ((from attachment in _context.Attachments
 						   join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
 						   join entity in _context.Entity on link.EntityID equals entity.ID
-						   where entity.Name == EntityConstants.Catelog && link.RecordID == c.ID
-						   select $"{baseURL}{attachment.DocumentFolderPath}{attachment.DocumentFile}").ToList()),
+						   where entity.Name == EntityConstants.Catelog && link.RecordID == c.ID && link.AttachmentTypeID == attachmentTypeID.ID
+							  select $"{baseURL}{attachment.DocumentFolderPath}{attachment.DocumentFile}").FirstOrDefault()),
                 Count = totalCount,
             }).ToListAsync();
 
@@ -172,13 +175,28 @@ namespace EpicMarket.Services
 
         public async Task<ProductsDto> GetProductDetails(int productId)
 		{
+
+
+			var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
+			var attachmentTypeID_Product = await  _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.PRODUCTIMAGES);
+
+
 			var baseURL = applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.APIROUTE) + applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.FILEURL);
 
 			var attachments = from attachment in _context.Attachments
 							  join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
 							  join entity in _context.Entity on link.EntityID equals entity.ID
-							  where entity.Name == EntityConstants.Catelog && link.RecordID == productId
+							  where entity.Name == EntityConstants.Catelog && link.RecordID == productId && link.AttachmentTypeID == attachmentTypeID_Product.ID
 							  select new
+							  {
+								  ImagePath = $"{baseURL}{attachment.DocumentFolderPath}{attachment.DocumentFile}"
+							  };
+
+            var thumbnail = from attachment in _context.Attachments
+							  join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+							  join entity in _context.Entity on link.EntityID equals entity.ID
+							  where entity.Name == EntityConstants.Catelog && link.RecordID == productId && link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
+						        select new
 							  {
 								  ImagePath = $"{baseURL}{attachment.DocumentFolderPath}{attachment.DocumentFile}"
 							  };
@@ -193,6 +211,7 @@ namespace EpicMarket.Services
 				IsActive = c.IsActive,
 				Category = c.Category,
 				Images = attachments.Select(a => a.ImagePath).ToList(),
+                Thumbnail = thumbnail.Select(a => a.ImagePath).FirstOrDefault(),
 				MaximumOrderPurchase = (int)c.MaximumOrderPurchase,
 				IsRecommended = c.IsRecommended
 			}).FirstOrDefaultAsync();

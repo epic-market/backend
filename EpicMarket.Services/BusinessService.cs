@@ -71,7 +71,7 @@ namespace EpicMarket.Services
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             });
             await this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = businessModel.ID, Data = savedJson, Description = null, EventName = EventConstants.AddBusiness, EntityName = EntityConstants.Business, Source = PageSource });
-            this.communicationQueueService.InsertCommunicationQueue(
+            await this.communicationQueueService.InsertCommunicationQueue(
                     new Entities.CommunicationQueueDTO()
                     {
                         MessageData = null,//TODO
