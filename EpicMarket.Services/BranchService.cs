@@ -251,7 +251,7 @@ namespace EpicMarket.Services
                     PrimaryAssignedToPersonID = AdminPersonID,
                     DateAssigned = DateTime.Now,
                     SubmittedByPersonID = userName.Id,
-                    TaskData = verifyBranchDto.Data,
+                    TaskData = string.Join(",", verifyBranchDto.ListOfProductIDs),
                     ReceivedDate = DateTime.Now,
                     CreateDate = DateTime.Now,
                     CreateBy = userName.Email
