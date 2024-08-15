@@ -17,10 +17,8 @@ namespace EpicMarket.Data.Models
         [StringLength(50)]
         public string Name { get; set; }
         public string Description { get; set; }
-        public string? Images { get; set; }
         public string? Category { get; set; }
         public double Rate { get; set; }
-        public bool IsActive { get; set; }
         public bool InStock { get; set; }
         public bool IsRecommended { get; set; }
         public int? MaximumOrderPurchase { get; set; }

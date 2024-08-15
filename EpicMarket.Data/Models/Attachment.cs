@@ -31,5 +31,7 @@ namespace EpicMarket.Data.Models
         public string DocumentFolderPath { get; set; }
 
         public string DocumentFile { get; set; }
-    }
+
+		public virtual ICollection<AttachmentLink> AttachmentLinks { get; set; }
+	}
 }

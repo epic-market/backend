@@ -101,8 +101,7 @@ namespace EpicMarket.Entities
     }
     public class VerifyDto
     {
-
-        public string Data { get; set; }
+        public List<int> ListOfProductIDs { get; set; }
 
     }
 }
