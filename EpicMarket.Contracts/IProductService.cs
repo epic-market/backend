@@ -11,14 +11,16 @@ namespace EpicMarket.Contracts
     public interface IProductService
     {
         Task<List<ProductsMapOptionResult>> GetAllProductForMap(int businessID, int outletID);
-        Task<int> AddOrUpdateProduct(AddProductsDto productsDto,string UserName, int businessID,string PageSource);
+        Task<int> AddProduct(AddProductsDto productsDto,string UserName, int businessID,string PageSource);
 
-        Task<GetDataResult<List<ProductResult>>> GetAllProducts(ProductParams productResult, int businessID);
+		Task<int> UpdateProducts(AddProductsDto productsDto,int id, string UserName, int businessID, string PageSource);
+
+		Task<GetDataResult<List<ProductResult>>> GetAllProducts(ProductParams productResult, int businessID);
 
         Task<ProductsDto> GetProductDetails(int productId);
 		Task<int> VerifyCatalog(VerifyDto verifyBranchDto, string UserName, int AdminPersonID, string PageSource);
 
-		Task<bool> deleteImage(string key, string UserName);
+		Task<bool> deleteImage(ListOfImages keys, string UserName);
 
 		Task deleteCatelog(int id,string UserName);
 	}

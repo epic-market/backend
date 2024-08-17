@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -12,14 +13,18 @@ namespace EpicMarket.Entities
 
 	public class AddProductsDto
 	{
-		public int? Id { get; set; }
 		public long? Barcode { get; set; }
+        [Required]
 		public string Name { get; set; }
+
+		[Required]
 		public string Description { get; set; }
 		public string Category { get; set; }
+		
+        [Required]
 		public double Rate { get; set; }
-		public bool InStock { get; set; }
-		public bool IsRecommended { get; set; }
+        public bool InStock { get; set; } = false;
+		public bool IsRecommended { get; set; }= false;
 		public int? MaximumOrderPurchase { get; set; }
 		public IFormFile[] Products { get; set; }
 		public IFormFile Thumbnail { get; set; }
@@ -40,9 +45,12 @@ namespace EpicMarket.Entities
 		public int? MaximumOrderPurchase { get; set; }
         public string? Status { get; set; }
 		public string Thumbnail { get; set; }
-
 	}
-    public class ProductsMapOptionResult 
+
+
+
+
+	public class ProductsMapOptionResult 
     {
         public int Id { get; set; }
 
@@ -79,6 +87,12 @@ namespace EpicMarket.Entities
 		public string Thumbnail { get; set; }
 
 		public string? Status { get; set; }
+
+	}
+
+	public class ListOfImages
+	{
+		public List<string> ImageKeys { get; set; } 
 
 	}
 }

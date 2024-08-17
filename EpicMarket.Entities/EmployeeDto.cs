@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
@@ -8,15 +9,14 @@ using System.Threading.Tasks;
 namespace EpicMarket.Entities
 {
     public class EmployeeDto
-    {
-        public int ID { get; set; }
-        public string FirstName { get; set; }
+	{
+		[Required]
+		public string FirstName { get; set; }
 
         public string LastName { get; set; }
-
-        public string Email { get; set; }
-
-        public string ContactNumber { get; set; }
+		
+        [Required]
+		public string ContactNumber { get; set; }
 
         public string Address { get; set; }
 
@@ -25,8 +25,9 @@ namespace EpicMarket.Entities
         public string State { get; set; }
 
         public string City { get; set; }
-
-        public string Password { get; set; }
+		
+        [Required]
+		public string Password { get; set; }
 
         public string ProfilePicture { get; set; }
 
@@ -37,10 +38,10 @@ namespace EpicMarket.Entities
 
     public class AddEmployeeParam 
     {
-
-        public string FirstName { get; set; }
-
-        public string EmailID { get; set; }
+		[Required]
+		public string FirstName { get; set; }
+		[Required]
+		public string EmailID { get; set; }
     }
 
     public class AddEmployeeResult
@@ -92,7 +93,7 @@ namespace EpicMarket.Entities
         public string Address { get; set; }
         public string City { get; set; }
         public string State { get; set; }
-        public int PinCode{ get; set; }
+        public int? PinCode{ get; set; }
       
     }
 

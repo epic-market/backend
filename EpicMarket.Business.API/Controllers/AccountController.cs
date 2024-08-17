@@ -83,8 +83,8 @@ namespace EpicMarket.Business.API.Controllers
         {
 
 			var response = new OperationResult<TokenDto>();
-            var user = await _userManager.Users
-                .SingleOrDefaultAsync(x => x.UserName == loginDto.Email.ToLower());
+
+            var user = await GetUser(loginDto.Email);
 
             if (user == null) return Unauthorized("Invalid username");
 
@@ -106,8 +106,7 @@ namespace EpicMarket.Business.API.Controllers
         {
 
             var response = new OperationResult<LoginResult>();
-            var user = await _userManager.Users
-                .SingleOrDefaultAsync(x => x.UserName == this.LoggedInUserName);
+            var user = await GetUser(this.LoggedInUserName); ;
 
             if (user == null) return Unauthorized("Invalid username");
 
@@ -160,9 +159,9 @@ namespace EpicMarket.Business.API.Controllers
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
 
 
-            var user = await _userManager.Users
-            .SingleOrDefaultAsync(x => x.UserName == UserName);
-            var result = await _userManager
+            var user = await GetUser(UserName);
+
+			var result = await _userManager
                 .ChangePasswordAsync(user, changePasswordParams.CurrentPassword, changePasswordParams.NewPassword);
 
             if (!result.Succeeded) return Unauthorized();
@@ -180,7 +179,7 @@ namespace EpicMarket.Business.API.Controllers
 
             var response = new OperationResult<string>();
 
-            if (await UserExists(resetPassword.email))
+            if (await UserExists(resetPassword.Email))
             {
                 response.Data = await this._tokenService.ResetPassword(resetPassword);
             }
@@ -219,8 +218,14 @@ namespace EpicMarket.Business.API.Controllers
 
         private async Task<bool> UserExists(string username)
         {
-            return await _userManager.Users.AnyAsync(x => x.UserName == username.ToLower());
+            return await _userManager.Users.AnyAsync(x => x.UserName == username.ToLower() && x.IsActive == true);
         }
 
-    }
+		private async Task<AppUser> GetUser(string username)
+		{
+			return await _userManager.Users
+             .SingleOrDefaultAsync(x => x.UserName == username.ToLower() && x.IsActive == true);
+		}
+
+	}
 }

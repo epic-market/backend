@@ -14,12 +14,14 @@ namespace EpicMarket.Contracts
         Task<AddEmployeeResult> Register(AddEmployeeParam addEmployeeParam, int businessid, int userID);
         CheckLinkResult CheckEmployeeLink(string queryParam);
 
-        Task<int> CreateEmployeeAccount(EmployeeDto employee);
+        Task<int> CreateEmployeeAccount(EmployeeDto employee , int id);
 
         Task<List<EmployeeMapOptionResult>> GetAllEmployeesForMap(int businessid, int Outletid);
 
         Task<GetDataResult<List<EmployeeResult>>> GetAllEmployees(EmployeeParams employeeParams, int businessid);
 
         Task<SingleEmployeeResult> GetEmployeeDetails(int employeeId);
-    }
+
+		Task DeleteEmployee(int employeeId);
+	}
 }

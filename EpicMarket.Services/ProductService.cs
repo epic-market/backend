@@ -49,30 +49,17 @@ namespace EpicMarket.Services
 			this.unitOfWork = unitOfWork;
 		}
 
-        public async Task<int> AddOrUpdateProduct(AddProductsDto productsDto, string UserName, int businessID, string PageSource)
+        public async Task<int> AddProduct(AddProductsDto productsDto, string UserName, int businessID, string PageSource)
         {
             var product = mapper.Map<Catalog>(productsDto);
-            var events = "";
-            var mailevent = "";
             product.BusinessID = businessID;
-            if (productsDto.Id == null || product.ID == 0)
-            {
-                product.CreateBy = UserName;
-                product.CreateDate = DateTime.Now;
-                var status = await _context.StatusOptionSets.FirstOrDefaultAsync(c => c.Status == Business_Status.BUSINESS_UNVERIFIED);
-				product.StatusId = status.Id;
-                events = EventConstants.AddCatelog;
-                mailevent = MessageDataConstants.AddCatelog;
-                await _context.Catalogs.AddAsync(product);
-            }
-            else 
-            {
-                product.ModifiedBy = UserName;
-                product.ModifiedDate = DateTime.Now;
-                events = EventConstants.EditCatelog;
-                mailevent = MessageDataConstants.EditCatelog;
-                _context.Catalogs.Update(product);
-            }
+            product.CreateBy = UserName;
+            product.CreateDate = DateTime.Now;
+            var status = await _context.StatusOptionSets.FirstOrDefaultAsync(c => c.Status == Business_Status.BUSINESS_UNVERIFIED);
+		    product.StatusId = status.Id;
+            var events = EventConstants.AddCatelog;
+            var mailevent = MessageDataConstants.AddCatelog;
+            await _context.Catalogs.AddAsync(product);
             await unitOfWork.Complete();
 			var saved = await _context.Catalogs.FirstOrDefaultAsync(o => o.ID == product.ID);
             string savedJson = JsonConvert.SerializeObject(saved, new JsonSerializerSettings
@@ -92,10 +79,46 @@ namespace EpicMarket.Services
             return product.ID;
         }
 
-	
+		public async Task<int> UpdateProducts(AddProductsDto productsDto,int id, string UserName, int businessID, string PageSource)
+		{
+
+			var product = await _context.Catalogs.FirstOrDefaultAsync(c => c.ID == id);
+
+			if (product == null)
+			{
+				throw new Exception("Product not found.");
+			}
+			mapper.Map(productsDto, product);
+			product.ModifiedBy = UserName;
+			product.ModifiedDate = DateTime.Now;
+			_context.Entry(product).State = EntityState.Modified;
+			await unitOfWork.Complete();
+			var events  =   EventConstants.EditCatelog;
+			var mailevent = MessageDataConstants.EditCatelog;
+
+			var saved = await _context.Catalogs.FirstOrDefaultAsync(o => o.ID == product.ID);
+			string savedJson = JsonConvert.SerializeObject(saved, new JsonSerializerSettings
+			{
+				ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+			});
+			await this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = product.ID, Data = savedJson, Description = null, EventName = events, EntityName = EntityConstants.Catelog, Source = PageSource });
+			await this.communicationQueueService.InsertCommunicationQueue(
+					new Entities.CommunicationQueueDTO()
+					{
+						MessageData = null,//TODO
+						Subject = mailevent,
+						NotificationRecipient = UserName,
+						ContactMethod = ContactMethodConstants.EMAIL,
+						CreateBy = UserName
+					});
+			return product.ID;
+		}
+
+
+
 		public async Task<List<ProductsMapOptionResult>> GetAllProductForMap(int BusinessID,int BranchId)
         {
-            var _ = await (from catalogItem in _context.Catalogs
+            var returnedProducts = await (from catalogItem in _context.Catalogs
                     join outletProduct in (_context.OutletProducts.Where(a => a.OutletID == BranchId))
                     on catalogItem.ID equals outletProduct.ProductID into joinedProducts
                     from matchedProduct in joinedProducts.DefaultIfEmpty()
@@ -109,13 +132,11 @@ namespace EpicMarket.Services
                         Selected = matchedProduct == null ? false : true,
                     }).ToListAsync();
 
-            return _;
+            return returnedProducts;
         }
 
         public async Task<GetDataResult<List<ProductResult>>> GetAllProducts(ProductParams productParams, int businessID)
         {
-            var baseURL = applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.APIROUTE) + applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.FILEURL);
-
             var attachmentTypeID = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
 
 			var getResult = new GetDataResult<List<ProductResult>>();
@@ -165,7 +186,7 @@ namespace EpicMarket.Services
 						   join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
 						   join entity in _context.Entity on link.EntityID equals entity.ID
 						   where entity.Name == EntityConstants.Catelog && link.RecordID == c.ID && link.AttachmentTypeID == attachmentTypeID.ID
-							  select $"{baseURL}{attachment.DocumentFolderPath}{attachment.DocumentFile}").FirstOrDefault()),
+							  select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}").FirstOrDefault()),
                 Count = totalCount,
             }).ToListAsync();
 
@@ -181,7 +202,7 @@ namespace EpicMarket.Services
 			var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
 			var attachmentTypeID_Product = await  _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.PRODUCTIMAGES);
 
-			var baseURL = applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.APIROUTE) + applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.FILEURL);
+
 
 			var attachments = from attachment in _context.Attachments
 							  join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
@@ -189,19 +210,18 @@ namespace EpicMarket.Services
 							  where entity.Name == EntityConstants.Catelog && link.RecordID == productId && link.AttachmentTypeID == attachmentTypeID_Product.ID
 							  select new
 							  {
-								  ImagePath = $"{baseURL}{attachment.DocumentFolderPath}{attachment.DocumentFile}"
+								  ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
 							  };
 
-            var thumbnail = from attachment in _context.Attachments
+            var thumbnail =   from attachment in _context.Attachments
 							  join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
 							  join entity in _context.Entity on link.EntityID equals entity.ID
 							  where entity.Name == EntityConstants.Catelog && link.RecordID == productId && link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
+                              orderby attachment.CreateDate descending
 						        select new
 							  {
-								  ImagePath = $"{baseURL}{attachment.DocumentFolderPath}{attachment.DocumentFile}"
+								  ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
 							  };
-
-
 
 
 			return await _context.Catalogs.Where(c => c.ID == productId && c.IsActive == true).Select(c =>  
@@ -213,6 +233,8 @@ namespace EpicMarket.Services
 				Rate = c.Rate,
 				InStock = c.InStock,
 				Category = c.Category,
+                IsActive = c.IsActive,
+                Barcode = c.Barcode,
 				Status = _context.StatusOptionSets.FirstOrDefault(s => s.Id == c.StatusId).Status,
 				Images = attachments.Select(a => a.ImagePath).ToList(),
 				Thumbnail = thumbnail.Select(a => a.ImagePath).FirstOrDefault(),
@@ -247,24 +269,30 @@ namespace EpicMarket.Services
             return taskToSave.ID;
         }
 
-		public async Task<bool> deleteImage(string key, string UserName)
+		public async Task<bool> deleteImage(ListOfImages keys, string UserName)
 		{
-			int lastSlashIndex = key.LastIndexOf('/');
-			string fileName = key.Substring(lastSlashIndex + 1);
 
-            var attachment = await _context.Attachments.Where(c => c.DocumentFile == fileName).FirstOrDefaultAsync();
+            var count = 1;
+            foreach (var key in keys.ImageKeys) {
 
-            if (attachment != null)
-            {
-                _context.Attachments.Remove(attachment);
-                var status = await this.fileService.DeleteFileAsync(key);
-                await unitOfWork.Complete();
-				return status;
+				int lastSlashIndex = key.LastIndexOf('/');
+				string fileName = key.Substring(lastSlashIndex + 1);
+
+				var attachment = await _context.Attachments.Where(c => c.DocumentFile == fileName).FirstOrDefaultAsync();
+
+				if (attachment != null)
+				{
+					_context.Attachments.Remove(attachment);
+					var status = await this.fileService.DeleteFileAsync(key);
+					await unitOfWork.Complete();
+				    count = status ? count+1 : count;
+				}
+				else
+				{
+					throw new Exception("File Not Found");
+				}
 			}
-            else {
-                throw new Exception("File Not Found");
-            }
-
+            return keys.ImageKeys.Count+1 == count;   			
 		}
 
 
