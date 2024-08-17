@@ -27,10 +27,19 @@
     <thead>
         <tr>
             <th>
+                @Html.DisplayNameFor(model => model.ID)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PrimaryAssignedToPersonID)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.Name)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Description)
+                @Html.DisplayNameFor(model => model.TaskTypes.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TaskStatusType.Status)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.ParentID)
@@ -38,9 +47,7 @@
             <th>
                 @Html.DisplayNameFor(model => model.TaskPriorityID)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PrimaryAssignedToPersonID)
-            </th>
+            
             <th>
                 @Html.DisplayNameFor(model => model.DateAssigned)
             </th>
@@ -48,41 +55,9 @@
                 @Html.DisplayNameFor(model => model.DateDue)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DateStarted)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DateCompleted)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.SubmittedByPersonID)
             </th>
-            <th>
-          @*       @Html.DisplayNameFor(model => model.EffectiveDate) *@
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TaskData)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ReceivedDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TaskTypes)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TaskStatusType)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreateDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreateBy)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ModifiedDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ModifiedBy)
-            </th>
+          
             <th></th>
         </tr>
     </thead>
@@ -90,10 +65,19 @@
 @foreach (var item in Model) {
         <tr>
             <td>
+                 @Html.DisplayFor(modelItem => item.ID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PrimaryAssignedToPersonID)
+            </td>
+            <td>
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Description)
+                @Html.DisplayFor(modelItem => item.TaskTypes.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TaskStatusType.Status)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.ParentID)
@@ -101,9 +85,7 @@
             <td>
                 @Html.DisplayFor(modelItem => item.TaskPriorityID)
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PrimaryAssignedToPersonID)
-            </td>
+            
             <td>
                 @Html.DisplayFor(modelItem => item.DateAssigned)
             </td>
@@ -111,40 +93,7 @@
                 @Html.DisplayFor(modelItem => item.DateDue)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.DateStarted)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DateCompleted)
-            </td>
-            <td>
                 @Html.DisplayFor(modelItem => item.SubmittedByPersonID)
-            </td>
-            <td>
-               @*  @Html.DisplayFor(modelItem => item.EffectiveDate) *@
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TaskData)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ReceivedDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TaskTypes.ID)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TaskStatusType.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreateDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreateBy)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ModifiedDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ModifiedBy)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |

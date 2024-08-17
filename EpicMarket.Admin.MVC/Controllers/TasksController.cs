@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
+using System.Reflection.Metadata;
+using System.Security.Claims;
+using EpicMarket.Entities.CustomModels;
+using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -49,8 +53,28 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: Tasks/Create
         public IActionResult Create()
         {
-            ViewData["TaskStatusID"] = new SelectList(_context.Set<TaskStatusType>(), "Id", "Id");
-            ViewData["TaskTypeID"] = new SelectList(_context.Set<TaskType>(), "ID", "ID");
+            ViewData["TaskStatusID"] = new SelectList(_context.Set<TaskStatusType>(), "Id", "Status");
+            ViewData["TaskTypeID"] = new SelectList(_context.Set<TaskType>(), "ID", "Name");
+            ViewData["ParentTaskId"] = new SelectList(_context.Set<Tasks>(), "ID", "ID");
+
+            List<SelectListItem> numbers = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "1", Text = "Critical" },
+                new SelectListItem { Value = "2", Text = "High" },
+                new SelectListItem { Value = "3", Text = "Normal", Selected = true  },
+                new SelectListItem { Value = "4", Text = "Low" },
+            };
+
+            ViewData["Priority"] = numbers;
+
+
+            var admins = from userrole in _context.UserRoles
+                         join role in _context.Roles on  userrole.RoleId equals role.Id
+                         join user in _context.Users on userrole.UserId equals user.Id
+                         where role.Name == ROLES.ADMIN
+                         select user;
+
+            ViewData["Admin"] = new SelectList(admins, "Id", "UserName");
             return View();
         }
 
@@ -61,14 +85,44 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,Name,Description,TaskTypeID,ParentID,TaskStatusID,TaskPriorityID,PrimaryAssignedToPersonID,DateAssigned,DateDue,DateStarted,DateCompleted,SubmittedByPersonID,EffectiveDate,TaskData,ReceivedDate,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Tasks tasks)
         {
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            var UserID = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var GetTaskType = _context.TaskTypes.Where(row => row.ID == tasks.TaskTypeID).FirstOrDefault();
+            tasks.CreateBy = userName;
+            tasks.CreateDate = DateTime.UtcNow;
+            tasks.DateDue = DateTime.Now.AddHours((double)GetTaskType.DefaultDueDateHours);
+            tasks.SubmittedByPersonID = UserID;
+            tasks.DateAssigned = DateTime.UtcNow;
+            tasks.ReceivedDate = DateTime.UtcNow;
             if (ModelState.IsValid)
             {
                 _context.Add(tasks);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["TaskStatusID"] = new SelectList(_context.Set<TaskStatusType>(), "Id", "Id", tasks.TaskStatusID);
-            ViewData["TaskTypeID"] = new SelectList(_context.Set<TaskType>(), "ID", "ID", tasks.TaskTypeID);
+
+
+            var admins = from userrole in _context.UserRoles
+                         join role in _context.Roles on userrole.RoleId equals role.Id
+                         join user in _context.Users on userrole.UserId equals user.Id
+                         where role.Name == ROLES.ADMIN
+                         select user;
+
+
+            List<SelectListItem> numbers = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "1", Text = "Critical" },
+                new SelectListItem { Value = "2", Text = "High" },
+                new SelectListItem { Value = "3", Text = "Normal", Selected = true  },
+                new SelectListItem { Value = "4", Text = "Low" },
+            };
+
+
+            ViewData["ParentTaskId"] = new SelectList(_context.Set<Tasks>(), "ID", "ID",tasks.ParentID);
+            ViewData["Priority"] = new SelectList(numbers, tasks.TaskPriorityID); 
+            ViewData["Admin"] = new SelectList(admins, "Id", "UserName",tasks.PrimaryAssignedToPersonID);
+            ViewData["TaskStatusID"] = new SelectList(_context.TaskStatusTypes, "Id", "Status", tasks.TaskStatusID);
+            ViewData["TaskTypeID"] = new SelectList(_context.TaskTypes, "ID", "Name", tasks.TaskTypeID);
             return View(tasks);
         }
 
@@ -85,8 +139,28 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 return NotFound();
             }
-            ViewData["TaskStatusID"] = new SelectList(_context.Set<TaskStatusType>(), "Id", "Id", tasks.TaskStatusID);
-            ViewData["TaskTypeID"] = new SelectList(_context.Set<TaskType>(), "ID", "ID", tasks.TaskTypeID);
+            ViewData["TaskStatusID"] = new SelectList(_context.Set<TaskStatusType>(), "Id", "Status");
+            ViewData["TaskTypeID"] = new SelectList(_context.Set<TaskType>(), "ID", "Name");
+            ViewData["ParentTaskId"] = new SelectList(_context.Set<Tasks>(), "ID", "ID");
+
+            List<SelectListItem> numbers = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "1", Text = "Critical" },
+                new SelectListItem { Value = "2", Text = "High" },
+                new SelectListItem { Value = "3", Text = "Normal", Selected = true  },
+                new SelectListItem { Value = "4", Text = "Low" },
+            };
+
+            ViewData["Priority"] = numbers;
+
+
+            var admins = from userrole in _context.UserRoles
+                         join role in _context.Roles on userrole.RoleId equals role.Id
+                         join user in _context.Users on userrole.UserId equals user.Id
+                         where role.Name == ROLES.ADMIN
+                         select user;
+
+            ViewData["Admin"] = new SelectList(admins, "Id", "UserName");
             return View(tasks);
         }
 
@@ -95,8 +169,51 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,TaskTypeID,ParentID,TaskStatusID,TaskPriorityID,PrimaryAssignedToPersonID,DateAssigned,DateDue,DateStarted,DateCompleted,SubmittedByPersonID,EffectiveDate,TaskData,ReceivedDate,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Tasks tasks)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,TaskTypeID,ParentID,TaskStatusID,TaskPriorityID,PrimaryAssignedToPersonID,DateAssigned,DateDue,DateStarted,DateCompleted,SubmittedByPersonID,TaskData,ReceivedDate,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Tasks tasks)
         {
+            var existingTask = await _context.Tasks.FindAsync(id);
+
+            if (existingTask == null)
+            {
+                return NotFound();
+            }
+
+            // Detach the existing entity
+            _context.Entry(existingTask).State = EntityState.Detached;
+
+            // Update properties as needed
+            if (existingTask.PrimaryAssignedToPersonID != tasks.PrimaryAssignedToPersonID)
+            {
+                tasks.DateAssigned = DateTime.UtcNow;
+            }
+
+            if (existingTask.TaskTypeID != tasks.TaskTypeID)
+            {
+                var GetTaskType = _context.TaskTypes.FirstOrDefault(row => row.ID == tasks.TaskTypeID);
+                if (GetTaskType != null)
+                {
+                    tasks.DateDue = DateTime.Now.AddHours((double)GetTaskType.DefaultDueDateHours);
+                }
+            }
+
+            var NewstatusID = _context.TaskStatusTypes.FirstOrDefault(row => row.Status == "New")?.Id;
+
+            if (existingTask.TaskStatusID == NewstatusID && existingTask.TaskStatusID != tasks.TaskStatusID)
+            {
+                tasks.DateStarted = DateTime.UtcNow;
+            }
+
+            var ClosedstatusID = _context.TaskStatusTypes.FirstOrDefault(row => row.Status == "Closed")?.Id;
+
+            if (tasks.TaskStatusID == ClosedstatusID)
+            {
+                tasks.DateCompleted = DateTime.UtcNow;
+            }
+
+            var userName = this.User.FindFirst(ClaimTypes.Name)?.Value;
+            tasks.ModifiedBy = userName;
+            tasks.ModifiedDate = DateTime.UtcNow;
+
             if (id != tasks.ID)
             {
                 return NotFound();
@@ -106,7 +223,10 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 try
                 {
-                    _context.Update(tasks);
+                    // Attach the updated entity and mark it as modified
+                    _context.Tasks.Attach(tasks);
+                    _context.Entry(tasks).State = EntityState.Modified;
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -122,8 +242,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["TaskStatusID"] = new SelectList(_context.Set<TaskStatusType>(), "Id", "Id", tasks.TaskStatusID);
-            ViewData["TaskTypeID"] = new SelectList(_context.Set<TaskType>(), "ID", "ID", tasks.TaskTypeID);
+
+            ViewData["TaskStatusID"] = new SelectList(_context.TaskStatusTypes, "Id", "Status", tasks.TaskStatusID);
+            ViewData["TaskTypeID"] = new SelectList(_context.TaskTypes, "ID", "Name", tasks.TaskTypeID);
             return View(tasks);
         }
 

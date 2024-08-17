@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EpicMarket.Data.Common;
+using System.ComponentModel;
 
 namespace EpicMarket.Data.Models
 {
@@ -16,6 +17,7 @@ namespace EpicMarket.Data.Models
         public int ID { get; set; }
 
         [MaxLength(50)]
+        [DisplayName("Task Type")]
         public string Name { get; set; } //support_userweb , support_userbusiness, verification
 
         [MaxLength(255)]
