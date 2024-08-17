@@ -72,20 +72,20 @@ namespace EpicMarket.Services
         {
             try
             {
-                var User = dbContext.Users.Where(u => resetPassword.email == u.UserName).FirstOrDefault();
+                var User = dbContext.Users.Where(u => resetPassword.Email == u.UserName).FirstOrDefault();
                 var UniqueGuid = Guid.NewGuid();
                 User.UniqueGuid = UniqueGuid.ToString();
                 dbContext.Users.Update(User);
                 var intialURL = applicationConfiguration.GetApplicationConfigurationValue("BusinessOwnerBaseURL");
-                string queryToken = intialURL+ resetPassword.path + "/"+ User.Id+"." + UniqueGuid;
+                string queryToken = intialURL+ resetPassword.Path + "/"+ User.Id+"." + UniqueGuid;
                 await this.communicationQueueService.InsertCommunicationQueue(
                     new Entities.CommunicationQueueDTO()
                     {
                         MessageData= queryToken,
                         Subject="Password Reset",
-                        NotificationRecipient= resetPassword.email,
+                        NotificationRecipient= resetPassword.Email,
                         ContactMethod= ContactMethodConstants.EMAIL,
-                        CreateBy= resetPassword.email
+                        CreateBy= resetPassword.Email
                     });
 
                 return "Reset Link sent to registered Email";

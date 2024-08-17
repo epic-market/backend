@@ -62,8 +62,9 @@ namespace EpicMarket.Services
             if (await UserExists(addEmployeeParam.EmailID)) return BadRequest("Username is taken");
 
             user.UserName = addEmployeeParam.EmailID.ToLower();
+			user.Email = addEmployeeParam.EmailID.ToLower();
 
-            var result = await userManager.CreateAsync(user);
+			var result = await userManager.CreateAsync(user);
 
             if (!result.Succeeded) return BadRequest(result.Errors.FirstOrDefault().ToString());
 
@@ -83,7 +84,6 @@ namespace EpicMarket.Services
             var _ =  _context.BusinessEmployeeMaps.Add(new BusinessEmployeeMap() {  BussinessID  = businessid, EmployeeID = user.Id});
             
             await _context.SaveChangesAsync();
-            
             Hashtable ListValues = new Hashtable();
 
             ListValues.Add("fromAddress", addEmployeeParam.FirstName);
@@ -142,7 +142,7 @@ namespace EpicMarket.Services
              
             if (User.UniqueGuid == uniqueGuid)
             {
-                var Business = _context.BusinessEmployeeMaps.Where(a => a.EmployeeID == User.Id).Include(a => a.Bussiness).FirstOrDefault();
+                var Business = _context.BusinessEmployeeMaps.Where(a => a.EmployeeID == User.Id && a.IsActive == true).Include(a => a.Bussiness).FirstOrDefault();
                 var result = new CheckLinkResult()
                 {
 
@@ -160,10 +160,10 @@ namespace EpicMarket.Services
             }
         }
 
-        public async Task<int> CreateEmployeeAccount(EmployeeDto employee)
+        public async Task<int> CreateEmployeeAccount(EmployeeDto employee , int id)
         {
 
-            var User = _context.Users.Where(u => employee.ID == u.Id).FirstOrDefault();
+            var User = _context.Users.Where(u => id == u.Id).FirstOrDefault();
 
             if (User.UniqueGuid == employee.Guid) {
                 var address = new AddressDto()
@@ -175,11 +175,8 @@ namespace EpicMarket.Services
                 };
 
                 var addressId = await addressService.AddAddress(address);
-
-
                 User.FirstName = employee.FirstName;
                 User.LastName = employee.LastName;
-                User.Email = employee.Email;
                 User.PhoneNumber = employee.ContactNumber;
                 User.UniqueGuid = null;
                 await userManager.AddPasswordAsync(User, employee.Password);
@@ -210,11 +207,6 @@ namespace EpicMarket.Services
             {
                 throw new Exception("Invalid Link");
             }
-
-
-
-
-
         }
 
         public async Task<List<EmployeeMapOptionResult>> GetAllEmployeesForMap(int businessid, int Outletid)
@@ -223,7 +215,7 @@ namespace EpicMarket.Services
                           join OutletPerson in (_context.OutletPeople.Where(a => a.OutletId == Outletid))
                           on singleEmployee.EmployeeID equals OutletPerson.PersonId into joinedEmployees
                           from matchedEmployee in joinedEmployees.DefaultIfEmpty()
-                          where singleEmployee.BussinessID == businessid
+                          where singleEmployee.BussinessID == businessid && singleEmployee.IsActive == true
                           select new EmployeeMapOptionResult
                           {
                               Id = singleEmployee.EmployeeID,
@@ -242,7 +234,7 @@ namespace EpicMarket.Services
             var getResult = new GetDataResult<List<EmployeeResult>>();
             //1 . filter with BusinessID
             var Employess = _context.BusinessEmployeeMaps
-                                .Include(c=> c.Employee).Where(c => c.BussinessID == businessid);
+                                .Include(c=> c.Employee).Where(c => c.BussinessID == businessid && c.IsActive == true);
 
 
             //2 . Appling Searching
@@ -292,19 +284,50 @@ namespace EpicMarket.Services
 
         public async Task<SingleEmployeeResult> GetEmployeeDetails(int employeeId)
         {
-           return await _context.UserAddresses.Where(c=>c.UserId == employeeId).Include(c => c.User).Include(c=>c.Address).Select(
-               c=> new SingleEmployeeResult()
-               { 
-                 EmployeeID = c.User.Id,
-                 EmailId= c.User.Email,
-                 FirstName = c.User.FirstName,
-                 LastName = c.User.LastName,
-                 ContactNumber= c.User.PhoneNumber,
-                 Address = c.Address.Address1,
-                 City = c.Address.City,
-                 State = c.Address.State,
-                 PinCode = c.Address.Pincode
-               }).FirstOrDefaultAsync();
-        }
-    }
+
+			var singleEmployeeResults = from businessEmployee in _context.BusinessEmployeeMaps
+										join user in _context.Users on businessEmployee.EmployeeID equals user.Id
+										join userAddress in _context.UserAddresses on businessEmployee.EmployeeID equals userAddress.UserId into userAddressGroup
+										from userAddress in userAddressGroup.DefaultIfEmpty() // Left join on UserAddresses
+										join address in _context.Addresses on userAddress.AddressId equals address.Id into addressGroup
+										from address in addressGroup.DefaultIfEmpty() // Left join on Addresses
+										where businessEmployee.EmployeeID == employeeId && businessEmployee.IsActive == true
+										select new SingleEmployeeResult
+										{
+											EmployeeID = businessEmployee.EmployeeID,
+											FirstName = user.FirstName,
+											LastName = user.LastName,
+											ContactNumber = user.PhoneNumber,
+											EmailId = user.Email,
+											Address = address != null ? address.Address1 : null,
+											City = address != null ? address.City : null,
+											State = address != null ? address.State : null,
+											PinCode = address != null ? address.Pincode : null,
+										};
+
+
+			return await singleEmployeeResults.FirstOrDefaultAsync();
+
+
+       }
+
+		public async Task DeleteEmployee(int employeeId)
+		{
+			var businessEmployeeMapEmployee = await _context.BusinessEmployeeMaps.FirstOrDefaultAsync(c => c.EmployeeID == employeeId && c.IsActive == true);
+			var AppUser = await _context.Users.FirstOrDefaultAsync(c => c.Id == employeeId && c.IsActive == true);
+
+			if (businessEmployeeMapEmployee != null)
+			{
+				businessEmployeeMapEmployee.IsActive = false;
+				_context.BusinessEmployeeMaps.Update(businessEmployeeMapEmployee);
+				_context.Users.Update(AppUser);
+				await unitOfWork.Complete();
+			}
+			else
+			{
+				throw new Exception("Employee Not Found");
+			}
+
+		}
+	}
 }

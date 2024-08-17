@@ -235,7 +235,9 @@ namespace EpicMarket.Data.Models
 				 typeof(ApplicationsTable),
 				 typeof(ApplicationSecurables),
 				 typeof(ApplicationConfiguration),
-				 typeof(Address)
+				 typeof(Address),
+				 typeof(BusinessEmployeeMap),
+				 typeof(AppUser)
 			 );
 
 		}

@@ -13,11 +13,10 @@ using System.Security.Claims;
 namespace EpicMarket.Business.API.Controllers
 {
 
-    public class ProductsController : BaseApiController
-    {
-
-        private readonly ILogger<ProductsController> logger;
-        private readonly IProductService productService;
+	public class ProductsController : BaseApiController
+	{
+		private readonly ILogger<ProductsController> logger;
+		private readonly IProductService productService;
 		private readonly IApplicationConfigurationService applicationConfigurationService;
 		private readonly IAttachmentService attachmentService;
 		private readonly IFileService fileStoreService;
@@ -25,11 +24,11 @@ namespace EpicMarket.Business.API.Controllers
 		private readonly IHttpContextAccessor httpContextAccessor;
 		private readonly IBranchService branchService;
 
-        public ProductsController(ILogger<ProductsController> logger, IProductService productService,IApplicationConfigurationService applicationConfigurationService,
+		public ProductsController(ILogger<ProductsController> logger, IProductService productService, IApplicationConfigurationService applicationConfigurationService,
 			IAttachmentService attachmentService, IFileService fileStoreService, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
-        {
-            this.logger = logger;
-            this.productService = productService;
+		{
+			this.logger = logger;
+			this.productService = productService;
 			this.applicationConfigurationService = applicationConfigurationService;
 			this.attachmentService = attachmentService;
 			this.fileStoreService = fileStoreService;
@@ -37,33 +36,33 @@ namespace EpicMarket.Business.API.Controllers
 			this.httpContextAccessor = httpContextAccessor;
 		}
 
-        [HttpGet("GetAllProductForMap")]
+		[HttpGet("Map/{outletID}")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<List<ProductsMapOptionResult>>>> GetAllProductForMap(int outletID)
-        {
-            var response = new OperationResult<List<ProductsMapOptionResult>>();
+		{
+			var response = new OperationResult<List<ProductsMapOptionResult>>();
 			this.logger.LogInformation("Products Controller -> GetAllProductForMap()-> params {0}", JsonConvert.SerializeObject(new { Params = outletID }));
-            var results = await productService.GetAllProductForMap(this.BusinessId, outletID);
-            this.logger.LogInformation("Products Controller -> GetAllProductForMap()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
+			var results = await productService.GetAllProductForMap(this.BusinessId, outletID);
+			this.logger.LogInformation("Products Controller -> GetAllProductForMap()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
 			response.Data = results;
 			return Ok(response);
-        }
+		}
 
 
-        [HttpPost("AddOrUpdateProduct")]
+		[HttpPost]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
-		public async  Task<ActionResult<OperationResult<int>>> AddOrUpdateProduct([FromForm]AddProductsDto productsDto)
-        {
+		public async Task<ActionResult<OperationResult<int>>> AddProduct([FromForm] AddProductsDto productsDto)
+		{
 
 			var response = new OperationResult<int>();
 			this.logger.LogInformation("Products Controller -> AddProduct()-> params {0}", JsonConvert.SerializeObject(new { Params = productsDto }));
-            var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-            response.Data  =  await productService.AddOrUpdateProduct(productsDto, UserName,this.BusinessId,this.PageSource);
+			var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
+			response.Data = await productService.AddProduct(productsDto, UserName, this.BusinessId, this.PageSource);
 
 			if (productsDto.Products.Length > 0)
 			{
-                foreach (var product in productsDto.Products) {
-					var filinsertOutput = await this.SaveFileGlobalAsync(product, ApplicationConfigurationConstants.Products, this.fileStoreService, this.applicationConfigurationService,this.BusinessId);
+				foreach (var product in productsDto.Products) {
+					var filinsertOutput = await this.SaveFileGlobalAsync(product, ApplicationConfigurationConstants.Products, this.fileStoreService, this.applicationConfigurationService, this.BusinessId);
 					var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
 					{
 						Name = EntityConstants.Catelog + AttachmentTypeConstants.PRODUCTIMAGES,
@@ -84,62 +83,125 @@ namespace EpicMarket.Business.API.Controllers
 				}
 
 				if (productsDto.Thumbnail.Length > 0)
-				{ 
-						var filinsertOutput = await this.SaveFileGlobalAsync(productsDto.Thumbnail, ApplicationConfigurationConstants.THUMBNAIL, this.fileStoreService, this.applicationConfigurationService, this.BusinessId);
-						var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
-						{
-							Name = EntityConstants.Catelog + AttachmentTypeConstants.THUMBNAIL,
-							Comment = null,
-							DocumentType = DocumentTypeConstants.FILE,
-							DocumentFileType = productsDto.Thumbnail.ContentType,
-							DocumentFolderPath = filinsertOutput.FullPathLocation,
-							DocumentFile = filinsertOutput.FileName,
-						});
+				{
+					var filinsertOutput = await this.SaveFileGlobalAsync(productsDto.Thumbnail, ApplicationConfigurationConstants.THUMBNAIL, this.fileStoreService, this.applicationConfigurationService, this.BusinessId);
+					var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
+					{
+						Name = EntityConstants.Catelog + AttachmentTypeConstants.THUMBNAIL,
+						Comment = null,
+						DocumentType = DocumentTypeConstants.FILE,
+						DocumentFileType = productsDto.Thumbnail.ContentType,
+						DocumentFolderPath = filinsertOutput.FullPathLocation,
+						DocumentFile = filinsertOutput.FileName,
+					});
 					await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
-						{
-							AttachmentTypeName = AttachmentTypeConstants.THUMBNAIL,
-							AttachmentID = attachmentId,
-							Entity = EntityConstants.Catelog,
-							RecordID = response.Data
-						});
-
-					}
+					{
+						AttachmentTypeName = AttachmentTypeConstants.THUMBNAIL,
+						AttachmentID = attachmentId,
+						Entity = EntityConstants.Catelog,
+						RecordID = response.Data
+					});
 
 				}
-				this.logger.LogInformation("Products Controller -> AddProduct()-> return {0}", JsonConvert.SerializeObject(new { Results = response }));
 
-            return Ok(response);
-        }
+			}
+			this.logger.LogInformation("Products Controller -> AddProduct()-> return {0}", JsonConvert.SerializeObject(new { Results = response }));
+
+			return Ok(response);
+		}
 
 
-        [HttpGet("GetAllProducts")]
-        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
+		[HttpPut("{id}")]
+		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
+		public async Task<ActionResult<OperationResult<int>>> UpdateProduct([FromRoute] int id, [FromForm] AddProductsDto productsDto)
+		{
+
+			var response = new OperationResult<int>();
+			this.logger.LogInformation("Products Controller -> AddProduct()-> params {0}", JsonConvert.SerializeObject(new { Params = productsDto }));
+			var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
+			response.Data = await productService.UpdateProducts(productsDto,id, UserName, this.BusinessId, this.PageSource);
+
+			if (productsDto.Products?.Length > 0)
+			{
+				foreach (var product in productsDto.Products)
+				{
+					var filinsertOutput = await this.SaveFileGlobalAsync(product, ApplicationConfigurationConstants.Products, this.fileStoreService, this.applicationConfigurationService, this.BusinessId);
+					var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
+					{
+						Name = EntityConstants.Catelog + AttachmentTypeConstants.PRODUCTIMAGES,
+						Comment = null,
+						DocumentType = DocumentTypeConstants.FILE,
+						DocumentFileType = product.ContentType,
+						DocumentFolderPath = filinsertOutput.FullPathLocation,
+						DocumentFile = filinsertOutput.FileName,
+					});
+					await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
+					{
+						AttachmentTypeName = AttachmentTypeConstants.PRODUCTIMAGES,
+						AttachmentID = attachmentId,
+						Entity = EntityConstants.Catelog,
+						RecordID = response.Data
+					});
+
+				}
+
+				if (productsDto.Thumbnail != null)
+				{
+					var filinsertOutput = await this.SaveFileGlobalAsync(productsDto.Thumbnail, ApplicationConfigurationConstants.THUMBNAIL, this.fileStoreService, this.applicationConfigurationService, this.BusinessId);
+					var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
+					{
+						Name = EntityConstants.Catelog + AttachmentTypeConstants.THUMBNAIL,
+						Comment = null,
+						DocumentType = DocumentTypeConstants.FILE,
+						DocumentFileType = productsDto.Thumbnail.ContentType,
+						DocumentFolderPath = filinsertOutput.FullPathLocation,
+						DocumentFile = filinsertOutput.FileName,
+					});
+					await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
+					{
+						AttachmentTypeName = AttachmentTypeConstants.THUMBNAIL,
+						AttachmentID = attachmentId,
+						Entity = EntityConstants.Catelog,
+						RecordID = response.Data
+					});
+
+				}
+
+			}
+			this.logger.LogInformation("Products Controller -> AddProduct()-> return {0}", JsonConvert.SerializeObject(new { Results = response }));
+
+			return Ok(response);
+		}
+
+
+		[HttpGet]
+		[Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
 		public async Task<ActionResult<OperationResult<GetDataResult<List<ProductResult>>>>> GetAllProducts([FromQuery] ProductParams productResult)
-        {
-            var response = new OperationResult<GetDataResult<List<ProductResult>>>();
-            this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = productResult }));
-            var results = await productService.GetAllProducts(productResult,this.BusinessId);
-            this.logger.LogInformation("Products Controller -> GetAllProducts()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
-            response.Data = results;
+		{
+			var response = new OperationResult<GetDataResult<List<ProductResult>>>();
+			this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = productResult }));
+			var results = await productService.GetAllProducts(productResult, this.BusinessId);
+			this.logger.LogInformation("Products Controller -> GetAllProducts()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
+			response.Data = results;
 
-            return Ok(response);
-        }
+			return Ok(response);
+		}
 
 
-        [HttpGet("GetProductDetails")]
+		[HttpGet("{id}")]
         [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
-        public async Task<ActionResult<OperationResult<ProductsDto>>> GetProductDetails(int productId)
+        public async Task<ActionResult<OperationResult<ProductsDto>>> GetProductDetails(int id)
         {
             var response = new OperationResult<ProductsDto>();
-            this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = productId }));
-            var results = await productService.GetProductDetails(productId);
+            this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = id }));
+            var results = await productService.GetProductDetails(id);
             this.logger.LogInformation("Products Controller -> GetAllProducts()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
             response.Data = results;
 
             return Ok(response);
         }
 
-        [HttpPost("verifyCatalog")]
+        [HttpPost("verify")]
         [Authorize(Roles = ROLES.BUSINESS_OWNER)]
         public async Task<ActionResult<OperationResult<int>>> VerifyCatalog(VerifyDto verifyBranchDto)
         {
@@ -153,27 +215,28 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
-		[HttpDelete("deleteImage")]
+		[HttpDelete("images")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
-		public async Task<ActionResult<OperationResult<bool>>> DeleteImage(string Key)
+		public async Task<ActionResult<OperationResult<bool>>> DeleteImage(ListOfImages Keys)
 		{
 			var response = new OperationResult<bool>();
-			this.logger.LogInformation("Products Controller -> deleteImage()-> params {0}", Key);
+			this.logger.LogInformation("Products Controller -> deleteImage()-> params {0}", JsonConvert.SerializeObject(new { Params = Keys }));
 			var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-			var status = await productService.deleteImage(Key, UserName);
+			var status = await productService.deleteImage(Keys, UserName);
 			response.Data = status;
 			this.logger.LogInformation("Products Controller -> deleteImage()-> return {0}", status);
 			return Ok(response);
 		}
 
 
-		[HttpDelete]
+		[HttpDelete("{id}")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<bool>>> Delete(int id)
 		{
 			var response = new OperationResult<bool>();
-			this.logger.LogInformation("Products Controller -> deleteImage()-> params {0}", id);
+			this.logger.LogInformation("Products Controller -> deleteProducts()-> params {0}", id);
 			var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
+			response.Data = true;
 			 await productService.deleteCatelog(id, UserName);
 			return Ok(response);
 		}

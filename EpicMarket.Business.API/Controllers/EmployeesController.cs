@@ -14,12 +14,13 @@ using System.Security.Claims;
 namespace EpicMarket.Business.API.Controllers
 {
 
-    public class EmployeeController : BaseApiController
+
+    public class EmployeesController : BaseApiController
     {
-        private readonly ILogger<EmployeeController> logger;
+        private readonly ILogger<EmployeesController> logger;
         private readonly IEmployeeService employeeService;
 
-        public EmployeeController(ILogger<EmployeeController> logger, IEmployeeService employeeService, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
+        public EmployeesController(ILogger<EmployeesController> logger, IEmployeeService employeeService, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
 		{
             this.logger = logger;
             this.employeeService = employeeService;
@@ -27,7 +28,7 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
-        [HttpPost("AddEmployee")]
+        [HttpPost]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<AddEmployeeResult>>> Register(AddEmployeeParam addEmployeeParam)
         {
@@ -45,39 +46,33 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
-        [HttpGet("CheckEmployeeLink")]
+        [HttpGet("Check")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<CheckLinkResult>>> CheckEmployeeLink(string queryParam)
         {
             var response = new OperationResult<CheckLinkResult>();
-
-
 			this.logger.LogInformation("Employee Controller -> CheckEmployeeLink()-> params {0}", JsonConvert.SerializeObject(new { Params = queryParam }));
             var result =  employeeService.CheckEmployeeLink(queryParam);
             this.logger.LogInformation("Employee Controller -> CheckEmployeeLink()-> return {0}", JsonConvert.SerializeObject(new { Value = result }));
-
             response.Data = result;  
-
             return Ok(response);
         }
 
-        [HttpPost("CreateEmployeeAccount")]
+        [HttpPut("{id}")]
         [AllowAnonymous] // we need to check the 
-        public async Task<ActionResult<int>> CreateEmployeeAccount(EmployeeDto employeeDto)
+        public async Task<ActionResult<int>> CreateEmployeeAccount(int id,[FromBody]EmployeeDto employeeDto)
         {
 
 			var response = new OperationResult<int>();
 			this.logger.LogInformation("Employee Controller -> CheckEmployeeLink()-> params {0}", JsonConvert.SerializeObject(new { Params = employeeDto }));
-            var result = await employeeService.CreateEmployeeAccount(employeeDto);
+            var result = await employeeService.CreateEmployeeAccount(employeeDto,id);
             this.logger.LogInformation("Employee Controller -> CheckEmployeeLink()-> return {0}", JsonConvert.SerializeObject(new { Value = result }));
-
             response.Data = result;
-
             return Ok(response);
         }
 
 
-        [HttpGet("GetAllEmployeesForMap")]
+        [HttpGet("Map/{outletID}")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<List<EmployeeMapOptionResult>>>> GetAllEmployeesForMap(int outletID)
         {
@@ -95,7 +90,7 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
-        [HttpGet("GetAllEmployees")]
+        [HttpGet]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<GetDataResult<List<EmployeeResult>>>>> GetAllEmployees([FromQuery]EmployeeParams employeeParams)
         {
@@ -112,15 +107,16 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
-        [HttpGet("GetEmployeeDetails")]
-		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
-		public async Task<ActionResult<OperationResult<SingleEmployeeResult>>> GetEmployeeDetails(int employeeId)
-        {
+        [HttpGet("{id}")]
+        [Authorize(Roles = ROLES.BUSINESS_OWNER)]
+        public async Task<ActionResult<OperationResult<SingleEmployeeResult>>> GetEmployeeDetails( int id)
+
+		{
             var response = new OperationResult<SingleEmployeeResult>();
 
-            this.logger.LogInformation("Employee Controller -> GetAllEmployees()-> params {0}", JsonConvert.SerializeObject(new { Params = employeeId }));
+            this.logger.LogInformation("Employee Controller -> GetAllEmployees()-> params {0}", JsonConvert.SerializeObject(new { Params = id }));
 
-            var results = await employeeService.GetEmployeeDetails(employeeId);
+            var results = await employeeService.GetEmployeeDetails(id);
 
             this.logger.LogInformation("Employee Controller -> GetAllEmployees()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
 
@@ -130,5 +126,22 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
-    }
+
+		[HttpDelete("{id}")]
+		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
+		public async Task<ActionResult> Delete(int id)
+		{
+			var response = new OperationResult<bool>();
+
+			this.logger.LogInformation("Employee Controller -> GetAllEmployees()-> params {0}", JsonConvert.SerializeObject(new { Params = id }));
+
+            await employeeService.DeleteEmployee(id);
+
+            response.Data = true;
+
+			return Ok(response);
+		}
+
+
+	}
 }

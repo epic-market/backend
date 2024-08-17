@@ -19,6 +19,8 @@ namespace EpicMarket.Data.Models
         public string LastName { get; set; }
         public string UniqueGuid { get; set; }
         public int OTP { get; set; }
+
+        public bool IsActive { get; set; }
         public DateTime LastActive { get; set; } = DateTime.Now;
  
         public virtual ICollection<Business> Businesses { get; set; }
