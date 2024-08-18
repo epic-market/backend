@@ -59,7 +59,8 @@ namespace EpicMarket.Entities.CustomModels
         public const string Employees = "Employees";
         public const string Order = "Order";
         public const string Business = "Business";
-    }
+		public const string Tasks = "Tasks";
+	}
     public static class AttachmentTypeConstants
     {
         public const string LOGO = "Logo";

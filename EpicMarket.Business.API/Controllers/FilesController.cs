@@ -37,7 +37,8 @@ namespace EpicMarket.Business.API.Controllers
 		}
 
 		[HttpGet("preview")]
-		public async Task<IActionResult> GetFileByKeyAsync(string key)
+        [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Client, NoStore = false)]
+        public async Task<IActionResult> GetFileByKeyAsync(string key)
 		{
 
 			var fileObject = await this.fileService.GetFileByKeyAsync(key);

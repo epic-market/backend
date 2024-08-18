@@ -31,52 +31,31 @@ namespace EpicMarket.Services
             var currentTask = _context.Tasks.Where(row => row.ID == tasksDTO.ID).FirstOrDefault();
             var newTaskStatus = _context.TaskStatusTypes.Where(row => row.Status == "New").FirstOrDefault();
             var updateTaskStatus = _context.TaskStatusTypes.Where(row => row.Status == tasksDTO.TaskStatus).FirstOrDefault();
-            Tasks taskToSave;
-            if (currentTask == null)
+            var GetTaskType =  _context.TaskTypes.Where(row => row.ID == tasksDTO.TaskTypeID).FirstOrDefault();
+            var taskToSave = new Tasks
             {
-                taskToSave = new Tasks
-                {
-                    Name = tasksDTO.Name,
-                    Description = tasksDTO.Description,
-                    TaskTypeID = tasksDTO.TaskTypeID,
-                    ParentID = tasksDTO.ParentID,
-                    TaskStatusID = newTaskStatus.Id,
-                    TaskPriorityID = tasksDTO.TaskPriorityID,
-                    PrimaryAssignedToPersonID = tasksDTO.PrimaryAssignedToPersonID,
-                    DateAssigned = DateTime.Now,
-                    DateDue = tasksDTO.DateDue,
-                    DateStarted = tasksDTO.DateStarted,
-                    DateCompleted = tasksDTO.DateCompleted,
-                    SubmittedByPersonID = tasksDTO.SubmittedByPersonID,
-                    TaskData = tasksDTO.TaskData,
-                    ReceivedDate = tasksDTO.ReceivedDate,
-                    CreateDate = DateTime.Now,
-                    CreateBy = tasksDTO.CreateBy
-                };
-                _context.Tasks.Add(taskToSave);
-				await unitOfWork.Complete();
-				return (long)taskToSave.ID;
-            }
-            else
-            {
-                taskToSave = new Tasks
-                {
-                    Name = tasksDTO.Name,
-                    Description = tasksDTO.Description,
-                    TaskTypeID = tasksDTO.TaskTypeID,
-                    TaskStatusID = updateTaskStatus.Id,
-                    TaskPriorityID = tasksDTO.TaskPriorityID,
-                    DateStarted = tasksDTO.DateStarted,
-                    DateCompleted = tasksDTO.DateCompleted,
-                    TaskData = tasksDTO.TaskData,
-                    ReceivedDate = tasksDTO.ReceivedDate,
-                    ModifiedDate = DateTime.Now,
-                    ModifiedBy = tasksDTO.ModifiedBy
-                };
-                _context.Tasks.Update(taskToSave);
-				await unitOfWork.Complete();
-				return (long)currentTask.ID;
-            }
+                Name = tasksDTO.Name,
+                Description = tasksDTO.Description,
+                TaskTypeID = tasksDTO.TaskTypeID,
+                ParentID = tasksDTO.ParentID,
+                TaskStatusID = newTaskStatus.Id,
+                TaskPriorityID = tasksDTO.TaskPriorityID,
+                PrimaryAssignedToPersonID = tasksDTO.PrimaryAssignedToPersonID,
+                DateAssigned = DateTime.Now,
+                DateDue = DateTime.Now.AddHours((double)GetTaskType.DefaultDueDateHours),
+                DateStarted = tasksDTO.DateStarted,
+                DateCompleted = tasksDTO.DateCompleted,
+                SubmittedByPersonID = tasksDTO.SubmittedByPersonID,
+                TaskData = tasksDTO.TaskData,
+                ReceivedDate = tasksDTO.ReceivedDate,
+                CreateDate = DateTime.Now,
+                CreateBy = tasksDTO.CreateBy
+            };
+            await _context.Tasks.AddAsync(taskToSave);
+			await unitOfWork.Complete();
+			return (long)taskToSave.ID;
+           
+     
         }
 
         public async Task<int> SaveComments(CommentDTO commentDTO)

@@ -93,6 +93,19 @@ namespace EpicMarket.Data.Webapp.AlterScripts
 				dbContext.SaveChanges();
 			}
 
+
+			if (!dbContext.Entity.Any(cm => cm.Name == "Tasks"))
+			{
+				var entity = new Entity
+				{
+					Name = "Tasks",
+					Description= "Tasks",
+				};
+				
+				dbContext.Entity.Add(entity);
+				dbContext.SaveChanges();
+			}
+
 			this.updateDatabaseVersion(this.GetType().Name);
         }
 
