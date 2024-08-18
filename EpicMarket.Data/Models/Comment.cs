@@ -20,6 +20,11 @@ namespace EpicMarket.Data.Models
         [StringLength(50)]
         public string Status { get; set; }
 
-        public int? RecordID{ get; set; }
+		[ForeignKey("Entity")]
+		public int EntityID { get; set; }
+		public virtual Entity Entity { get; set; }
+
+
+		public int? RecordID{ get; set; }
     }
 }

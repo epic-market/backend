@@ -69,6 +69,10 @@ namespace EpicMarket.Data.Models
         [ForeignKey("TaskStatusID")]
         public virtual TaskStatusType TaskStatusType { get; set; }
         public virtual Entity Entity { get; set; }
+
+
+        [ForeignKey("PrimaryAssignedToPersonID")]
+        public virtual AppUser AppUser { get; set; }
         public virtual ICollection<SupportTicket> SupportTickets { get; set; }
 
     }

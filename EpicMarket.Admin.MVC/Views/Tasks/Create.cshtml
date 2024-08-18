@@ -32,6 +32,7 @@
                 <hr />
                 <form asp-action="Create">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                 
                     <div class="row mb-3">
                         <label asp-for="PrimaryAssignedToPersonID" class="col-sm-3 col-form-label"></label>
                         <div class="col-sm-9">
@@ -62,10 +63,11 @@
                     </div>
                     @if (ViewBag.ExistingID != null)
                     {
+                           <input type="hidden" asp-for="ParentID" />
                         <div class="row mb-3">
                             <label asp-for="ParentID" class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
-                                <select asp-for="ParentID" class="form-control" asp-items="ViewBag.ParentTaskId"></select>
+                                <select asp-for="ParentID" class="form-control" asp-items="ViewBag.ParentTaskId" disabled></select>
                                 <span asp-validation-for="ParentID" class="text-danger"></span>
                             </div>
                         </div>
