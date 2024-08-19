@@ -1,133 +1,318 @@
-﻿@model EpicMarket.Data.Models.Tasks
+﻿@model EpicMarket.Admin.MVC.Models.TaskDetailsModel
 
 @{
     ViewData["Title"] = "Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Details</h1>
+<<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+    <div class="breadcrumb-title pe-3">Tasks</div>
+    <div class="ps-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 p-0">
+                <li class="breadcrumb-item">
+                    <a asp-action="Index"><i class="bx bx-home-alt"></i></a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Details</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<hr />
 
-<div>
-    <h4>Tasks</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ParentID)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ParentID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TaskPriorityID)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TaskPriorityID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PrimaryAssignedToPersonID)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PrimaryAssignedToPersonID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DateAssigned)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DateAssigned)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DateDue)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DateDue)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DateStarted)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DateStarted)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DateCompleted)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DateCompleted)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SubmittedByPersonID)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.SubmittedByPersonID)
-        </dd>
-        <dt class = "col-sm-2">
-      @*       @Html.DisplayNameFor(model => model.EffectiveDate) *@
-        </dt>
-        <dd class = "col-sm-10">
-          @*   @Html.DisplayFor(model => model.EffectiveDate) *@
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TaskData)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TaskData)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ReceivedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ReceivedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TaskTypes)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TaskTypes.ID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TaskStatusType)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TaskStatusType.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreateDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreateDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreateBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreateBy)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ModifiedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ModifiedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ModifiedBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ModifiedBy)
-        </dd>
-    </dl>
+
+<div class="row mb-4" >
+	<div class="d-flex">
+	<div class="col-8 px-2">
+			<div class="card mb-4  h-100">
+			<div class="card-body">
+				<div class="d-flex justify-content-end mb-3">
+					<a asp-action="Edit" class="btn btn-primary px-5" asp-route-id="@Model?.Task.ID">Edit</a>
+				</div>
+				<h3 class="card-title"> #@Html.DisplayFor(model => model.Task.ID) -  @Html.DisplayFor(model => model.Task.Name)</h3>
+				<p class="card-text fs-6"> @Html.DisplayFor(model => model.Task.Description) </p>
+				<div class="d-flex gap-3 py-3">
+					<div> <b>@Html.DisplayFor(model => model.Task.TaskTypes.Name)</b> </div>
+					<div class="text-success"> @Html.DisplayFor(model => model.Task.TaskStatusType.Status)</div>
+				</div>
+				<div class="row">
+					<dl class="row col-6">
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Task.AppUser.FirstName)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Task.AppUser.FirstName)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Task.AppUser.UserName)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Task.AppUser.UserName)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Task.DateAssigned)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Task.DateAssigned)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Task.DateDue)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Task.DateDue)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Task.DateStarted)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Task.DateStarted)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Task.DateCompleted)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Task.DateCompleted)
+						</dd>
+
+					</dl>
+					<dl class="row col-6">
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Task.SubmittedByPersonID)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Task.SubmittedByPersonID)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Task.TaskPriorityID)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Task.TaskPriorityID)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Task.CreateDate)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Task.CreateDate)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Task.CreateBy)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Task.CreateBy)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Task.ModifiedDate)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Task.ModifiedDate)
+						</dd>
+						<dt class="col-sm-4">
+							@Html.DisplayNameFor(model => model.Task.ModifiedBy)
+						</dt>
+						<dd class="col-sm-8">
+							@Html.DisplayFor(model => model.Task.ModifiedBy)
+						</dd>
+					</dl>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-4">
+		<div class="card h-100">
+			<div class="card-header">
+					<h4><i class='bx bx-comment-detail font-18 me-1'></i>Activitys</h4>
+			</div>
+				<div class="card-body overflow-auto" style="max-height: 500px;">
+					<!-- Activities content goes here -->
+					@{
+						var eventLogs = Model.EventLogs.ToList();
+						var totalLogs = eventLogs.Count;
+					}
+
+					@for (int i = 0; i < totalLogs; i++)
+					{
+						var item = eventLogs[i];
+						<div class="row">
+							<div class="col-auto text-center flex-column d-none d-sm-flex">
+								@if (i == 0)
+								{
+									<!-- First record -->
+									<div class="row h-50">
+										<div class="col">&nbsp;</div>
+										<div class="col">&nbsp;</div>
+									</div>
+									<h5 class="m-2">
+										<span class="badge rounded-pill bg-light border">&nbsp;</span>
+									</h5>
+									<div class="row h-50">
+										<div class="col border-end">&nbsp;</div>
+										<div class="col">&nbsp;</div>
+									</div>
+								}
+								else if (i == totalLogs - 1)
+								{
+									<!-- Last record -->
+									<div class="row h-50">
+										<div class="col border-end">&nbsp;</div>
+										<div class="col">&nbsp;</div>
+									</div>
+									<h5 class="m-2">
+										<span class="badge rounded-pill bg-light border">&nbsp;</span>
+									</h5>
+									<div class="row h-50">
+										<div class="col">&nbsp;</div>
+										<div class="col">&nbsp;</div>
+									</div>
+								}
+								else
+								{
+									<!-- Middle records -->
+									<div class="row h-50">
+										<div class="col border-end">&nbsp;</div>
+										<div class="col">&nbsp;</div>
+									</div>
+									<h5 class="m-2">
+										<span class="badge rounded-pill bg-light border">&nbsp;</span>
+									</h5>
+									<div class="row h-50">
+										<div class="col border-end">&nbsp;</div>
+										<div class="col">&nbsp;</div>
+									</div>
+								}
+							</div>
+							<div class="col py-2">
+								<div class="card radius-15">
+									<div class="card-body">
+										<div class="float-end text-muted">@item.CreateDate</div>
+										<h5 class="card-title">@item.CreateBy</h5>
+										<p>@item.Description</p> <!-- Assuming you want to display the description -->
+									</div>
+								</div>
+							</div>
+						</div>
+					}
+					<!-- Add more activities as needed -->
+				</div>
+		</div>
+	</div>
+	</div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.ID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+<div class="row mb-4">
+	<div class="d-flex">
+		<div class="col-8 px-2">
+			<div class="card mb-4 h-100" style="min-height: 300px;">
+				<div class="card-header">
+					<h4>Task Data</h4>
+				</div>
+				<div class="card-body">
+					<p class="card-text fs-6">@Html.DisplayFor(model => model.Task.TaskData)</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-4">
+			<div class="card h-100" style="min-height: 300px;">
+				<div class="card-header">
+					<h5><i class='bx bx-comment-detail font-18 me-1'></i> Comments</h5>
+				</div>
+				<div class="card-body d-flex flex-column">
+					<!-- Scrollable comments section -->
+					<div class="flex-grow-1 overflow-auto mb-3" style="max-height: 400px;">
+						<!-- Comments content goes here -->
+						@foreach (var item in Model.Comments)
+						{
+							<div class="mb-2">
+								<strong>@item.CreateBy</strong> <small class="text-muted">@item.CreateDate</small>
+								<p>@item.CommentText</p>
+							</div>
+						}
+						<!-- Add more comments as needed -->
+					</div>
+					<!-- Input area for adding new comments -->
+					<!-- Form for adding new comments -->
+					<form asp-action="AddComment" method="post" class="d-flex">
+						<input type="hidden" name="taskId" value="@Model.Task.ID" />
+						<input type="text" name="commentText" class="form-control me-2" placeholder="Add a comment..." required />
+						<button type="submit" class="btn btn-primary">Submit</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
+
+
+
+
+<div class="card-body">
+	<ul class="nav nav-tabs nav-primary mb-0" role="tablist">
+		<li class="nav-item active" role="presentation">
+			<a class="nav-link active" data-bs-toggle="tab" href="#primaryorders" role="tab" aria-selected="true">
+				<div class="d-flex align-items-center">
+					<div class="tab-icon">
+						<i class='bx bx-star font-18 me-1'></i>
+					</div>
+					<div class="tab-title"> Child Tasks </div>
+				</div>
+			</a>
+		</li>
+	</ul>
+	<div class="tab-content pt-3">
+		<div class="tab-pane fade show active" id="primaryorders" role="tabpanel">
+			<div class="card">
+				<div class="card-body">
+					<div class="d-flex justify-content-end mb-3">
+						<a asp-action="Create" class="btn btn-primary px-5" asp-route-parentTaskId="@Model?.Task.ID">Add Sub-Task</a>
+					</div>
+					<div class="table-responsive">
+						<table id="example2" class="table table-striped table-bordered" style="width:100%">
+							<thead>
+								<tr>
+									<th>
+										@Html.DisplayNameFor(model => model.SubTask.ID)
+									</th>
+									<th>
+										@Html.DisplayNameFor(model => model.SubTask.Name)
+									</th>
+									<th>
+										@Html.DisplayNameFor(model => model.SubTask.PrimaryAssignedToPersonID)
+									</th>
+									<th>
+										@Html.DisplayNameFor(model => model.SubTask.TaskStatusType.Status)
+									</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody>
+								@foreach (var item in Model.SubTasks)
+								{
+									<tr>
+										<td>
+											@Html.DisplayFor(modelItem => item.ID)
+										</td>
+										<td>
+											@Html.DisplayFor(modelItem => item.Name)
+										</td>
+										<td>
+											@Html.DisplayFor(modelItem => item.AppUser.UserName)
+										</td>
+										<td>
+											@Html.DisplayFor(modelItem => item.TaskStatusType.Status)
+										</td>
+
+										<td>
+											<a asp-controller="BusinessEmployeeMaps" asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
+											<a asp-controller="BusinessEmployeeMaps" asp-action="Details" asp-route-id="@item.ID">Details</a> |
+											<a asp-controller="BusinessEmployeeMaps" asp-action="Delete" asp-route-id="@item.ID">Delete</a>
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+  

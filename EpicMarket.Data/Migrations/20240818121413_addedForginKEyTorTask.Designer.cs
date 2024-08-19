@@ -4,6 +4,7 @@ using EpicMarket.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EpicMarket.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240818121413_addedForginKEyTorTask")]
+    partial class addedForginKEyTorTask
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -843,9 +846,6 @@ namespace EpicMarket.Data.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("EntityID")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -865,8 +865,6 @@ namespace EpicMarket.Data.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("ID");
-
-                    b.HasIndex("EntityID");
 
                     b.ToTable("Comments");
                 });
@@ -2223,17 +2221,6 @@ namespace EpicMarket.Data.Migrations
                     b.Navigation("StatusOptionSets");
                 });
 
-            modelBuilder.Entity("EpicMarket.Data.Models.Comment", b =>
-                {
-                    b.HasOne("EpicMarket.Data.Models.Entity", "Entity")
-                        .WithMany("Comments")
-                        .HasForeignKey("EntityID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Entity");
-                });
-
             modelBuilder.Entity("EpicMarket.Data.Models.CommunicationQueue", b =>
                 {
                     b.HasOne("EpicMarket.Data.Models.ContactMethod", "ContactMethod")
@@ -2652,8 +2639,6 @@ namespace EpicMarket.Data.Migrations
             modelBuilder.Entity("EpicMarket.Data.Models.Entity", b =>
                 {
                     b.Navigation("AttachmentLinks");
-
-                    b.Navigation("Comments");
 
                     b.Navigation("EventLogs");
 

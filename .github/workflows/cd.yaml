@@ -34,22 +34,22 @@ jobs:
 
       - name: Remove existing Docker containers and images
         run: |
-        should_run_webapp=${{ inputs.should_run_webapp }}
-        /home/ubuntu/remove_containers.sh ghcr.io/${{ github.repository }}-${{ steps.determine-application.outputs.application }}
-        if [ "$should_run_webapp" = "true" ]; then
-          /home/ubuntu/remove_containers.sh ghcr.io/${{ github.repository }}-webapp
-        fi
+          should_run_webapp=${{ inputs.should_run_webapp }}
+          /home/ubuntu/remove_containers.sh ghcr.io/${{ github.repository }}-${{ steps.determine-application.outputs.application }}
+          if [ "$should_run_webapp" = "true" ]; then
+            /home/ubuntu/remove_containers.sh ghcr.io/${{ github.repository }}-webapp
+          fi
 
       - name: Login to Docker Hub
         run: sudo docker login -u ${{ github.actor }} -p ${{ secrets.CONTAINER_REGISTRY_TOKEN }} ghcr.io
 
       - name: Pull Docker images
         run: |
-        should_run_webapp=${{ inputs.should_run_webapp }}
-        sudo docker pull ghcr.io/${{ github.repository }}-${{ steps.determine-application.outputs.application }}:latest
-        if [ "$should_run_webapp" = "true" ]; then
-          sudo docker pull ghcr.io/${{ github.repository }}-webapp:latest
-        fi
+          should_run_webapp=${{ inputs.should_run_webapp }}
+          sudo docker pull ghcr.io/${{ github.repository }}-${{ steps.determine-application.outputs.application }}:latest
+          if [ "$should_run_webapp" = "true" ]; then
+            sudo docker pull ghcr.io/${{ github.repository }}-webapp:latest
+          fi
 
       - name: Determine port based on application
         id: determine-port
@@ -78,5 +78,5 @@ jobs:
           sleep 30
 
           if [ "$should_run_webapp" = "true" ]; then
-            sudo docker run -d -e ConnectionStrings:DefaultConnection="$(echo "$db_conn_base64" | base64 --decode)" -e ConnectionStrings:AuthDbContextConnection="$(echo "$db_conn_base64" | base64 --decode)" ghcr.io/${{ github.repository }}-webapp
+            sudo docker run -d -e ConnectionStrings:DefaultConnection="$(echo "$db_conn_base64" | base64 --decode)" ghcr.io/${{ github.repository }}-webapp
           fi

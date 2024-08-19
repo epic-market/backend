@@ -36,5 +36,7 @@ namespace EpicMarket.Data.Models
 
         public virtual ICollection<BusinessEmployeeMap> BusinessEmployeeMaps { get; set; }
 
+        public virtual ICollection<Tasks> Tasks { get; set; }
+
     }
 }
