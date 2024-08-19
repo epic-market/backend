@@ -8,6 +8,11 @@ on:
         required: true
         type: boolean
         default: true
+      should_run_webapp:
+        description: 'True to run the webapp after deployment'
+        required: true
+        type: boolean
+        default: true
 
 concurrency:
   group: 'cd-${{ inputs.is_api }}'
@@ -16,7 +21,6 @@ concurrency:
 jobs:
   deploy:
     runs-on: self-hosted
-
     steps:
       - name: Determine which application to deploy
         id: determine-application
@@ -29,13 +33,23 @@ jobs:
           fi
 
       - name: Remove existing Docker containers and images
-        run: /home/ubuntu/remove_containers.sh ghcr.io/${{ github.repository }}-${{ steps.determine-application.outputs.application }}
+        run: |
+        should_run_webapp=${{ inputs.should_run_webapp }}
+        /home/ubuntu/remove_containers.sh ghcr.io/${{ github.repository }}-${{ steps.determine-application.outputs.application }}
+        if [ "$should_run_webapp" = "true" ]; then
+          /home/ubuntu/remove_containers.sh ghcr.io/${{ github.repository }}-webapp
+        fi
 
       - name: Login to Docker Hub
         run: sudo docker login -u ${{ github.actor }} -p ${{ secrets.CONTAINER_REGISTRY_TOKEN }} ghcr.io
 
-      - name: Pull Docker image
-        run: sudo docker pull ghcr.io/${{ github.repository }}-${{ steps.determine-application.outputs.application }}:latest
+      - name: Pull Docker images
+        run: |
+        should_run_webapp=${{ inputs.should_run_webapp }}
+        sudo docker pull ghcr.io/${{ github.repository }}-${{ steps.determine-application.outputs.application }}:latest
+        if [ "$should_run_webapp" = "true" ]; then
+          sudo docker pull ghcr.io/${{ github.repository }}-webapp:latest
+        fi
 
       - name: Determine port based on application
         id: determine-port
@@ -47,14 +61,22 @@ jobs:
             echo "::set-output name=port::3001"
           fi
 
-      - name: Run Docker container
+      - name: Run Docker containers
         run: |
           is_api=${{ inputs.is_api }}
+          should_run_webapp=${{ inputs.should_run_webapp }}
           db_conn="Server=tcp:${{ secrets.DB_HOSTNAME }},${{ secrets.DB_PORT }};Database=${{ secrets.DB_NAME }};User Id=${{ secrets.DB_USERNAME }};Password=${{ secrets.DB_PASSWORD }};Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;"
           db_conn_base64=$(echo -n "$db_conn" | base64)
+
           if [ "$is_api" = "true" ]; then
             sudo docker run -d -p ${{ steps.determine-port.outputs.port }}:8080 -e ConnectionStrings:DefaultConnection="$(echo "$db_conn_base64" | base64 --decode)" ghcr.io/${{ github.repository }}-${{ steps.determine-application.outputs.application }}
           else 
             sudo docker run -d -p ${{ steps.determine-port.outputs.port }}:8080 -e ConnectionStrings:DefaultConnection="$(echo "$db_conn_base64" | base64 --decode)" -e ConnectionStrings:AuthDbContextConnection="$(echo "$db_conn_base64" | base64 --decode)" ghcr.io/${{ github.repository }}-${{ steps.determine-application.outputs.application }}
           fi
 
+          # Wait for the API/MVC to start and run migrations if needed.
+          sleep 30
+
+          if [ "$should_run_webapp" = "true" ]; then
+            sudo docker run -d -e ConnectionStrings:DefaultConnection="$(echo "$db_conn_base64" | base64 --decode)" -e ConnectionStrings:AuthDbContextConnection="$(echo "$db_conn_base64" | base64 --decode)" ghcr.io/${{ github.repository }}-webapp
+          fi

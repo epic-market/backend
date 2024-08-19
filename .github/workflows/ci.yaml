@@ -8,6 +8,11 @@ on:
         required: true
         type: boolean
         default: true
+      should_run_webapp:
+        description: 'True to run the webapp after deployment'
+        required: true
+        type: boolean
+        default: true
 
 concurrency:
   group: 'ci-${{ inputs.is_api }}'
@@ -40,7 +45,7 @@ jobs:
             echo "::set-output name=application::mvc"
           fi
 
-      - name: Build and push
+      - name: Build and push ${{ steps.determine-application.outputs.application }}
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -48,9 +53,19 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository }}-${{ steps.determine-application.outputs.application }}:latest
 
+      - name: Build and push webapp
+        if: inputs.should_run_webapp == true
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.webapp
+          push: true
+          tags: ghcr.io/${{ github.repository }}-webapp:latest
+
   call-cd:
     needs: build
     uses: ./.github/workflows/cd.yaml
     secrets: inherit
     with:
       is_api: ${{ inputs.is_api }}
+      should_run_webapp: ${{ inputs.should_run_webapp }}
