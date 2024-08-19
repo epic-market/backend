@@ -1,18 +1,15 @@
 ﻿using AutoMapper;
 using EpicMarket.Contracts;
-using EpicMarket.Data;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
 using EpicMarket.Entities.Entities;
-using EpicMarket.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using EpicMarket.Services;
-using Newtonsoft.Json;
+
 
 namespace EpicMarket.Business.API.Controllers
 {
@@ -100,6 +97,7 @@ namespace EpicMarket.Business.API.Controllers
 
             return response;
         }
+        
         [HttpGet("info")]
         [Authorize]
         public async Task<ActionResult<OperationResult<LoginResult>>> Info()
@@ -171,7 +169,6 @@ namespace EpicMarket.Business.API.Controllers
             return response;
         }
 
-
         [HttpPost("ResetPassword")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<string>>> ResetPassword(ResetPasswordParams resetPassword)
@@ -190,9 +187,10 @@ namespace EpicMarket.Business.API.Controllers
             }
             return response;
         }
+
         [HttpGet("CheckResetPasswordLink")]
         [AllowAnonymous]
-        public async Task<ActionResult<OperationResult<CheckResetLinkResult>>> CheckResetPasswordLink(string queryParam)
+        public ActionResult<OperationResult<CheckResetLinkResult>> CheckResetPasswordLink(string queryParam)
         {
             var response = new OperationResult<CheckResetLinkResult>();
 
@@ -203,6 +201,7 @@ namespace EpicMarket.Business.API.Controllers
 
             return Ok(response);
         }
+
         [HttpPost("setNewPassword")]
 		[AllowAnonymous]
 		public async Task<ActionResult<OperationResult<string>>> setNewPassword(SetNewPasswordParams setNewPasswordParams)
