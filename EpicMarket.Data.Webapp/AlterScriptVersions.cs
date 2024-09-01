@@ -21,7 +21,8 @@ namespace EpicMarket.Data.Webapp
             AddDatabaseVersion("AlterScriptseedMigration", "This is for migarting the seed data", "Vinay", new AlterScriptseedMigration(this.dbContext));
             AddDatabaseVersion("AlterScript3", "This is seed data FOR ATTACHMENTTYPE AND PersonType", "Vinay", new AlterScript3(this.dbContext));
 			AddDatabaseVersion("AlterScript4", "This is seed data adding data for ApplicationConfiguration in products", "Gadamsetti Akhil", new AlterScript4(this.dbContext));
-		}
+            AddDatabaseVersion("AlterScript5", "This is seed data adding data for ApplicationConfiguration in branches", "Gadamsetti Akhil", new AlterScript5(this.dbContext));
+        }
 
         public void AddDatabaseVersion(string versionClass, string description, string createBy , IAlterScript alterScriptClass)
         {
@@ -33,6 +34,7 @@ namespace EpicMarket.Data.Webapp
                     VersionClass = versionClass,
                     Description = description,
                     CreateBy = createBy,
+                    CreateDate = DateTime.Now,
                     Status = false
                 });
                 ListOfClass.Add(alterScriptClass);

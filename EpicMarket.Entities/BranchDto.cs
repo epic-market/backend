@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,28 +11,38 @@ namespace EpicMarket.Entities
 
     public class BranchDto
     {
-        public int? ID { get; set; }
-        public int? AddressID { get; set; }
+        [Required]
         public string Name { get; set; }
 
         public string Description { get; set; }
 
+        [Required]
         public long ContactNumber { get; set; }
 
+        [Required]
         public string ContactEmail { get; set; }
 
+        [Required]
         public string Address { get; set; }
-
+        [Required]
         public string City { get; set; }
-
+        [Required]
         public string State { get; set; }
 
         public double Latitude { get; set; }
 
         public double Longitude { get; set; }
-
+        [Required]
         public int Pincode { get; set; }
+
+        public IFormFile[] Photos { get; set; }
+        public IFormFile Thumbnail { get; set; }
     }
+
+
+
+
+
 
     public class BranchResult
     {
@@ -58,6 +70,42 @@ namespace EpicMarket.Entities
         public double? Latitude { get; set; }
 
         public double? Longitude { get; set; }
+        public string Status { get; set; }
+
+        public string Thumbnail { get; set; }
+    }
+
+
+    public class BranchDetailResult
+    {
+        public int ID { get; set; }
+
+        public string Name { get; set; }
+
+        public string Description { get; set; }
+
+        public long ContactNumber { get; set; }
+
+        public string ContactEmail { get; set; }
+
+        public string Address { get; set; }
+
+        public string City { get; set; }
+
+        public string State { get; set; }
+
+        public int Pincode { get; set; }
+
+        public int Count { get; set; }
+
+        public int AddressID { get; set; }
+        public double? Latitude { get; set; }
+
+        public double? Longitude { get; set; }
+        public string Status { get; set; }
+
+        public string Thumbnail { get; set; }
+        public List<string> Photos { get; set; }
     }
 
 

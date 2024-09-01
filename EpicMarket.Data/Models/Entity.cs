@@ -19,10 +19,10 @@ namespace EpicMarket.Data.Models
         [MaxLength(255)]
         public string Description { get; set; }
 
-        public virtual ICollection<EventLog>? EventLogs { get; set; } 
-        public virtual ICollection<Tasks>? Taskss { get; set; }
-        public virtual ICollection<AttachmentLink>? AttachmentLinks { get; set; }
+        public virtual ICollection<EventLog> EventLogs { get; set; } 
+        public virtual ICollection<Tasks> Taskss { get; set; }
+        public virtual ICollection<AttachmentLink> AttachmentLinks { get; set; }
 
-		public virtual ICollection<Comment>? Comments { get; set; }
+		public virtual ICollection<Comment> Comments { get; set; }
 	}
 }

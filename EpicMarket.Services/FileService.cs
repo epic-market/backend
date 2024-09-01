@@ -1,8 +1,10 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
 using EpicMarket.Contracts;
+using EpicMarket.Data.Models;
 using EpicMarket.Entities;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,12 +16,16 @@ namespace EpicMarket.Services
 	public class FileService : IFileService
 	{
 		private readonly IAmazonS3 _s3Client;
-		private readonly string _bucketName;
+        private readonly ApplicationDbContext dbContext;
+        private readonly IUnitOfWork unitOfWork;
+        private readonly string _bucketName;
 
-		public FileService(IAmazonS3 s3Client)
+		public FileService(IAmazonS3 s3Client, ApplicationDbContext dbContext, IUnitOfWork unitOfWork)
         {
 			_s3Client = s3Client;
-			_bucketName = "epic-market";
+            this.dbContext = dbContext;
+            this.unitOfWork = unitOfWork;
+            _bucketName = "epic-market";
 		}
 
         public async Task<bool> DeleteFileAsync( string key)
@@ -78,5 +84,33 @@ namespace EpicMarket.Services
 			return fileNameKey;
 		}
 
-	}
+
+        public async Task<bool> DeleteImage(ListOfImages keys, string UserName)
+        {
+
+            var count = 1;
+            foreach (var key in keys.ImageKeys)
+            {
+
+                int lastSlashIndex = key.LastIndexOf('/');
+                string fileName = key.Substring(lastSlashIndex + 1);
+
+                var attachment = await dbContext.Attachments.Where(c => c.DocumentFile == fileName).FirstOrDefaultAsync();
+
+                if (attachment != null)
+                {
+                    dbContext.Attachments.Remove(attachment);
+                    var status = await DeleteFileAsync(key);
+                    await unitOfWork.Complete();
+                    count = status ? count + 1 : count;
+                }
+                else
+                {
+                    throw new Exception("File Not Found");
+                }
+            }
+            return keys.ImageKeys.Count + 1 == count;
+        }
+
+    }
 }

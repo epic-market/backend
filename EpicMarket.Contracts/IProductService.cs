@@ -20,8 +20,6 @@ namespace EpicMarket.Contracts
         Task<ProductsDto> GetProductDetails(int productId);
 		Task<int> VerifyCatalog(VerifyDto verifyBranchDto, string UserName, int AdminPersonID, string PageSource);
 
-		Task<bool> deleteImage(ListOfImages keys, string UserName);
-
 		Task deleteCatelog(int id,string UserName);
 	}
 }

@@ -269,31 +269,7 @@ namespace EpicMarket.Services
             return taskToSave.ID;
         }
 
-		public async Task<bool> deleteImage(ListOfImages keys, string UserName)
-		{
-
-            var count = 1;
-            foreach (var key in keys.ImageKeys) {
-
-				int lastSlashIndex = key.LastIndexOf('/');
-				string fileName = key.Substring(lastSlashIndex + 1);
-
-				var attachment = await _context.Attachments.Where(c => c.DocumentFile == fileName).FirstOrDefaultAsync();
-
-				if (attachment != null)
-				{
-					_context.Attachments.Remove(attachment);
-					var status = await this.fileService.DeleteFileAsync(key);
-					await unitOfWork.Complete();
-				    count = status ? count+1 : count;
-				}
-				else
-				{
-					throw new Exception("File Not Found");
-				}
-			}
-            return keys.ImageKeys.Count+1 == count;   			
-		}
+		
 
 
         public async Task deleteCatelog(int id, string UserName)

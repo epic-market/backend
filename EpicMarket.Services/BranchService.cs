@@ -4,6 +4,7 @@ using EpicMarket.Data.Models;
 using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -40,10 +41,71 @@ namespace EpicMarket.Services
 			this.unitOfWork = unitOfWork;
 		}
 
-        public async Task<int> AddOrUpdateBranch(BranchDto branchDto,  string UserName, int BusinessID, string PageSource)
+        public async Task<int> AddBranch(BranchDto branchDto,  string UserName, int BusinessID, string PageSource)
+        {
+                var addressModel = new AddressDto
+                {
+                    Address1 = branchDto.Address,
+                    City = branchDto.City,
+                    State = branchDto.State,
+                    Pincode = branchDto.Pincode,
+                    Latitude = branchDto.Latitude,
+                    Longitude = branchDto.Longitude,
+                    CreateBy = UserName,
+                    CreateDate = DateTime.Now
+                };
+            
+                int addressId = await addressService.AddAddress(addressModel);
+
+                var outletModel = new Outlet
+                {
+                    AddressID = addressId,
+                    BussinessID = BusinessID,
+                    Name = branchDto.Name,
+                    Description = branchDto.Description,
+                    ContactEmail = branchDto.ContactEmail,
+                    ContactNumber = branchDto.ContactNumber,
+                    CreateBy = UserName,
+                    CreateDate = DateTime.Now
+                };
+                var status = await _context.StatusOptionSets.FirstOrDefaultAsync(c => c.Status == Business_Status.BUSINESS_UNVERIFIED);
+                outletModel.StatusId = status.Id;
+
+
+
+                await _context.Outlets.AddAsync(outletModel);
+                await unitOfWork.Complete();
+
+                string events = EventConstants.AddBranch;
+                string mailevent = MessageDataConstants.EditBranch;
+
+
+
+                var savedOutletModel = _context.Outlets.FirstOrDefault(o => o.ID == outletModel.ID);
+                string outletModelJson = JsonConvert.SerializeObject(savedOutletModel, new JsonSerializerSettings
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                });
+                await this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = outletModel.ID, Data = outletModelJson, Description = null, EventName = events, EntityName = EntityConstants.Branch, Source = PageSource });
+                await this.communicationQueueService.InsertCommunicationQueue(
+                        new Entities.CommunicationQueueDTO()
+                        {
+                            MessageData = null,//TODO
+                            Subject = mailevent,
+                            NotificationRecipient = UserName,
+                            ContactMethod = ContactMethodConstants.EMAIL,
+                            CreateBy = UserName
+                        });
+
+                return outletModel.ID;
+        
+        }
+
+
+        public async Task<int> UpdateBranch(int id, BranchDto branchDto, string UserName, int BusinessID, string PageSource)
         {
             var addressModel = new AddressDto();
-            var events="";
+            var events = "";
             var mailevent = "";
             addressModel.Address1 = branchDto.Address;
             addressModel.City = branchDto.City;
@@ -51,55 +113,32 @@ namespace EpicMarket.Services
             addressModel.Pincode = branchDto.Pincode;
             addressModel.Latitude = branchDto.Latitude;
             addressModel.Longitude = branchDto.Longitude;
+            addressModel.ID = _context.Outlets.Include(o => o.Address).AsNoTracking().FirstOrDefault(o => o.ID == id).AddressID;
 
-            if (branchDto.ID != null || branchDto.ID > 0)
-            {
-                addressModel.ModifiedBy = UserName;
-                addressModel.ModifiedDate = DateTime.Now;
-                addressModel.ID = branchDto.AddressID;
-            }
-            else {
-                addressModel.CreateBy = UserName;
-                addressModel.CreateDate = DateTime.Now;
-            }
-           
-            
-            int addressId =  await addressService.AddAddress(addressModel); 
+            int addressId = await addressService.AddAddress(addressModel);
 
-            var outletModel = new Outlet();
-            outletModel.AddressID = addressId;
+            var outletModel = _context.Outlets.Find(id);
+            outletModel.AddressID  = addressId;
             outletModel.BussinessID = BusinessID;
             outletModel.Name = branchDto.Name;
             outletModel.Description = branchDto.Description;
             outletModel.ContactEmail = branchDto.ContactEmail;
             outletModel.ContactNumber = branchDto.ContactNumber;
-            outletModel.ID = (int)branchDto.ID;
+            outletModel.ID = (int)id;
+            outletModel.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == Business_Status.BUSINESS_UNVERIFIED).Id;
+            outletModel.ModifiedBy = UserName;
+            outletModel.ModifiedDate = DateTime.Now;
+            events = EventConstants.EditBranch;
+            mailevent = MessageDataConstants.AddBranch;
+            _context.Outlets.Update(outletModel);
 
-            if (branchDto.ID != null || branchDto.ID > 0)
-            {
-                outletModel.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == Business_Status.BUSINESS_UNVERIFIED).Id;
-                outletModel.ModifiedBy = UserName;
-                outletModel.ModifiedDate = DateTime.Now;
-                events = EventConstants.EditBranch;
-                mailevent = MessageDataConstants.AddBranch;
-                _context.Outlets.Update(outletModel);
-            }
-            else
-            {
-                outletModel.CreateBy = UserName;
-                outletModel.CreateDate = DateTime.Now;
-                events = EventConstants.AddBranch;
-                mailevent = MessageDataConstants.EditBranch;
-                _context.Outlets.Add(outletModel);
-            }
-
-			await unitOfWork.Complete();
-			var savedOutletModel = _context.Outlets.FirstOrDefault(o => o.ID == outletModel.ID);
+            await unitOfWork.Complete();
+            var savedOutletModel = _context.Outlets.FirstOrDefault(o => o.ID == outletModel.ID);
             string outletModelJson = JsonConvert.SerializeObject(savedOutletModel, new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             });
-            await this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = outletModel.ID, Data = outletModelJson, Description = null, EventName = events, EntityName = EntityConstants.Branch,Source=PageSource });
+            await this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = outletModel.ID, Data = outletModelJson, Description = null, EventName = events, EntityName = EntityConstants.Branch, Source = PageSource });
             await this.communicationQueueService.InsertCommunicationQueue(
                     new Entities.CommunicationQueueDTO()
                     {
@@ -111,6 +150,7 @@ namespace EpicMarket.Services
                     });
             return outletModel.ID;
         }
+
 
         public async Task<int> MapBranchToPeople(BranchPeopleMapParams branchPeopleMapParams)
         {
@@ -160,12 +200,12 @@ namespace EpicMarket.Services
 
         public async Task<GetDataResult<List<BranchResult>>> GetAllBranches(BranchParams branchParams, int BusinessID)
         {
-
+            var attachmentTypeID = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.BRANCH_THUMBNAIL);
             var getResult = new GetDataResult<List<BranchResult>>();
 
             //1 . filter with BusinessID
             var Outlets = _context.Outlets
-                                .Where(c => c.BussinessID == BusinessID);
+                                .Where(c => c.BussinessID == BusinessID && c.IsActive == true);
 
 
             //2 . Appling Searching
@@ -205,7 +245,15 @@ namespace EpicMarket.Services
                 Address = c.Address.Address1,
                 City = c.Address.City,
                 Pincode = c.Address.Pincode,
+                Latitude = c.Address.Latitude,
+                Longitude = c.Address.Longitude,
                 State = c.Address.State,
+                Status = _context.StatusOptionSets.FirstOrDefault(s => s.Id == c.StatusId).Status,
+                Thumbnail = ((from attachment in _context.Attachments
+                              join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                              join entity in _context.Entity on link.EntityID equals entity.ID
+                              where entity.Name == EntityConstants.Branch && link.RecordID == c.ID && link.AttachmentTypeID == attachmentTypeID.ID
+                              select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}").FirstOrDefault()),
             }).ToListAsync();
 
 
@@ -215,9 +263,34 @@ namespace EpicMarket.Services
             return getResult;
         }
 
-        public async Task<BranchResult> GetBranchByID(int branchId)
+        public async Task<BranchDetailResult> GetBranchByID(int branchId)
         {
-           return await _context.Outlets.Where(o => o.ID == branchId).Include(o=> o.Address).Select(o => new BranchResult()
+
+            var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.BRANCH_THUMBNAIL);
+            var attachmentTypeID_Product = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.BRANCH_PHOTOS);
+
+
+
+            var attachments = from attachment in _context.Attachments
+                              join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                              join entity in _context.Entity on link.EntityID equals entity.ID
+                              where entity.Name == EntityConstants.Branch && link.RecordID == branchId && link.AttachmentTypeID == attachmentTypeID_Product.ID
+                              select new
+                              {
+                                  ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
+                              };
+
+            var thumbnail = from attachment in _context.Attachments
+                            join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                            join entity in _context.Entity on link.EntityID equals entity.ID
+                            where entity.Name == EntityConstants.Branch && link.RecordID == branchId && link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
+                            orderby attachment.CreateDate descending
+                            select new
+                            {
+                                ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
+                            };
+
+            return await _context.Outlets.Where(o => o.ID == branchId && o.IsActive == true).Include(o=> o.Address).Select(o => new BranchDetailResult()
            {
                ID = o.ID,
                Name = o.Name,
@@ -231,7 +304,10 @@ namespace EpicMarket.Services
                AddressID = o.AddressID,
                Latitude=o.Address.Latitude,
                Longitude=o.Address.Longitude,
-           }).FirstOrDefaultAsync();
+               Status = _context.StatusOptionSets.FirstOrDefault(s => s.Id == o.StatusId).Status,
+               Photos = attachments.Select(a => a.ImagePath).ToList(),
+               Thumbnail = thumbnail.Select(a => a.ImagePath).FirstOrDefault(),
+            }).FirstOrDefaultAsync();
         }
 
         public async Task<int> VerifyBranchs (VerifyDto verifyBranchDto, string UserName, int AdminPersonID, string PageSource)
@@ -260,6 +336,21 @@ namespace EpicMarket.Services
 			await unitOfWork.Complete(); ;
             return taskToSave.ID;
                
+        }
+
+        public async Task DeleteBranch(int branchId, string UserName)
+        {
+            var outlet = await _context.Outlets.FindAsync(branchId);
+            if (outlet != null)
+            {
+                outlet.IsActive = false;
+                _context.Outlets.Update(outlet);
+                await unitOfWork.Complete();
+            }
+            else
+            {
+                throw new Exception("Branch Not Found");
+            }
         }
     }
 }
