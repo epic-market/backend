@@ -121,7 +121,7 @@ namespace EpicMarket.Services
 						var UniqueGuid = Guid.NewGuid();
 						User.UniqueGuid = null;
 						dbContext.Users.Update(User);
-						return "Succesfully";
+						return "Successfull";
 					}
 				}
 					
