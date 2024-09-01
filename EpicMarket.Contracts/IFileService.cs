@@ -18,5 +18,8 @@ namespace EpicMarket.Contracts
 
 		Task<bool> DeleteFileAsync(string key);
 
-	}
+		Task<bool> DeleteImage(ListOfImages keys, string UserName);
+
+
+    }
 }

@@ -174,6 +174,7 @@ namespace EpicMarket.Business.API.Controllers
 			return Ok(response);
 		}
 
+
         [HttpGet]
         [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
         public async Task<ActionResult<OperationResult<GetDataResult<List<ProductResult>>>>> GetAllProducts([FromQuery] ProductParams productResult)
@@ -201,6 +202,8 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
+
+
         [HttpPost("verify")]
         [Authorize(Roles = ROLES.BUSINESS_OWNER)]
         public async Task<ActionResult<OperationResult<int>>> VerifyCatalog(VerifyDto verifyBranchDto)
@@ -214,19 +217,6 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
-
-		[HttpDelete("images")]
-		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
-		public async Task<ActionResult<OperationResult<bool>>> DeleteImage(ListOfImages Keys)
-		{
-			var response = new OperationResult<bool>();
-			this.logger.LogInformation("Products Controller -> deleteImage()-> params {0}", JsonConvert.SerializeObject(new { Params = Keys }));
-			var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-			var status = await productService.deleteImage(Keys, UserName);
-			response.Data = status;
-			this.logger.LogInformation("Products Controller -> deleteImage()-> return {0}", status);
-			return Ok(response);
-		}
 
 
 		[HttpDelete("{id}")]

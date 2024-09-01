@@ -4,8 +4,13 @@ using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
+using EpicMarket.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using System.Security.Claims;
 
 namespace EpicMarket.Business.API.Controllers
 {
@@ -14,12 +19,16 @@ namespace EpicMarket.Business.API.Controllers
 	{
 
 		private readonly IFileService fileService;
-		private readonly IApplicationConfigurationService applicationConfigurationService;
+        private readonly ApplicationDbContext dbContext;
+        private readonly IUnitOfWork unitOfWork;
+        private readonly IApplicationConfigurationService applicationConfigurationService;
 
-		public FilesController(IFileService fileService, ApplicationDbContext dbContext , IApplicationConfigurationService applicationConfigurationService, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
+		public FilesController(IFileService fileService, ApplicationDbContext dbContext ,IUnitOfWork unitOfWork, IApplicationConfigurationService applicationConfigurationService, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
 		{
 			this.fileService = fileService;
-			this.applicationConfigurationService = applicationConfigurationService;
+            this.dbContext = dbContext;
+            this.unitOfWork = unitOfWork;
+            this.applicationConfigurationService = applicationConfigurationService;
 		}
 
 		[HttpPost]
@@ -53,6 +62,20 @@ namespace EpicMarket.Business.API.Controllers
 		}
 
 
+        [HttpDelete("images")]
+        [Authorize(Roles = ROLES.BUSINESS_OWNER)]
+        public async Task<ActionResult<OperationResult<bool>>> DeleteImage(ListOfImages Keys)
+        {
+            var response = new OperationResult<bool>();
+            var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
+            var status = await this.fileService.DeleteImage(Keys, UserName);
+            response.Data = status;
+            return Ok(response);
+        }
 
-	}
+
+
+
+
+    }
 }

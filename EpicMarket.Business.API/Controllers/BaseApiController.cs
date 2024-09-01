@@ -198,8 +198,18 @@ namespace EpicMarket.Business.API.Controllers
 			{
 				path = applicationConfigurationService.GetApplicationConfigurationValue(FilePathConstants.THUMBNAILPATH);
 			}
+            else if (ApplicationConfigurationConstants.BranchesPhotos.Equals(entityNameOrAppConfig))
+            {
+                path = applicationConfigurationService.GetApplicationConfigurationValue(FilePathConstants.BranchesPhotos);
+            }
+            else if (ApplicationConfigurationConstants.BranchThumbnail.Equals(entityNameOrAppConfig))
+            {
+                path = applicationConfigurationService.GetApplicationConfigurationValue(FilePathConstants.BranchThumbnail);
+            }
 
-			return path;
+
+
+            return path;
 		}
 
 

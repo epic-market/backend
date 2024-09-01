@@ -32,7 +32,7 @@ namespace EpicMarket.Services
             }
             else 
             {
-                _context.Addresses.Add(addressModel);
+               await _context.Addresses.AddAsync(addressModel);
             }
 
             await unitOfWork.Complete();
