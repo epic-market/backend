@@ -46,4 +46,34 @@ namespace EpicMarket.Entities
         {
         public int BusinessId { get; set; }
     }
+
+    public class BusinessDetailResult
+    {
+        public int ID { get; set; }
+
+        public string Name { get; set; }
+
+        public string Description { get; set; }
+
+        public long ContactNumber { get; set; }
+
+        public string ContactEmail { get; set; }
+
+        public string Address { get; set; }
+
+        public string City { get; set; }
+
+        public string State { get; set; }
+
+        public int Pincode { get; set; }
+        public int AddressID { get; set; }
+        public double? Latitude { get; set; }
+
+        public double? Longitude { get; set; }
+        public string Status { get; set; }
+
+        public string Thumbnail { get; set; }
+        public List<string> Proofs { get; set; }
+    }
+
 }

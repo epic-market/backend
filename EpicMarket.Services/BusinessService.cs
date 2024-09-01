@@ -83,5 +83,53 @@ namespace EpicMarket.Services
 
             return businessModel.ID;
         }
+
+        public async Task<BusinessDetailResult> GetBusinessByID(int businessId)
+        {
+
+            var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.LOGO);
+            var attachmentTypeID_Product = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.PROOF);
+
+
+
+            var attachments = from attachment in _context.Attachments
+                              join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                              join entity in _context.Entity on link.EntityID equals entity.ID
+                              where entity.Name == EntityConstants.Branch && link.RecordID == businessId && link.AttachmentTypeID == attachmentTypeID_Product.ID
+                              select new
+                              {
+                                  ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
+                              };
+
+            var thumbnail = from attachment in _context.Attachments
+                            join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                            join entity in _context.Entity on link.EntityID equals entity.ID
+                            where entity.Name == EntityConstants.Branch && link.RecordID == businessId && link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
+                            orderby attachment.CreateDate descending
+                            select new
+                            {
+                                ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
+                            };
+
+            return await _context.Businesses.Where(o => o.ID == businessId && o.IsActive == true).Include(o => o.Address).Select(o => new BusinessDetailResult()
+            {
+                ID = o.ID,
+                Name = o.Name,
+                Description = o.Description,
+                ContactEmail = o.ContactEmail,
+                ContactNumber = o.ContactNumber,
+                Address = o.Address.Address1,
+                City = o.Address.City,
+                Pincode = o.Address.Pincode,
+                State = o.Address.State,
+                AddressID = o.AddressID,
+                Latitude = o.Address.Latitude,
+                Longitude = o.Address.Longitude,
+                Status = _context.StatusOptionSets.FirstOrDefault(s => s.Id == o.StatusId).Status,
+                Proofs = attachments.Select(a => a.ImagePath).ToList(),
+                Thumbnail = thumbnail.Select(a => a.ImagePath).FirstOrDefault(),
+            }).FirstOrDefaultAsync();
+        }
+
     }
 }

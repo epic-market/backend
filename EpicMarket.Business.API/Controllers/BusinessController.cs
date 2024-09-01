@@ -113,5 +113,21 @@ namespace EpicMarket.Business.API.Controllers
 			return Ok(response);
         }
 
+        [HttpGet("{businessId}")]
+        public async Task<ActionResult<OperationResult<BusinessDetailResult>>> GetBusinessByID(int businessId)
+        {
+            var response = new OperationResult<BusinessDetailResult>();
+
+            this.logger.LogInformation("Business Controller -> GetBusinessByID()-> params {0}", JsonConvert.SerializeObject(new { Params = new { businessId = businessId } }));
+
+            var results = await businessService.GetBusinessByID(businessId);
+
+            this.logger.LogInformation("Business Controller -> GetBusinessByID()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
+
+            response.Data = results;
+
+            return Ok(response);
+        }
+
     }
 }
