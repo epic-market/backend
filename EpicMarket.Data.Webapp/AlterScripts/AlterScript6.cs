@@ -37,7 +37,29 @@ namespace EpicMarket.Data.Webapp.AlterScripts
 				dbContext.Event.Add(branchPhotos);
 				dbContext.SaveChanges();
 			}
+            if (!dbContext.ApplicationConfigurations.Any(cm => cm.Name == "TaskPath"))
+            {
+                var applicationConfiguration = new ApplicationConfiguration
+                {
+                    Name = "TaskPath",
+                    Value = "TaskPath",
+                };
 
+                dbContext.ApplicationConfigurations.Add(applicationConfiguration);
+                dbContext.SaveChanges();
+            }
+
+            if (!dbContext.AttachmentTypes.Any(cm => cm.Name == "Task"))
+            {
+                var personType = new AttachmentType
+                {
+                    Name = "Task",
+                    Description = "Task",
+                };
+
+                dbContext.AttachmentTypes.Add(personType);
+                dbContext.SaveChanges();
+            }
 
 
             Console.WriteLine("Completed Executing " + this.GetType().Name);
