@@ -54,6 +54,7 @@ namespace EpicMarket.Entities.CustomModels
         public const string branches = "branches";
         public const string BranchesPhotos = "BranchesPhotos";
         public const string BranchThumbnail = "BranchThumbnail";
+        public const string TASKPATH = "TaskPath";
     }
     public static class FilePathConstants
     {
@@ -66,6 +67,8 @@ namespace EpicMarket.Entities.CustomModels
         public const string branches = "branches";
         public const string BranchesPhotos = "BranchPhotos";
         public const string BranchThumbnail = "BranchThumbnail";
+
+        public const string TASKPATH = "TaskPath";
 
     }
     public static class EntityConstants
@@ -85,6 +88,7 @@ namespace EpicMarket.Entities.CustomModels
 		public const string THUMBNAIL = "Thumbnail";
         public const string BRANCH_PHOTOS = "BranchPhotos";
         public const string BRANCH_THUMBNAIL = "BranchThumbnail";
+        public const string TASK = "Task";
     }
     public static class DocumentTypeConstants
     {
@@ -101,6 +105,7 @@ namespace EpicMarket.Entities.CustomModels
         public const string AddOrder = "AddOrder";
         public const string EditOrder = "EditOrder"; 
         public const string AddBusiness = "AddBusiness";
+        public const string EditBusiness = "EditBusiness";
     }
     public static class ContactMethodConstants
     {
@@ -118,11 +123,15 @@ namespace EpicMarket.Entities.CustomModels
     public static class MessageDataConstants
     {
         public const string AddBusiness = "Business added sucessfully";
+        public const string EditBusiness = "Business updated sucessfully";
         public const string AddBranch = "Branch added sucessfully";
         public const string EditBranch = "Branch updated sucessfully";
         public const string AddCatelog = "Catelog added sucessfully ";
         public const string EditCatelog = "Catelog  updated sucessfully";
     }
-
+    public static class TaskStatusTypesConstants
+    {
+        public const string NEW = "New";
+    }
 }
 
