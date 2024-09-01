@@ -40,7 +40,7 @@ namespace EpicMarket.Entities
         public string ProofNumber { get; set; }
 
         public IFormFile LogoFile { get; set; }
-        public IFormFile ProofFile { get; set; }
+        public IFormFile[] ProofFile { get; set; }
     }
     public class BusinessDTO_Result 
         {

@@ -92,6 +92,7 @@ namespace EpicMarket.Entities.CustomModels
         public const string AddOrder = "AddOrder";
         public const string EditOrder = "EditOrder"; 
         public const string AddBusiness = "AddBusiness";
+        public const string EditBusiness = "EditBusiness";
     }
     public static class ContactMethodConstants
     {
@@ -109,6 +110,7 @@ namespace EpicMarket.Entities.CustomModels
     public static class MessageDataConstants
     {
         public const string AddBusiness = "Business added sucessfully";
+        public const string EditBusiness = "Business updated sucessfully";
         public const string AddBranch = "Branch added sucessfully";
         public const string EditBranch = "Branch updated sucessfully";
         public const string AddCatelog = "Catelog added sucessfully ";
