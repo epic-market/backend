@@ -51,6 +51,28 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
+        [HttpGet("DropDown")]
+        [Authorize(Roles = ROLES.BUSINESS_OWNER)]
+        public async Task<ActionResult<List<DropDownOptions>>> GetAllOutletsForDropDown()
+        {
+            var response = new OperationResult<List<DropDownOptions>> ();
+
+            var UserID = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+            this.logger.LogInformation("Branch Controller -> GetAllBranches()-> params {0}", JsonConvert.SerializeObject(new { Params = UserID }));
+
+
+
+            var results = await branchService.GetAllOutletsForDropDown(UserID, this.BusinessId);
+
+            this.logger.LogInformation("Branch Controller -> GetAllBranches()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
+
+            response.Data = results;
+
+            return Ok(response);
+        }
+
+
         [HttpGet("{branchId}")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<BranchDetailResult>>> GetBranchByID(int branchId)

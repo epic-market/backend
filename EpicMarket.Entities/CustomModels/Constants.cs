@@ -7,7 +7,16 @@ using System.Threading.Tasks;
 namespace EpicMarket.Entities.CustomModels
 {
 
-	public static class Constants
+
+
+
+    public static class OrderType
+    {
+        public const string ONLINE = "Online";
+        public const string OFFLINE = "Offline";
+    }
+
+    public static class Constants
     {
 
         public const string ADMIN_USERID = "admin@epicmarket.in";

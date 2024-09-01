@@ -8,28 +8,40 @@ namespace EpicMarket.Entities
 {
     public class OrdersDto
     {
-
         public int OutletId { get; set; }
+        public string PaymentMode { get; set; }
+        public int StatusId { get; set; }
+        public string CustomerName { get; set; }
+        public string CustomerEmail { get; set; }
+        public string CustomerPhone { get; set; }
+        public  List<OrderDetailsDto> orderDetailsDtos { get; set; } // this List<OrderDetailsDto> convert to json to string
+    }
+
+
+    public class OrdersDetailsResult
+    {
+        public int OutletId { get; set; }
+        public string OutletName { get; set; }
         public DateTime OrderDate { get; set; } = DateTime.Now;
 
         public string PaymentMode { get; set; }
 
-        public int OrderedModeId { get; set; }
-        
-        public int StatusId { get; set; }
-        
+        public string OrderMode { get; set; }
+
+        public string Status { get; set; }
+
         public double TotalPrice { get; set; }
-        
+
         public int TotalItems { get; set; }
 
         public string CustomerName { get; set; }
-
         public string CustomerEmail { get; set; }
-
         public string CustomerPhone { get; set; }
-        public string OrderDetails { get; set; }
-        public  List<OrderDetailsDto> orderDetailsDtos { get; set; } // this List<OrderDetailsDto> convert to json to string
+        public List<OrderDetails> OrderDetails { get; set; } 
     }
+
+
+
 
     public class OrderParams
     {

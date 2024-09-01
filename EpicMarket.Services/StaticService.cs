@@ -56,6 +56,16 @@ namespace EpicMarket.Services
         {
             return _context.SupportQuerys.Where(c => c.TypeofPersonid == personTypeId).Select(c => new DropDownOptions { Text = c.Query, Value = c.ID }).ToListAsync();
         }
+
+        public async Task<List<DropDownOptions>> GetOrderStatusOptions()
+        {
+            return await _context.OrderStatusOptions.Select(c => new DropDownOptions()
+            {
+                Text = c.OrderStatus,
+                Value = c.Id
+            }).ToListAsync();
+        }
+
         public Task<List<HelpItemDTO>> GetHelpItemsforBypage(string pagename)
         {
             return _context.HelpItems

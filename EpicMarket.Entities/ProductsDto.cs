@@ -58,11 +58,11 @@ namespace EpicMarket.Entities
 
         public string Description { get; set; }
 
-        public string ImageURL { get; set; }
-
         public double Rate { get; set; }
 
         public bool Selected { get; set; }
+
+        public string Thumbnail { get; set; }
     }
 
     public class ProductParams
@@ -71,6 +71,15 @@ namespace EpicMarket.Entities
         public int pageSize { get; set; } = 10;
         public string sortColumn { get; set; } = string.Empty;
         public bool ascending { get; set; } = true;
+        public string searchTerm { get; set; } = string.Empty;
+
+    }
+
+
+    public class ProductPOSParams
+    {
+        public int PageIndex { get; set; } = 1;
+        public int pageSize { get; set; } = 10;
         public string searchTerm { get; set; } = string.Empty;
 
     }

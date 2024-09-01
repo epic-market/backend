@@ -40,10 +40,6 @@ namespace EpicMarket.Entities
     }
 
 
-
-
-
-
     public class BranchResult
     {
         public int ID { get; set; }
