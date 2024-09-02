@@ -55,7 +55,7 @@ namespace EpicMarket.Services
      
         }
 
-        public int SaveComments(CommentDTO commentDTO)
+        public int SaveComments(CommentDTO commentDTO, string LoggedInUserName)
         {
             var EntityForTasks =  _context.Entity.FirstOrDefault(m => m.Name == EntityConstants.Tasks);
             Comment commentSave;
@@ -63,9 +63,9 @@ namespace EpicMarket.Services
             {
                 CommentText = commentDTO.CommentText,
                 Status = commentDTO.Status,
-                RecordID = commentDTO.RecordID,
+                RecordID = commentDTO.TaskId,
                 CreateDate = DateTime.Now,
-                CreateBy = commentDTO.CreateBy,
+                CreateBy = LoggedInUserName,
                 EntityID= EntityForTasks.ID,
             };
             _context.Comments.Add(commentSave);
@@ -79,11 +79,9 @@ namespace EpicMarket.Services
                                         .Where(c => c.RecordID == taskId)
                                         .Select(c => new CommentDTO
                                         {
-                                            RecordID = c.RecordID,
+                                            TaskId = c.RecordID,
                                             CommentText = c.CommentText,
                                             Status = c.Status,
-                                            CreateBy = c.CreateBy,
-                                            CreateDate = c.CreateDate
                                         })
                                         .ToListAsync();
 
@@ -99,7 +97,7 @@ namespace EpicMarket.Services
             var uploadFilePaths = from attachment in _context.Attachments
                             join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
                             join entity in _context.Entity on link.EntityID equals entity.ID
-                            where entity.Name == EntityConstants.Branch && link.RecordID == taskId && link.AttachmentTypeID == attachmentTypeID.ID
+                            where entity.Name == EntityConstants.Tasks && link.RecordID == taskId && link.AttachmentTypeID == attachmentTypeID.ID
                             orderby attachment.CreateDate descending
                             select new
                             {
@@ -112,6 +110,7 @@ namespace EpicMarket.Services
                 Name = c.Name,
                 Description = c.Description,
                 TaskTypeID = c.TaskTypeID,
+                TaskType=c.TaskTypes.Name,
                 TaskStatus = c.TaskStatusType.Status,
                 TaskData = c.TaskData,
                 CreateDate = c.CreateDate,
