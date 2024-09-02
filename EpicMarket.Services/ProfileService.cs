@@ -42,5 +42,22 @@ namespace EpicMarket.Services
 
 			return accessControlList;
         }
+
+        public async Task<List<CustomerDetails>> GetCustomerDetails(string PhoneOrUserName)
+        {
+            var query = context.Users
+                     .Where(customer => customer.UserName.ToLower().Contains(PhoneOrUserName.ToLower()) ||
+                      customer.PhoneNumber.ToString().ToLower().Contains(PhoneOrUserName.ToLower()))
+                      .Select(c => new CustomerDetails()
+                      {
+                          FirstName = c.FirstName,
+                          PhoneNumber = c.PhoneNumber,
+                          Username = c.UserName,
+                      });
+
+            var result = await query.ToListAsync();
+
+            return result;
+        }
     }
 }

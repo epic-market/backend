@@ -190,6 +190,8 @@ namespace EpicMarket.Business.API.Controllers
             }
             return response;
         }
+
+
         [HttpGet("CheckResetPasswordLink")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<CheckResetLinkResult>>> CheckResetPasswordLink(string queryParam)
@@ -203,6 +205,9 @@ namespace EpicMarket.Business.API.Controllers
 
             return Ok(response);
         }
+
+
+
         [HttpPost("setNewPassword")]
 		[AllowAnonymous]
 		public async Task<ActionResult<OperationResult<string>>> setNewPassword(SetNewPasswordParams setNewPasswordParams)
@@ -216,16 +221,36 @@ namespace EpicMarket.Business.API.Controllers
             return response;
         }
 
+
+
+        [HttpPost("PersonDetails/{PhoneOrUserName}")]
+        [AllowAnonymous]
+        public async Task<ActionResult<OperationResult<List<CustomerDetails>>>> getPersonDetails(string PhoneOrUserName)
+        {
+
+            var response = new OperationResult<List<CustomerDetails>>();
+
+            response.Data =  await this.profileService.GetCustomerDetails(PhoneOrUserName);
+
+            return response;
+        }
+
+
+
         private async Task<bool> UserExists(string username)
         {
             return await _userManager.Users.AnyAsync(x => x.UserName == username.ToLower() && x.IsActive == true);
         }
+
+
 
 		private async Task<AppUser> GetUser(string username)
 		{
 			return await _userManager.Users
              .SingleOrDefaultAsync(x => x.UserName == username.ToLower() && x.IsActive == true);
 		}
+
+
 
 	}
 }
