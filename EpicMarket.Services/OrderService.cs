@@ -25,9 +25,9 @@ namespace EpicMarket.Services
         private readonly IAddressService addressService;
         private readonly ICommunicationService communicationService;
         private readonly IEventLogService eventLogService;
-		private readonly IUnitOfWork unitOfWork;
+        private readonly IUnitOfWork unitOfWork;
 
-		public OrderService(ApplicationDbContext context, IMapper mapper, IApplicationConfigurationService applicationConfiguration, ICommunicationService communicationService, UserManager<AppUser> userManager, IAddressService addressService, IEventLogService eventLogService,IUnitOfWork unitOfWork)
+        public OrderService(ApplicationDbContext context, IMapper mapper, IApplicationConfigurationService applicationConfiguration, ICommunicationService communicationService, UserManager<AppUser> userManager, IAddressService addressService, IEventLogService eventLogService, IUnitOfWork unitOfWork)
         {
             _context = context;
             this.mapper = mapper;
@@ -36,22 +36,40 @@ namespace EpicMarket.Services
             this.addressService = addressService;
             this.communicationService = communicationService;
             this.eventLogService = eventLogService;
-			this.unitOfWork = unitOfWork;
-		}
+            this.unitOfWork = unitOfWork;
+        }
 
 
 
-        public async Task<int> CreateOrder(OrdersDto orderdto,string UserName, string PageSource)
-        {   
+        public async Task<int> CreateOrder(OrdersDto orderdto, string UserName, string PageSource)
+        {
             var User = new AppUser();
             var totalItems = 0;
             double totalPrice = 0.0;
-            User.FirstName = orderdto.CustomerName;
-            User.UserName = orderdto.CustomerEmail;
-            User.PhoneNumber = orderdto.CustomerPhone;
-            _context.Users.Add(User);
-			await unitOfWork.Complete();
+
+            var existingUser = await _context.Users
+                        .FirstOrDefaultAsync(u => u.UserName == orderdto.CustomerEmail || u.PhoneNumber == orderdto.CustomerPhone);
+
+            var OrderTypeID = await _context.OrderTypesOptions
+                      .FirstOrDefaultAsync(u => u.Ordertype == OrderType.OFFLINE);
+
+            if (existingUser == null)
+            {
+                
+                User.FirstName = orderdto.CustomerName;
+                User.UserName = orderdto.CustomerEmail;
+                User.Email = orderdto.CustomerEmail;
+                User.PhoneNumber = orderdto.CustomerPhone;
+                await _context.Users.AddAsync(User);
+                await unitOfWork.Complete();
+            }
+            else{
+                User.Id = existingUser.Id;
+            }
+
 			var listoforderDetails = new List<OrderDetail>();
+
+
             foreach(var orderDetail in orderdto.orderDetailsDtos)
             {
                 var catelog = _context.Catalogs.FirstOrDefault(c => c.ID == orderDetail.CatalogID);
@@ -64,22 +82,29 @@ namespace EpicMarket.Services
                 totalItems += orderDetail.Quantity;
                 totalPrice += (catelog.Rate * orderDetail.Quantity);
             }
+
+
             var newOrder = new Order()
             {
                 PersonID = User.Id,
 				OutletID = orderdto.OutletId,
-                OrderTypeId = orderdto.OrderedModeId,
+                OrderTypeId = OrderTypeID.Id,
                 OrderAt = DateTime.Now,
                 StatusId = orderdto.StatusId,
                 PaymentMode = orderdto.PaymentMode,
                 TotalItems = totalItems,
                 TotalPrice = totalPrice,
             };
-            _context.Orders.Add(newOrder);
+
+            await _context.Orders.AddAsync(newOrder);
 			await unitOfWork.Complete();
+
+
 			listoforderDetails.ForEach(od => od.OrderID = newOrder.ID);
-            _context.OrderDetails.AddRange(listoforderDetails);
+            await _context.OrderDetails.AddRangeAsync(listoforderDetails);
 			await unitOfWork.Complete();
+
+
 			var saved = _context.Orders.FirstOrDefault(o => o.ID == newOrder.ID);
             string saveJson = JsonConvert.SerializeObject(saved, new JsonSerializerSettings
             {
@@ -90,46 +115,56 @@ namespace EpicMarket.Services
             return newOrder.ID;
         }
 
-        public async Task<List<DropDownOptions>> GetOrderStatusOptions()
+    
+        public async Task<OrdersDetailsResult> GetSingleOrder(int OrderId)
         {
-            return await _context.OrderStatusOptions.Select(c => new DropDownOptions()
-            {
-                Text = c.OrderStatus,
-                Value = c.Id
-            }).ToListAsync();
-        }
 
-        public async Task<OrdersDto> GetSingleOrder(int OrderId)
-        {
-			List<OrderDetail> OrderDetails  = await _context.OrderDetails.Where(c => c.OrderID == OrderId ).ToListAsync();
+            var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
+
+            List<OrderDetails> OrderDetails = await _context.OrderDetails.Include(c => c.Catalog).Where(c => c.OrderID == OrderId)
+                .Select(c => new OrderDetails()
+                {
+                    CatalogID = c.CatalogID,
+                    ProductName = c.Catalog.Name,
+                    Quantity = c.Quantity,
+                    Rate = c.Rate,
+                    TotalPrice = c.TotalPrice,
+                    Thumbnail = ((from attachment in _context.Attachments
+                                  join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                                  join entity in _context.Entity on link.EntityID equals entity.ID
+                                  where entity.Name == EntityConstants.Catelog && link.RecordID == c.CatalogID && link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
+                                  select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}").FirstOrDefault())
+                }).ToListAsync();
+
             string OrderDetailsString = JsonConvert.SerializeObject(OrderDetails);
-
-
-            var Order = await _context.Orders.Where(c => c.ID == OrderId).Include(c => c.Person).Include(c => c.Address).Select(
-                c => new OrdersDto()
+            var Order = await _context.Orders.Where(c => c.ID == OrderId).Include(c => c.Person).Include(c=>c.OrderTypesOptions).Include(c=>c.Outlet).Include(c=>c.OrderStatusOptions).Include(c => c.Address).Select(
+                c => new OrdersDetailsResult()
                 {
                     CustomerName = c.Person.FirstName + " " + c.Person.LastName,
                     CustomerEmail = c.Person.Email,
                     CustomerPhone = c.Person.PhoneNumber,
                     OrderDate = c.OrderAt,
                     PaymentMode = c.PaymentMode,
-                    OrderedModeId = c.OrderTypeId,
-                    StatusId = c.StatusId,
-                    OrderDetails = OrderDetailsString,
+                    OrderMode = c.OrderTypesOptions.Ordertype,
+                    Status = c.OrderStatusOptions.OrderStatus,
+                    TotalItems = c.TotalItems,
+                    TotalPrice = c.TotalPrice,
+                    OrderDetails = OrderDetails,
+                    OutletName = c.Outlet.Name,
+                    OutletId = c.OutletID,
                 }).FirstOrDefaultAsync();
 
             return Order;
 
         }
 
-        public async Task<int> UpdateStatus(int OrderId, string OrderStatus)
+        public async Task<int> UpdateStatus(int OrderId, int StatusId)
         {
             var Order = _context.Orders.Find(OrderId);
-            //Order.Status = OrderStatus;
+            Order.StatusId = StatusId;
             _context.Orders.Update(Order);
 			await unitOfWork.Complete();
-			await this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = Order.ID, Data = OrderStatus, Description = null, EventName = EventConstants.EditOrder, EntityName = EntityConstants.Order });
-
+			await this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = Order.ID, Data = StatusId.ToString(), Description = null, EventName = EventConstants.EditOrder, EntityName = EntityConstants.Order });
             return Order.ID;
 
         }

@@ -20,6 +20,9 @@ namespace EpicMarket.Contracts
         Task<ProductsDto> GetProductDetails(int productId);
 		Task<int> VerifyCatalog(VerifyDto verifyBranchDto, string UserName, int AdminPersonID, string PageSource);
 
-		Task deleteCatelog(int id,string UserName);
+        Task<GetDataResult<List<ProductResult>>> GetAllProductsForPOS(ProductPOSParams productParams, int outletId);
+
+
+        Task deleteCatelog(int id,string UserName);
 	}
 }

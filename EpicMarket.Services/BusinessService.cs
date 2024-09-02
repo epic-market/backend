@@ -22,19 +22,22 @@ namespace EpicMarket.Services
         private readonly IAddressService addressService;
         private readonly IEventLogService eventLogService;
         private readonly ICommunicationQueueService communicationQueueService;
-		private static readonly object _lock = new object();
+        private readonly IUnitOfWork unitOfWork;
+        private static readonly object _lock = new object();
 		public BusinessService(
                                 ApplicationDbContext context,
                                 IMapper mapper ,
                                 IAddressService addressService,
                                 IEventLogService eventLogService,
-                                ICommunicationQueueService communicationQueueService)
+                                ICommunicationQueueService communicationQueueService,
+                                IUnitOfWork unitOfWork)
         {
             _context = context;
             this.mapper = mapper;
             this.addressService = addressService;
             this.eventLogService = eventLogService;
             this.communicationQueueService = communicationQueueService;
+            this.unitOfWork = unitOfWork;
         }
         public async Task<int> RegisterBusiness(BusinessRegisterDto businessRegisterDto, string UserName , int userid, string PageSource)
         {
@@ -83,5 +86,101 @@ namespace EpicMarket.Services
 
             return businessModel.ID;
         }
+
+        public async Task<BusinessDetailResult> GetBusinessByID(int businessId)
+        {
+
+            var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.LOGO);
+            var attachmentTypeID_Product = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.PROOF);
+
+
+
+            var attachments = from attachment in _context.Attachments
+                              join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                              join entity in _context.Entity on link.EntityID equals entity.ID
+                              where entity.Name == EntityConstants.Branch && link.RecordID == businessId && link.AttachmentTypeID == attachmentTypeID_Product.ID
+                              select new
+                              {
+                                  ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
+                              };
+
+            var thumbnail = from attachment in _context.Attachments
+                            join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                            join entity in _context.Entity on link.EntityID equals entity.ID
+                            where entity.Name == EntityConstants.Branch && link.RecordID == businessId && link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
+                            orderby attachment.CreateDate descending
+                            select new
+                            {
+                                ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
+                            };
+
+            return await _context.Businesses.Where(o => o.ID == businessId && o.IsActive == true).Include(o => o.Address).Select(o => new BusinessDetailResult()
+            {
+                ID = o.ID,
+                Name = o.Name,
+                Description = o.Description,
+                ContactEmail = o.ContactEmail,
+                ContactNumber = o.ContactNumber,
+                Address = o.Address.Address1,
+                City = o.Address.City,
+                Pincode = o.Address.Pincode,
+                State = o.Address.State,
+                AddressID = o.AddressID,
+                Latitude = o.Address.Latitude,
+                Longitude = o.Address.Longitude,
+                Status = _context.StatusOptionSets.FirstOrDefault(s => s.Id == o.StatusId).Status,
+                Proofs = attachments.Select(a => a.ImagePath).ToList(),
+                Thumbnail = thumbnail.Select(a => a.ImagePath).FirstOrDefault(),
+            }).FirstOrDefaultAsync();
+        }
+        public async Task<int> UpdateBusiness(int id, BusinessRegisterDto businessRegisterDto, string UserName, string PageSource)
+        {
+            var addressModel = new AddressDto();
+            var events = "";
+            var mailevent = "";
+            addressModel.Address1 = businessRegisterDto.Address;
+            addressModel.City = businessRegisterDto.City;
+            addressModel.State = businessRegisterDto.State;
+            addressModel.Pincode = businessRegisterDto.PinCode;
+            addressModel.Latitude = businessRegisterDto.Latitude;
+            addressModel.Longitude = businessRegisterDto.Longitude;
+            addressModel.ID = _context.Businesses.Include(o => o.Address).AsNoTracking().FirstOrDefault(o => o.ID == id).AddressID;
+
+            int addressId = await addressService.AddAddress(addressModel);
+
+            var businessModel = _context.Businesses.Find(id);
+            businessModel.AddressID = addressId;
+            businessModel.Name = businessRegisterDto.BussinessName;
+            businessModel.Description = businessRegisterDto.Description;
+            businessModel.ContactEmail = businessRegisterDto.ContactEmail;
+            businessModel.ContactNumber = businessRegisterDto.ContactNumber;
+            businessModel.ID = (int)id;
+            businessModel.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == Business_Status.BUSINESS_UNVERIFIED).Id;
+            businessModel.ModifiedBy = UserName;
+            businessModel.ModifiedDate = DateTime.Now;
+            events = EventConstants.EditBusiness;
+            mailevent = MessageDataConstants.EditBusiness;
+            _context.Businesses.Update(businessModel);
+
+            await unitOfWork.Complete();
+            var savedOutletModel = _context.Businesses.FirstOrDefault(o => o.ID == businessModel.ID);
+            string outletModelJson = JsonConvert.SerializeObject(savedOutletModel, new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            });
+            await this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = businessModel.ID, Data = outletModelJson, Description = null, EventName = events, EntityName = EntityConstants.Business, Source = PageSource });
+            await this.communicationQueueService.InsertCommunicationQueue(
+                    new Entities.CommunicationQueueDTO()
+                    {
+                        MessageData = null,//TODO
+                        Subject = mailevent,
+                        NotificationRecipient = UserName,
+                        ContactMethod = ContactMethodConstants.EMAIL,
+                        CreateBy = UserName
+                    });
+            return businessModel.ID;
+        }
+
+
     }
 }

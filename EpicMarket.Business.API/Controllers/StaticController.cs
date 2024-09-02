@@ -196,5 +196,23 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
+
+        [HttpGet("GetOrderStatusOptions")]
+        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
+        public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetOrderStatusOptions()
+        {
+            var response = new OperationResult<List<DropDownOptions>>();
+
+            this.logger.LogInformation("Orders Controller -> GetOrderStatusOptions()");
+
+            var id = await staticService.GetOrderStatusOptions();
+
+            this.logger.LogInformation("Orders Controller -> GetOrderStatusOptions()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
+
+            response.Data = id;
+
+            return Ok(response);
+        }
+
     }
 }
