@@ -60,7 +60,32 @@ namespace EpicMarket.Data.Webapp.AlterScripts
                 dbContext.AttachmentTypes.Add(personType);
                 dbContext.SaveChanges();
             }
+            if (!dbContext.Pages.Any(cm => cm.Name == "HomePage"))
+            {
+                var pages = new Page
+                {
+                    Name = "HomePage",
+                    Description = "Home Page",
+                    ApplicationId=2
+                };
 
+                dbContext.Pages.Add(pages);
+                dbContext.SaveChanges();
+            }
+            if (!dbContext.HelpItems.Any(cm => cm.Name == "HomePage"))
+            {
+                var pages = new HelpItem
+                {
+                    Name = "HomePage Help",
+                    Description = "Home Page Help",
+                    Title ="Help Test",
+                    PageID=1,
+                    IsShownOnPage=true,
+                };
+
+                dbContext.HelpItems.Add(pages);
+                dbContext.SaveChanges();
+            }
 
             Console.WriteLine("Completed Executing " + this.GetType().Name);
 

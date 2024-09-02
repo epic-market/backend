@@ -13,7 +13,7 @@ namespace EpicMarket.Contracts
     {
         Task<long> SaveTask(TasksDTO tasksDTO, int AdminPersonID, string LoggedInUserName);
 
-		int SaveComments(CommentDTO commentDTO);
+		int SaveComments(CommentDTO commentDTO , string LoggedInUserName);
         Task<GetDataResult<List<CommentDTO>>> GetAllComments( int taskId); 
         Task<GetDataResult<List<TasksListDTO>>> GetSupportByPersonId( int personId);
         Task<TaskDeatilDTO> GettaskDetails(int taskId);

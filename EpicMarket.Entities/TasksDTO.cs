@@ -19,6 +19,11 @@ namespace EpicMarket.Entities
         public string TaskData { get; set; }
         public IFormFile[] UploadFiles { get; set; }
     }
+       public class AttachmentTASKDTO
+    {
+        public int TaskID { get; set; }
+        public IFormFile[] UploadFiles { get; set; }
+    }
 
     public class TaskDeatilDTO
     {
@@ -26,6 +31,7 @@ namespace EpicMarket.Entities
         public string Name { get; set; }
         public string Description { get; set; }
         public int? TaskTypeID { get; set; }
+        public string? TaskType { get; set; }
         public string TaskData { get; set; }
         public string TaskStatus { get; set; }
         public DateTime? CreateDate { get; set; }
@@ -46,12 +52,8 @@ namespace EpicMarket.Entities
     public class CommentDTO
     {
         public string CommentText { get; set; }
-
         public string Status { get; set; }
-
-        public int? RecordID { get; set; }
-        public DateTime? CreateDate { get; set; }
-        public string CreateBy { get; set; }
+        public int? TaskId { get; set; }
     }
     public class CommentListDTO
     {

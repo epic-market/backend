@@ -99,7 +99,7 @@ namespace EpicMarket.Business.API.Controllers
                     {
                         AttachmentTypeName = AttachmentTypeConstants.TASK,
                         AttachmentID = attachmentId,
-                        Entity = EntityConstants.Business,
+                        Entity = EntityConstants.Tasks,
                         RecordID = ((int)results)
                     });
                 }
@@ -125,13 +125,13 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
-        [HttpPost("Comment")]
+        [HttpPost("Comments")]
         [Authorize]
         public ActionResult<OperationResult<int>> AddTaskComment(CommentDTO commentDTO)
         {
             var response = new OperationResult<int>();
             this.logger.LogInformation("Support Controller -> AddTaskComment()-> params {0}", JsonConvert.SerializeObject(new { Params = commentDTO }));
-             response.Data = tasksService.SaveComments(commentDTO);
+             response.Data = tasksService.SaveComments(commentDTO,this.LoggedInUserName);
             this.logger.LogInformation("Support Controller -> AddTaskComment()-> return {0}", JsonConvert.SerializeObject(new { Results = response.Data }));
             return Ok(response);
         }
@@ -148,6 +148,41 @@ namespace EpicMarket.Business.API.Controllers
 
             var results = tasksService.AddSupportTask(supportDTO,this.AdminPersonID);
             this.logger.LogInformation("Support Controller -> AddSupportTask()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
+            return Ok(response);
+        }
+
+        [HttpPost("attachment")]
+        [Authorize]
+        public async Task<ActionResult<OperationResult<int>>> Attachment([FromForm] AttachmentTASKDTO tasksDTO)
+        {
+            var response = new OperationResult<int>();
+
+            this.logger.LogInformation("Support Controller -> Attachment()-> params {0}", JsonConvert.SerializeObject(new { Params = tasksDTO }));
+            if (tasksDTO.UploadFiles.Length > 0 && tasksDTO.TaskID>0)
+            {
+                foreach (var proof in tasksDTO.UploadFiles)
+                {
+                    var filinsertOutput = await this.SaveFileGlobalAsync(proof, FilePathConstants.TASKPATH, this.fileStoreService, this.applicationConfigurationService, tasksDTO.TaskID);
+                    var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
+                    {
+
+                        Name = AttachmentTypeConstants.TASK,
+                        Comment = null,
+                        DocumentType = DocumentTypeConstants.FILE,
+                        DocumentFileType = proof.ContentType,
+                        DocumentFolderPath = filinsertOutput.FullPathLocation,
+                        DocumentFile = filinsertOutput.FileName,
+                    });
+                    await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
+                    {
+                        AttachmentTypeName = AttachmentTypeConstants.TASK,
+                        AttachmentID = attachmentId,
+                        Entity = EntityConstants.Tasks,
+                        RecordID = tasksDTO.TaskID
+                    });
+                }
+            }
+            this.logger.LogInformation("Support Controller -> Attachment()-> return {0}");
             return Ok(response);
         }
     }
