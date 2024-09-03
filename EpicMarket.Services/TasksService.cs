@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,51 +27,49 @@ namespace EpicMarket.Services
             this.mapper = mapper;
 			this.unitOfWork = unitOfWork;
 		}
-        public async Task<long> SaveTask(TasksDTO tasksDTO)
+        public async Task<long> SaveTask(TasksDTO tasksDTO, int AdminPersonID, string LoggedInUserName)
         {
-            var currentTask = _context.Tasks.Where(row => row.ID == tasksDTO.ID).FirstOrDefault();
-            var newTaskStatus = _context.TaskStatusTypes.Where(row => row.Status == "New").FirstOrDefault();
-            var updateTaskStatus = _context.TaskStatusTypes.Where(row => row.Status == tasksDTO.TaskStatus).FirstOrDefault();
+            var taskStatusTypes = _context.TaskStatusTypes.Where(row => row.Status == TaskStatusTypesConstants.NEW).FirstOrDefault();
             var GetTaskType =  _context.TaskTypes.Where(row => row.ID == tasksDTO.TaskTypeID).FirstOrDefault();
             var taskToSave = new Tasks
             {
                 Name = tasksDTO.Name,
                 Description = tasksDTO.Description,
                 TaskTypeID = tasksDTO.TaskTypeID,
-                ParentID = tasksDTO.ParentID,
-                TaskStatusID = newTaskStatus.Id,
-                TaskPriorityID = tasksDTO.TaskPriorityID,
-                PrimaryAssignedToPersonID = tasksDTO.PrimaryAssignedToPersonID,
+                TaskStatusID = taskStatusTypes.Id,
+                TaskPriorityID = 1,//TODO hardcoded
+                PrimaryAssignedToPersonID = AdminPersonID,
                 DateAssigned = DateTime.Now,
                 DateDue = DateTime.Now.AddHours((double)GetTaskType.DefaultDueDateHours),
-                DateStarted = tasksDTO.DateStarted,
-                DateCompleted = tasksDTO.DateCompleted,
+                DateStarted = null,
+                DateCompleted = null,
                 SubmittedByPersonID = tasksDTO.SubmittedByPersonID,
                 TaskData = tasksDTO.TaskData,
-                ReceivedDate = tasksDTO.ReceivedDate,
+                ReceivedDate = DateTime.Now,
                 CreateDate = DateTime.Now,
-                CreateBy = tasksDTO.CreateBy
+                CreateBy = LoggedInUserName
             };
             await _context.Tasks.AddAsync(taskToSave);
 			await unitOfWork.Complete();
 			return (long)taskToSave.ID;
-           
      
         }
 
-        public async Task<int> SaveComments(CommentDTO commentDTO)
+        public int SaveComments(CommentDTO commentDTO, string LoggedInUserName)
         {
+            var EntityForTasks =  _context.Entity.FirstOrDefault(m => m.Name == EntityConstants.Tasks);
             Comment commentSave;
             commentSave = new Comment
             {
                 CommentText = commentDTO.CommentText,
                 Status = commentDTO.Status,
-                RecordID = commentDTO.RecordID,
+                RecordID = commentDTO.TaskId,
                 CreateDate = DateTime.Now,
-                CreateBy = commentDTO.CreateBy
+                CreateBy = LoggedInUserName,
+                EntityID= EntityForTasks.ID,
             };
             _context.Comments.Add(commentSave);
-			await unitOfWork.Complete();
+			unitOfWork.Complete();
 			return commentSave.ID;
         }
 
@@ -80,11 +79,9 @@ namespace EpicMarket.Services
                                         .Where(c => c.RecordID == taskId)
                                         .Select(c => new CommentDTO
                                         {
-                                            RecordID = c.RecordID,
+                                            TaskId = c.RecordID,
                                             CommentText = c.CommentText,
                                             Status = c.Status,
-                                            CreateBy = c.CreateBy,
-                                            CreateDate = c.CreateDate
                                         })
                                         .ToListAsync();
 
@@ -93,52 +90,59 @@ namespace EpicMarket.Services
                 items = comments,
             };
         }
-        public async Task<TasksDTO> GettaskDetails(int taskId)
+        public async Task<TaskDeatilDTO> GettaskDetails(int taskId) //get attachments if any
         {
-            return await _context.Tasks.Where(c => c.ID == taskId).Select(c => new TasksDTO
+            var attachmentTypeID= await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.TASK);
+
+            var uploadFilePaths = from attachment in _context.Attachments
+                            join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                            join entity in _context.Entity on link.EntityID equals entity.ID
+                            where entity.Name == EntityConstants.Tasks && link.RecordID == taskId && link.AttachmentTypeID == attachmentTypeID.ID
+                            orderby attachment.CreateDate descending
+                            select new
+                            {
+                                ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
+                            };
+
+            return await _context.Tasks.Where(c => c.ID == taskId).Select(c => new TaskDeatilDTO
             {
                 ID = c.ID,
                 Name = c.Name,
                 Description = c.Description,
                 TaskTypeID = c.TaskTypeID,
+                TaskType=c.TaskTypes.Name,
                 TaskStatus = c.TaskStatusType.Status,
-                TaskPriorityID = c.TaskPriorityID,
-                DateStarted = c.DateStarted,
-                DateCompleted = c.DateCompleted,
                 TaskData = c.TaskData,
-                ReceivedDate = c.ReceivedDate,
-                ModifiedDate = c.ModifiedDate,
-                ModifiedBy = c.ModifiedBy,
                 CreateDate = c.CreateDate,
-                CreateBy = c.CreateBy
-            }
-
-            ).FirstOrDefaultAsync();
+                UploadFiles = uploadFilePaths.Select(a => a.ImagePath).ToList(),
+                CommentsList = _context.Comments
+                          .Where(comment => comment.RecordID == c.ID)
+                          .Select(comment => new CommentListDTO
+                          {
+                              ID = comment.ID,
+                              CommentText = comment.CommentText,
+                              Status = comment.Status,
+                              CreateBy = comment.CreateBy,
+                              CreateDate = comment.CreateDate
+                          }).ToList()
+            }).FirstOrDefaultAsync();
         }
-        public async Task<GetDataResult<List<TasksDTO>>> GetSupportByPersonId(int personId)
+        public async Task<GetDataResult<List<TasksListDTO>>> GetSupportByPersonId(int personId)
         {
             var tasksDTOs = await _context.Tasks
                                         .Where(c => c.SubmittedByPersonID == personId)
-                                        .Select(c => new TasksDTO
+                                        .Select(c => new TasksListDTO
                                         {
                                             ID = c.ID,
                                             Name = c.Name,
-                                            Description = c.Description,
                                             TaskTypeID = c.TaskTypeID,
                                             TaskStatus = c.TaskStatusType.Status,
-                                            TaskPriorityID = c.TaskPriorityID,
-                                            DateStarted = c.DateStarted,
-                                            DateCompleted = c.DateCompleted,
                                             TaskData = c.TaskData,
-                                            ReceivedDate = c.ReceivedDate,
-                                            ModifiedDate = c.ModifiedDate,
-                                            ModifiedBy = c.ModifiedBy,
                                             CreateDate = c.CreateDate,
-                                            CreateBy = c.CreateBy
                                         })
                                         .ToListAsync();
 
-            return new GetDataResult<List<TasksDTO>>
+            return new GetDataResult<List<TasksListDTO>>
             {
                 items = tasksDTOs,
             };
@@ -151,11 +155,8 @@ namespace EpicMarket.Services
                 Name= "Support Query",
                 Description= supportQuery.Query,
                 TaskTypeID=supportQuery.TaskTypeID,
-                PrimaryAssignedToPersonID= AdminPersonID,
                 TaskData = supportDTO.Comment,
-                CreateBy = supportDTO.Email,
-                ReceivedDate = DateTime.Now
-            });
+            }, AdminPersonID, supportDTO.Email);
 
             SupportTicket supportTicket;
             supportTicket = new SupportTicket

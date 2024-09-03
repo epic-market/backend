@@ -118,6 +118,7 @@ namespace EpicMarket.Services
 
 		public async Task<List<ProductsMapOptionResult>> GetAllProductForMap(int BusinessID,int BranchId)
         {
+            var attachmentTypeID = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
             var returnedProducts = await (from catalogItem in _context.Catalogs
                     join outletProduct in (_context.OutletProducts.Where(a => a.OutletID == BranchId))
                     on catalogItem.ID equals outletProduct.ProductID into joinedProducts
@@ -129,10 +130,61 @@ namespace EpicMarket.Services
                         Name = catalogItem.Name,
                         Description = catalogItem.Description,
                         Rate = catalogItem.Rate,
+                        Thumbnail = ((from attachment in _context.Attachments
+                                      join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                                      join entity in _context.Entity on link.EntityID equals entity.ID
+                                      where entity.Name == EntityConstants.Catelog && link.RecordID == catalogItem.ID && link.AttachmentTypeID == attachmentTypeID.ID
+                                      select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}").FirstOrDefault()),
                         Selected = matchedProduct == null ? false : true,
+
                     }).ToListAsync();
 
             return returnedProducts;
+        }
+
+
+
+
+        public async Task<GetDataResult<List<ProductResult>>> GetAllProductsForPOS(ProductPOSParams productParams, int outletId)
+        {
+            var attachmentTypeID = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
+
+            var getResult = new GetDataResult<List<ProductResult>>();
+
+
+            //1 . filter with BusinessID
+            var Products = _context.OutletProducts.Where(c => c.ID == outletId).Include(c => c.Product)
+                                .Where(c => c.Product.IsActive == true);
+
+
+            //2 . Appling Searching
+            var sortedProducts = Products.Where(row => row.Product.Name.Contains(productParams.searchTerm.Trim()) || row.Product.Description.Contains(productParams.searchTerm.Trim()));
+
+            int totalCount = sortedProducts.Count();
+
+            // 4. Apply pagination (skip and take)
+            var pagedProducts = sortedProducts
+                .Skip((productParams.PageIndex - 1) * productParams.pageSize) // Skip items for previous pages
+                .Take(productParams.pageSize); // Take items for the current page
+
+            // 5. Select data and add SRNO
+            var results = await pagedProducts.Select(c => new ProductResult()
+            {
+                ProductId = c.ID,
+                Name = c.Product.Name,
+                Rate = c.Product.Rate,
+                InStock = c.Product.InStock,
+                Thumbnail = ((from attachment in _context.Attachments
+                              join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                              join entity in _context.Entity on link.EntityID equals entity.ID
+                              where entity.Name == EntityConstants.Catelog && link.RecordID == c.Product.ID && link.AttachmentTypeID == attachmentTypeID.ID
+                              select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}").FirstOrDefault()),
+            }).ToListAsync();
+
+            getResult.items = results;
+            getResult.Count = totalCount;
+
+            return getResult;
         }
 
         public async Task<GetDataResult<List<ProductResult>>> GetAllProducts(ProductParams productParams, int businessID)

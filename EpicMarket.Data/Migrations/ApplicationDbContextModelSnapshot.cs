@@ -1266,6 +1266,68 @@ namespace EpicMarket.Data.Migrations
                     b.ToTable("HelpItems");
                 });
 
+            modelBuilder.Entity("EpicMarket.Data.Models.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Link")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.OnboardingStep", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NavigationURL")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StepDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StepName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StepOrder")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("OnboardingSteps");
+                });
+
             modelBuilder.Entity("EpicMarket.Data.Models.Order", b =>
                 {
                     b.Property<int>("ID")
@@ -1973,6 +2035,35 @@ namespace EpicMarket.Data.Migrations
                     b.ToTable("UserAddresses");
                 });
 
+            modelBuilder.Entity("EpicMarket.Data.Models.UserOnboardingProgress", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("StepID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserID")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StepID");
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("UserOnboardingProgresses");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
                     b.Property<int>("Id")
@@ -2293,6 +2384,17 @@ namespace EpicMarket.Data.Migrations
                     b.Navigation("Pages");
                 });
 
+            modelBuilder.Entity("EpicMarket.Data.Models.Notification", b =>
+                {
+                    b.HasOne("EpicMarket.Data.Models.AppUser", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("EpicMarket.Data.Models.Order", b =>
                 {
                     b.HasOne("EpicMarket.Data.Models.Address", "Address")
@@ -2520,6 +2622,25 @@ namespace EpicMarket.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("EpicMarket.Data.Models.UserOnboardingProgress", b =>
+                {
+                    b.HasOne("EpicMarket.Data.Models.OnboardingStep", "Step")
+                        .WithMany("OnboardingProgress")
+                        .HasForeignKey("StepID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EpicMarket.Data.Models.AppUser", "User")
+                        .WithMany("UserOnboardingProgresses")
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Step");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
                     b.HasOne("EpicMarket.Data.Models.AppRole", null)
@@ -2592,6 +2713,8 @@ namespace EpicMarket.Data.Migrations
 
                     b.Navigation("Businesses");
 
+                    b.Navigation("Notifications");
+
                     b.Navigation("Orders");
 
                     b.Navigation("OutletPeople");
@@ -2601,6 +2724,8 @@ namespace EpicMarket.Data.Migrations
                     b.Navigation("Tasks");
 
                     b.Navigation("UserAddresses");
+
+                    b.Navigation("UserOnboardingProgresses");
 
                     b.Navigation("UserRoles");
                 });
@@ -2668,6 +2793,11 @@ namespace EpicMarket.Data.Migrations
             modelBuilder.Entity("EpicMarket.Data.Models.FAQCategory", b =>
                 {
                     b.Navigation("FAQs");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.OnboardingStep", b =>
+                {
+                    b.Navigation("OnboardingProgress");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Order", b =>

@@ -40,10 +40,6 @@ namespace EpicMarket.Entities
     }
 
 
-
-
-
-
     public class BranchResult
     {
         public int ID { get; set; }
@@ -152,4 +148,23 @@ namespace EpicMarket.Entities
         public List<int> ListOfProductIDs { get; set; }
 
     }
+
+    public class ActivityParams
+    {
+        public int RecordId { get; set; }
+        public string Entity { get; set; }
+        public int PageIndex { get; set; } = 1;
+        public int pageSize { get; set; } = 10;
+
+    }
+    public class ActivityResult
+    {
+        public long ID { get; set; }
+        public string Description { get; set; }
+        public string Data { get; set; }
+        public string EventName { get; set; }
+        public string CreatedBy { get; set; }
+        public DateTime? CreatedDate { get; set; }
+    }
+
 }

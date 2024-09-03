@@ -38,5 +38,9 @@ namespace EpicMarket.Data.Models
 
         public virtual ICollection<Tasks> Tasks { get; set; }
 
+        public virtual ICollection<Notification> Notifications { get; set; }
+
+        public virtual ICollection<UserOnboardingProgress> UserOnboardingProgresses { get; set; }
+
     }
 }

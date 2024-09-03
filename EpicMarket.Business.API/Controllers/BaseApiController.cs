@@ -206,6 +206,10 @@ namespace EpicMarket.Business.API.Controllers
             {
                 path = applicationConfigurationService.GetApplicationConfigurationValue(FilePathConstants.BranchThumbnail);
             }
+			else if (ApplicationConfigurationConstants.TASKPATH.Equals(entityNameOrAppConfig))
+            {
+                path = applicationConfigurationService.GetApplicationConfigurationValue(FilePathConstants.TASKPATH);
+            }
 
 
 

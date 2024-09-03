@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using Amazon.S3.Model.Internal.MarshallTransformations;
+using AutoMapper;
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
@@ -352,5 +353,34 @@ namespace EpicMarket.Services
                 throw new Exception("Branch Not Found");
             }
         }
+
+
+        public async Task<List<DropDownOptions>> GetAllOutletsForDropDown(int personID , int businessID)
+        {
+
+            if (personID == _context.Businesses.FirstOrDefault(c => c.ID == businessID).PersonID)
+            {
+                return await _context.Outlets.Where(c => c.IsActive == true).Select(
+                     c => new DropDownOptions()
+                     {
+                         Text = c.Name,
+                         Value = c.ID
+                     }
+                    ).ToListAsync();
+            }
+            else {
+                return await _context.OutletPeople.Include(c => c.Outlet).Where(c => c.PersonId == personID && c.Outlet.IsActive == true).Select(
+                      c => new DropDownOptions()
+                      {
+                          Text = c.Outlet.Name,
+                          Value = c.OutletId
+                      }
+                     ).ToListAsync();
+
+            }
+            
+      
+        }
+
     }
 }

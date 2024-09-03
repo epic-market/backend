@@ -60,4 +60,12 @@ public DbSet<EpicMarket.Data.Models.PromotionalLeads> PromotionalLeads { get; se
 
 public DbSet<EpicMarket.Data.Models.Page> Page { get; set; } = default!;
 
+public DbSet<EpicMarket.Data.Models.Notification> Notification { get; set; } = default!;
+
+public DbSet<EpicMarket.Data.Models.HelpItem> HelpItem { get; set; } = default!;
+
+public DbSet<EpicMarket.Data.Models.OnboardingStep> OnboardingStep { get; set; } = default!;
+
+public DbSet<EpicMarket.Data.Models.UserOnboardingProgress> UserOnboardingProgress { get; set; } = default!;
+
 }

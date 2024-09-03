@@ -231,6 +231,17 @@ namespace EpicMarket.Business.API.Controllers
 			return Ok(response);
 		}
 
+        [HttpGet("POS/{outletID}")]
+        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
+        public async Task<ActionResult<OperationResult<GetDataResult<List<ProductResult>>>>> GetAllProductsForPOS([FromQuery] ProductPOSParams productResult , int outletID)
+        {
+            var response = new OperationResult<GetDataResult<List<ProductResult>>>();
+            this.logger.LogInformation("Products Controller -> GetAllProductsForPOS()-> params {0}", JsonConvert.SerializeObject(new { Params = productResult }));
+            var results = await productService.GetAllProductsForPOS(productResult, outletID);
+            this.logger.LogInformation("Products Controller -> GetAllProductsForPOS()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
+            response.Data = results;
 
-	}
+            return Ok(response);
+        }
+    }
 }

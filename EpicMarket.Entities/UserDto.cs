@@ -40,5 +40,12 @@ namespace EpicMarket.Entities
     {
         public string Token { get; set; }
     }
+
+    public class CustomerDetails
+    {
+        public string Username { get; set; }
+        public string FirstName { get; set; }
+        public string PhoneNumber { get; set; }
+    }
     
 }

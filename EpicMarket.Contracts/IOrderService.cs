@@ -12,11 +12,10 @@ namespace EpicMarket.Contracts
     {
         Task<int> CreateOrder(OrdersDto order,string UserName,string PageSource);
 
-        Task<OrdersDto> GetSingleOrder(int OrderId);
+        Task<OrdersDetailsResult> GetSingleOrder(int OrderId);
 
-        Task<int> UpdateStatus(int OrderId, string OrderStatus);
+        Task<int> UpdateStatus(int OrderId, int statusID);
 
-        Task<List<DropDownOptions>> GetOrderStatusOptions();
 
         Task<GetDataResult<List<OrderResult>>> GetAllOrders(OrderParams orderParams,int businessID);
     }
