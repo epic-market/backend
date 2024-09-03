@@ -123,7 +123,7 @@ namespace EpicMarket.Services
                     join outletProduct in (_context.OutletProducts.Where(a => a.OutletID == BranchId))
                     on catalogItem.ID equals outletProduct.ProductID into joinedProducts
                     from matchedProduct in joinedProducts.DefaultIfEmpty()
-                    where catalogItem.BusinessID == BusinessID
+                    where catalogItem.BusinessID == BusinessID && catalogItem.IsActive == true 
                     select new ProductsMapOptionResult
                     {
                         Id = catalogItem.ID,
