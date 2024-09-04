@@ -3,6 +3,7 @@ using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -19,18 +20,25 @@ namespace EpicMarket.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper mapper;
-		private readonly IUnitOfWork unitOfWork;
+        private readonly UserManager<AppUser> _userManager;
+        private readonly IUnitOfWork unitOfWork;
 
-		public TasksService(ApplicationDbContext context, IMapper mapper,IUnitOfWork unitOfWork)
+        public TasksService(
+                            ApplicationDbContext context,
+                            IMapper mapper,
+                            IUnitOfWork unitOfWork,
+                            UserManager<AppUser> _userManager)
         {
             _context = context;
             this.mapper = mapper;
-			this.unitOfWork = unitOfWork;
-		}
+            this.unitOfWork = unitOfWork;
+            this._userManager = _userManager;
+        }
         public async Task<long> SaveTask(TasksDTO tasksDTO, int AdminPersonID, string LoggedInUserName)
         {
             var taskStatusTypes = _context.TaskStatusTypes.Where(row => row.Status == TaskStatusTypesConstants.NEW).FirstOrDefault();
-            var GetTaskType =  _context.TaskTypes.Where(row => row.ID == tasksDTO.TaskTypeID).FirstOrDefault();
+            var GetTaskType = _context.TaskTypes.Where(row => row.ID == tasksDTO.TaskTypeID).FirstOrDefault();
+            var user = await GetUser(LoggedInUserName);
             var taskToSave = new Tasks
             {
                 Name = tasksDTO.Name,
@@ -43,21 +51,21 @@ namespace EpicMarket.Services
                 DateDue = DateTime.Now.AddHours((double)GetTaskType.DefaultDueDateHours),
                 DateStarted = null,
                 DateCompleted = null,
-                SubmittedByPersonID = tasksDTO.SubmittedByPersonID,
+                SubmittedByPersonID = user.Id,
                 TaskData = tasksDTO.TaskData,
                 ReceivedDate = DateTime.Now,
                 CreateDate = DateTime.Now,
                 CreateBy = LoggedInUserName
             };
             await _context.Tasks.AddAsync(taskToSave);
-			await unitOfWork.Complete();
-			return (long)taskToSave.ID;
-     
+            await unitOfWork.Complete();
+            return (long)taskToSave.ID;
+
         }
 
         public int SaveComments(CommentDTO commentDTO, string LoggedInUserName)
         {
-            var EntityForTasks =  _context.Entity.FirstOrDefault(m => m.Name == EntityConstants.Tasks);
+            var EntityForTasks = _context.Entity.FirstOrDefault(m => m.Name == EntityConstants.Tasks);
             Comment commentSave;
             commentSave = new Comment
             {
@@ -66,11 +74,11 @@ namespace EpicMarket.Services
                 RecordID = commentDTO.TaskId,
                 CreateDate = DateTime.Now,
                 CreateBy = LoggedInUserName,
-                EntityID= EntityForTasks.ID,
+                EntityID = EntityForTasks.ID,
             };
             _context.Comments.Add(commentSave);
-			unitOfWork.Complete();
-			return commentSave.ID;
+            unitOfWork.Complete();
+            return commentSave.ID;
         }
 
         public async Task<GetDataResult<List<CommentDTO>>> GetAllComments(int taskId)
@@ -92,17 +100,17 @@ namespace EpicMarket.Services
         }
         public async Task<TaskDeatilDTO> GettaskDetails(int taskId) //get attachments if any
         {
-            var attachmentTypeID= await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.TASK);
+            var attachmentTypeID = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.TASK);
 
             var uploadFilePaths = from attachment in _context.Attachments
-                            join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
-                            join entity in _context.Entity on link.EntityID equals entity.ID
-                            where entity.Name == EntityConstants.Tasks && link.RecordID == taskId && link.AttachmentTypeID == attachmentTypeID.ID
-                            orderby attachment.CreateDate descending
-                            select new
-                            {
-                                ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
-                            };
+                                  join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                                  join entity in _context.Entity on link.EntityID equals entity.ID
+                                  where entity.Name == EntityConstants.Tasks && link.RecordID == taskId && link.AttachmentTypeID == attachmentTypeID.ID
+                                  orderby attachment.CreateDate descending
+                                  select new
+                                  {
+                                      ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
+                                  };
 
             return await _context.Tasks.Where(c => c.ID == taskId).Select(c => new TaskDeatilDTO
             {
@@ -110,7 +118,7 @@ namespace EpicMarket.Services
                 Name = c.Name,
                 Description = c.Description,
                 TaskTypeID = c.TaskTypeID,
-                TaskType=c.TaskTypes.Name,
+                TaskType = c.TaskTypes.Name,
                 TaskStatus = c.TaskStatusType.Status,
                 TaskData = c.TaskData,
                 CreateDate = c.CreateDate,
@@ -152,9 +160,9 @@ namespace EpicMarket.Services
             var supportQuery = _context.SupportQuerys.Where(row => row.ID == supportDTO.QueryId).FirstOrDefault();
             var taskID = await this.SaveTask(new TasksDTO
             {
-                Name= "Support Query",
-                Description= supportQuery.Query,
-                TaskTypeID=supportQuery.TaskTypeID,
+                Name = "Support Query",
+                Description = supportQuery.Query,
+                TaskTypeID = supportQuery.TaskTypeID,
                 TaskData = supportDTO.Comment,
             }, AdminPersonID, supportDTO.Email);
 
@@ -165,12 +173,16 @@ namespace EpicMarket.Services
                 Phonenumber = supportDTO.Phonenumber,
                 TypeofPersonid = supportDTO.TypeofPersonid,
                 Fullname = supportDTO.Fullname,
-                Taskid= (int)taskID
+                Taskid = (int)taskID
             };
             _context.SupportTickets.Add(supportTicket);
-			await unitOfWork.Complete();
-			return (long)supportTicket.ID;
+            await unitOfWork.Complete();
+            return (long)supportTicket.ID;
         }
-
+        private async Task<AppUser> GetUser(string username)
+        {
+            return await _userManager.Users
+             .SingleOrDefaultAsync(x => x.UserName == username.ToLower() && x.IsActive == true);
+        }
     }
 }

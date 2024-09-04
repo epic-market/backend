@@ -80,7 +80,7 @@ namespace EpicMarket.Business.API.Controllers
 
             this.logger.LogInformation("Support Controller -> AddTask()-> params {0}", JsonConvert.SerializeObject(new { Params = tasksDTO }));
             var results = await tasksService.SaveTask(tasksDTO,this.AdminPersonID,this.LoggedInUserName);
-            if (tasksDTO.UploadFiles.Length > 0)
+            if (tasksDTO.UploadFiles?.Length > 0)
             {
                 foreach (var proof in tasksDTO.UploadFiles)
                 {

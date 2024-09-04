@@ -15,7 +15,6 @@ namespace EpicMarket.Entities
         public string Name { get; set; }
         public string Description { get; set; }
         public int? TaskTypeID { get; set; }
-        public int? SubmittedByPersonID { get; set; }
         public string TaskData { get; set; }
         public IFormFile[] UploadFiles { get; set; }
     }
