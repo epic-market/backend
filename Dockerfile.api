@@ -1,10 +1,13 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
 WORKDIR /src
 
-# Copy everything
-COPY . ./
+# Copy csproj and restore as distinct layers
+COPY ./EpicMarket.Business.API/EpicMarket.Business.API.csproj ./EpicMarket.Business.API/EpicMarket.Business.API.csproj
 # Restore as distinct layers
 RUN dotnet restore ./EpicMarket.Business.API/EpicMarket.Business.API.csproj
+
+# Copy everything else and build
+COPY . .
 # Build and publish a release
 RUN dotnet publish "./EpicMarket.Business.API/EpicMarket.Business.API.csproj" -c Release -o out
 
