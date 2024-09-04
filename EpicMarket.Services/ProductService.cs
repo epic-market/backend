@@ -153,7 +153,7 @@ namespace EpicMarket.Services
 
 
             //1 . filter with BusinessID
-            var Products = _context.OutletProducts.Include(c => c.Product).Where(c => c.OutletID == outletId)
+            var Products = _context.OutletProducts.Where(c => c.ID == outletId).Include(c => c.Product)
                                 .Where(c => c.Product.IsActive == true);
 
 
