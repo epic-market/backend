@@ -229,7 +229,30 @@ namespace EpicMarket.Business.API.Controllers
             return response;
         }
 
+        [HttpPut("info")]
+        [Authorize]
+        public async Task<ActionResult<OperationResult<string>>> PutInfo(LoginUserEditDTO loginUserEditDTO)
+        {
+            var user = await GetUser(this.LoggedInUserName); ;
 
+            if (user == null) return Unauthorized("Invalid username, Please LogOut and LogIn");
+
+            user.Email = loginUserEditDTO.Email; 
+            user.PhoneNumber = loginUserEditDTO.Phone;  
+            user.FirstName = loginUserEditDTO.FirstName;  
+            user.LastName = loginUserEditDTO.LastName;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                return Ok("User updated successfully.");
+            }
+            else
+            {
+                return BadRequest(result.Errors);
+            }
+        }
 
         private async Task<bool> UserExists(string username)
         {
