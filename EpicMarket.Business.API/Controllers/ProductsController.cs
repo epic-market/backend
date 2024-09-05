@@ -60,7 +60,7 @@ namespace EpicMarket.Business.API.Controllers
 			var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
 			response.Data = await productService.AddProduct(productsDto, UserName, this.BusinessId, this.PageSource);
 
-			if (productsDto.Products.Length > 0)
+			if (productsDto.Products?.Length > 0)
 			{
 				foreach (var product in productsDto.Products) {
 					var filinsertOutput = await this.SaveFileGlobalAsync(product, ApplicationConfigurationConstants.Products, this.fileStoreService, this.applicationConfigurationService, this.BusinessId);
