@@ -116,14 +116,15 @@ namespace EpicMarket.Business.API.Controllers
 			return Ok(response);
         }
 
-        [HttpGet("{businessId}")]
-        public async Task<ActionResult<OperationResult<BusinessDetailResult>>> GetBusinessByID(int businessId)
+        [HttpGet]
+        [Authorize]
+        public async Task<ActionResult<OperationResult<BusinessDetailResult>>> GetBusinessByID()
         {
             var response = new OperationResult<BusinessDetailResult>();
 
-            this.logger.LogInformation("Business Controller -> GetBusinessByID()-> params {0}", JsonConvert.SerializeObject(new { Params = new { businessId = businessId } }));
+            this.logger.LogInformation("Business Controller -> GetBusinessByID()-> params {0}", JsonConvert.SerializeObject(new { Params = new { businessId = this.BusinessId } }));
 
-            var results = await businessService.GetBusinessByID(businessId);
+            var results = await businessService.GetBusinessByID(this.BusinessId);
 
             this.logger.LogInformation("Business Controller -> GetBusinessByID()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
 
@@ -132,16 +133,17 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult<OperationResult<int>>> UpdateBusiness(int id, [FromForm] BusinessRegisterDto businessRegisterDto)
+        [HttpPut]
+        [Authorize]
+        public async Task<ActionResult<OperationResult<int>>> UpdateBusiness( [FromForm] UpdateBusinessRegisterDto businessRegisterDto)
         {
             var response = new OperationResult<int>();
             this.logger.LogInformation("Business Controller -> UpdateBusiness()-> params {0}", JsonConvert.SerializeObject(new { Params = businessRegisterDto }));
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-            var branchID = await businessService.UpdateBusiness(id, businessRegisterDto, UserName, this.PageSource);
-            if (businessRegisterDto.LogoFile.Length > 0)
+            var branchID = await businessService.UpdateBusiness(this.BusinessId, businessRegisterDto, UserName, this.PageSource);
+            if (businessRegisterDto.LogoFile?.Length > 0)
             {
-                var filinsertOutput = await this.SaveFileGlobalAsync(businessRegisterDto.LogoFile, FilePathConstants.LOGOPATH, this.fileStoreService, this.applicationConfigurationService, id);
+                var filinsertOutput = await this.SaveFileGlobalAsync(businessRegisterDto.LogoFile, FilePathConstants.LOGOPATH, this.fileStoreService, this.applicationConfigurationService, this.BusinessId);
                 var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
                 {
 
@@ -157,14 +159,14 @@ namespace EpicMarket.Business.API.Controllers
                     AttachmentTypeName = AttachmentTypeConstants.LOGO,
                     AttachmentID = attachmentId,
                     Entity = EntityConstants.Business,
-                    RecordID = id
+                    RecordID = this.BusinessId
                 });
             }
-            if (businessRegisterDto.ProofFile.Length > 0)
+            if (businessRegisterDto.ProofFile?.Length > 0)
             {
                 foreach (var proof in businessRegisterDto.ProofFile)
                 {
-                    var filinsertOutput = await this.SaveFileGlobalAsync(proof, FilePathConstants.ProofPATH, this.fileStoreService, this.applicationConfigurationService, id);
+                    var filinsertOutput = await this.SaveFileGlobalAsync(proof, FilePathConstants.ProofPATH, this.fileStoreService, this.applicationConfigurationService, this.BusinessId);
                     var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
                     {
 
@@ -180,13 +182,13 @@ namespace EpicMarket.Business.API.Controllers
                         AttachmentTypeName = AttachmentTypeConstants.PROOF,
                         AttachmentID = attachmentId,
                         Entity = EntityConstants.Business,
-                        RecordID = id
+                        RecordID = this.BusinessId
                     });
                 }
             }
 
-            this.logger.LogInformation("Business Controller -> UpdateBusiness()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
-            response.Data = id;
+            this.logger.LogInformation("Business Controller -> UpdateBusiness()-> return {0}", JsonConvert.SerializeObject(new { Value = this.BusinessId }));
+            response.Data = this.BusinessId;
             return Ok(response);
         }
 

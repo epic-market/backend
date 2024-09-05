@@ -98,7 +98,7 @@ namespace EpicMarket.Services
             var attachments = from attachment in _context.Attachments
                               join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
                               join entity in _context.Entity on link.EntityID equals entity.ID
-                              where entity.Name == EntityConstants.Branch && link.RecordID == businessId && link.AttachmentTypeID == attachmentTypeID_Product.ID
+                              where entity.Name == EntityConstants.Business && link.RecordID == businessId && link.AttachmentTypeID == attachmentTypeID_Product.ID
                               select new
                               {
                                   ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
@@ -107,7 +107,7 @@ namespace EpicMarket.Services
             var thumbnail = from attachment in _context.Attachments
                             join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
                             join entity in _context.Entity on link.EntityID equals entity.ID
-                            where entity.Name == EntityConstants.Branch && link.RecordID == businessId && link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
+                            where entity.Name == EntityConstants.Business && link.RecordID == businessId && link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
                             orderby attachment.CreateDate descending
                             select new
                             {
@@ -133,7 +133,7 @@ namespace EpicMarket.Services
                 Thumbnail = thumbnail.Select(a => a.ImagePath).FirstOrDefault(),
             }).FirstOrDefaultAsync();
         }
-        public async Task<int> UpdateBusiness(int id, BusinessRegisterDto businessRegisterDto, string UserName, string PageSource)
+        public async Task<int> UpdateBusiness(int id, UpdateBusinessRegisterDto businessRegisterDto, string UserName, string PageSource)
         {
             var addressModel = new AddressDto();
             var events = "";
