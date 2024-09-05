@@ -83,7 +83,7 @@ namespace EpicMarket.Business.API.Controllers
 
 				}
 
-				if (productsDto.Thumbnail.Length > 0)
+				if (productsDto.Thumbnail != null)
 				{
 					var filinsertOutput = await this.SaveFileGlobalAsync(productsDto.Thumbnail, ApplicationConfigurationConstants.THUMBNAIL, this.fileStoreService, this.applicationConfigurationService, this.BusinessId);
 					var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
