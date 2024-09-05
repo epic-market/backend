@@ -75,5 +75,31 @@ namespace EpicMarket.Entities
         public string Thumbnail { get; set; }
         public List<string> Proofs { get; set; }
     }
+    public class UpdateBusinessRegisterDto
+    {
+        public string BussinessName { get; set; }
 
+        public string Description { get; set; }
+
+        public long ContactNumber { get; set; }
+
+        public string ContactEmail { get; set; }
+
+        public string Address { get; set; }
+
+        public string State { get; set; }
+
+        public string City { get; set; }
+
+        public double Latitude { get; set; }
+
+        public double Longitude { get; set; }
+
+        public int PinCode { get; set; }
+        public string ProofType { get; set; }
+
+        public string ProofNumber { get; set; }
+        public IFormFile LogoFile { get; set; }
+        public IFormFile[] ProofFile { get; set; }
+    }
 }
