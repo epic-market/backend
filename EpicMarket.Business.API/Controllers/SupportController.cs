@@ -39,14 +39,14 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<OperationResult<GetDataResult<List<TasksListDTO>>>>> GetSupportByPersonId()
+        public async Task<ActionResult<OperationResult<GetDataResult<List<TasksListDTO>>>>> GetSupportByPersonId([FromQuery] TasksListParams tasksListParams)
         {
             var response = new OperationResult<GetDataResult<List<TasksListDTO>>>();
 
             var UserID = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
             this.logger.LogInformation("Support Controller -> GetSupportByPersonId()-> params {0}", JsonConvert.SerializeObject(new { Params = UserID }));
 
-            var results = await tasksService.GetSupportByPersonId(UserID);
+            var results = await tasksService.GetSupportByPersonId(UserID,tasksListParams);
 
             this.logger.LogInformation("Support Controller -> GetSupportByPersonId()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
 

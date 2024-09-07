@@ -217,7 +217,7 @@ namespace EpicMarket.Business.API.Controllers
 
 
 
-        [HttpPost("PersonDetails/{PhoneOrUserName}")]
+        [HttpGet("PersonDetails/{PhoneOrUserName}")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<List<CustomerDetails>>>> getPersonDetails(string PhoneOrUserName)
         {

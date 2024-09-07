@@ -180,7 +180,7 @@ namespace EpicMarket.Services
         public async Task<int> MapBranchToProducts(BranchProductMapParams branchProductMap)
         {
             
-            foreach (var i in branchProductMap.AddProductsId)
+            foreach (var i in branchProductMap?.AddProductsId)
             {
                 var branchProduct = new OutletProduct();
                 branchProduct.OutletID = branchProductMap.OutletId;
@@ -188,7 +188,7 @@ namespace EpicMarket.Services
                 _context.OutletProducts.Add(branchProduct);
             }
 
-            foreach (var i in branchProductMap.RemovedProductsId)
+            foreach (var i in branchProductMap?.RemovedProductsId)
             {
                 var removedProducts = await _context.OutletProducts.Where(c => c.ProductID == i && c.OutletID == branchProductMap.OutletId).FirstOrDefaultAsync();
                 _context.OutletProducts.Remove(removedProducts);

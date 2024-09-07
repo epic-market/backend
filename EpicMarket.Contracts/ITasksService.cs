@@ -15,7 +15,7 @@ namespace EpicMarket.Contracts
 
 		int SaveComments(CommentDTO commentDTO , string LoggedInUserName);
         Task<GetDataResult<List<CommentDTO>>> GetAllComments( int taskId); 
-        Task<GetDataResult<List<TasksListDTO>>> GetSupportByPersonId( int personId);
+        Task<GetDataResult<List<TasksListDTO>>> GetSupportByPersonId( int personId, TasksListParams tasksListParams);
         Task<TaskDeatilDTO> GettaskDetails(int taskId);
 		Task<long> AddSupportTask(SupportDTO supportDTO, int AdminPersonID);
     }

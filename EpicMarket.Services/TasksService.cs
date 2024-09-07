@@ -135,15 +135,19 @@ namespace EpicMarket.Services
                           }).ToList()
             }).FirstOrDefaultAsync();
         }
-        public async Task<GetDataResult<List<TasksListDTO>>> GetSupportByPersonId(int personId)
+        public async Task<GetDataResult<List<TasksListDTO>>> GetSupportByPersonId(int personId, TasksListParams tasksListParams)
         {
-            var tasksDTOs = await _context.Tasks
-                                        .Where(c => c.SubmittedByPersonID == personId)
+
+            var sortedOutlets = _context.Tasks.Where(c => c.SubmittedByPersonID == personId);
+            int totalCount = sortedOutlets.Count();
+            var pagedOutlets = sortedOutlets.Skip((tasksListParams.PageIndex - 1) * tasksListParams.pageSize).Take(tasksListParams.pageSize);
+            var tasksDTOs = await pagedOutlets
                                         .Select(c => new TasksListDTO
                                         {
                                             ID = c.ID,
                                             Name = c.Name,
                                             TaskTypeID = c.TaskTypeID,
+                                            TaskType=c.TaskTypes.Name,
                                             TaskStatus = c.TaskStatusType.Status,
                                             TaskData = c.TaskData,
                                             CreateDate = c.CreateDate,
@@ -153,6 +157,7 @@ namespace EpicMarket.Services
             return new GetDataResult<List<TasksListDTO>>
             {
                 items = tasksDTOs,
+                Count = totalCount
             };
         }
         public async Task<long> AddSupportTask(SupportDTO supportDTO, int AdminPersonID)
