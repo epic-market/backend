@@ -43,11 +43,17 @@ namespace EpicMarket.Entities
         public int? ID { get; set; }
         public string Name { get; set; }
         public int? TaskTypeID { get; set; }
+        public string TaskType { get; set; }
         public string TaskData { get; set; }
         public string TaskStatus { get; set; }
         public DateTime? CreateDate { get; set; }
     }
+    public class TasksListParams
+    {
+        public int PageIndex { get; set; } = 1;
+        public int pageSize { get; set; } = 10;
 
+    }
     public class CommentDTO
     {
         public string CommentText { get; set; }
