@@ -81,19 +81,22 @@ namespace EpicMarket.Services
             return commentSave.ID;
         }
 
-        public async Task<GetDataResult<List<CommentDTO>>> GetAllComments(int taskId)
+        public async Task<GetDataResult<List<CommentListDTO>>> GetAllComments(int taskId)
         {
+            var eventModel = await _context.Entity.Where(row => row.Name == EntityConstants.Tasks).FirstOrDefaultAsync();
             var comments = await _context.Comments
-                                        .Where(c => c.RecordID == taskId)
-                                        .Select(c => new CommentDTO
+                                        .Where(comment => comment.RecordID == taskId && comment.EntityID == eventModel.ID)
+                                        .Select(comment => new CommentListDTO
                                         {
-                                            TaskId = c.RecordID,
-                                            CommentText = c.CommentText,
-                                            Status = c.Status,
+                                            ID = comment.ID,
+                                            CommentText = comment.CommentText,
+                                            Status = comment.Status,
+                                            CreateBy = comment.CreateBy,
+                                            CreateDate = comment.CreateDate
                                         })
                                         .ToListAsync();
 
-            return new GetDataResult<List<CommentDTO>>
+            return new GetDataResult<List<CommentListDTO>>
             {
                 items = comments,
             };
@@ -122,17 +125,7 @@ namespace EpicMarket.Services
                 TaskStatus = c.TaskStatusType.Status,
                 TaskData = c.TaskData,
                 CreateDate = c.CreateDate,
-                UploadFiles = uploadFilePaths.Select(a => a.ImagePath).ToList(),
-                CommentsList = _context.Comments
-                          .Where(comment => comment.RecordID == c.ID)
-                          .Select(comment => new CommentListDTO
-                          {
-                              ID = comment.ID,
-                              CommentText = comment.CommentText,
-                              Status = comment.Status,
-                              CreateBy = comment.CreateBy,
-                              CreateDate = comment.CreateDate
-                          }).ToList()
+                UploadFiles = uploadFilePaths.Select(a => a.ImagePath).ToList()
             }).FirstOrDefaultAsync();
         }
         public async Task<GetDataResult<List<TasksListDTO>>> GetSupportByPersonId(int personId, TasksListParams tasksListParams)
