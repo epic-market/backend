@@ -12,6 +12,7 @@ using Microsoft.CodeAnalysis.Elfie.Model;
 using System.Security.Claims;
 using EpicMarket.Admin.MVC.Models;
 using EpicMarket.Entities.CustomModels;
+using System.Net.Mail;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -69,7 +70,35 @@ namespace EpicMarket.Admin.MVC.Controllers
 							.ToListAsync();
 
 
-			businessDetailModel.Business = business;
+
+            var attachmentTypeID_LOGO = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.LOGO);
+            var attachmentTypeID_PROOF = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.PROOF);
+
+
+
+             var attachments_logo = from attachment in _context.Attachments
+                              join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                              join entity in _context.Entity on link.EntityID equals entity.ID
+                              where entity.Name == EntityConstants.Business && link.RecordID == id && link.AttachmentTypeID == attachmentTypeID_LOGO.ID
+                              select new
+                              {
+                                  ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
+                              };
+
+            var attachments_proof = from attachment in _context.Attachments
+                            join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                            join entity in _context.Entity on link.EntityID equals entity.ID
+                            where entity.Name == EntityConstants.Business && link.RecordID == id && link.AttachmentTypeID == attachmentTypeID_PROOF.ID
+                            orderby attachment.CreateDate descending
+                            select new
+                            {
+                                ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
+                            };
+
+
+            ViewBag.AttachmentLogo = attachments_logo.Select(a => a.ImagePath).FirstOrDefault();
+            ViewBag.AttachmentProof = attachments_proof.Select(a => a.ImagePath).ToList();
+            businessDetailModel.Business = business;
 			businessDetailModel.Outlets = braches;
 			businessDetailModel.employees = employees;
 			businessDetailModel.Catalogs = products;

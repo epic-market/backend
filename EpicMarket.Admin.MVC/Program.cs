@@ -2,6 +2,7 @@ using EpicMarket.Data.Models;
 using EpicMarket.Admin.MVC.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Amazon.S3;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,6 +28,12 @@ builder.Services.AddDbContext<AuthDbContext>(options =>
 builder.Services.AddDefaultIdentity<AppUser>().AddDefaultTokenProviders().
         AddRoles<AppRole>()
     .AddEntityFrameworkStores<AuthDbContext>();
+
+
+builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
+builder.Services.AddAWSService<IAmazonS3>();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

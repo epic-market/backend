@@ -76,6 +76,9 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Tasks/Create
+
+
+        [HttpGet]
         public IActionResult Create(int? parentTaskId)
         {
             ViewData["TaskStatusID"] = new SelectList(_context.Set<TaskStatusType>(), "Id", "Status");
@@ -110,7 +113,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Name,Description,TaskTypeID,ParentID,TaskStatusID,TaskPriorityID,PrimaryAssignedToPersonID,DateAssigned,DateDue,DateStarted,DateCompleted,SubmittedByPersonID,EffectiveDate,TaskData,ReceivedDate,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Tasks tasks)
+        public async Task<IActionResult> CreateTask([FromQuery] int? parentTaskId,[Bind("ID,Name,Description,TaskTypeID,ParentID,TaskStatusID,TaskPriorityID,PrimaryAssignedToPersonID,DateAssigned,DateDue,DateStarted,DateCompleted,SubmittedByPersonID,EffectiveDate,TaskData,ReceivedDate,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Tasks tasks)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             var UserID = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
@@ -119,6 +122,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             tasks.CreateDate = DateTime.UtcNow;
             tasks.DateDue = DateTime.Now.AddHours((double)GetTaskType.DefaultDueDateHours);
             tasks.SubmittedByPersonID = UserID;
+            tasks.ParentID = parentTaskId;
             tasks.DateAssigned = DateTime.UtcNow;
             tasks.ReceivedDate = DateTime.UtcNow;
             if (ModelState.IsValid)

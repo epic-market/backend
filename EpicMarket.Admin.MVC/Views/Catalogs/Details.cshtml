@@ -27,7 +27,10 @@
 <div class="card">
 	<div class="row g-0">
 		<div class="col-md-4 border-end">
-		@* 	<img src="@Model.Images" alt="@Model.Images" class="img-fluid"> *@
+			<a href="@Url.Action("DisplayImage", "File", new { key = ViewBag.thumbnail })" target="_blank" rel="noopener noreferrer">
+				<img src="@Url.Action("DisplayImage", "File", new { key = ViewBag.thumbnail })" alt="Image"
+					 style="max-width: 100%; max-height: 100%; object-fit: contain; cursor: pointer;" />
+			</a>
 		</div>
 		<div class="col-md-8">
 			<div class="card-body">
@@ -114,6 +117,28 @@
 					</dl>
 				</div>
 			</div>
+		</div>
+	</div>
+</div>
+<div class="card mt-4">
+	<div class="card-header">
+		<h5 class="card-title mb-0">Product Images</h5>
+	</div>
+	<div class="card-body">
+		<div class="row row-cols-1 row-cols-md-4 g-4">
+			@foreach (var imageKey in ViewBag.attachments) // Assuming you have a collection of image keys
+			{
+				<div class="col">
+					<div class="card h-100">
+						<a href="@Url.Action("DisplayImage", "File", new { key = imageKey })" target="_blank" rel="noopener noreferrer">
+							<img src="@Url.Action("DisplayImage", "File", new { key = imageKey })"
+								 class="card-img-top"
+								 alt="Product Image"
+								 style="height: 200px; object-fit: cover; cursor: pointer;">
+						</a>
+					</div>
+				</div>
+			}
 		</div>
 	</div>
 </div>
