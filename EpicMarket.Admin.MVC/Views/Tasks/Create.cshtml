@@ -30,81 +30,85 @@
                     <h5 class="mb-0 text-info">Tasks</h5>
                 </div>
                 <hr />
-                <form asp-action="Create">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                 
-                    <div class="row mb-3">
-                        <label asp-for="PrimaryAssignedToPersonID" class="col-sm-3 col-form-label"></label>
-                        <div class="col-sm-9">
-                            <select asp-for="PrimaryAssignedToPersonID" class="form-control" asp-items="ViewBag.Admin"></select>
-                            <span asp-validation-for="PrimaryAssignedToPersonID" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label asp-for="Name" class="col-sm-3 col-form-label"></label>
-                        <div class="col-sm-9">
-                            <input asp-for="Name" class="form-control" />
-                            <span asp-validation-for="Name" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label asp-for="Description" class="col-sm-3 col-form-label"></label>
-                        <div class="col-sm-9">
-                            <textarea asp-for="Description" class="form-control" ></textarea>
-                            <span asp-validation-for="Description" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label asp-for="TaskTypeID" class="col-sm-3 col-form-label"></label>
-                        <div class="col-sm-9">
-                            <select asp-for="TaskTypeID" class="form-control" asp-items="ViewBag.TaskTypeID"></select>
-                            <span asp-validation-for="TaskTypeID" class="text-danger"></span>
-                        </div>
-                    </div>
-                    @if (ViewBag.ExistingID != null)
+
+
+                @using (Html.BeginForm("CreateTask", "Tasks", new { parentTaskId = ViewBag.ExistingID }, FormMethod.Post))
                     {
-                           <input type="hidden" asp-for="ParentID" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
                         <div class="row mb-3">
-                            <label asp-for="ParentID" class="col-sm-3 col-form-label"></label>
+                            <label asp-for="PrimaryAssignedToPersonID" class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
-                                <select asp-for="ParentID" class="form-control" asp-items="ViewBag.ParentTaskId" disabled></select>
-                                <span asp-validation-for="ParentID" class="text-danger"></span>
+                                <select asp-for="PrimaryAssignedToPersonID" class="form-control" asp-items="ViewBag.Admin"></select>
+                                <span asp-validation-for="PrimaryAssignedToPersonID" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label asp-for="Name" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <input asp-for="Name" class="form-control" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label asp-for="Description" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <textarea asp-for="Description" class="form-control"></textarea>
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label asp-for="TaskTypeID" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <select asp-for="TaskTypeID" class="form-control" asp-items="ViewBag.TaskTypeID"></select>
+                                <span asp-validation-for="TaskTypeID" class="text-danger"></span>
+                            </div>
+                        </div>
+                        @if (ViewBag.ExistingID != null)
+                        {
+                            <input type="hidden" asp-for="ParentID" />
+                            <div class="row mb-3">
+                                <label asp-for="ParentID" class="col-sm-3 col-form-label"></label>
+                                <div class="col-sm-9">
+                                    <select asp-for="ParentID" class="form-control" asp-items="ViewBag.ParentTaskId" disabled></select>
+                                    <span asp-validation-for="ParentID" class="text-danger"></span>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="row mb-3">
+                            <label asp-for="TaskStatusID" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <select asp-for="TaskStatusID" class="form-control" asp-items="ViewBag.TaskStatusID"></select>
+                                <span asp-validation-for="TaskStatusID" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label asp-for="TaskPriorityID" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <select asp-for="TaskPriorityID" class="form-control" asp-items="ViewBag.Priority"></select>
+                                <span asp-validation-for="TaskPriorityID" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label asp-for="TaskData" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <textarea asp-for="TaskData" class="form-control"></textarea>
+                                <span asp-validation-for="TaskData" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <button type="submit" class="btn btn-info px-5"> Save</button>
+                            </div>
+                            <div>
+                                <a asp-action="Index">Back to List</a>
                             </div>
                         </div>
                     }
-               
-                    <div class="row mb-3">
-                        <label asp-for="TaskStatusID" class="col-sm-3 col-form-label"></label>
-                        <div class="col-sm-9">
-                            <select asp-for="TaskStatusID" class="form-control" asp-items="ViewBag.TaskStatusID"></select>
-                            <span asp-validation-for="TaskStatusID" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label asp-for="TaskPriorityID" class="col-sm-3 col-form-label"></label>
-                        <div class="col-sm-9">
-                            <select asp-for="TaskPriorityID" class="form-control" asp-items="ViewBag.Priority"></select>
-                            <span asp-validation-for="TaskPriorityID" class="text-danger"></span>
-                        </div>
-                    </div>
-                   
-                    <div class="row mb-3">
-                        <label asp-for="TaskData" class="col-sm-3 col-form-label"></label>
-                        <div class="col-sm-9">
-                            <textarea asp-for="TaskData" class="form-control"></textarea>
-                            <span asp-validation-for="TaskData" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <label class="col-sm-3 col-form-label"></label>
-                        <div class="col-sm-9">
-                            <button type="submit" class="btn btn-info px-5"> Save</button>
-                        </div>
-                        <div>
-                            <a asp-action="Index">Back to List</a>
-                        </div>
-                    </div>
-                </form>
+     
             </div>
         </div>
 

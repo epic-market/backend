@@ -9,6 +9,7 @@ using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using EpicMarket.Entities.CustomModels;
+using Microsoft.CodeAnalysis;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -41,7 +42,40 @@ namespace EpicMarket.Admin.MVC.Controllers
                 .Include(c => c.Business)
                .Include(c=>c.StatusOptionSets)
                 .FirstOrDefaultAsync(m => m.ID == id);
-            if (catalog == null)
+
+
+
+			var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
+			var attachmentTypeID_Product = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.PRODUCTIMAGES);
+
+
+
+			var attachments = from attachment in _context.Attachments
+							  join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+							  join entity in _context.Entity on link.EntityID equals entity.ID
+							  where entity.Name == EntityConstants.Catelog && link.RecordID == id && link.AttachmentTypeID == attachmentTypeID_Product.ID
+							  select new
+							  {
+								  ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
+							  };
+
+			var thumbnail = from attachment in _context.Attachments
+							join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+							join entity in _context.Entity on link.EntityID equals entity.ID
+							where entity.Name == EntityConstants.Catelog && link.RecordID == id && link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
+							orderby attachment.CreateDate descending
+							select new
+							{
+								ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
+							};
+
+
+
+			ViewBag.thumbnail = thumbnail.Select(a => a.ImagePath).FirstOrDefault();
+			ViewBag.attachments = attachments.Select(a => a.ImagePath).ToList();
+
+
+			if (catalog == null)
             {
                 return NotFound();
             }
