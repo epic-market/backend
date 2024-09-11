@@ -63,7 +63,7 @@ namespace EpicMarket.Services
 
         }
 
-        public int SaveComments(CommentDTO commentDTO, string LoggedInUserName)
+        public async Task<int> SaveComments(CommentDTO commentDTO, string LoggedInUserName)
         {
             var EntityForTasks = _context.Entity.FirstOrDefault(m => m.Name == EntityConstants.Tasks);
             Comment commentSave;
@@ -76,16 +76,18 @@ namespace EpicMarket.Services
                 CreateBy = LoggedInUserName,
                 EntityID = EntityForTasks.ID,
             };
-            _context.Comments.Add(commentSave);
-            unitOfWork.Complete();
+            await _context.Comments.AddAsync(commentSave);
+            await unitOfWork.Complete();
             return commentSave.ID;
         }
 
-        public async Task<GetDataResult<List<CommentListDTO>>> GetAllComments(int taskId)
+        public async Task<GetDataResult<List<CommentListDTO>>> GetAllComments(CommentListParams commentDTO)
         {
             var eventModel = await _context.Entity.Where(row => row.Name == EntityConstants.Tasks).FirstOrDefaultAsync();
-            var comments = await _context.Comments
-                                        .Where(comment => comment.RecordID == taskId && comment.EntityID == eventModel.ID)
+            var comments =  _context.Comments.Where(comment => comment.RecordID == commentDTO.TaskId && comment.EntityID == eventModel.ID);
+            int totalCount = comments.Count();
+            var pagedOutlets = comments.Skip((commentDTO.PageIndex - 1) * commentDTO.pageSize).Take(commentDTO.pageSize);
+            var commentslist = await pagedOutlets
                                         .Select(comment => new CommentListDTO
                                         {
                                             ID = comment.ID,
@@ -98,7 +100,8 @@ namespace EpicMarket.Services
 
             return new GetDataResult<List<CommentListDTO>>
             {
-                items = comments,
+                items = commentslist,
+                Count = totalCount
             };
         }
         public async Task<TaskDeatilDTO> GettaskDetails(int taskId) //get attachments if any

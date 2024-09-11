@@ -110,13 +110,13 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpGet("Comments")]
         [Authorize]
-        public async Task<ActionResult<OperationResult<GetDataResult<List<CommentListDTO>>>>> GetAllComments([FromQuery] int taskId)
+        public async Task<ActionResult<OperationResult<GetDataResult<List<CommentListDTO>>>>> GetAllComments([FromQuery] CommentListParams commentDTO)
         {
             var response = new OperationResult<GetDataResult<List<CommentListDTO>>>();
 
-            this.logger.LogInformation("Support Controller -> GetAllComments()-> params {0}", JsonConvert.SerializeObject(new { Params = taskId }));
+            this.logger.LogInformation("Support Controller -> GetAllComments()-> params {0}", JsonConvert.SerializeObject(new { Params = commentDTO }));
 
-            var results = await tasksService.GetAllComments(taskId);
+            var results = await tasksService.GetAllComments(commentDTO);
 
             this.logger.LogInformation("Support Controller -> GetAllComments()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
 
@@ -131,10 +131,10 @@ namespace EpicMarket.Business.API.Controllers
         {
             var response = new OperationResult<int>();
             this.logger.LogInformation("Support Controller -> AddTaskComment()-> params {0}", JsonConvert.SerializeObject(new { Params = commentDTO }));
-             response.Data = tasksService.SaveComments(commentDTO,this.LoggedInUserName);
+             response.Data = await tasksService.SaveComments(commentDTO,this.LoggedInUserName);
 
             this.logger.LogInformation("Support Controller -> Attachment()-> params {0}", JsonConvert.SerializeObject(new { Params = commentDTO }));
-            if (commentDTO.UploadFiles.Length > 0 && commentDTO.TaskId.Value > 0)
+            if (commentDTO.UploadFiles?.Length > 0 && commentDTO.TaskId.Value > 0)
             {
                 foreach (var proof in commentDTO.UploadFiles)
                 {
