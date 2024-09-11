@@ -53,6 +53,13 @@ namespace EpicMarket.Entities
         public int pageSize { get; set; } = 10;
 
     }
+    public class CommentListParams
+    {
+        public int PageIndex { get; set; } = 1;
+        public int pageSize { get; set; } = 10;
+        public int? TaskId { get; set; }
+    }
+
     public class CommentDTO
     {
         public string CommentText { get; set; }
