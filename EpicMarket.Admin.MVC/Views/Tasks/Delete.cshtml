@@ -1,136 +1,116 @@
 ﻿@model EpicMarket.Data.Models.Tasks
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Delete Task";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Delete</h1>
+<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+    <div class="breadcrumb-title pe-3">Tasks</div>
+    <div class="ps-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 p-0">
+                <li class="breadcrumb-item">
+                    <a asp-action="Index"><i class="bx bx-home-alt"></i></a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Delete Task</li>
+            </ol>
+        </nav>
+    </div>
+</div>
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>Tasks</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ParentID)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ParentID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TaskPriorityID)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TaskPriorityID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PrimaryAssignedToPersonID)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PrimaryAssignedToPersonID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DateAssigned)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DateAssigned)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DateDue)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DateDue)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DateStarted)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DateStarted)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DateCompleted)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DateCompleted)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SubmittedByPersonID)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.SubmittedByPersonID)
-        </dd>
-        <dt class = "col-sm-2">
-    @*         @Html.DisplayNameFor(model => model.EffectiveDate) *@
-        </dt>
-        <dd class = "col-sm-10">
-           @*  @Html.DisplayFor(model => model.EffectiveDate) *@
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TaskData)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TaskData)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ReceivedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ReceivedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TaskTypes)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TaskTypes.ID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TaskStatusType)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TaskStatusType.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreateDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreateDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreateBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreateBy)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ModifiedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ModifiedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ModifiedBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ModifiedBy)
-        </dd>
-    </dl>
-    
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="ID" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
+<div class="card">
+    <div class="card-body">
+        <h3 class="card-title">Confirm Task Deletion</h3>
+        <p class="card-text">Are you sure you want to delete this task?</p>
+
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <tr>
+                    <th class="bg-light" style="width: 30%;">@Html.DisplayNameFor(model => model.Name)</th>
+                    <td>@Html.DisplayFor(model => model.Name)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.Description)</th>
+                    <td>@Html.DisplayFor(model => model.Description)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.ParentID)</th>
+                    <td>@Html.DisplayFor(model => model.ParentID)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.TaskPriorityID)</th>
+                    <td>@Html.DisplayFor(model => model.TaskPriorityID)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.PrimaryAssignedToPersonID)</th>
+                    <td>@Html.DisplayFor(model => model.PrimaryAssignedToPersonID)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.DateAssigned)</th>
+                    <td>@Html.DisplayFor(model => model.DateAssigned)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.DateDue)</th>
+                    <td>@Html.DisplayFor(model => model.DateDue)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.DateStarted)</th>
+                    <td>@Html.DisplayFor(model => model.DateStarted)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.DateCompleted)</th>
+                    <td>@Html.DisplayFor(model => model.DateCompleted)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.SubmittedByPersonID)</th>
+                    <td>@Html.DisplayFor(model => model.SubmittedByPersonID)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.TaskData)</th>
+                    <td>@Html.DisplayFor(model => model.TaskData)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.ReceivedDate)</th>
+                    <td>@Html.DisplayFor(model => model.ReceivedDate)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.TaskTypes)</th>
+                    <td>@Html.DisplayFor(model => model.TaskTypes.ID)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.TaskStatusType)</th>
+                    <td>@Html.DisplayFor(model => model.TaskStatusType.Id)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.CreateDate)</th>
+                    <td>@Html.DisplayFor(model => model.CreateDate)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.CreateBy)</th>
+                    <td>@Html.DisplayFor(model => model.CreateBy)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.ModifiedDate)</th>
+                    <td>@Html.DisplayFor(model => model.ModifiedDate)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.ModifiedBy)</th>
+                    <td>@Html.DisplayFor(model => model.ModifiedBy)</td>
+                </tr>
+            </table>
+        </div>
+
+        <form asp-action="Delete" class="mt-4">
+            <input type="hidden" asp-for="ID" />
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="bx bx-arrow-back me-1"></i> Back to List
+                </a>
+                <button type="submit" class="btn btn-danger">
+                    <i class="bx bx-trash me-1"></i> Delete
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
