@@ -35,7 +35,6 @@ namespace EpicMarket.Entities
         public string TaskStatus { get; set; }
         public DateTime? CreateDate { get; set; }
         public List<string> UploadFiles { get; set; }
-        public List<CommentListDTO> CommentsList { get; set; }
     }
 
     public class TasksListDTO
@@ -54,11 +53,19 @@ namespace EpicMarket.Entities
         public int pageSize { get; set; } = 10;
 
     }
+    public class CommentListParams
+    {
+        public int PageIndex { get; set; } = 1;
+        public int pageSize { get; set; } = 10;
+        public int? TaskId { get; set; }
+    }
+
     public class CommentDTO
     {
         public string CommentText { get; set; }
         public string Status { get; set; }
         public int? TaskId { get; set; }
+        public IFormFile[] UploadFiles { get; set; }
     }
     public class CommentListDTO
     {

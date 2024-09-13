@@ -63,7 +63,7 @@ namespace EpicMarket.Services
 
         }
 
-        public int SaveComments(CommentDTO commentDTO, string LoggedInUserName)
+        public async Task<int> SaveComments(CommentDTO commentDTO, string LoggedInUserName)
         {
             var EntityForTasks = _context.Entity.FirstOrDefault(m => m.Name == EntityConstants.Tasks);
             Comment commentSave;
@@ -76,26 +76,32 @@ namespace EpicMarket.Services
                 CreateBy = LoggedInUserName,
                 EntityID = EntityForTasks.ID,
             };
-            _context.Comments.Add(commentSave);
-            unitOfWork.Complete();
+            await _context.Comments.AddAsync(commentSave);
+            await unitOfWork.Complete();
             return commentSave.ID;
         }
 
-        public async Task<GetDataResult<List<CommentDTO>>> GetAllComments(int taskId)
+        public async Task<GetDataResult<List<CommentListDTO>>> GetAllComments(CommentListParams commentDTO)
         {
-            var comments = await _context.Comments
-                                        .Where(c => c.RecordID == taskId)
-                                        .Select(c => new CommentDTO
+            var eventModel = await _context.Entity.Where(row => row.Name == EntityConstants.Tasks).FirstOrDefaultAsync();
+            var comments =  _context.Comments.Where(comment => comment.RecordID == commentDTO.TaskId && comment.EntityID == eventModel.ID);
+            int totalCount = comments.Count();
+            var pagedOutlets = comments.Skip((commentDTO.PageIndex - 1) * commentDTO.pageSize).Take(commentDTO.pageSize);
+            var commentslist = await pagedOutlets
+                                        .Select(comment => new CommentListDTO
                                         {
-                                            TaskId = c.RecordID,
-                                            CommentText = c.CommentText,
-                                            Status = c.Status,
+                                            ID = comment.ID,
+                                            CommentText = comment.CommentText,
+                                            Status = comment.Status,
+                                            CreateBy = comment.CreateBy,
+                                            CreateDate = comment.CreateDate
                                         })
                                         .ToListAsync();
 
-            return new GetDataResult<List<CommentDTO>>
+            return new GetDataResult<List<CommentListDTO>>
             {
-                items = comments,
+                items = commentslist,
+                Count = totalCount
             };
         }
         public async Task<TaskDeatilDTO> GettaskDetails(int taskId) //get attachments if any
@@ -122,17 +128,7 @@ namespace EpicMarket.Services
                 TaskStatus = c.TaskStatusType.Status,
                 TaskData = c.TaskData,
                 CreateDate = c.CreateDate,
-                UploadFiles = uploadFilePaths.Select(a => a.ImagePath).ToList(),
-                CommentsList = _context.Comments
-                          .Where(comment => comment.RecordID == c.ID)
-                          .Select(comment => new CommentListDTO
-                          {
-                              ID = comment.ID,
-                              CommentText = comment.CommentText,
-                              Status = comment.Status,
-                              CreateBy = comment.CreateBy,
-                              CreateDate = comment.CreateDate
-                          }).ToList()
+                UploadFiles = uploadFilePaths.Select(a => a.ImagePath).ToList()
             }).FirstOrDefaultAsync();
         }
         public async Task<GetDataResult<List<TasksListDTO>>> GetSupportByPersonId(int personId, TasksListParams tasksListParams)
