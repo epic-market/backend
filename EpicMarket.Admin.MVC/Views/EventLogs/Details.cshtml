@@ -1,11 +1,11 @@
 ﻿@model EpicMarket.Data.Models.EventLog
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Event Log Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+<div class="page-breadcrumb d-flex align-items-center mb-3">
     <div class="breadcrumb-title pe-3">Event Log</div>
     <div class="ps-3">
         <nav aria-label="breadcrumb">
@@ -18,75 +18,64 @@
         </nav>
     </div>
 </div>
-<hr />
 
-
-<div class="card mb-4">
+<div class="card">
     <div class="card-body">
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.RecordID)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.RecordID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Source)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Source)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Data)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Data)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Event)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Event.ID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Entity)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Entity.ID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreateDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreateDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreateBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreateBy)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ModifiedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ModifiedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ModifiedBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ModifiedBy)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.ID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title mb-0">Event Log Details</h5>
+            <a asp-action="Edit" class="btn btn-primary" asp-route-id="@Model?.ID">
+                <i class="bx bx-edit me-1"></i> Edit
+            </a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <tr>
+                    <th class="bg-light" style="width: 30%;">@Html.DisplayNameFor(model => model.RecordID)</th>
+                    <td>@Html.DisplayFor(model => model.RecordID)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.Source)</th>
+                    <td>@Html.DisplayFor(model => model.Source)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.Description)</th>
+                    <td>@Html.DisplayFor(model => model.Description)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.Data)</th>
+                    <td>@Html.DisplayFor(model => model.Data)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.Event)</th>
+                    <td>@Html.DisplayFor(model => model.Event.ID)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.Entity)</th>
+                    <td>@Html.DisplayFor(model => model.Entity.ID)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.CreateDate)</th>
+                    <td>@Html.DisplayFor(model => model.CreateDate)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.CreateBy)</th>
+                    <td>@Html.DisplayFor(model => model.CreateBy)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.ModifiedDate)</th>
+                    <td>@Html.DisplayFor(model => model.ModifiedDate)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.ModifiedBy)</th>
+                    <td>@Html.DisplayFor(model => model.ModifiedBy)</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bx bx-arrow-back me-1"></i> Back to List
+        </a>
+    </div>
 </div>

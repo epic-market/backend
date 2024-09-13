@@ -7,28 +7,25 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
-using System.Reflection.Metadata;
-using System.Security.Claims;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    public class PagesController : Controller
+    public class AppRolesController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public PagesController(ApplicationDbContext context)
+        public AppRolesController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: Pages
+        // GET: AppRoles
         public async Task<IActionResult> Index()
         {
-            var authDbContext = _context.Pages.Include(p => p.ApplicationsTable);
-            return View(await authDbContext.ToListAsync());
+            return View(await _context.Roles.ToListAsync());
         }
 
-        // GET: Pages/Details/5
+        // GET: AppRoles/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -36,45 +33,39 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var page = await _context.Pages
-                .Include(p => p.ApplicationsTable)
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (page == null)
+            var appRole = await _context.Roles
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (appRole == null)
             {
                 return NotFound();
             }
 
-            return View(page);
+            return View(appRole);
         }
 
-        // GET: Pages/Create
+        // GET: AppRoles/Create
         public IActionResult Create()
         {
-            ViewData["ApplicationId"] = new SelectList(_context.ApplicationsTable, "ID", "Name");
             return View();
         }
 
-        // POST: Pages/Create
+        // POST: AppRoles/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Name,Description,ApplicationId,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Page page)
+        public async Task<IActionResult> Create([Bind("Id,Name,NormalizedName,ConcurrencyStamp")] AppRole appRole)
         {
-            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
-            page.CreateBy = userName;
-            page.CreateDate = DateTime.UtcNow;
             if (ModelState.IsValid)
             {
-                _context.Add(page);
+                _context.Add(appRole);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ApplicationId"] = new SelectList(_context.ApplicationsTable, "ID", "Name", page.ApplicationId);
-            return View(page);
+            return View(appRole);
         }
 
-        // GET: Pages/Edit/5
+        // GET: AppRoles/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -82,26 +73,22 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var page = await _context.Pages.FindAsync(id);
-            if (page == null)
+            var appRole = await _context.Roles.FindAsync(id);
+            if (appRole == null)
             {
                 return NotFound();
             }
-            ViewData["ApplicationId"] = new SelectList(_context.ApplicationsTable, "ID", "Name", page.ApplicationId);
-            return View(page);
+            return View(appRole);
         }
 
-        // POST: Pages/Edit/5
+        // POST: AppRoles/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,ApplicationId,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Page page)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,NormalizedName,ConcurrencyStamp")] AppRole appRole)
         {
-            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
-            page.ModifiedBy = userName;
-            page.ModifiedDate = DateTime.UtcNow;
-            if (id != page.ID)
+            if (id != appRole.Id)
             {
                 return NotFound();
             }
@@ -110,12 +97,12 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 try
                 {
-                    _context.Update(page);
+                    _context.Update(appRole);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PageExists(page.ID))
+                    if (!AppRoleExists(appRole.Id))
                     {
                         return NotFound();
                     }
@@ -126,11 +113,10 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ApplicationId"] = new SelectList(_context.ApplicationsTable, "ID", "Name", page.ApplicationId);
-            return View(page);
+            return View(appRole);
         }
 
-        // GET: Pages/Delete/5
+        // GET: AppRoles/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -138,35 +124,34 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var page = await _context.Pages
-                .Include(p => p.ApplicationsTable)
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (page == null)
+            var appRole = await _context.Roles
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (appRole == null)
             {
                 return NotFound();
             }
 
-            return View(page);
+            return View(appRole);
         }
 
-        // POST: Pages/Delete/5
+        // POST: AppRoles/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var page = await _context.Pages.FindAsync(id);
-            if (page != null)
+            var appRole = await _context.Roles.FindAsync(id);
+            if (appRole != null)
             {
-                _context.Pages.Remove(page);
+                _context.Roles.Remove(appRole);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool PageExists(int id)
+        private bool AppRoleExists(int id)
         {
-            return _context.Pages.Any(e => e.ID == id);
+            return _context.Roles.Any(e => e.Id == id);
         }
     }
 }

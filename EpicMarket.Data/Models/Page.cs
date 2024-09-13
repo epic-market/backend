@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EpicMarket.Data.Common;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace EpicMarket.Data.Models
 {
-    public class Page
+    public class Page : BaseModel
     {
         [Key]
         public int ID { get; set; }
@@ -24,6 +25,6 @@ namespace EpicMarket.Data.Models
         public int ApplicationId { get; set; }
         public virtual ICollection<HelpItem> HelpItems { get; set; }
         [ForeignKey("ApplicationId")]
-        public virtual ApplicationsTable EventCategorys { get; set; }
+        public virtual ApplicationsTable ApplicationsTable { get; set; }
     }
 }

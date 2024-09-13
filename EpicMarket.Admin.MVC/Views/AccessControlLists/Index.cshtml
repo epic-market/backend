@@ -1,4 +1,4 @@
-﻿@model IEnumerable<EpicMarket.Data.ApplicationModels.AccessControlList>
+﻿@model EpicMarket.Admin.MVC.Models.SecurityMatrixViewModel
 
 @{
     ViewData["Title"] = "Index";
@@ -18,54 +18,120 @@
         </nav>
     </div>
 </div>
-
-<p class="d-flex justify-content-end">
-    <a asp-action="Create" class="btn btn-primary px-5"><i class='bx bx-plus mr-1'></i>Create New</a>
-</p>
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">Notification</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            <!-- Toast message will be inserted here -->
+        </div>
+    </div>
+</div>
 
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
+
             <table id="example" class="table table-striped table-bordered" style="width:100%">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Role)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.AccessType)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Securable)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Role.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.AccessType.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Securable.Name)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
-            @section Scripts {
-                <script>
-                    $(document).ready(function () {
-                        $('#example').DataTable();
-                    });
-                </script>
+                <thead>
+                    <tr>
+                        <th>Securable</th>
+                        @foreach (var role in Model.RoleNames)
+                        {
+                            <th>@role</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var securable in Model.Securables)
+                    {
+                        <tr>
+                            <td>@securable.Name</td>
+                            @foreach (var role in Model.RoleNames)
+                            {
+                                <td>
+                                    @Html.DropDownList($"AccessType_{securable.Name}_{role}",
+                                             new SelectList(Model.AccessTypes, "ID", "Name", securable.RoleAccess[role]),
+                                             new
+                                             {
+                                                 @class = "form-control access-type-dropdown",
+                                                 data_securable = securable.Name,
+                                                 data_role = role
+                                             })
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var toast = new bootstrap.Toast(document.getElementById('liveToast'));
+
+            $('.access-type-dropdown').change(function () {
+                var dropdown = $(this);
+                var securable = dropdown.data('securable');
+                var role = dropdown.data('role');
+                var accessTypeId = dropdown.val();
+                var accessTypeName = dropdown.find("option:selected").text();
+
+                // Add loading indicator
+                dropdown.prop('disabled', true);
+                dropdown.addClass('opacity-50');
+
+                $.ajax({
+                    url: '@Url.Action("UpdateAccessType", "AccessControlLists")',
+                    type: 'POST',
+                    data: {
+                        securable: securable,
+                        role: role,
+                        accessTypeId: accessTypeId
+                    },
+                    success: function (result) {
+                        if (result.success) {
+                            showToast(`Access type for ${securable} - ${role} updated to ${accessTypeName}.`, 'success');
+                        } else {
+                            showToast('An error occurred while updating the access type.', 'danger');
+                        }
+                    },
+                    error: function (error) {
+                        showToast('An error occurred while updating the access type.', 'danger');
+                    },
+                    complete: function () {
+                        // Remove loading indicator
+                        dropdown.prop('disabled', false);
+                        dropdown.removeClass('opacity-50');
+                    }
+                });
+            });
+
+            function showToast(message, type = 'success') {
+                var toastEl = document.getElementById('liveToast');
+                var toastBody = toastEl.querySelector('.toast-body');
+
+                // Set the message
+                toastBody.textContent = message;
+
+                // Set the color based on the type
+                toastEl.className = 'toast';
+                if (type === 'success') {
+                    toastEl.classList.add('bg-success', 'text-white');
+                } else if (type === 'danger') {
+                    toastEl.classList.add('bg-danger', 'text-white');
+                }
+
+                // Show the toast
+                toast.show();
             }
+        });
+    </script>
+}

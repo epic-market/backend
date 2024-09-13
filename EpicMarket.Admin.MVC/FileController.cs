@@ -31,7 +31,6 @@ namespace EpicMarket.Admin.MVC
             }
         }
 
-
         public async Task<FileDto> GetFileByKeyAsync(string key)
         {
             var s3Object = await _s3Client.GetObjectAsync(_bucketName, key);

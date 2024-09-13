@@ -35,7 +35,7 @@
                 @Html.DisplayNameFor(model => model.Description)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.EventCategorys)
+                @Html.DisplayNameFor(model => model.ApplicationsTable)
             </th>
             <th></th>
         </tr>
@@ -50,7 +50,7 @@
                 @Html.DisplayFor(modelItem => item.Description)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.EventCategorys.Name)
+               @Html.DisplayFor(modelItem => item.ApplicationsTable.Name)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |

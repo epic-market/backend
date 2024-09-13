@@ -58,6 +58,27 @@
 						<div class="menu-title">Home</div>
 					</a>
 				</li>
+			@* 	<li>
+					<a class="has-arrow" href="javascript:;">
+						<div class="parent-icon"><i class="bx bx-menu"></i></div>
+						<div class="menu-title">Menu Levels</div>
+					</a>
+					<ul>
+						<li>
+							<a class="has-arrow" href="javascript:;"><i class="bx bx-right-arrow-alt"></i>Level One</a>
+							<ul>
+								<li>
+									<a class="has-arrow" href="javascript:;"><i class="bx bx-right-arrow-alt"></i>Level Two</a>
+									<ul>
+										<li>
+											<a href="javascript:;"><i class="bx bx-right-arrow-alt"></i>Level Three</a>
+										</li>
+									</ul>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</li> *@
 				<li>
 					<a href="javascript:;" class="has-arrow">
 						<div class="parent-icon">
@@ -69,20 +90,27 @@
 						<li>
 							<a asp-area="" asp-controller="ApplicationConfigurations" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Application Configuations</a>
 						</li>
-						<li>
-							<a asp-area="" asp-controller="ApplicationSecurables" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Application Securables</a>
-						</li>
+						
 						<li>
 							<a asp-area="" asp-controller="ApplicationsTables" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Applications</a>
 						</li>
+
 						<li>
-							<a asp-area="" asp-controller="AccessControlLists" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Access Control List</a>
+							<a class="has-arrow" href="javascript:;"><i class="bx bx-right-arrow-alt"></i>Application Control</a>
+							<ul>
+								<li>
+									<a asp-area="" asp-controller="AccessControlLists" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Access Control List</a>
+								</li>
+								<li>
+									<a asp-area="" asp-controller="ApplicationSecurables" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Application Securables</a>
+								</li>
+								<li>
+									<a asp-area="" asp-controller="AccessTypes" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Access Types OptionSet</a>
+								</li>
+							</ul>
 						</li>
 						<li>
 							<a asp-area="" asp-controller="Entities" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Entities</a>
-						</li>
-						<li >
-							<a asp-area="" asp-controller="AccessTypes" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Access Types OptionSet</a>
 						</li>
 						<li >
 							<a asp-area="" asp-controller="Pages" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Pages</a>
@@ -94,11 +122,17 @@
 							<a asp-area="" asp-controller="Notifications" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Notifications</a>
 						</li>
 						<li>
-							<a asp-area="" asp-controller="OnboardingSteps" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Onboarding Steps</a>
+							<a class="has-arrow" href="javascript:;"><i class="bx bx-right-arrow-alt"></i>OnBoarding Process</a>
+							<ul>
+								<li>
+									<a asp-area="" asp-controller="OnboardingSteps" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Onboarding Steps</a>
+								</li>
+								<li>
+									<a asp-area="" asp-controller="UserOnboardingProgresses" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>User Onboarding Progresses</a>
+								</li>
+							</ul>
 						</li>
-						<li>
-							<a asp-area="" asp-controller="UserOnboardingProgresses" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>User Onboarding Progresses</a>
-						</li>
+						
 					</ul>
 				</li>
 				<li>
@@ -128,7 +162,7 @@
 							<a asp-area="" asp-controller="AppUsers" asp-action="Index"> <i class="bx bx-right-arrow-alt"></i>Users</a>
 						</li>
 						<li class="list-group-item">
-							<a asp-area="" asp-controller="AppUserRoles" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Roles</a>
+							<a asp-area="" asp-controller="AppRoles" asp-action="Index"> <i class="bx bx-right-arrow-alt"></i>Roles</a>
 						</li>
 					</ul>
 				</li>

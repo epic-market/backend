@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.ApplicationModels;
 using EpicMarket.Data.Models;
+using EpicMarket.Admin.MVC.Models;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -20,158 +21,83 @@ namespace EpicMarket.Admin.MVC.Controllers
             _context = context;
         }
 
-        // GET: AccessControlLists
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var authDbContext = _context.AccessControlLists.Include(a => a.AccessType).Include(a => a.Role).Include(a => a.Securable);
-            return View(await authDbContext.ToListAsync());
-        }
 
-        // GET: AccessControlLists/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
+            var roles = _context.Roles.ToList();
+            var securables = _context.ApplicationSecurables.ToList();
+            var accessTypes = _context.AccessTypes.ToList();
+
+            // Assume "Denied" has ID 0
+            var deniedAccessTypeId = 0;
+
+            var viewModel = new SecurityMatrixViewModel
             {
-                return NotFound();
-            }
-
-            var accessControlList = await _context.AccessControlLists
-				.Include(a => a.AccessType)
-                .Include(a => a.Role)
-                .Include(a => a.Securable)
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (accessControlList == null)
-            {
-                return NotFound();
-            }
-
-            return View(accessControlList);
-        }
-
-        // GET: AccessControlLists/Create
-        public IActionResult Create()
-        {
-            ViewData["AccessTypeID"] = new SelectList(_context.Set<AccessType>(), "Id", "Name");
-            ViewData["RoleID"] = new SelectList(_context.Roles, "Id", "Name");
-            ViewData["SecurableID"] = new SelectList(_context.Set<ApplicationSecurables>(), "Id", "Name");
-            return View();
-        }
-
-        // POST: AccessControlLists/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,RoleID,AccessTypeID,SecurableID")] AccessControlList accessControlList)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(accessControlList);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["AccessTypeID"] = new SelectList(_context.Set<AccessType>(), "Id", "Name", accessControlList.AccessTypeID);
-            ViewData["RoleID"] = new SelectList(_context.Roles, "Id", "Name", accessControlList.RoleID);
-            ViewData["SecurableID"] = new SelectList(_context.Set<ApplicationSecurables>(), "Id", "Name", accessControlList.SecurableID);
-            return View(accessControlList);
-        }
-
-        // GET: AccessControlLists/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var accessControlList = await _context.AccessControlLists.FindAsync(id);
-            if (accessControlList == null)
-            {
-                return NotFound();
-            }
-            ViewData["AccessTypeID"] = new SelectList(_context.Set<AccessType>(), "Id", "Name", accessControlList.AccessTypeID);
-            ViewData["RoleID"] = new SelectList(_context.Roles, "Id", "Name", accessControlList.RoleID);
-            ViewData["SecurableID"] = new SelectList(_context.Set<ApplicationSecurables>(), "Id", "Name", accessControlList.SecurableID);
-            return View(accessControlList);
-        }
-
-        // POST: AccessControlLists/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,RoleID,AccessTypeID,SecurableID")] AccessControlList accessControlList)
-        {
-            if (id != accessControlList.ID)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
+                RoleNames = roles.Select(r => r.Name).ToList(),
+                Securables = securables.Select(s => new SecurableViewModel
                 {
-                    _context.Update(accessControlList);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
+                    Name = s.Name,
+                    RoleAccess = roles.ToDictionary(
+                        r => r.Name,
+                        r => _context.AccessControlLists
+                            .FirstOrDefault(rs => rs.RoleID == r.Id && rs.SecurableID == s.Id)?.AccessTypeID ?? deniedAccessTypeId
+                    )
+                }).ToList(),
+                AccessTypes = accessTypes.Select(at => new AccessTypeViewModel
                 {
-                    if (!AccessControlListExists(accessControlList.ID))
+                    ID = at.Id,
+                    Name = at.Name
+                }).ToList(),
+                DefaultAccessTypeId = deniedAccessTypeId
+            };
+
+            return View(viewModel);
+
+
+            //var authDbContext = _context.AccessControlLists.Include(a => a.AccessType).Include(a => a.Role).Include(a => a.Securable);
+            //return View(await authDbContext.ToListAsync());
+        }
+
+
+        [HttpPost]
+        public IActionResult UpdateAccessType(string securable, string role, int accessTypeId)
+        {
+            try
+            {
+                // Find the corresponding RoleSecurable entry and update it
+                var roleSecurable = _context.AccessControlLists
+                    .FirstOrDefault(rs => rs.Securable.Name == securable && rs.Role.Name == role);
+
+                if (roleSecurable == null)
+                {
+                    // Create a new entry if it doesn't exist
+                    roleSecurable = new AccessControlList
                     {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                        Role = _context.Roles.FirstOrDefault(r => r.Name == role),
+                        Securable = _context.ApplicationSecurables.FirstOrDefault(s => s.Name == securable),
+                        AccessTypeID = accessTypeId
+                    };
+                    _context.AccessControlLists.Add(roleSecurable);
                 }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["AccessTypeID"] = new SelectList(_context.Set<AccessType>(), "Id", "Name", accessControlList.AccessTypeID);
-            ViewData["RoleID"] = new SelectList(_context.Roles, "Id", "Name", accessControlList.RoleID);
-            ViewData["SecurableID"] = new SelectList(_context.Set<ApplicationSecurables>(), "Id", "Name", accessControlList.SecurableID);
-            return View(accessControlList);
-        }
+                else
+                {
+                    roleSecurable.AccessTypeID = accessTypeId;
+                }
 
-        // GET: AccessControlLists/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
+                _context.SaveChanges();
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
             {
-                return NotFound();
+                // Log the exception
+                return Json(new { success = false, message = "An error occurred while updating the access type." });
             }
-
-            var accessControlList = await _context.AccessControlLists
-				.Include(a => a.AccessType)
-                .Include(a => a.Role)
-                .Include(a => a.Securable)
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (accessControlList == null)
-            {
-                return NotFound();
-            }
-
-            return View(accessControlList);
         }
 
-        // POST: AccessControlLists/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var accessControlList = await _context.AccessControlLists.FindAsync(id);
-            if (accessControlList != null)
-            {
-                _context.AccessControlLists.Remove(accessControlList);
-            }
+   
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool AccessControlListExists(int id)
-        {
-            return _context.AccessControlLists.Any(e => e.ID == id);
-        }
+     
     }
 }
