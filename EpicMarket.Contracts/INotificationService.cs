@@ -12,7 +12,7 @@ namespace EpicMarket.Contracts
     {
         Task ReadNotification(int NotifificationId);
 
-        Task<List<NotificationDto>> GetAllUnReadNoticationForSpecificUser(int UserID);
+        Task<List<NotificationResult>> GetAllUnReadNoticationForSpecificUser(int UserID);
 
         Task<int> AddNotification(NotificationDto notification, int userID);
 

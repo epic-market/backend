@@ -76,7 +76,7 @@ namespace EpicMarket.Data.Models
         public DbSet<Notification> Notifications { get; set; }
 
         public DbSet<OnboardingStep> OnboardingSteps { get; set; }
-
+        public DbSet<Quicklink> Quicklink { get; set; }
         public DbSet<UserOnboardingProgress> UserOnboardingProgresses { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -245,7 +245,8 @@ namespace EpicMarket.Data.Models
 					typeof(Address),
 					typeof(BusinessEmployeeMap),
 					typeof(AppUser),
-                    typeof(Page)
+                    typeof(Page),
+                   typeof(Quicklink)
                 );
 
 

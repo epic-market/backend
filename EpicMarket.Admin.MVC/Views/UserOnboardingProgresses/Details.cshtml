@@ -40,11 +40,11 @@
                 </tr>
                 <tr>
                     <th class="bg-light">@Html.DisplayNameFor(model => model.User)</th>
-                    <td>@Html.DisplayFor(model => model.User.Id)</td>
+                    <td>@Html.ActionLink(Model.User.UserName, "Details", "AppUsers", new { id = Model.User.Id }, null)</td>
                 </tr>
                 <tr>
                     <th class="bg-light">@Html.DisplayNameFor(model => model.Step)</th>
-                    <td>@Html.DisplayFor(model => model.Step.StepName)</td>
+                    <td>@Html.ActionLink(Model.Step.StepName, "Details", "OnboardingSteps", new { id = Model.Step.Id }, null)</td>
                 </tr>
             </table>
         </div>

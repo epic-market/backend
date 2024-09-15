@@ -42,35 +42,28 @@
                             </div>
             </div>
             <div class="row mb-3">
-                <label asp-for="Type" class="col-sm-3 col-form-label"></label>
-                                    <div class="col-sm-9">
-                                <input asp-for="Type" class="form-control" />
-                <span asp-validation-for="Type" class="text-danger"></span>
-                                    </div>
+                 <label asp-for="ContactMethodId" class="col-sm-3 col-form-label"></label>
+                <div class="col-sm-9">
+                    <select asp-for="ContactMethodId" class="form-control" asp-items="ViewBag.ContactMethodId"></select>
+                </div>
             </div>
-            <div class="row mb-3">
-                <label asp-for="Link" class="col-sm-3 col-form-label"></label>
-                                        <div class="col-sm-9">
-                                <input asp-for="Link" class="form-control" />
-                <span asp-validation-for="Link" class="text-danger"></span>
-                                        </div>
-            </div>
-                                        <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label"></label>
-                                            <div class="col-sm-9">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" asp-for="IsRead" />
-                                                    <label class="form-check-label" for="gridCheck4"> @Html.DisplayNameFor(model => model.IsRead)</label>
-                                                </div>
-                                            </div>
-                                        </div>
-      
-            <div class="row mb-3">
-                <label asp-for="UserId" class="col-sm-3 col-form-label"></label>
-                                            <div class="col-sm-9">
-                                <select asp-for="UserId" class="form-control" asp-items="ViewBag.UserId"></select>
-                                            </div>
-            </div>
+                        <div class="row mb-3">
+                            <label asp-for="QuickLinkId" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <select asp-for="QuickLinkId" class="form-control" asp-items="ViewBag.QuickLinkId"></select>
+                                <a asp-action="Create" asp-controller="Quicklinks" asp-route-returnUrl="@Url.Action("Create", "Notifications")">Not listed? Create one</a>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label asp-for="UserId" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <select class="single-select" asp-for="UserId" class="form-control"
+                                        data-ajax-url="@Url.Action("GetUsers", "AppUsers")">
+                                </select>
+                                <span asp-validation-for="UserId" class="text-danger"></span>
+                            </div>
+                        </div>
                         <div class="row">
                             <label class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
@@ -84,3 +77,34 @@
     </div>
 </div>
 
+            @section Scripts {
+                <script>
+                    $('.single-select').select2({
+                        theme: 'bootstrap4',
+                        width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+                        placeholder: $(this).data('placeholder'),
+                        allowClear: Boolean($(this).data('allow-clear')),
+                        ajax: {
+                            url: $('.single-select').data('ajax-url'),
+                            dataType: 'json',
+                            delay: 250,
+                            data: function (params) {
+                                return {
+                                    search: params.term
+                                };
+                            },
+                            processResults: function (data) {
+                                return {
+                                    results: data
+                                };
+                            },
+                            cache: true
+                        },
+                        minimumInputLength: 1
+                    });
+                </script>
+
+                @{
+                    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+                }
+            }

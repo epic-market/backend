@@ -68,4 +68,6 @@ public DbSet<EpicMarket.Data.Models.OnboardingStep> OnboardingStep { get; set; }
 
 public DbSet<EpicMarket.Data.Models.UserOnboardingProgress> UserOnboardingProgress { get; set; } = default!;
 
+public DbSet<EpicMarket.Data.Models.Quicklink> Quicklink { get; set; } = default!;
+
 }
