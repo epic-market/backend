@@ -22,8 +22,17 @@ namespace EpicMarket.Business.API.Controllers
         private readonly IAttachmentService attachmentService;
         private readonly IFileService fileStoreService;
         private readonly IApplicationConfigurationService applicationConfigurationService;
+        private readonly IUnitOfWork unitOfWork;
 
-        public branchesController(ILogger<branchesController> logger, IBranchService branchService, ApplicationDbContext dbContext,IHttpContextAccessor httpContextAccessor,IAttachmentService attachmentService,IFileService fileStoreService,IApplicationConfigurationService applicationConfigurationService) : base(dbContext, httpContextAccessor)
+        public branchesController(
+                                    ILogger<branchesController> logger,
+                                    IBranchService branchService,
+                                    ApplicationDbContext dbContext,
+                                    IHttpContextAccessor httpContextAccessor,
+                                    IAttachmentService attachmentService,
+                                    IFileService fileStoreService,
+                                    IApplicationConfigurationService applicationConfigurationService,
+                                    IUnitOfWork unitOfWork) : base(dbContext, httpContextAccessor)
 		{
             this.logger = logger;
             this.branchService = branchService;
@@ -31,6 +40,7 @@ namespace EpicMarket.Business.API.Controllers
             this.attachmentService = attachmentService;
             this.fileStoreService = fileStoreService;
             this.applicationConfigurationService = applicationConfigurationService;
+            this.unitOfWork = unitOfWork;
         }
 
         [HttpGet]
@@ -53,9 +63,9 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpGet("DropDown")]
         [Authorize(Roles = ROLES.BUSINESS_OWNER)]
-        public async Task<ActionResult<List<DropDownOptions>>> GetAllOutletsForDropDown()
+        public async Task<ActionResult<List<BranchsDropDownOptions>>> GetAllOutletsForDropDown()
         {
-            var response = new OperationResult<List<DropDownOptions>> ();
+            var response = new OperationResult<List<BranchsDropDownOptions>> ();
 
             var UserID = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
@@ -275,6 +285,32 @@ namespace EpicMarket.Business.API.Controllers
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
             response.Data = true;
             await branchService.DeleteBranch(id, UserName);
+            return Ok(response);
+        }
+
+        [HttpPatch]
+        [Authorize(Roles = ROLES.BUSINESS_OWNER)]
+        public async Task<ActionResult<OperationResult<bool>>> UpdateBrancheStatus( UpdateBrancheStatusParams branchParams)
+        {
+            var response = new OperationResult<bool>();
+
+            this.logger.LogInformation("Branch Controller -> UpdateBrancheStatus()-> params {0}", JsonConvert.SerializeObject(new { Params = branchParams }));
+
+            var outlet = await dbContext.Outlets.FindAsync(branchParams.BranchId);
+            if (outlet != null)
+            {
+                outlet.IsOpen = branchParams.Is_Open;
+                outlet.ModifiedDate= DateTime.UtcNow;
+                outlet.ModifiedBy = this.LoggedInUserName;
+                dbContext.Outlets.Update(outlet);
+                await unitOfWork.Complete();
+                response.Data = true;
+            }
+            else
+            {
+                throw new Exception("Branch Not Found");
+            }
+
             return Ok(response);
         }
 
