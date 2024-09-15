@@ -1,4 +1,4 @@
-﻿@model EpicMarket.Data.Models.ApplicationsTable
+﻿@model EpicMarket.Data.Models.Quicklink
 
 @{
     ViewData["Title"] = "Edit";
@@ -6,7 +6,7 @@
 }
 
 <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-    <div class="breadcrumb-title pe-3">Event Category</div>
+    <div class="breadcrumb-title pe-3">Quick link</div>
     <div class="ps-3">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0 p-0">
@@ -29,21 +29,29 @@
                         <div>
                             <i class="bx bxs-user me-1 font-22 text-info"></i>
                         </div>
-                        <h5 class="mb-0 text-info">Event Category</h5>
+                        <h5 class="mb-0 text-info">Quick link</h5>
                     </div>
                     <hr />
                     <form asp-action="Edit">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                        <input type="hidden" asp-for="ID" />
+                        <input type="hidden" asp-for="Id" />
                         <input type="hidden" asp-for="CreateDate" />
                         <input type="hidden" asp-for="CreateBy" />
                         <input type="hidden" asp-for="ModifiedDate" />
                         <input type="hidden" asp-for="ModifiedBy" />
+                        <input type="hidden" asp-for="IsActive" />
                         <div class="row mb-3">
-                            <label asp-for="Name" class="col-sm-3 col-form-label"></label>
+                            <label asp-for="Title" class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
-                                <input asp-for="Name" class="form-control" />
-                                <span asp-validation-for="Name" class="text-danger"></span>
+                                <input asp-for="Title" class="form-control" />
+                                <span asp-validation-for="Title" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label asp-for="Url" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <input asp-for="Url" class="form-control" />
+                                <span asp-validation-for="Url" class="text-danger"></span>
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -53,13 +61,7 @@
                                 <span asp-validation-for="Description" class="text-danger"></span>
                             </div>
                         </div>
-                        <div class="row mb-3">
-                            <label asp-for="Sequence" class="col-sm-3 col-form-label"></label>
-                            <div class="col-sm-9">
-                                <input asp-for="Sequence" class="form-control" />
-                                <span asp-validation-for="Sequence" class="text-danger"></span>
-                            </div>
-                        </div>
+
                         <div class="row">
                             <label class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
@@ -72,4 +74,3 @@
                     </form>
                 </div>
             </div>
-

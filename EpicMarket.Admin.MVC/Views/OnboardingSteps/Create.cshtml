@@ -49,11 +49,11 @@
                             </div>
             </div>
             <div class="row mb-3">
-                <label asp-for="NavigationURL" class="col-sm-3 col-form-label"></label>
-                                    <div class="col-sm-9">
-                <input asp-for="NavigationURL" class="form-control" />
-                <span asp-validation-for="NavigationURL" class="text-danger"></span>
-                            </div>
+                <label asp-for="QuickLinkId" class="col-sm-3 col-form-label"></label>
+                <div class="col-sm-9">
+                    <select asp-for="QuickLinkId" class="form-control" asp-items="ViewBag.QuickLinkId"></select>
+                     <a asp-action="Create" asp-controller="Quicklinks" asp-route-returnUrl="@Url.Action("Create", "OnboardingSteps")">Not listed? Create one</a>
+                </div>
             </div>
             <div class="row mb-3">
                 <label asp-for="StepOrder" class="col-sm-3 col-form-label"></label>

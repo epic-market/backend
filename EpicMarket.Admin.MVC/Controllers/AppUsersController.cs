@@ -30,6 +30,22 @@ namespace EpicMarket.Admin.MVC.Controllers
             return View(await _context.Users.ToListAsync());
         }
 
+
+
+        [HttpGet]
+        public JsonResult GetUsers(string search)
+        {
+            var users = _context.Users
+                .Where(u => u.UserName.Contains(search))
+                .Select(u => new { id = u.Id, text = u.UserName })
+                .Take(10)
+                .ToList();
+
+            return Json(users);
+        }
+
+
+
         // GET: AppUsers/Details/5
         public async Task<IActionResult> Details(int? id)
         {

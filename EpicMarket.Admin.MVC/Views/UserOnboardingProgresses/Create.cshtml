@@ -35,27 +35,20 @@
                     <hr />
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <div class="row mb-3">
-                        <label asp-for="UserID" class="col-sm-3 col-form-label"></label>
-                        <div class="col-sm-9">
-                            <select asp-for="UserID" class="form-control" asp-items="ViewBag.UserID"></select>
-                            <span asp-validation-for="UserID" class="text-danger"></span>
+                        <div class="row mb-3">
+                            <label asp-for="UserID" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <select class="single-select" asp-for="UserID" class="form-control"
+                                        data-ajax-url="@Url.Action("GetUsers", "AppUsers")">
+                                </select>
+                                <span asp-validation-for="UserID" class="text-danger"></span>
+                            </div>
                         </div>
-                    </div>
                     <div class="row mb-3">
                         <label asp-for="StepID" class="col-sm-3 col-form-label"></label>
                         <div class="col-sm-9">
                             <select asp-for="StepID" class="form-control" asp-items="ViewBag.StepID"></select>
                             <span asp-validation-for="StepID" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label"></label>
-                        <div class="col-sm-9">
-                            <div class="form-check">
-                                <input class="form-check-input" asp-for="IsCompleted" />
-                                <label class="form-check-label" for="gridCheck4"> @Html.DisplayNameFor(model => model.IsCompleted)</label>
-                            </div>
                         </div>
                     </div>
             <div class="row">
@@ -71,3 +64,34 @@
     </div>
 </div>
 
+@section Scripts {
+    <script>
+        $('.single-select').select2({
+            theme: 'bootstrap4',
+            width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+            placeholder: $(this).data('placeholder'),
+            allowClear: Boolean($(this).data('allow-clear')),
+            ajax: {
+                url: $('.single-select').data('ajax-url'),
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        search: params.term
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data
+                    };
+                },
+                cache: true
+            },
+            minimumInputLength: 1
+        });
+    </script>
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

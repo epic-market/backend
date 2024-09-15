@@ -66,88 +66,43 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: Orders/Create
         public IActionResult Create()
         {
-            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id");
-            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID");
-            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Id");
-            return View();
+            var businesses = _context.Businesses.Select(c => new BusinessModel() { Name = c.Name , Id = c.ID}).ToList();
+            return View(businesses);
         }
 
-        // POST: Orders/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpGet]
+        public IActionResult GetBranches(int businessId)
+        {
+            var branches = _context.Outlets
+                .Where(b => b.BussinessID == businessId)
+                .Select(b => new { b.ID, b.Name })
+                .ToList();
+            return Json(branches);
+        }
+
+        [HttpGet]
+        public IActionResult GetProducts(int branchId)
+        {
+            var products = _context.OutletProducts
+                .Where(p => p.OutletID == branchId)
+                .Include(p=>p.Product)
+                .Select(p => new Product { Id = p.Product.ID,Name =  p.Product.Name,Price = (decimal)p.Product.Rate })
+                .ToList();
+            return Json(products);
+        }
+
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,PersonID,BusinessID,OrderType,TotalPrice,TotalItems,OrderAt,Status,PaymentMode,AddressID,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Order order)
+        public IActionResult PlaceOrder([FromBody] SingleOrder order)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(order);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", order.AddressID);
-            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID", order.OutletID);
-            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Id", order.PersonID);
-            return View(order);
+            // Process the order (save to database, etc.)
+            return Ok();
         }
 
-        // GET: Orders/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
 
-            var order = await _context.Orders.Where(o=> o.ID == id).Include(c=>c.Address).FirstOrDefaultAsync();
-            if (order == null)
-            {
-                return NotFound();
-            }
-            ViewData["BusinessID"] = new SelectList(_context.Outlets, "ID", "Name", order.OutletID);
-            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "UserName", order.PersonID);
-            return View(order);
-        }
 
-        // POST: Orders/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,PersonID,BusinessID,OrderType,TotalPrice,TotalItems,OrderAt,Status,PaymentMode,AddressID,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Order order)
-        {
-            if (id != order.ID)
-            {
-                return NotFound();
-            }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(order);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!OrderExists(order.ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", order.AddressID);
-            ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID", order.OutletID);
-            ViewData["PersonID"] = new SelectList(_context.Users, "Id", "Id", order.PersonID);
-            return View(order);
-        }
 
-        // GET: Orders/Delete/5
+
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)

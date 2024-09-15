@@ -30,6 +30,7 @@
 	<link rel="stylesheet" href="~/assets/css/header-colors.css" />
 	<link rel="stylesheet" href="~/assets/plugins/notifications/css/lobibox.min.css" />
 	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 	<title>Epic Market</title>
 </head>
 <body>
@@ -118,9 +119,7 @@
 						<li>
 							<a asp-area="" asp-controller="HelpItems" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Help Items</a>
 						</li>
-						<li>
-							<a asp-area="" asp-controller="Notifications" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Notifications</a>
-						</li>
+						
 						<li>
 							<a class="has-arrow" href="javascript:;"><i class="bx bx-right-arrow-alt"></i>OnBoarding Process</a>
 							<ul>
@@ -146,6 +145,15 @@
 						<li>
 							<a asp-area="" asp-controller="CommunicationQueues" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Communication Queue</a>
 						</li>
+						<li class="list-group-item">
+							<a asp-area="" asp-controller="ContactMethods" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Contact Methods</a>
+						</li>
+						<li>
+							<a asp-area="" asp-controller="Notifications" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Notifications</a>
+						</li>
+						<li>
+							<a asp-area="" asp-controller="Quicklinks" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Quick links</a>
+						</li>
 					</ul>
 				</li>
 				<li class="menu-label">Admin Functionalitys</li>
@@ -163,6 +171,9 @@
 						</li>
 						<li class="list-group-item">
 							<a asp-area="" asp-controller="AppRoles" asp-action="Index"> <i class="bx bx-right-arrow-alt"></i>Roles</a>
+						</li>
+						<li class="list-group-item">
+							<a asp-area="" asp-controller="PersonTypes" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Person Types</a>
 						</li>
 					</ul>
 				</li>
@@ -190,17 +201,9 @@
 						<div class="menu-title">OptionSets</div>
 					</a>
 					<ul>
-						<li class="list-group-item">
-							<a asp-area="" asp-controller="ContactMethods" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Contact Methods</a>
-						</li>
+					
 						<li class="list-group-item">
 							<a asp-area="" asp-controller="Events" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Events</a>
-						</li>
-						<li class="list-group-item">
-							<a asp-area="" asp-controller="EventCategories" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Event Categories OptionSet</a>
-						</li>
-						<li class="list-group-item">
-							<a asp-area="" asp-controller="PersonTypes" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Person Types</a>
 						</li>
 						<li class="list-group-item">
 							<a asp-area="" asp-controller="SupportQuerys" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Support Querys</a>
