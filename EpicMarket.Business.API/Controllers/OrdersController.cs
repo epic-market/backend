@@ -96,6 +96,39 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
+        [HttpGet("Mobile")]
+        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
+        public async Task<ActionResult<OperationResult<GetDataResult<List<OrderMobileResult>>>>> GetAllOrdersForMobile([FromQuery] OrderParams orderParams)
+        {
+            var response = new OperationResult<GetDataResult<List<OrderMobileResult>>>();
+
+            this.logger.LogInformation("Orders Controller -> GetAllOrdersForMobile()-> params {0}", JsonConvert.SerializeObject(new { Params = orderParams }));
+
+            var orderResults = await orderService.GetAllOrdersForMobile(orderParams, this.BusinessId);
+
+            this.logger.LogInformation("Orders Controller -> GetAllOrdersForMobile()-> return {0}", JsonConvert.SerializeObject(new { Value = orderResults }));
+
+            response.Data = orderResults;
+            return Ok(response);
+        }
+
+        [HttpGet("Mobile/{OrderId}")]
+        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
+        public async Task<ActionResult<OperationResult<GetDataResult<OrderMobileDeatilsResult>>>> GetOrdersDetailsForMobile(int OrderId)
+        {
+            var response = new OperationResult<GetDataResult<OrderMobileDeatilsResult>>();
+
+            this.logger.LogInformation("Orders Controller -> GetOrdersDetailsForMobile()-> params {0}", JsonConvert.SerializeObject(new { Params = OrderId }));
+
+            var orderResults = await orderService.GetOrdersDetailsForMobile(OrderId, this.BusinessId);
+
+            this.logger.LogInformation("Orders Controller -> GetOrdersDetailsForMobile()-> return {0}", JsonConvert.SerializeObject(new { Value = orderResults }));
+
+            response.Data = orderResults;
+
+            return Ok(response);
+        }
+
 
     }
 }

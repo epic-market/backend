@@ -337,8 +337,25 @@ namespace EpicMarket.Services
 			{
 				throw new Exception("Product Not Found");
 			}
-			
+        }
 
+        public async Task<int> QuickActions(QuickActionsParams quickActionsParams, string UserName)
+        {
+            var catalog = await _context.Catalogs.FindAsync(quickActionsParams.ProductId);
+			if (catalog != null)
+			{
+				catalog.InStock= quickActionsParams.InStock == null ? catalog.InStock : quickActionsParams.InStock.Value;
+                catalog.IsRecommended = quickActionsParams.IsRecommended == null ? catalog.IsRecommended : quickActionsParams.IsRecommended.Value;
+                catalog.ModifiedDate = DateTime.Now;
+                catalog.ModifiedBy = UserName;
+                _context.Catalogs.Update(catalog);
+				await unitOfWork.Complete();
+                return catalog.ID;
+			}
+			else
+			{
+				throw new Exception("Product Not Found");
+			}
         }
     }
 
