@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.ApplicationModels;
+using System.Reflection.Emit;
 
 namespace EpicMarket.Admin.MVC.Data;
 
@@ -17,6 +18,20 @@ public class AuthDbContext : IdentityDbContext<AppUser, AppRole, int, IdentityUs
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+        builder.Entity<AppUserRole>()
+.ToTable("AspNetUserRoles");
+        builder.Entity<AppUserRole>()
+           .HasKey(ur => new { ur.UserId, ur.RoleId });
+        builder.Entity<AppUserRole>()
+           .HasOne(ur => ur.User)
+           .WithMany(u => u.UserRoles)
+           .HasForeignKey(ur => ur.UserId)
+           .HasPrincipalKey(u => u.Id);
+        builder.Entity<AppUserRole>()
+           .HasOne(ur => ur.Roles)
+           .WithMany(r => r.UserRoles)
+           .HasForeignKey(ur => ur.RoleId)
+           .HasPrincipalKey(r => r.Id);
         // Customize the ASP.NET Identity model and override the defaults if needed.
         // For example, you can rename the ASP.NET Identity table names and more.
         // Add your customizations after calling base.OnModelCreating(builder);

@@ -17,11 +17,13 @@ namespace EpicMarket.Admin.MVC.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<AppUser> userManager;
+        private readonly RoleManager<AppRole> roleManager;
 
-        public AppUsersController(ApplicationDbContext context, UserManager<AppUser> userManager)
+        public AppUsersController(ApplicationDbContext context, UserManager<AppUser> userManager,RoleManager<AppRole> roleManager)
         {
             _context = context;
             this.userManager = userManager;
+            this.roleManager = roleManager;
         }
 
         // GET: AppUsers
@@ -55,11 +57,16 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
 
             var appUser = await _context.Users
+                       .Include(u => u.UserRoles)
+                       .ThenInclude(ur => ur.Roles)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (appUser == null)
             {
                 return NotFound();
             }
+            var roles = string.Join(", ", appUser.UserRoles.Select(ur => ur.Roles.Name));
+            // Pass roles to the view
+            ViewData["Roles"] = roles;
 
             return View(appUser);
         }
@@ -76,6 +83,14 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             var appUser = await _context.Users
                 .FirstOrDefaultAsync(m => m.Id == id);
+
+            var roles = await userManager.GetRolesAsync(appUser);
+            var allRoles = await roleManager.Roles.ToListAsync();
+
+            var selectedRoles = allRoles.Select(r => new { Name = r.Name, Selected = roles.Contains(r.Name) }).ToList();
+
+            ViewBag.Roles = selectedRoles;
+
             if (appUser == null)
             {
                 return NotFound();
@@ -88,39 +103,57 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("FirstName,LastName,UniqueGuid,OTP,LastActive,Id,UserName,NormalizedUserName,Email,NormalizedEmail,EmailConfirmed,PasswordHash,SecurityStamp,ConcurrencyStamp,PhoneNumber,PhoneNumberConfirmed,TwoFactorEnabled,LockoutEnd,LockoutEnabled,AccessFailedCount")] AppUser appUser)
+        public async Task<IActionResult> Edit(int id, [Bind("FirstName,LastName,UniqueGuid,OTP,LastActive,Id,UserName,NormalizedUserName,Email,NormalizedEmail,EmailConfirmed,PasswordHash,SecurityStamp,ConcurrencyStamp,PhoneNumber,PhoneNumberConfirmed,TwoFactorEnabled,LockoutEnd,LockoutEnabled,AccessFailedCount")] AppUser user, string[] SelectedRoles)
         {
-            if (id != appUser.Id)
+            if (id != user.Id)
             {
                 return NotFound();
             }
 
-            appUser.LastActive = DateTime.Now;
-            appUser.NormalizedUserName = userManager.NormalizeName(appUser.UserName);
-            appUser.NormalizedEmail = userManager.NormalizeName(appUser.Email);
-
             if (ModelState.IsValid)
             {
-                try
+                var existingUser = await userManager.FindByIdAsync(id.ToString());
+                if (existingUser == null)
                 {
-                    _context.Users.Update(appUser);
-                _context.SaveChanges();
+                    return NotFound();
+                }
 
-                }
-                catch (DbUpdateConcurrencyException)
+                // Update user properties
+                existingUser.FirstName = user.FirstName;
+                existingUser.LastName = user.LastName;
+                existingUser.UserName = user.UserName;
+                existingUser.Email = user.Email;
+                existingUser.PhoneNumber = user.PhoneNumber;
+                existingUser.TwoFactorEnabled = user.TwoFactorEnabled;
+                existingUser.LastActive = DateTime.Now;
+                existingUser.NormalizedUserName = userManager.NormalizeName(user.UserName);
+                existingUser.NormalizedEmail = userManager.NormalizeName(user.Email);
+                // Update user roles
+                var userRoles = await userManager.GetRolesAsync(existingUser);
+                await userManager.RemoveFromRolesAsync(existingUser, userRoles);
+                await userManager.AddToRolesAsync(existingUser, SelectedRoles);
+
+                // Update user in database
+                var result = await userManager.UpdateAsync(existingUser);
+                if (result.Succeeded)
                 {
-                    if (!AppUserExists(appUser.Id))
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    foreach (var error in result.Errors)
                     {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
+                        ModelState.AddModelError(string.Empty, error.Description);
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
-            return View(appUser);
+
+            // If we got this far, something failed, redisplay form
+            var roles = await roleManager.Roles.ToListAsync();
+            var selectedRoles = roles.Select(r => new { Name = r.Name, Selected = SelectedRoles.Contains(r.Name) }).ToList();
+            ViewBag.Roles = selectedRoles;
+
+            return View(user);
         }
 
         // GET: AppUsers/Delete/5
