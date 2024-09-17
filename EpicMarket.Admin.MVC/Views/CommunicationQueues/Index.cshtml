@@ -25,14 +25,9 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.MessageData)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.Subject)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.MessageText)
-            </th>
+          
             <th>
                 @Html.DisplayNameFor(model => model.Attempts)
             </th>
@@ -41,12 +36,6 @@
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.NotificationRecipient)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.SysStartTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.SysEndTime)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.ContactMethod)
@@ -58,13 +47,7 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.MessageData)
-            </td>
-            <td>
                 @Html.DisplayFor(modelItem => item.Subject)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.MessageText)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Attempts)
@@ -76,13 +59,7 @@
                 @Html.DisplayFor(modelItem => item.NotificationRecipient)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.SysStartTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.SysEndTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ContactMethod.ID)
+                @Html.DisplayFor(modelItem => item.ContactMethod.Name)
             </td>
             <td>
                 <a asp-action="Details" asp-route-id="@item.ID">Details</a> |

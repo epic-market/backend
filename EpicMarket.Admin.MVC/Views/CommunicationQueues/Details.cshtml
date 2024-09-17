@@ -24,16 +24,16 @@
         <div class="table-responsive">
             <table class="table table-bordered">
                 <tr>
-                    <th class="bg-light" style="width: 30%;">@Html.DisplayNameFor(model => model.MessageData)</th>
-                    <td>@Html.DisplayFor(model => model.MessageData)</td>
-                </tr>
-                <tr>
                     <th class="bg-light">@Html.DisplayNameFor(model => model.Subject)</th>
                     <td>@Html.DisplayFor(model => model.Subject)</td>
                 </tr>
                 <tr>
-                    <th class="bg-light">@Html.DisplayNameFor(model => model.MessageText)</th>
-                    <td>@Html.DisplayFor(model => model.MessageText)</td>
+                    <th class="bg-light" style="width: 30%; height: 100px; overflow-y: auto;">@Html.DisplayNameFor(model => model.MessageData)</th>
+                    <td style="height: 100px; overflow-y: auto;">@Html.DisplayFor(model => model.MessageData)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light" style="width: 30%; height: 100px; overflow-y: auto;">@Html.DisplayNameFor(model => model.MessageText)</th>
+                    <td style="height: 100px; overflow-y: auto;">@Html.DisplayFor(model => model.MessageText)</td>
                 </tr>
                 <tr>
                     <th class="bg-light">@Html.DisplayNameFor(model => model.Attempts)</th>

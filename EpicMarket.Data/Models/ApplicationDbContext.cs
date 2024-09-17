@@ -88,6 +88,8 @@ namespace EpicMarket.Data.Models
         {
 			base.OnModelCreating(modelBuilder);
 
+
+
 			modelBuilder.Entity<AppUser>()
                          .HasIndex(op => op.UserName)
                          .IsUnique();
