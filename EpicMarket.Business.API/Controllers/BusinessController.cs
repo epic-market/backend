@@ -62,7 +62,7 @@ namespace EpicMarket.Business.API.Controllers
 			await userManager.AddToRoleAsync(appuser, ROLES.BUSINESS_OWNER);
 
             this.logger.LogInformation("Business Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
-            if (businessRegisterDto.LogoFile.Length>0)
+            if (businessRegisterDto.LogoFile?.Length>0)
             {
                 var filinsertOutput = await this.SaveFileGlobalAsync(businessRegisterDto.LogoFile, FilePathConstants.LOGOPATH, this.fileStoreService, this.applicationConfigurationService, id);
                 var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
@@ -83,7 +83,7 @@ namespace EpicMarket.Business.API.Controllers
                     RecordID = id
                 });
             }
-            if (businessRegisterDto.ProofFile.Length>0)
+            if (businessRegisterDto.ProofFile?.Length>0)
             {
                 foreach (var proof in businessRegisterDto.ProofFile)
                 {
