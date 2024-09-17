@@ -22,7 +22,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: Notifications
         public async Task<IActionResult> Index()
         {
-            var authDbContext = _context.Notifications.Include(n => n.User);
+            var authDbContext = _context.Notifications.Include(n => n.User).Include(n => n.Quicklink);
             return View(await authDbContext.ToListAsync());
         }
 
@@ -36,6 +36,7 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             var notification = await _context.Notifications
                 .Include(n => n.User)
+                .Include(n => n.Quicklink)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (notification == null)
             {
@@ -48,7 +49,8 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: Notifications/Create
         public IActionResult Create()
         {
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id");
+            ViewData["ContactMethodId"] = new SelectList(_context.ContactMethod, "ID", "Name");
+            ViewData["QuickLinkId"] = new SelectList(_context.Quicklink, "Id", "Url");
             return View();
         }
 
@@ -57,17 +59,19 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Message,DateCreated,Type,Link,IsRead,UserId")] Notification notification)
+        public async Task<IActionResult> Create([Bind("Id,Message,DateCreated,ContactMethodId,QuickLinkId,IsRead,UserId")] Notification notification)
         {
 
             notification.DateCreated = DateTime.Now;
+            notification.IsRead = false;
             if (ModelState.IsValid)
             {
                 _context.Add(notification);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", notification.UserId);
+            ViewData["QuickLinkId"] = new SelectList(_context.Quicklink, "Id", "Url", notification.QuickLinkId);
+            ViewData["ContactMethodId"] = new SelectList(_context.ContactMethod, "ID", "Name",notification.ContactMethodId);
             return View(notification);
         }
 
@@ -84,7 +88,13 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 return NotFound();
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", notification.UserId);
+            var user = await _context.Users.FindAsync(notification.UserId);
+            if (user != null)
+            {
+                ViewData["UserEmail"] = user.UserName; // Assuming the user has an Email property
+            }
+            ViewData["QuickLinkId"] = new SelectList(_context.Quicklink, "Id", "Url",notification.QuickLinkId);
+            ViewData["ContactMethodId"] = new SelectList(_context.ContactMethod, "ID", "Name", notification.ContactMethodId);
             return View(notification);
         }
 
@@ -93,7 +103,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Message,DateCreated,Type,Link,IsRead,UserId")] Notification notification)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Message,DateCreated,ContactMethodId,QuickLinkId,IsRead,UserId")] Notification notification)
         {
             if (id != notification.Id)
             {
@@ -120,7 +130,8 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", notification.UserId);
+            ViewData["QuickLinkId"] = new SelectList(_context.Quicklink, "Id", "Url", notification.QuickLinkId);
+            ViewData["ContactMethodId"] = new SelectList(_context.ContactMethod, "ID", "Name", notification.ContactMethodId);
             return View(notification);
         }
 
@@ -134,6 +145,7 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             var notification = await _context.Notifications
                 .Include(n => n.User)
+                .Include(n => n.Quicklink)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (notification == null)
             {

@@ -27,4 +27,11 @@ namespace EpicMarket.Entities
 
         public bool IsShownOnPage { get; set; }
     }
+    public class BranchsDropDownOptions
+    {
+        public string Text { get; set; }
+
+        public int Value { get; set; }
+        public bool? IsOpen { get; set; } = false;
+    }
 }

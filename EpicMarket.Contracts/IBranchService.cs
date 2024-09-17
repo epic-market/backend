@@ -23,7 +23,7 @@ namespace EpicMarket.Contracts
         Task<BranchDetailResult> GetBranchByID(int branchId);
         Task<int> VerifyBranchs(VerifyDto verifyBranchDto, string UserName, int AdminPersonID, string PageSource);
 
-        Task<List<DropDownOptions>> GetAllOutletsForDropDown(int personID, int businessID);
+        Task<List<BranchsDropDownOptions>> GetAllOutletsForDropDown(int personID, int businessID);
 
         Task DeleteBranch(int branchId, string UserName);
     }

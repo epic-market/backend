@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Nodes;
@@ -177,7 +178,7 @@ namespace EpicMarket.Services
             //1 . filter with BusinessID
             var orders = _context.Orders.Include(c=>c.Outlet).
                 Where(c => c.Outlet.BussinessID == businessID).Include(c=> c.Person);
-
+            
             //2 . Appling Searching
             var sortedOrders = orders.Where(row => row.Person.FirstName.Contains(orderParams.searchTerm.Trim()) || row.ID.ToString() == orderParams.searchTerm.Trim());
 
@@ -220,6 +221,131 @@ namespace EpicMarket.Services
             getData.items = results;
             getData.Count = totalCount;
 
+            return getData;
+        }
+
+
+        public async Task<GetDataResult<List<OrderMobileResult>>> GetAllOrdersForMobile(OrderParams orderParams, int businessID)
+        {
+
+            var getData = new GetDataResult<List<OrderMobileResult>>();
+
+            //1 . filter with BusinessID
+            IQueryable<Order> orders;
+            if (orderParams.BranchId == null)
+            {
+                orders = _context.Orders.Include(c => c.Outlet).
+                Where(c => c.Outlet.BussinessID == businessID).Include(c => c.Person);
+            }
+            else
+            {
+                orders = _context.Orders.Include(c => c.Outlet).
+                Where(c => c.OutletID == orderParams.BranchId).Include(c => c.Person);
+            }
+
+
+            //2 . Appling Searching
+            var sortedOrders = orders.Where(row => row.Person.FirstName.Contains(orderParams.searchTerm.Trim()) || row.ID.ToString() == orderParams.searchTerm.Trim());
+
+
+            // 3 .Appying Sorting
+            switch (orderParams.sortColumn)
+            {
+                case "OrderID":
+                    sortedOrders = orderParams.ascending ? sortedOrders.OrderBy(c => c.ID) : sortedOrders.OrderByDescending(c => c.ID);
+                    break;
+                case "Status":
+                    sortedOrders = orderParams.ascending ? sortedOrders.OrderBy(c => c.StatusId) : sortedOrders.OrderByDescending(c => c.StatusId);
+                    break;
+                default:
+                    break;
+            }
+
+            //getting the total count
+            int totalCount = sortedOrders.Count();
+
+
+            // 4. Apply pagination (skip and take)
+            var pagedOrders = sortedOrders
+                .Skip((orderParams.PageIndex - 1) * orderParams.pageSize) // Skip items for previous pages
+                .Take(orderParams.pageSize); // Take items for the current page
+
+            // 5. Select data and add SRNO
+            var results = await pagedOrders.Select(c => new OrderMobileResult()
+            {
+                ID = c.ID,
+                Status = c.OrderStatusOptions.OrderStatus,
+                Payment_Mode = c.PaymentMode,
+                Ordered_At = c.CreateDate,
+                Branch = new OrderBranchMobileResult()
+                {
+                    ID = c.Outlet.ID,
+                    Name = c.Outlet.Name
+                },
+                Customer = new OrderCustomerMobileResult()
+                {
+                    ID = c.Person.Id,
+                    Username = c.Person.UserName,
+                    Name = c.Person.FirstName + "" + c.Person.LastName
+                },
+                Items_Peak = new OrderItemMobileResult()
+                {
+                    ID =c.OrderDetails.FirstOrDefault().ID,
+                    Quantity= c.OrderDetails.FirstOrDefault().Quantity,
+                    Name= c.OrderDetails.FirstOrDefault().Catalog.Name,
+                    Price=c.OrderDetails.FirstOrDefault().Rate,
+                    Total_price=c.OrderDetails.FirstOrDefault().TotalPrice
+                },
+
+                Items_count = c.TotalItems,
+                Total_price = c.TotalPrice
+            }).ToListAsync();
+
+
+            getData.items = results;
+            getData.Count = totalCount;
+
+            return getData;
+        }
+
+
+        public async Task<GetDataResult<OrderMobileDeatilsResult>> GetOrdersDetailsForMobile(int OrderId, int businessID)
+        {
+
+            var getData = new GetDataResult<OrderMobileDeatilsResult>();
+            
+            var results = await _context.Orders.Include(c => c.Outlet).
+                Where(c => c.ID == OrderId).Include(c => c.Person).Select(c => new OrderMobileDeatilsResult()
+            {
+                ID = c.ID,
+                Status = c.OrderStatusOptions.OrderStatus,
+                Payment_Mode = c.PaymentMode,
+                Ordered_At = c.CreateDate,
+                Branch = new OrderBranchMobileResult()
+                {
+                    ID = c.Outlet.ID,
+                    Name = c.Outlet.Name
+                },
+                Customer = new OrderCustomerMobileResult()
+                {
+                    ID = c.Person.Id,
+                    Username = c.Person.UserName,
+                    Name = c.Person.FirstName + "" + c.Person.LastName
+                },
+                Items = c.OrderDetails.Select(od => new OrderItemMobileResult()
+                    {
+                        ID = od.ID,
+                        Quantity = od.Quantity,
+                        Name = od.Catalog.Name,
+                        Price = od.Rate,
+                        Total_price = od.TotalPrice
+                    }).ToList(),
+
+                Items_count = c.TotalItems,
+                Total_price = c.TotalPrice
+            }).FirstOrDefaultAsync();
+
+            getData.items = results;
             return getData;
         }
 

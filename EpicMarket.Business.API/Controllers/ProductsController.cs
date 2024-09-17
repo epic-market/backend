@@ -243,5 +243,18 @@ namespace EpicMarket.Business.API.Controllers
 
             return Ok(response);
         }
+
+        [HttpPost("QuickActions")]
+        [Authorize(Roles = ROLES.BUSINESS_OWNER)]
+        public async Task<ActionResult<OperationResult<int>>> QuickActions(QuickActionsParams quickActionsParams)
+        {
+            var response = new OperationResult<int>();
+            this.logger.LogInformation("Products Controller -> QuickActions()-> params {0}", JsonConvert.SerializeObject(new { Params = quickActionsParams }));
+            var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
+            var id = await productService.QuickActions(quickActionsParams, UserName);
+            this.logger.LogInformation("Products Controller -> QuickActions()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
+            response.Data = id;
+            return Ok(response);
+        }
     }
 }

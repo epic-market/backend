@@ -39,7 +39,11 @@
                         <div class="row mb-3">
                             <label asp-for="UserID" class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
-                                <select asp-for="UserID" class="form-control" asp-items="ViewBag.UserID"></select>
+                                <select class="single-select" asp-for="UserID" class="form-control"
+                                        data-ajax-url="@Url.Action("GetUsers", "AppUsers")"
+                                        data-initial-id="@Model.UserID"
+                                        data-initial-text="@ViewData["UserEmail"]">
+                                </select>
                                 <span asp-validation-for="UserID" class="text-danger"></span>
                             </div>
                         </div>
@@ -74,3 +78,49 @@
 
 
 
+            @section Scripts {
+                <script>
+                    $(document).ready(function () {
+                        debugger
+                        var $select = $('.single-select');
+                        var initialId = $select.data('initial-id');
+                        var initialText = $select.data('initial-text');
+
+
+                        $select.select2({
+                            theme: 'bootstrap4',
+                            width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+                            placeholder: $(this).data('placeholder'),
+                            allowClear: Boolean($(this).data('allow-clear')),
+                            ajax: {
+                                url: $select.data('ajax-url'),
+                                dataType: 'json',
+                                delay: 250,
+                                data: function (params) {
+                                    return {
+                                        search: params.term
+                                    };
+                                },
+                                processResults: function (data) {
+                                    return {
+                                        results: data
+                                    };
+                                },
+                                cache: true
+                            },
+                            minimumInputLength: 1
+                        });
+
+                        // If there's an initial value, fetch and set it
+                        // If there's an initial value, set it
+                        if (initialId && initialText) {
+                            var option = new Option(initialText, initialId, true, true);
+                            $select.append(option).trigger('change');
+                        }
+                    });
+                </script>
+
+                @{
+                    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+                }
+            }

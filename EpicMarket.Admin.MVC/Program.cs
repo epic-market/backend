@@ -25,6 +25,8 @@ builder.Services.AddDbContext<ApplicationDbContext>();
 
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+
 builder.Services.AddDefaultIdentity<AppUser>().AddDefaultTokenProviders().
         AddRoles<AppRole>()
     .AddEntityFrameworkStores<AuthDbContext>();

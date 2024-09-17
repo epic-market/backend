@@ -16,7 +16,8 @@ namespace EpicMarket.Contracts
 
         Task<int> UpdateStatus(int OrderId, int statusID);
 
-
         Task<GetDataResult<List<OrderResult>>> GetAllOrders(OrderParams orderParams,int businessID);
+        Task<GetDataResult<List<OrderMobileResult>>> GetAllOrdersForMobile(OrderParams orderParams,int businessID);
+        Task<GetDataResult<OrderMobileDeatilsResult>> GetOrdersDetailsForMobile(int OrderId, int businessID);
     }
 }

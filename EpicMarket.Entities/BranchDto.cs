@@ -61,6 +61,7 @@ namespace EpicMarket.Entities
         public int Pincode { get; set; }
 
         public int Count { get; set; }
+        public bool? IsOpen {  get; set; }
 
         public int AddressID { get; set; }
         public double? Latitude { get; set; }
@@ -148,6 +149,13 @@ namespace EpicMarket.Entities
         public List<int> ListOfProductIDs { get; set; }
 
     }
+    public class QuickActionsParams
+    {
+        public int? ProductId { get; set; }
+        public bool? IsRecommended { get; set; }
+        public bool? InStock { get; set; }
+
+    }
 
     public class ActivityParams
     {
@@ -166,5 +174,9 @@ namespace EpicMarket.Entities
         public string CreatedBy { get; set; }
         public DateTime? CreatedDate { get; set; }
     }
-
+    public class UpdateBrancheStatusParams
+    {
+        public int? BranchId { get; set; }
+        public bool? Is_Open { get; set; } = true;
+    }
 }

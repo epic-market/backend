@@ -47,7 +47,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("SecurableID");
 
-                    b.ToTable("AccessControlLists");
+                    b.ToTable("AccessControlLists", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.ApplicationModels.AccessType", b =>
@@ -66,7 +66,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AccessTypes");
+                    b.ToTable("AccessTypes", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.ApplicationModels.ApplicationConfiguration", b =>
@@ -78,10 +78,14 @@ namespace EpicMarket.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -105,7 +109,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("ApplicationConfigurations");
+                    b.ToTable("ApplicationConfigurations", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.ApplicationModels.ApplicationSecurables", b =>
@@ -117,10 +121,14 @@ namespace EpicMarket.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -141,7 +149,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ApplicationSecurables");
+                    b.ToTable("ApplicationSecurables", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Address", b =>
@@ -163,10 +171,14 @@ namespace EpicMarket.Data.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -197,7 +209,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Addresses");
+                    b.ToTable("Addresses", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.AppRole", b =>
@@ -247,6 +259,16 @@ namespace EpicMarket.Data.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CreateBy")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
+
+                    b.Property<DateTime>("CreateDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -351,10 +373,14 @@ namespace EpicMarket.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -380,7 +406,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("ApplicationsTable");
+                    b.ToTable("ApplicationsTable", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Attachment", b =>
@@ -395,10 +421,14 @@ namespace EpicMarket.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("DocumentFile")
                         .HasColumnType("nvarchar(max)");
@@ -434,7 +464,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Attachments");
+                    b.ToTable("Attachments", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.AttachmentLink", b =>
@@ -452,10 +482,14 @@ namespace EpicMarket.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<int>("EntityID")
                         .HasColumnType("int");
@@ -482,7 +516,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("EntityID");
 
-                    b.ToTable("AttachmentLinks");
+                    b.ToTable("AttachmentLinks", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.AttachmentType", b =>
@@ -503,7 +537,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("AttachmentTypes");
+                    b.ToTable("AttachmentTypes", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Blog", b =>
@@ -521,10 +555,14 @@ namespace EpicMarket.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -553,7 +591,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("BlogCategoryID");
 
-                    b.ToTable("Blogs");
+                    b.ToTable("Blogs", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.BlogCategory", b =>
@@ -565,10 +603,14 @@ namespace EpicMarket.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -589,7 +631,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("BlogCategory");
+                    b.ToTable("BlogCategory", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Business", b =>
@@ -616,10 +658,14 @@ namespace EpicMarket.Data.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -669,7 +715,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Businesses");
+                    b.ToTable("Businesses", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.BusinessCategoryInternal", b =>
@@ -681,10 +727,14 @@ namespace EpicMarket.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -708,7 +758,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("BusinessCategories");
+                    b.ToTable("BusinessCategories", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.BusinessEmployeeMap", b =>
@@ -723,10 +773,14 @@ namespace EpicMarket.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<int>("EmployeeID")
                         .HasColumnType("int");
@@ -748,7 +802,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("EmployeeID");
 
-                    b.ToTable("BusinessEmployeeMaps");
+                    b.ToTable("BusinessEmployeeMaps", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Catalog", b =>
@@ -769,10 +823,14 @@ namespace EpicMarket.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -822,7 +880,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Catalogs");
+                    b.ToTable("Catalogs", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Comment", b =>
@@ -838,10 +896,14 @@ namespace EpicMarket.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<int>("EntityID")
                         .HasColumnType("int");
@@ -868,7 +930,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("EntityID");
 
-                    b.ToTable("Comments");
+                    b.ToTable("Comments", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.CommunicationQueue", b =>
@@ -886,10 +948,14 @@ namespace EpicMarket.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -930,7 +996,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("ContactMethodID");
 
-                    b.ToTable("CommunicationQueue");
+                    b.ToTable("CommunicationQueue", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.ContactMethod", b =>
@@ -942,10 +1008,14 @@ namespace EpicMarket.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Description")
                         .HasMaxLength(255)
@@ -968,7 +1038,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("ContactMethod");
+                    b.ToTable("ContactMethod", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.DatabaseVersion", b =>
@@ -996,7 +1066,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DatabaseVersions");
+                    b.ToTable("DatabaseVersions", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Entity", b =>
@@ -1008,10 +1078,14 @@ namespace EpicMarket.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Description")
                         .HasMaxLength(255)
@@ -1034,7 +1108,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Entity");
+                    b.ToTable("Entity", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Event", b =>
@@ -1046,10 +1120,14 @@ namespace EpicMarket.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Description")
                         .HasMaxLength(255)
@@ -1080,7 +1158,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("EventCategoryID");
 
-                    b.ToTable("Event");
+                    b.ToTable("Event", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.EventLog", b =>
@@ -1092,10 +1170,14 @@ namespace EpicMarket.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ID"));
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Data")
                         .HasColumnType("nvarchar(max)");
@@ -1135,7 +1217,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("EventID");
 
-                    b.ToTable("EventLog");
+                    b.ToTable("EventLog", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.FAQ", b =>
@@ -1150,10 +1232,14 @@ namespace EpicMarket.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -1176,7 +1262,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("FAQs");
+                    b.ToTable("FAQs", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.FAQCategory", b =>
@@ -1191,10 +1277,14 @@ namespace EpicMarket.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -1212,7 +1302,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("FAQCategories");
+                    b.ToTable("FAQCategories", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.HelpItem", b =>
@@ -1224,10 +1314,14 @@ namespace EpicMarket.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -1263,7 +1357,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("PageID");
 
-                    b.ToTable("HelpItems");
+                    b.ToTable("HelpItems", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Notification", b =>
@@ -1274,29 +1368,33 @@ namespace EpicMarket.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("ContactMethodId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Link")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Message")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Type")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("QuickLinkId")
+                        .HasColumnType("int");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ContactMethodId");
+
+                    b.HasIndex("QuickLinkId");
+
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.OnboardingStep", b =>
@@ -1310,8 +1408,8 @@ namespace EpicMarket.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("NavigationURL")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("QuickLinkId")
+                        .HasColumnType("int");
 
                     b.Property<string>("StepDescription")
                         .HasColumnType("nvarchar(max)");
@@ -1325,7 +1423,9 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("OnboardingSteps");
+                    b.HasIndex("QuickLinkId");
+
+                    b.ToTable("OnboardingSteps", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Order", b =>
@@ -1340,10 +1440,14 @@ namespace EpicMarket.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -1392,7 +1496,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.OrderDetail", b =>
@@ -1407,10 +1511,14 @@ namespace EpicMarket.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -1441,7 +1549,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("OrderID");
 
-                    b.ToTable("OrderDetails");
+                    b.ToTable("OrderDetails", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.OrderStatusOptions", b =>
@@ -1457,7 +1565,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("OrderStatusOptions");
+                    b.ToTable("OrderStatusOptions", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.OrderTypesOptions", b =>
@@ -1473,7 +1581,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("OrderTypesOptions");
+                    b.ToTable("OrderTypesOptions", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Outlet", b =>
@@ -1497,10 +1605,14 @@ namespace EpicMarket.Data.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -1543,7 +1655,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Outlets");
+                    b.ToTable("Outlets", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.OutletPerson", b =>
@@ -1566,7 +1678,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("PersonId");
 
-                    b.ToTable("OutletPeople");
+                    b.ToTable("OutletPeople", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.OutletProduct", b =>
@@ -1589,7 +1701,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("ProductID");
 
-                    b.ToTable("OutletProducts");
+                    b.ToTable("OutletProducts", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Page", b =>
@@ -1603,9 +1715,30 @@ namespace EpicMarket.Data.Migrations
                     b.Property<int>("ApplicationId")
                         .HasColumnType("int");
 
+                    b.Property<string>("CreateBy")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
+
+                    b.Property<DateTime>("CreateDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
                     b.Property<string>("Description")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValueSql("1");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1616,7 +1749,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("ApplicationId");
 
-                    b.ToTable("Pages");
+                    b.ToTable("Pages", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.PersonType", b =>
@@ -1635,7 +1768,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("PersonTypes");
+                    b.ToTable("PersonTypes", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.ProductInternal", b =>
@@ -1650,10 +1783,14 @@ namespace EpicMarket.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -1677,7 +1814,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("ProductInternals");
+                    b.ToTable("ProductInternals", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.PromotionalLeads", b =>
@@ -1704,7 +1841,50 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PromotionalLeads");
+                    b.ToTable("PromotionalLeads", (string)null);
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.Quicklink", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CreateBy")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
+
+                    b.Property<DateTime>("CreateDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValueSql("1");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Quicklink", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.StatusOptionSet", b =>
@@ -1716,10 +1896,14 @@ namespace EpicMarket.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -1741,7 +1925,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("StatusOptionSets");
+                    b.ToTable("StatusOptionSets", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.SupportQuerys", b =>
@@ -1753,10 +1937,14 @@ namespace EpicMarket.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -1784,7 +1972,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("TypeofPersonid");
 
-                    b.ToTable("SupportQuerys");
+                    b.ToTable("SupportQuerys", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.SupportTicket", b =>
@@ -1799,10 +1987,14 @@ namespace EpicMarket.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
@@ -1838,7 +2030,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("TypeofPersonid");
 
-                    b.ToTable("SupportTickets");
+                    b.ToTable("SupportTickets", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.TaskStatusType", b =>
@@ -1850,10 +2042,14 @@ namespace EpicMarket.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -1875,7 +2071,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TaskStatusTypes");
+                    b.ToTable("TaskStatusTypes", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.TaskType", b =>
@@ -1887,10 +2083,14 @@ namespace EpicMarket.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<int?>("DefaultDueDateHours")
                         .HasColumnType("int");
@@ -1925,7 +2125,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("TaskCategoryID");
 
-                    b.ToTable("TaskTypes");
+                    b.ToTable("TaskTypes", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Tasks", b =>
@@ -1937,10 +2137,14 @@ namespace EpicMarket.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
                     b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.Property<DateTime?>("DateAssigned")
                         .HasColumnType("datetime2");
@@ -2009,7 +2213,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("TaskTypeID");
 
-                    b.ToTable("Tasks");
+                    b.ToTable("Tasks", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.UserAddress", b =>
@@ -2032,7 +2236,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserAddresses");
+                    b.ToTable("UserAddresses", (string)null);
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.UserOnboardingProgress", b =>
@@ -2061,7 +2265,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("UserOnboardingProgresses");
+                    b.ToTable("UserOnboardingProgresses", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -2386,13 +2590,40 @@ namespace EpicMarket.Data.Migrations
 
             modelBuilder.Entity("EpicMarket.Data.Models.Notification", b =>
                 {
+                    b.HasOne("EpicMarket.Data.Models.ContactMethod", "ContactMethod")
+                        .WithMany()
+                        .HasForeignKey("ContactMethodId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EpicMarket.Data.Models.Quicklink", "Quicklink")
+                        .WithMany("Notifications")
+                        .HasForeignKey("QuickLinkId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("EpicMarket.Data.Models.AppUser", "User")
                         .WithMany("Notifications")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("ContactMethod");
+
+                    b.Navigation("Quicklink");
+
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.OnboardingStep", b =>
+                {
+                    b.HasOne("EpicMarket.Data.Models.Quicklink", "Quicklink")
+                        .WithMany("OnboardingProgress")
+                        .HasForeignKey("QuickLinkId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Quicklink");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Order", b =>
@@ -2522,13 +2753,13 @@ namespace EpicMarket.Data.Migrations
 
             modelBuilder.Entity("EpicMarket.Data.Models.Page", b =>
                 {
-                    b.HasOne("EpicMarket.Data.Models.ApplicationsTable", "EventCategorys")
+                    b.HasOne("EpicMarket.Data.Models.ApplicationsTable", "ApplicationsTable")
                         .WithMany("Pages")
                         .HasForeignKey("ApplicationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("EventCategorys");
+                    b.Navigation("ApplicationsTable");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.SupportQuerys", b =>
@@ -2834,6 +3065,13 @@ namespace EpicMarket.Data.Migrations
                     b.Navigation("SupportQuerys");
 
                     b.Navigation("SupportTickets");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.Quicklink", b =>
+                {
+                    b.Navigation("Notifications");
+
+                    b.Navigation("OnboardingProgress");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.StatusOptionSet", b =>

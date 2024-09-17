@@ -1,8 +1,20 @@
-﻿@model EpicMarket.Data.Models.Order
+﻿@model List<BusinessModel>
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
 
-@{
-    ViewData["Title"] = "Create";
-}
+    .card {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    .table thead th {
+        background-color: #343a40;
+        color: white;
+    }
+
+</style>
+
 <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
     <div class="breadcrumb-title pe-3">Orders</div>
     <div class="ps-3">
@@ -11,132 +23,226 @@
                 <li class="breadcrumb-item">
                     <a asp-action="Index"><i class="bx bx-home-alt"></i></a>
                 </li>
-                <li class="breadcrumb-item active" aria-current="page">Create</li>
+                <li class="breadcrumb-item active" aria-current="page">Details</li>
             </ol>
         </nav>
     </div>
 </div>
 <hr />
-<div class="row">
-    <div class="col-xl-9 mx-auto">
-        <div class="card border-top border-0 border-4 border-info">
-            <div class="card-body">
-                <div class="border p-4 rounded">
-                    <div class="card-title d-flex align-items-center">
-                        <div>
-                            <i class="bx bxs-user me-1 font-22 text-info"></i>
-                        </div>
-                        <h5 class="mb-0 text-info">Create Order Details</h5>
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">POS System</h2>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Business Selection</h5>
+                    <div class="form-group">
+                        <label for="businessSelect">Select Business:</label>
+                        <select id="businessSelect" class="form-control">
+                            <option value="">-- Select Business --</option>
+                            @foreach (var business in Model)
+                            {
+                                <option value="@business.Id">@business.Name</option>
+                            }
+                        </select>
                     </div>
-                    <hr />
-                    <form asp-action="Create">
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                        <div class="row mb-3">
-                            <label asp-for="PersonID" class="col-sm-3 col-form-label"></label>
-                            <div class="col-sm-9">
-                                <select asp-for="PersonID" class="form-control" asp-items="ViewBag.PersonID"></select>
-                                <span asp-validation-for="PersonID" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label asp-for="OutletID" class="col-sm-3 col-form-label"></label>
-                            <div class="col-sm-9">
-                                <select asp-for="OutletID" class="form-control" asp-items="ViewBag.BusinessID"></select>
-                                <span asp-validation-for="OutletID" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            @* <label asp-for="OrderType" class="col-sm-3 col-form-label"></label>
-                            <div class="col-sm-9">
-                                <input asp-for="OrderType" class="form-control" />
-                                <span asp-validation-for="OrderType" class="text-danger"></span>
-                            </div> *@
-                        </div>
-                        <div class="row mb-3">
-                            <label asp-for="TotalPrice" class="col-sm-3 col-form-label"></label>
-                            <div class="col-sm-9">
-                                <input asp-for="TotalPrice" class="form-control" />
-                                <span asp-validation-for="TotalPrice" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label asp-for="TotalItems" class="col-sm-3 col-form-label"></label>
-                            <div class="col-sm-9">
-                                <input asp-for="TotalItems" class="form-control" />
-                                <span asp-validation-for="TotalItems" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label asp-for="OrderAt" class="col-sm-3 col-form-label"></label>
-                            <div class="col-sm-9">
-                                <input asp-for="OrderAt" class="form-control" />
-                                <span asp-validation-for="OrderAt" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            @* <label asp-for="Status" class="col-sm-3 col-form-label"></label>
-                            <div class="col-sm-9">
-                                <input asp-for="Status" class="form-control" />
-                                <span asp-validation-for="Status" class="text-danger"></span>
-                            </div> *@
-                        </div>
-                        <div class="row mb-3">
-                            <label asp-for="PaymentMode" class="col-sm-3 col-form-label"></label>
-                            <div class="col-sm-9">
-                                <input asp-for="PaymentMode" class="form-control" />
-                                <span asp-validation-for="PaymentMode" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label asp-for="Address.Address1" class="col-sm-3 col-form-label"></label>
-                            <div class="col-sm-9">
-                                <input asp-for="Address.Address1" class="form-control" />
-                                <span asp-validation-for="Address.Address1" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label asp-for="Address.State" class="col-sm-3 col-form-label"></label>
-                            <div class="col-sm-9">
-                                <input asp-for="Address.State" class="form-control" />
-                                <span asp-validation-for="Address.State" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label asp-for="Address.City" class="col-sm-3 col-form-label"></label>
-                            <div class="col-sm-9">
-                                <input asp-for="Address.City" class="form-control" />
-                                <span asp-validation-for="Address.City" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label asp-for="Address.Pincode" class="col-sm-3 col-form-label"></label>
-                            <div class="col-sm-9">
-                                <input asp-for="Address.Pincode" class="form-control" />
-                                <span asp-validation-for="Address.Pincode" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <label class="col-sm-3 col-form-label"></label>
-                            <div class="col-sm-9">
-                                <button type="submit" class="btn btn-info px-5"> Save</button>
-                            </div>
-                            <div>
-                                <a asp-action="Index">Back to List</a>
-                            </div>
-                        </div>
-                    </form>
+                    <div class="form-group mt-3">
+                        <label for="branchSelect">Select Branch:</label>
+                        <select id="branchSelect" class="form-control" disabled>
+                            <option value="">-- Select Branch --</option>
+                        </select>
+                    </div>
                 </div>
             </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Customer Details</h5>
+                    <div class="form-group">
+                        <input type="text" id="customerName" class="form-control mb-2" placeholder="Name">
+                        <input type="email" id="customerEmail" class="form-control mb-2" placeholder="Email">
+                        <input type="tel" id="customerPhone" class="form-control mb-2" placeholder="Phone">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Product Selection</h5>
+            <div class="table-responsive">
+                <table id="productTable" class="table table-striped table-hover">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-info">
+                            <td colspan="2"></td>
+                            <td><strong>Total Items:</strong></td>
+                            <td id="totalItems">0</td>
+                        </tr>
+                        <tr class="table-info">
+                            <td colspan="2"></td>
+                            <td><strong>Total Amount:</strong></td>
+                            <td id="totalAmount">$0.00</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="paymentMode">Payment Mode:</label>
+                <select id="paymentMode" class="form-control">
+                    <option value="cash">Cash</option>
+                    <option value="card">Card</option>
+                    <option value="upi">UPI</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <button id="placeOrderBtn" class="btn btn-primary btn-lg">
+                <i class="fas fa-shopping-cart mr-2"></i>Place Order
+            </button>
         </div>
     </div>
 </div>
 
 
-
-    </div>
-</div>
-
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function () {
+            debugger
+            $('#businessSelect').change(function () {
+                var businessId = $(this).val();
+                if (businessId) {
+                    $.get('/Orders/GetBranches', { businessId: businessId }, function (data) {
+                        $('#branchSelect').prop('disabled', false).empty().append('<option value="">-- Select Branch --</option>');
+                        $.each(data, function (index, branch) {
+                            $('#branchSelect').append($('<option></option>').val(branch.id).text(branch.name));
+                        });
+                    });
+                } else {
+                    $('#branchSelect').prop('disabled', true).empty().append('<option value="">-- Select Branch --</option>');
+                }
+                $('#productTable tbody').empty();
+                updateTotals();
+            });
+            $('#branchSelect').change(function () {
+                var branchId = $(this).val();
+                if (branchId) {
+                    $.get('/Orders/GetProducts', { branchId: branchId }, function (data) {
+                        $('#productTable tbody').empty();
+                        $.each(data, function (index, product) {
+                            var price = parseFloat(product.price);
+                            var formattedPrice = isNaN(price) ? 'Invalid' : '₹' + price.toFixed(2);
+                            var row = `<tr data-product-id="${product.id}">
+                            <td>${product.name}</td>
+                            <td class="price-cell">${formattedPrice}</td>
+                            <td>
+                                <select class="quantity-select form-control">
+                                    ${[0, 1, 2, 3, 4, 5].map(q => `<option value="${q}">${q}</option>`).join('')}
+                                </select>
+                            </td>
+                            <td class="total">$0.00</td>
+                        </tr>`;
+                            $('#productTable tbody').append(row);
+                        });
+                    });
+                } else {
+                    $('#productTable tbody').empty();
+                }
+                updateTotals();
+            });
+
+            $(document).on('change', '.quantity-select', function () {
+                var row = $(this).closest('tr');
+                var priceText = row.find('.price-cell').text().replace('₹', '').trim();
+                var price = parseFloat(priceText);
+                var quantity = parseInt($(this).val());
+                var total = price * quantity;
+                if (!isNaN(total)) {
+                    row.find('.total').text('₹' + total.toFixed(2));
+                } else {
+                    row.find('.total').text('Invalid');
+                }
+                updateTotals();
+            });
+
+            function updateTotals() {
+                var totalItems = 0;
+                var totalAmount = 0;
+                $('#productTable tbody tr').each(function () {
+                    var quantity = parseInt($(this).find('.quantity-select').val()) || 0;
+                    var totalText = $(this).find('.total').text().replace('₹', '').trim();
+                    var total = parseFloat(totalText) || 0;
+                    totalItems += quantity;
+                    if (!isNaN(total)) {
+                        totalAmount += total;
+                    }
+                });
+                $('#totalItems').text(totalItems);
+                $('#totalAmount').text('₹' + totalAmount.toFixed(2));
+            }
+
+            $('#placeOrderBtn').click(function () {
+                var order = {
+                    items: [],
+                    totalAmount: parseFloat($('#totalAmount').text().replace('₹', '')),
+                    totalItems: parseInt($('#totalItems').text()),
+                    paymentMode: $('#paymentMode').val(),
+                    customerDetails: {
+                        name: $('#customerName').val(),
+                        email: $('#customerEmail').val(),
+                        phone: $('#customerPhone').val()
+                    }
+                };
+
+                $('#productTable tbody tr').each(function () {
+                    var quantity = parseInt($(this).find('.quantity-select').val());
+                    if (quantity > 0) {
+                        order.items.push({
+                            productId: $(this).data('product-id'),
+                            productName: $(this).find('td:eq(0)').text(),
+                            price: parseFloat($(this).find('td:eq(1)').text().replace('₹', '')),
+                            quantity: quantity,
+                            totalPrice: parseFloat($(this).find('.total').text().replace('₹', ''))
+                        });
+                    }
+                });
+
+                $.ajax({
+                    url: '/Orders/PlaceOrder',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(order),
+                    success: function (response) {
+                        alert('Order placed successfully!');
+                        // Reset the form or redirect to a new page
+                    },
+                    error: function () {
+                        alert('Error placing order. Please try again.');
+                    }
+                });
+            });
+        });
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

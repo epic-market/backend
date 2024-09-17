@@ -45,6 +45,7 @@ namespace EpicMarket.Entities
 
     public class OrderParams
     {
+        public int? BranchId { get; set; }
         public int PageIndex { get; set; } = 1;
         public int pageSize { get; set; } = 10;
         public string sortColumn { get; set; } = string.Empty;
@@ -68,6 +69,54 @@ namespace EpicMarket.Entities
         public string OrderType { get; set; }
 
         public int Count { get; set; }
+    }
+
+    public class OrderMobileResult
+    {
+        public int ID { get; set; }
+
+        public string Status { get; set; }
+        public string Payment_Mode { get; set; }
+        public DateTime? Ordered_At { get; set; } 
+        public OrderBranchMobileResult Branch {get;set;}
+        public OrderCustomerMobileResult Customer { get;set;}
+        public OrderItemMobileResult Items_Peak { get; set; }
+        public double? Items_count { get; set; }
+        public double? Total_price { get; set; }
+
+    }
+    public class OrderMobileDeatilsResult
+    {
+        public int ID { get; set; }
+
+        public string Status { get; set; }
+        public string Payment_Mode { get; set; }
+        public DateTime? Ordered_At { get; set; } 
+        public OrderBranchMobileResult Branch {get;set;}
+        public OrderCustomerMobileResult Customer { get;set;}
+        public List<OrderItemMobileResult> Items { get; set; }
+        public double? Items_count { get; set; }
+        public double? Total_price { get; set; }
+
+    }
+    public class OrderBranchMobileResult
+    {
+        public int? ID { get; set; }
+        public string Name { get; set; }
+    } 
+    public class OrderCustomerMobileResult
+    {
+        public int? ID { get; set; }
+        public string Username { get; set; }
+        public string Name { get; set; }
+    } 
+    public class OrderItemMobileResult
+    {
+        public int? ID { get; set; }
+        public int? Quantity { get; set; }
+        public string Name { get; set; }
+        public double? Price { get; set; }
+        public double? Total_price { get; set; }
     }
 
 }

@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 
 namespace EpicMarket.Admin.MVC.Areas.Identity.Pages.Account
 {
@@ -30,13 +31,16 @@ namespace EpicMarket.Admin.MVC.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<AppUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly RoleManager<AppRole> _roleManager;
+
 
         public RegisterModel(
             UserManager<AppUser> userManager,
             IUserStore<AppUser> userStore,
             SignInManager<AppUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            RoleManager<AppRole> roleManager)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -44,6 +48,7 @@ namespace EpicMarket.Admin.MVC.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _roleManager = roleManager;
         }
 
         /// <summary>
@@ -64,6 +69,8 @@ namespace EpicMarket.Admin.MVC.Areas.Identity.Pages.Account
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         public IList<AuthenticationScheme> ExternalLogins { get; set; }
+
+        public List<AppRole> AvailableRoles { get; set; }
 
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -90,6 +97,8 @@ namespace EpicMarket.Admin.MVC.Areas.Identity.Pages.Account
             public string LastName { get; set; }
 
 
+
+
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
@@ -108,6 +117,9 @@ namespace EpicMarket.Admin.MVC.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+
+            [Display(Name = "Roles")]
+            public List<string> SelectedRoles { get; set; }
         }
 
 
@@ -115,6 +127,7 @@ namespace EpicMarket.Admin.MVC.Areas.Identity.Pages.Account
         {
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            AvailableRoles = await _roleManager.Roles.ToListAsync();
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
@@ -132,7 +145,18 @@ namespace EpicMarket.Admin.MVC.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
-                     
+                    if (Input.SelectedRoles != null && Input.SelectedRoles.Any())
+                    {
+                        var roleResult = await _userManager.AddToRolesAsync(user, Input.SelectedRoles);
+                        if (!roleResult.Succeeded)
+                        {
+                            foreach (var error in roleResult.Errors)
+                            {
+                                ModelState.AddModelError(string.Empty, error.Description);
+                            }
+                            return Page();
+                        }
+                    }
                     return LocalRedirect(returnUrl);
     
                 }
@@ -143,6 +167,7 @@ namespace EpicMarket.Admin.MVC.Areas.Identity.Pages.Account
             }
 
             // If we got this far, something failed, redisplay form
+            AvailableRoles = await _roleManager.Roles.ToListAsync();
             return Page();
         }
 

@@ -1,10 +1,11 @@
 ﻿@model EpicMarket.Data.Models.CommunicationQueue
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Communication Queue Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+
+<div class="page-breadcrumb d-flex align-items-center mb-3">
     <div class="breadcrumb-title pe-3">Communication Queue</div>
     <div class="ps-3">
         <nav aria-label="breadcrumb">
@@ -17,96 +18,69 @@
         </nav>
     </div>
 </div>
-<hr />
 
-
-<div class="card mb-4">
+<div class="card">
     <div class="card-body">
-        <div class="d-flex justify-content-end mb-3">
-            <a asp-action="Edit" class="btn btn-primary px-5" asp-route-id="@Model?.ID">Edit</a>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.Subject)</th>
+                    <td>@Html.DisplayFor(model => model.Subject)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light" style="width: 30%; height: 100px; overflow-y: auto;">@Html.DisplayNameFor(model => model.MessageData)</th>
+                    <td style="height: 100px; overflow-y: auto;">@Html.DisplayFor(model => model.MessageData)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light" style="width: 30%; height: 100px; overflow-y: auto;">@Html.DisplayNameFor(model => model.MessageText)</th>
+                    <td style="height: 100px; overflow-y: auto;">@Html.DisplayFor(model => model.MessageText)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.Attempts)</th>
+                    <td>@Html.DisplayFor(model => model.Attempts)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.ScheduledDate)</th>
+                    <td>@Html.DisplayFor(model => model.ScheduledDate)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.NotificationRecipient)</th>
+                    <td>@Html.DisplayFor(model => model.NotificationRecipient)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.SysStartTime)</th>
+                    <td>@Html.DisplayFor(model => model.SysStartTime)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.SysEndTime)</th>
+                    <td>@Html.DisplayFor(model => model.SysEndTime)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.ContactMethod)</th>
+                    <td>@Html.DisplayFor(model => model.ContactMethod.ID)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.CreateDate)</th>
+                    <td>@Html.DisplayFor(model => model.CreateDate)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.CreateBy)</th>
+                    <td>@Html.DisplayFor(model => model.CreateBy)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.ModifiedDate)</th>
+                    <td>@Html.DisplayFor(model => model.ModifiedDate)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.ModifiedBy)</th>
+                    <td>@Html.DisplayFor(model => model.ModifiedBy)</td>
+                </tr>
+            </table>
         </div>
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MessageData)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MessageData)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Subject)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Subject)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MessageText)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MessageText)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Attempts)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Attempts)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ScheduledDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ScheduledDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NotificationRecipient)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NotificationRecipient)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SysStartTime)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.SysStartTime)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SysEndTime)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.SysEndTime)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ContactMethod)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ContactMethod.ID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreateDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreateDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreateBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreateBy)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ModifiedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ModifiedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ModifiedBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ModifiedBy)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.ID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    </div>
+    <div class="card-footer">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bx bx-arrow-back me-1"></i> Back to List
+        </a>
+    </div>
 </div>

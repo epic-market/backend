@@ -35,11 +35,11 @@
                 @Html.DisplayNameFor(model => model.DateCreated)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Type)
+                @Html.DisplayNameFor(model => model.ContactMethod)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Link)
-            </th>
+             <th>
+                 @Html.DisplayNameFor(model => model.Quicklink)
+             </th>
             <th>
                 @Html.DisplayNameFor(model => model.IsRead)
             </th>
@@ -59,10 +59,10 @@
                 @Html.DisplayFor(modelItem => item.DateCreated)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Type)
+                @Html.DisplayFor(modelItem => item.ContactMethodId)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Link)
+                @Html.DisplayFor(modelItem => item.Quicklink.Url)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.IsRead)

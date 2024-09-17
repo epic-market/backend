@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
+using System.Reflection.Metadata;
+using System.Security.Claims;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -22,7 +24,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: Pages
         public async Task<IActionResult> Index()
         {
-            var authDbContext = _context.Pages.Include(p => p.EventCategorys);
+            var authDbContext = _context.Pages.Include(p => p.ApplicationsTable);
             return View(await authDbContext.ToListAsync());
         }
 
@@ -35,7 +37,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
 
             var page = await _context.Pages
-                .Include(p => p.EventCategorys)
+                .Include(p => p.ApplicationsTable)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (page == null)
             {
@@ -57,8 +59,11 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Name,Description,ApplicationId")] Page page)
+        public async Task<IActionResult> Create([Bind("ID,Name,Description,ApplicationId,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Page page)
         {
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            page.CreateBy = userName;
+            page.CreateDate = DateTime.UtcNow;
             if (ModelState.IsValid)
             {
                 _context.Add(page);
@@ -91,8 +96,11 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,ApplicationId")] Page page)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,ApplicationId,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Page page)
         {
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            page.ModifiedBy = userName;
+            page.ModifiedDate = DateTime.UtcNow;
             if (id != page.ID)
             {
                 return NotFound();
@@ -131,7 +139,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
 
             var page = await _context.Pages
-                .Include(p => p.EventCategorys)
+                .Include(p => p.ApplicationsTable)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (page == null)
             {

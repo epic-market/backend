@@ -50,11 +50,11 @@ namespace EpicMarket.Services
             return 
                 await _context.OnboardingSteps
                 .Include(os => os.OnboardingProgress)
-                .Where(os => !os.OnboardingProgress.Any(up => up.UserID == UserID && up.IsCompleted)).Select(c=> new OnboardingStepResult() { 
+                .Where(os => !os.OnboardingProgress.Any(up => up.UserID == UserID && up.IsCompleted)).Include(c=>c.Quicklink).Select(c=> new OnboardingStepResult() { 
                 StepName = c.StepName,
                 StepDescription = c.StepDescription,
                 StepOrder = c.StepOrder,
-                NavigationURL = c.NavigationURL
+                NavigationURL = c.Quicklink.Url
                 }).ToListAsync();
         }
     }

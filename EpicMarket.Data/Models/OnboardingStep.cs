@@ -15,11 +15,11 @@ namespace EpicMarket.Data.Models
         public string StepName { get; set; }
         public string StepDescription { get; set; }
 
-        public string NavigationURL { get; set; }
+        public int QuickLinkId { get; set; }
         [Required]
         public int StepOrder { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-
+        public Quicklink Quicklink { get; set; }
         public ICollection<UserOnboardingProgress> OnboardingProgress { get; set; }
     }
 }

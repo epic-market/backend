@@ -93,6 +93,11 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 return NotFound();
             }
+            var user = await _context.Users.FindAsync(userOnboardingProgress.UserID);
+            if (user != null)
+            {
+                ViewData["UserEmail"] = user.UserName; // Assuming the user has an Email property
+            }
             ViewData["StepID"] = new SelectList(_context.OnboardingSteps, "Id", "StepName", userOnboardingProgress.StepID);
             ViewData["UserID"] = new SelectList(_context.Users, "Id", "Id", userOnboardingProgress.UserID);
             return View(userOnboardingProgress);

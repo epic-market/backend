@@ -27,9 +27,7 @@ namespace EpicMarket.Business.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetNotification()
         {
-
-
-            var reponse = new OperationResult<List<NotificationDto>>();
+            var reponse = new OperationResult<List<NotificationResult>>();
 
             this.logger.LogInformation("Notification Controller -> GetStatusOptions()");
 

@@ -248,6 +248,7 @@ namespace EpicMarket.Services
                 Pincode = c.Address.Pincode,
                 Latitude = c.Address.Latitude,
                 Longitude = c.Address.Longitude,
+                IsOpen=c.IsOpen,
                 State = c.Address.State,
                 Status = _context.StatusOptionSets.FirstOrDefault(s => s.Id == c.StatusId).Status,
                 Thumbnail = ((from attachment in _context.Attachments
@@ -355,25 +356,27 @@ namespace EpicMarket.Services
         }
 
 
-        public async Task<List<DropDownOptions>> GetAllOutletsForDropDown(int personID , int businessID)
+        public async Task<List<BranchsDropDownOptions>> GetAllOutletsForDropDown(int personID , int businessID)
         {
 
             if (personID == _context.Businesses.FirstOrDefault(c => c.ID == businessID).PersonID)
             {
                 return await _context.Outlets.Where(c => c.IsActive == true).Select(
-                     c => new DropDownOptions()
+                     c => new BranchsDropDownOptions()
                      {
                          Text = c.Name,
-                         Value = c.ID
+                         Value = c.ID,
+                         IsOpen=c.IsOpen
                      }
                     ).ToListAsync();
             }
             else {
                 return await _context.OutletPeople.Include(c => c.Outlet).Where(c => c.PersonId == personID && c.Outlet.IsActive == true).Select(
-                      c => new DropDownOptions()
+                      c => new BranchsDropDownOptions()
                       {
                           Text = c.Outlet.Name,
-                          Value = c.OutletId
+                          Value = c.OutletId,
+                          IsOpen = c.Outlet.IsOpen
                       }
                      ).ToListAsync();
 

@@ -1,5 +1,6 @@
 ﻿
 using EpicMarket.Data.ApplicationModels;
+using EpicMarket.Data.Common;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -75,7 +76,7 @@ namespace EpicMarket.Data.Models
         public DbSet<Notification> Notifications { get; set; }
 
         public DbSet<OnboardingStep> OnboardingSteps { get; set; }
-
+        public DbSet<Quicklink> Quicklink { get; set; }
         public DbSet<UserOnboardingProgress> UserOnboardingProgresses { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -86,6 +87,8 @@ namespace EpicMarket.Data.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 			base.OnModelCreating(modelBuilder);
+
+
 
 			modelBuilder.Entity<AppUser>()
                          .HasIndex(op => op.UserName)
@@ -211,53 +214,67 @@ namespace EpicMarket.Data.Models
 					.HasForeignKey(fk => fk.AttachmentID)
 					.OnDelete(DeleteBehavior.Cascade);
 
-			modelBuilder.AddIsActiveDefaultValue(
-				 typeof(TaskType),
-				 typeof(TaskStatusType),
-				 typeof(Tasks),
-				 typeof(SupportTicket),
-				 typeof(SupportQuerys),
-				 typeof(StatusOptionSet),
-				 typeof(ProductInternal),
-				 typeof(Outlet),
-				 typeof(Order),
-				 typeof(OrderDetail),
-				 typeof(HelpItem),
-				 typeof(FAQ),
-				 typeof(FAQCategory),
-				 typeof(EventLog),
-				 typeof(Event),
-				 typeof(Entity),
-				 typeof(ContactMethod),
-				 typeof(CommunicationQueue),
-				 typeof(Comment),
-		        typeof(Catalog),
-				 typeof(Business),
-				 typeof(BusinessCategoryInternal),
-				 typeof(Blog),
-				 typeof(BlogCategory),
-				 typeof(Attachment),
-				 typeof(AttachmentLink),
-				 typeof(ApplicationsTable),
-				 typeof(ApplicationSecurables),
-				 typeof(ApplicationConfiguration),
-				 typeof(Address),
-				 typeof(BusinessEmployeeMap),
-				 typeof(AppUser)
-			 );
+			modelBuilder.ApplyDefaultValuesToEntities(
+					typeof(TaskType),
+					typeof(TaskStatusType),
+					typeof(Tasks),
+					typeof(SupportTicket),
+					typeof(SupportQuerys),
+					typeof(StatusOptionSet),
+					typeof(ProductInternal),
+					typeof(Outlet),
+					typeof(Order),
+					typeof(OrderDetail),
+					typeof(HelpItem),
+					typeof(FAQ),
+					typeof(FAQCategory),
+					typeof(EventLog),
+					typeof(Event),
+					typeof(Entity),
+					typeof(ContactMethod),
+					typeof(CommunicationQueue),
+					typeof(Comment),
+					typeof(Catalog),
+					typeof(Business),
+					typeof(BusinessCategoryInternal),
+					typeof(Blog),
+					typeof(BlogCategory),
+					typeof(Attachment),
+					typeof(AttachmentLink),
+					typeof(ApplicationsTable),
+					typeof(ApplicationSecurables),
+					typeof(ApplicationConfiguration),
+					typeof(Address),
+					typeof(BusinessEmployeeMap),
+					typeof(AppUser),
+                    typeof(Page),
+                   typeof(Quicklink)
+                );
+
+
+
 
 		}
 	}
 }
+
 public static class ModelBuilderExtensions
 {
-	public static void AddIsActiveDefaultValue(this ModelBuilder modelBuilder, params Type[] entityTypes)
+	public static void ApplyDefaultValuesToEntities(this ModelBuilder modelBuilder, params Type[] entityTypes)
 	{
 		foreach (var entityType in entityTypes)
 		{
 			modelBuilder.Entity(entityType)
 				.Property<bool>("IsActive")
 				.HasDefaultValueSql("1");
+
+			modelBuilder.Entity(entityType)
+				.Property<string>("CreateBy")
+				.HasDefaultValueSql("'System'");
+
+			modelBuilder.Entity(entityType)
+				.Property<DateTime>("CreateDate")
+				.HasDefaultValueSql("GETDATE()");
 		}
 	}
 }
