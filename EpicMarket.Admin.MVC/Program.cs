@@ -3,6 +3,10 @@ using EpicMarket.Admin.MVC.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Amazon.S3;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Admin.MVC.Services;
+using EpicMarket.Contracts;
+using EpicMarket.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +24,9 @@ var connectionString = builder.Configuration.GetConnectionString("AuthDbContextC
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>();
+builder.Services.AddScoped<IAttachmentService,AttachmentService>();
+builder.Services.AddScoped<IApplicationConfigurationService, ApplicationConfigurationService>();
+builder.Services.AddScoped<IFileService, FileService>();
 
 
 

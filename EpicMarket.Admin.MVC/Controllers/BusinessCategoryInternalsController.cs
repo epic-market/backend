@@ -37,7 +37,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var businessCategoryInternal = await _context.BusinessCategories
+            var businessCategoryInternal = await _context.BusinessCategories.Include(c=>c.Businesses)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (businessCategoryInternal == null)
             {

@@ -9,6 +9,8 @@ using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using EpicMarket.Entities.CustomModels;
 using System.Security.Claims;
+using EpicMarket.Admin.MVC.Models;
+using EpicMarket.Admin.MVC.Contracts;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -16,10 +18,12 @@ namespace EpicMarket.Admin.MVC.Controllers
     public class ProductInternalsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IAttachmentService attachmentService;
 
-        public ProductInternalsController(ApplicationDbContext context)
+        public ProductInternalsController(ApplicationDbContext context,IAttachmentService attachmentService)
         {
             _context = context;
+            this.attachmentService = attachmentService;
         }
 
         // GET: ProductInternals
@@ -38,6 +42,15 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             var productInternal = await _context.ProductInternals
                 .FirstOrDefaultAsync(m => m.ID == id);
+
+            ViewBag.attachments = await this.attachmentService.GetAttachmentLinks(new GetAttachmentLink()
+            {
+                AttachmentType = AttachmentTypeConstants.ProductInternal,
+                Entity = EntityConstants.ProductInternal,
+                RecordID = productInternal.ID
+            });
+           
+
             if (productInternal == null)
             {
                 return NotFound();
@@ -57,18 +70,33 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,BarCode,Name,Description,Images")] ProductInternal productInternal)
+        public async Task<IActionResult> Create([Bind("ID,BarCode,Name,Description")] ProductInternalModel productInternalModel, IFormFile[] images)
         {
+
+            var productInternal = new ProductInternal();
+
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             productInternal.CreateBy = userName;
             productInternal.CreateDate = DateTime.UtcNow;
-            if (ModelState.IsValid)
-            {
+            productInternal.BarCode = productInternalModel.BarCode;
+            productInternal.Name = productInternalModel.Name;
+            productInternal.Description = productInternalModel.Description;
+      
                 _context.Add(productInternal);
                 await _context.SaveChangesAsync();
+                var attachment = new AttachmentModel()
+                {
+                    Name = EntityConstants.ProductInternal,
+                    Comment = EntityConstants.ProductInternal,
+                    RecordID = productInternal.ID,
+                    Entity = EntityConstants.ProductInternal,
+                    AttachmentType = AttachmentTypeConstants.ProductInternal,
+                    FolderPathConstant = FilePathConstants.ProductInternal,
+                    Files = images
+                };
+                await attachmentService.InsertAttachment(attachment);
                 return RedirectToAction(nameof(Index));
-            }
-            return View(productInternal);
+
         }
 
         // GET: ProductInternals/Edit/5

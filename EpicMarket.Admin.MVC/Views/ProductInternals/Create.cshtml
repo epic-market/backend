@@ -1,4 +1,4 @@
-﻿@model EpicMarket.Data.Models.ProductInternal
+﻿@model EpicMarket.Admin.MVC.Models.ProductInternalModel
 
 @{
     ViewData["Title"] = "Create";
@@ -32,7 +32,7 @@
                         <h5 class="mb-0 text-info">Product Internal</h5>
                     </div>
                     <hr />
-        <form asp-action="Create">
+                    <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="row mb-3">
                 <label asp-for="BarCode" class="col-sm-3 col-form-label"></label>
@@ -55,13 +55,13 @@
                 <span asp-validation-for="Description" class="text-danger"></span>
                             </div>
             </div>
-            <div class="row mb-3">
-                <label asp-for="Images" class="col-sm-3 col-form-label"></label>
-                                        <div class="col-sm-9">
-                <input asp-for="Images" class="form-control" />
-                <span asp-validation-for="Images" class="text-danger"></span>
+                        <div class="row mb-3">
+                            <label asp-for="Images" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <input asp-for="Images" type="file" multiple class="form-control" />
+                                <span asp-validation-for="Images" class="text-danger"></span>
                             </div>
-            </div>
+                        </div>
                         <div class="row">
                             <label class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">

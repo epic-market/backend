@@ -42,6 +42,7 @@
                         <input type="hidden" asp-for="CreateBy" />
                         <input type="hidden" asp-for="ModifiedDate" />
                         <input type="hidden" asp-for="ModifiedBy" />
+                        <input type="hidden" asp-for="IsActive" />
                         <div class="row mb-3">
                             <label asp-for="PersonID" class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
@@ -149,7 +150,9 @@
                              <button type="submit" class="btn btn-info px-5"> Save</button>
                         </div>
                         <div>
-                            <a asp-action="Index">Back to List</a>
+                            <a href="javascript:history.go(-1)" class="btn btn-secondary">
+                                <i class="bx bx-arrow-back me-1"></i> Back
+                            </a>
                         </div>
                     </div>
                     </form>

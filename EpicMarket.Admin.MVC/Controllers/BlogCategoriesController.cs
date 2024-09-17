@@ -46,8 +46,9 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: BlogCategories/Create
-        public IActionResult Create()
+        public IActionResult Create(string returnUrl = null)
         {
+            ViewBag.ReturnUrl = returnUrl;
             return View();
         }
 
@@ -56,7 +57,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] BlogCategory blogCategory)
+        public async Task<IActionResult> Create([Bind("Id,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] BlogCategory blogCategory, string returnUrl = null)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             blogCategory.CreateBy = userName;
@@ -65,8 +66,16 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 _context.Add(blogCategory);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (!string.IsNullOrEmpty(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+                else
+                {
+                    return RedirectToAction(nameof(Index));
+                }
             }
+            ViewBag.ReturnUrl = returnUrl;
             return View(blogCategory);
         }
 

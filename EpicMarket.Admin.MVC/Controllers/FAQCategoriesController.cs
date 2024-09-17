@@ -72,8 +72,9 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: FAQCategories/Create
-        public IActionResult Create()
+        public IActionResult Create(string returnUrl = null)
         {
+            ViewBag.ReturnUrl = returnUrl;
             return View();
         }
 
@@ -82,7 +83,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,CategoryTitle,TypeOfFAQ,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] FAQCategory fAQCategory)
+        public async Task<IActionResult> Create([Bind("Id,CategoryTitle,TypeOfFAQ,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] FAQCategory fAQCategory, string returnUrl = null)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             fAQCategory.CreateBy = userName;
@@ -91,8 +92,17 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 _context.Add(fAQCategory);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (!string.IsNullOrEmpty(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+                else
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+           
             }
+            ViewBag.ReturnUrl = returnUrl;
             return View(fAQCategory);
         }
 
