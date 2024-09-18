@@ -120,7 +120,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,BarCode,Name,Description,Images,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] ProductInternal productInternal)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,BarCode,Name,Description,Images,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] ProductInternal productInternal)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             productInternal.ModifiedBy = userName;

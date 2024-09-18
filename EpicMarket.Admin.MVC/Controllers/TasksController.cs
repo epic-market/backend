@@ -200,7 +200,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,TaskTypeID,ParentID,TaskStatusID,TaskPriorityID,PrimaryAssignedToPersonID,DateAssigned,DateDue,DateStarted,DateCompleted,SubmittedByPersonID,TaskData,ReceivedDate,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Tasks tasks)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,TaskTypeID,ParentID,TaskStatusID,TaskPriorityID,PrimaryAssignedToPersonID,DateAssigned,DateDue,DateStarted,DateCompleted,SubmittedByPersonID,TaskData,ReceivedDate,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] Tasks tasks)
         {
             var existingTask = await _context.Tasks.FindAsync(id);
 
