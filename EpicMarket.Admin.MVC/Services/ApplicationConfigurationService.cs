@@ -1,4 +1,4 @@
-﻿using EpicMarket.Contracts;
+﻿using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Data.ApplicationModels;
 using EpicMarket.Data.Models;
 using Microsoft.Extensions.Logging;
@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EpicMarket.Services
+namespace EpicMarket.Admin.MVC.Services
 {
 
         public class ApplicationConfigurationService : IApplicationConfigurationService

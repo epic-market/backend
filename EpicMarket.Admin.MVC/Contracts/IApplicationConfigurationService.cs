@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EpicMarket.Contracts
+namespace EpicMarket.Admin.MVC.Contracts
 {
     public interface IApplicationConfigurationService
     {

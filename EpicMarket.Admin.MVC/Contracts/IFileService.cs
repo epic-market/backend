@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EpicMarket.Contracts
+namespace EpicMarket.Admin.MVC.Contracts
 {
 	public interface IFileService
 	{
@@ -18,7 +18,7 @@ namespace EpicMarket.Contracts
 
 		Task<bool> DeleteFileAsync(string key);
 
-		Task<bool> DeleteImage(ListOfImages keys, string UserName);
+		Task<bool> DeleteImage(List<string> ImageKeys, string UserName);
 
 
     }

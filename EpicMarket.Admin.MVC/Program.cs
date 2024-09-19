@@ -5,8 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Amazon.S3;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Admin.MVC.Services;
-using EpicMarket.Contracts;
-using EpicMarket.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);

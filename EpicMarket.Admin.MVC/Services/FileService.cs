@@ -1,6 +1,5 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
-using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
 using Microsoft.AspNetCore.Http;
@@ -10,8 +9,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EpicMarket.Admin.MVC.Contracts;
 
-namespace EpicMarket.Services
+namespace EpicMarket.Admin.MVC.Services
 {
 	public class FileService : IFileService
 	{
@@ -83,11 +83,11 @@ namespace EpicMarket.Services
 		}
 
 
-        public async Task<bool> DeleteImage(ListOfImages keys, string UserName)
+        public async Task<bool> DeleteImage(List<string> ImageKeys, string UserName)
         {
 
             var count = 1;
-            foreach (var key in keys.ImageKeys)
+            foreach (var key in ImageKeys)
             {
 
                 int lastSlashIndex = key.LastIndexOf('/');
@@ -107,7 +107,7 @@ namespace EpicMarket.Services
                     throw new Exception("File Not Found");
                 }
             }
-            return keys.ImageKeys.Count + 1 == count;
+            return ImageKeys.Count + 1 == count;
         }
 
     }

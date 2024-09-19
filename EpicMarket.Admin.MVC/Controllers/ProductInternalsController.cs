@@ -12,6 +12,7 @@ using System.Security.Claims;
 using EpicMarket.Admin.MVC.Models;
 using EpicMarket.Admin.MVC.Contracts;
 
+
 namespace EpicMarket.Admin.MVC.Controllers
 {
     [Authorize(Roles = $"{ROLES.ADMIN}")]
@@ -19,11 +20,13 @@ namespace EpicMarket.Admin.MVC.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IAttachmentService attachmentService;
+        private readonly IFileService fileService;
 
-        public ProductInternalsController(ApplicationDbContext context,IAttachmentService attachmentService)
+        public ProductInternalsController(ApplicationDbContext context,IAttachmentService attachmentService,IFileService fileService)
         {
             _context = context;
             this.attachmentService = attachmentService;
+            this.fileService = fileService;
         }
 
         // GET: ProductInternals
@@ -106,8 +109,16 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 return NotFound();
             }
-
             var productInternal = await _context.ProductInternals.FindAsync(id);
+
+            ViewBag.attachments = await this.attachmentService.GetAttachmentLinks(new GetAttachmentLink()
+            {
+                AttachmentType = AttachmentTypeConstants.ProductInternal,
+                Entity = EntityConstants.ProductInternal,
+                RecordID = productInternal.ID
+            });
+
+
             if (productInternal == null)
             {
                 return NotFound();
@@ -120,11 +131,12 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,BarCode,Name,Description,Images,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] ProductInternal productInternal)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,BarCode,Name,Description,Images,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] ProductInternal productInternal, IFormFile[] newImages , string? removedImages, string? addedImages)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             productInternal.ModifiedBy = userName;
             productInternal.ModifiedDate = DateTime.UtcNow;
+
             if (id != productInternal.ID)
             {
                 return NotFound();
@@ -136,6 +148,30 @@ namespace EpicMarket.Admin.MVC.Controllers
                 {
                     _context.Update(productInternal);
                     await _context.SaveChangesAsync();
+                    // Handle removed images
+                    if (!string.IsNullOrEmpty(removedImages))
+                    {
+                        var removedImageUrls = removedImages.Split(',').ToList();
+                        await  this.fileService.DeleteImage(removedImageUrls, userName);
+                    }
+
+                    // Handle added images
+                    if (addedImages != null && newImages?.Length > 0 )
+                    {
+
+                            var attachment = new AttachmentModel()
+                            {
+                                Name = EntityConstants.ProductInternal,
+                                Comment = EntityConstants.ProductInternal,
+                                RecordID = productInternal.ID,
+                                Entity = EntityConstants.ProductInternal,
+                                AttachmentType = AttachmentTypeConstants.ProductInternal,
+                                FolderPathConstant = FilePathConstants.ProductInternal,
+                                Files = newImages
+                            };
+                            await attachmentService.InsertAttachment(attachment);
+      
+                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
