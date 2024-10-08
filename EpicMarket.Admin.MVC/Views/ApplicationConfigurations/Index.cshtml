@@ -35,32 +35,98 @@
                         <th></th>
                     </tr>
                 </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.Name)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.Description)
-                            </td>
-                            <td>
-                                <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-                                <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
-                                <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
             </table>
         </div>
     </div>
 </div>
+
 @section Scripts {
     <script>
         $(document).ready(function () {
-            $('#example').DataTable();
+            $('#example').DataTable({
+                "processing": true, // for show progress bar
+                "serverSide": true, // for process server side
+                "filter": true, // this is for disable filter (search box)
+                "orderMulti": false, // for disable multiple column at once
+                "ajax": {
+                    "url": "/ApplicationConfigurations/LoadData",
+                    "type": "POST",
+                    "datatype": "json"
+                },
+                "columnDefs":
+                    [{
+                        "targets": [2],
+                        "visible": true, // Changed to true to display the actions column
+                        "searchable": false
+                    }],
+                "columns": [
+                    { "data": "name", "name": "Name", "autoWidth": true },
+                    { "data": "description", "name": "Description", "autoWidth": true },
+                    {
+                        "data": "id", // Use the 'id' property to generate the action links
+                        "render": function (data, type, full, meta) {
+                            return '<a href="/ApplicationConfigurations/Edit/' + data + '">Edit</a> | <a href="/ApplicationConfigurations/Details/' + data + '">Details</a> | <a  href="/ApplicationConfigurations/Delete/' + data + '">Delete</a>';
+                        }
+                    },
+                ],
+                "initComplete": function () {
+                    var api = this.api();
+                    api.columns().eq(0).each(function (colIdx) {
+                        var cell = api.column(colIdx).header();
+                        var title = $(cell).text();
+                        $(api.column(colIdx).footer()).find('input').on('keyup change', function () {
+                            api.column(colIdx).search(this.value).draw();
+                        });
+                    });
+                }
+            });
+
+            // Add a checkbox for filtering active/inactive
+            $('<div class="dataTables_filter d-flex align-items-center"><label class="me-2">Show Active Only:</label><input type="checkbox" id="showActiveOnly" checked></div>').appendTo('#example_wrapper .dataTables_filter');
+            $('#showActiveOnly').on('change', function () {
+                var showActiveOnly = $(this).is(':checked');
+                $('#example').DataTable().ajax.reload(null, false);
+                $.ajax({
+                    type: "POST",
+                    url: "/ApplicationConfigurations/LoadData",
+                    data: { showActiveOnly: showActiveOnly },
+                    success: function (data) {
+                        $('#example').DataTable().clear().draw();
+                        $('#example').DataTable().rows.add(data.data).draw();
+                    }
+                });
+            });
+
+            // Align search box and checkbox
+            $('#example_wrapper .dataTables_filter label').css('display', 'inline-block');
+            $('#example_wrapper .dataTables_filter input[type="search"]').css('width', '200px');
+            $('#example_wrapper .dataTables_filter input[type="checkbox"]').css('margin-left', '10px');
         });
     </script>
+    <style>
+
+        #example td {
+            vertical-align: middle;
+        }
+
+        #example .action-icons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #example_wrapper .dataTables_filter {
+            display: flex;
+            align-items: center;
+        }
+
+        #example_wrapper .dataTables_filter label {
+            margin-right: 10px;
+        }
+
+        #example_wrapper .dataTables_filter input[type="search"] {
+            width: 200px;
+            margin-right: 10px;
+        }
+    </style>
 }

@@ -37,7 +37,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var businessCategoryInternal = await _context.BusinessCategories
+            var businessCategoryInternal = await _context.BusinessCategories.Include(c=>c.Businesses)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (businessCategoryInternal == null)
             {
@@ -93,7 +93,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,Type,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] BusinessCategoryInternal businessCategoryInternal)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,Type,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] BusinessCategoryInternal businessCategoryInternal)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             businessCategoryInternal.ModifiedBy = userName;

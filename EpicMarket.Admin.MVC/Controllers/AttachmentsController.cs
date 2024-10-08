@@ -93,7 +93,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,AttachmentTypeID,Name,Comment,DocumentType,DocumentFileType,DocumentFolderPath,DocumentFile,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Attachment attachment)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,AttachmentTypeID,Name,Comment,DocumentType,DocumentFileType,DocumentFolderPath,DocumentFile,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] Attachment attachment)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             attachment.ModifiedBy = userName;

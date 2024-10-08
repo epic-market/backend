@@ -143,7 +143,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,BusinessID,Barcode,Name,Description,Images,Category,Rate,IsActive,InStock,IsRecommended,MaximumOrderPurchase,Rating,ReviewCount,OrderCount,StatusId,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Catalog catalog)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,BusinessID,Barcode,Name,Description,Images,Category,Rate,IsActive,InStock,IsRecommended,MaximumOrderPurchase,Rating,ReviewCount,OrderCount,StatusId,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] Catalog catalog)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
 

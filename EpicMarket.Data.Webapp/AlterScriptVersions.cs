@@ -23,6 +23,7 @@ namespace EpicMarket.Data.Webapp
 			AddDatabaseVersion("AlterScript4", "This is seed data adding data for ApplicationConfiguration in products", "Gadamsetti Akhil", new AlterScript4(this.dbContext));
             AddDatabaseVersion("AlterScript5", "This is seed data adding data for ApplicationConfiguration in branches", "Gadamsetti Akhil", new AlterScript5(this.dbContext)); 
             AddDatabaseVersion("AlterScript6", "This is seed data adding data for Events, ApplicationConfiguration and ATTACHMENTTYPE", "Vinay", new AlterScript6(this.dbContext));
+            AddDatabaseVersion("AlterScript7", "This is seed data adding data for ProductInternal Attachment", "Gadamsetti Akhil", new AlterScript7(this.dbContext));
         }
 
         public void AddDatabaseVersion(string versionClass, string description, string createBy , IAlterScript alterScriptClass)

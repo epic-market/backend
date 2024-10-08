@@ -24,13 +24,69 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: ApplicationConfigurations
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(bool IsActive = true)
         {
-            return View(await _context.ApplicationConfigurations.ToListAsync());
+            return View();
         }
 
-        // GET: ApplicationConfigurations/Details/5
-        public async Task<IActionResult> Details(int? id)
+        [HttpPost]
+        public async Task<IActionResult> LoadData()
+        {
+            try
+            {
+                var draw = HttpContext.Request.Form["draw"].FirstOrDefault();
+                var start = Request.Form["start"].FirstOrDefault();
+                var length = Request.Form["length"].FirstOrDefault();
+                var sortColumn = Request.Form["columns[" + Request.Form["order[0][column]"].FirstOrDefault() + "][name]"].FirstOrDefault();
+                var sortColumnDir = Request.Form["order[0][dir]"].FirstOrDefault();
+                var searchValue = Request.Form["search[value]"].FirstOrDefault();
+                var showActiveOnly = Request.Form["showActiveOnly"].FirstOrDefault() == "true";
+
+                int pageSize = length != null ? Convert.ToInt32(length) : 0;
+                int skip = start != null ? Convert.ToInt32(start) : 0;
+                int recordsTotal = 0;
+
+                var data = _context.ApplicationConfigurations.AsQueryable();
+
+                if (!string.IsNullOrEmpty(searchValue))
+                {
+                    data = data.Where(m => m.Name.Contains(searchValue));
+                }
+
+                if (showActiveOnly)
+                {
+                    // Assuming you have an 'IsActive' property in your model
+                    data = data.Where(m => m.IsActive == true);
+                }
+
+                if (!(string.IsNullOrEmpty(sortColumn) && string.IsNullOrEmpty(sortColumnDir)))
+                {
+                    if (sortColumnDir.ToLower() == "asc")
+                    {
+                        data = data.OrderBy(item => EF.Property<object>(item, sortColumn));
+                    }
+                    else
+                    {
+                        data = data.OrderByDescending(item => EF.Property<object>(item, sortColumn));
+                    }
+                }
+                recordsTotal = data.Count();
+                var dataPage = data.Skip(skip).Take(pageSize).ToList();
+
+                var jsonData = new { draw = draw, recordsFiltered = recordsTotal, recordsTotal = recordsTotal, data = dataPage };
+
+                return Ok(jsonData);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+ 
+
+// GET: ApplicationConfigurations/Details/5
+public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
@@ -94,7 +150,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Value,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] ApplicationConfiguration applicationConfiguration)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Value,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] ApplicationConfiguration applicationConfiguration)
         {
 
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;

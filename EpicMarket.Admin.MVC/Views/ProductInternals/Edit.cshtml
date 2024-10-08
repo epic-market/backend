@@ -31,13 +31,14 @@
                         <h5 class="mb-0 text-info">Product Internal</h5>
                     </div>
                     <hr />
-                    <form asp-action="Edit">
+                    <form asp-action="Edit" enctype="multipart/form-data">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <input type="hidden" asp-for="ID" />
                         <input type="hidden" asp-for="CreateDate" />
                         <input type="hidden" asp-for="CreateBy" />
                         <input type="hidden" asp-for="ModifiedDate" />
                         <input type="hidden" asp-for="ModifiedBy" />
+                        <input type="hidden" asp-for="IsActive" />
                         <div class="row mb-3">
                             <label asp-for="BarCode" class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
@@ -59,13 +60,38 @@
                                 <span asp-validation-for="Description" class="text-danger"></span>
                             </div>
                         </div>
+
+                        <!-- Existing Images -->
                         <div class="row mb-3">
-                            <label asp-for="Images" class="col-sm-3 col-form-label"></label>
+                            <label class="col-sm-3 col-form-label">Existing Images</label>
                             <div class="col-sm-9">
-                                <input asp-for="Images" class="form-control" />
-                                <span asp-validation-for="Images" class="text-danger"></span>
+                                <div class="row" id="existingImagesContainer">
+                                    @if (ViewBag.attachments != null)
+                                    {
+                                        foreach (var imageKey in ViewBag.attachments as List<string>)
+                                        {
+                                            <div class="col-md-3 mb-3 position-relative" data-image-key="@imageKey">
+                                                <img src="@Url.Action("DisplayImage", "File", new { key = imageKey })" width="100%" height="150" class="img-fluid" />
+                                                <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0" onclick="removeImage('@imageKey')">
+                                                    <i class="bx bx-trash"></i>
+                                                </button>
+                                            </div>
+                                        }
+                                    }
+                                </div>
                             </div>
                         </div>
+
+                        <!-- Upload New Images -->
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Upload New Images</label>
+                            <div class="col-sm-9">
+                                <input type="file" multiple class="form-control" id="newImages" name="newImages" multiple />
+                            </div>
+                        </div>
+                        <!-- Hidden Fields for Removed and Added Images -->
+                        <input type="hidden" id="removedImages" name="removedImages" />
+                        <input type="hidden" id="addedImages" name="addedImages" />
                         <div class="row">
                             <label class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
@@ -79,6 +105,38 @@
                 </div>
             </div>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+
+            @section Scripts {
+                @{
+                    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+                }
+
+                <script>
+                    function removeImage(imageKey) {
+                        debugger
+                        const removedImagesInput = document.getElementById('removedImages');
+                        const existingImages = removedImagesInput.value.split(',');
+
+                        if (existingImages[0] === '') {
+                            existingImages.shift();
+                        }
+
+                        if (!existingImages.includes(imageKey)) {
+                            existingImages.push(imageKey);
+                        }
+                        removedImagesInput.value = existingImages.join(',');
+                        // Remove the image element from the DOM
+                        const imageElement = document.querySelector(`div[data-image-key="${imageKey}"]`);
+                        if (imageElement) {
+                            imageElement.remove();
+                        }
+                    }
+
+                    document.getElementById('newImages').addEventListener('change', function () {
+                        const addedImagesInput = document.getElementById('addedImages');
+                        const files = this.files;
+                        const fileNames = Array.from(files).map(file => file.name);
+                        addedImagesInput.value = fileNames.join(',');
+                    });
+                </script>
+            }

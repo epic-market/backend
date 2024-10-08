@@ -56,6 +56,8 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,NormalizedName,ConcurrencyStamp")] AppRole appRole)
         {
+
+            appRole.NormalizedName = appRole.Name.ToUpper();
             if (ModelState.IsValid)
             {
                 _context.Add(appRole);
@@ -88,6 +90,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,NormalizedName,ConcurrencyStamp")] AppRole appRole)
         {
+            appRole.NormalizedName = appRole.Name.ToUpper();
             if (id != appRole.Id)
             {
                 return NotFound();
