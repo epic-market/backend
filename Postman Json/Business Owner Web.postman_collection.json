@@ -1,0 +1,2008 @@
+{
+	"info": {
+		"_postman_id": "9c258428-13ca-4dc4-b8d3-f665c2b185b8",
+		"name": "Business Owner Web",
+		"description": "|  |  |\n| --- | --- |\n|  |  |",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38597780",
+		"_collection_link": "https://api-development-1033.postman.co/workspace/Epic-Market~fcb94503-1517-4ba9-a80f-f8800194dff9/collection/38597780-9c258428-13ca-4dc4-b8d3-f665c2b185b8?action=share&source=collection_link&creator=38597780"
+	},
+	"item": [
+		{
+			"name": "Register Business",
+			"item": [
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();\r",
+									"const Token = response.data.token\r",
+									"pm.collectionVariables.set(\"Token\",Token);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Set random email\r",
+									"pm.collectionVariables.set(\"Email\", pm.variables.replaceIn('{{$randomEmail}}'));\r",
+									"\r",
+									"// Set random first name\r",
+									"pm.collectionVariables.set(\"FirstName\", pm.variables.replaceIn('{{$randomFirstName}}'));\r",
+									"\r",
+									"// Set random last name\r",
+									"pm.collectionVariables.set(\"LastName\", pm.variables.replaceIn('{{$randomLastName}}'));\r",
+									"\r",
+									"// Set random phone number\r",
+									"pm.collectionVariables.set(\"Phone\", pm.variables.replaceIn('{{$randomPhoneNumber}}'));\r",
+									"\r",
+									"// Set random password\r",
+									"pm.collectionVariables.set(\"Password\", pm.variables.replaceIn('{{$randomPassword}}'));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"{{Email}}\",\r\n  \"firstName\": \"{{FirstName}}\",\r\n  \"lastName\": \"{{LastName}}\",\r\n  \"phone\": \"{{Phone}}\",\r\n  \"password\": \"{{Password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Account/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Account",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const category = pm.response.json()\r",
+									"pm.collectionVariables.set(\"BusinessCategoryText\",category.data[0].text)\r",
+									"pm.collectionVariables.set(\"BusinessCategoryValue\",category.data[0].value)"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"{{Email}}\",\r\n  \"firstName\": \"{{FirstName}}\",\r\n  \"lastName\": \"{{LastName}}\",\r\n  \"phone\": \"{{Phone}}\",\r\n  \"password\": \"{{Password}}\"\r\n}\r\n\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Static/GetBusinessCategoriesOptions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Static",
+								"GetBusinessCategoriesOptions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register Business",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const today = new Date();\r",
+									"\r",
+									"pm.collectionVariables.set(\"BusinessCategoryID\", pm.variables.replaceIn('{{$randomInt}}'));\r",
+									"pm.collectionVariables.set(\"BussinessName\", pm.variables.replaceIn('{{$randomCompanyName}}'));\r",
+									"pm.collectionVariables.set(\"ContactNumber\", pm.variables.replaceIn('{{$randomInt}}'));\r",
+									"pm.collectionVariables.set(\"ContactEmail\", pm.variables.replaceIn('{{$randomEmail}}'));\r",
+									"pm.collectionVariables.set(\"WebsiteURL\", pm.variables.replaceIn('{{$randomUrl}}'));\r",
+									"pm.collectionVariables.set(\"Address\", pm.variables.replaceIn('{{$randomStreetAddress}}'));\r",
+									"pm.collectionVariables.set(\"State\", pm.variables.replaceIn('{{$randomCity}}'));\r",
+									"pm.collectionVariables.set(\"City\", pm.variables.replaceIn('{{$randomCity}}'));\r",
+									"pm.collectionVariables.set(\"Latitude\", pm.variables.replaceIn('{{$randomLatitude}}'));\r",
+									"pm.collectionVariables.set(\"Longitude\", pm.variables.replaceIn('{{$randomLongitude}}'));\r",
+									"pm.collectionVariables.set(\"PinCode\", pm.variables.replaceIn('{{$randomInt}}'));\r",
+									"pm.collectionVariables.set(\"Description\", pm.variables.replaceIn('{{$randomJobDescriptor}}'));\r",
+									"pm.collectionVariables.set(\"EstablishedOn\", pm.variables.replaceIn(today.toDateString()));\r",
+									"pm.collectionVariables.set(\"ProofType\", pm.variables.replaceIn('{{$randomWord}}'));\r",
+									"pm.collectionVariables.set(\"ProofNumber\", pm.variables.replaceIn('{{$randomAlphaNumeric}}'));\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Removed the JSON parsing as the response is not in JSON format\r",
+									"pm.collectionVariables.set(\"BusinessId\", pm.response.json()?.data?.businessId);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "BusinessCategoryID",
+									"value": "{{BusinessCategoryValue}}",
+									"type": "text"
+								},
+								{
+									"key": "BussinessName",
+									"value": "'{{BussinessName}}'",
+									"type": "text"
+								},
+								{
+									"key": "ContactNumber",
+									"value": "{{ContactNumber}}",
+									"type": "text"
+								},
+								{
+									"key": "ContactEmail",
+									"value": "'{{ContactEmail}}'",
+									"type": "text"
+								},
+								{
+									"key": "WebsiteURL",
+									"value": "'{{WebsiteURL}}'",
+									"type": "text"
+								},
+								{
+									"key": "Address",
+									"value": "'{{Address}}'",
+									"type": "text"
+								},
+								{
+									"key": "State",
+									"value": "'{{State}}'",
+									"type": "text"
+								},
+								{
+									"key": "City",
+									"value": "'{{City}}'",
+									"type": "text"
+								},
+								{
+									"key": "Latitude",
+									"value": "{{Latitude}}",
+									"type": "text"
+								},
+								{
+									"key": "Longitude",
+									"value": "{{Longitude}}",
+									"type": "text"
+								},
+								{
+									"key": "PinCode",
+									"value": "{{PinCode}}",
+									"type": "text"
+								},
+								{
+									"key": "Description",
+									"value": "''{{Description}}",
+									"type": "text"
+								},
+								{
+									"key": "EstablishedOn",
+									"value": "{{EstablishedOn}}",
+									"type": "text"
+								},
+								{
+									"key": "ProofType",
+									"value": "'{{ProofType}}'",
+									"type": "text"
+								},
+								{
+									"key": "ProofNumber",
+									"value": "'{{ProofNumber}}'",
+									"type": "text"
+								},
+								{
+									"key": "LogoFile",
+									"type": "file",
+									"src": "postman-cloud:///1ef81a05-cc48-4c30-a02e-a164d07c57cc",
+									"disabled": true
+								},
+								{
+									"key": "ProofFile",
+									"type": "file",
+									"src": "postman-cloud:///1ef81a06-6e10-4c70-b3e9-0cbaacc18b4b",
+									"disabled": true
+								},
+								{
+									"key": "ProofFile",
+									"type": "file",
+									"src": "postman-cloud:///1ef81a09-b04d-43b0-83b7-65b9a4b777bc",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Business/RegisterDetails",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Business",
+								"RegisterDetails"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();\r",
+									"const Token = response.data.token\r",
+									"pm.collectionVariables.set(\"Token\",Token);\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"{{Email}}\",\r\n    \"password\": \"{{Password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Account/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Account",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{Token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Branch Operation",
+			"item": [
+				{
+					"name": "Add Branches",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const today = new Date();\r",
+									"\r",
+									"pm.collectionVariables.set(\"BranchName\", pm.variables.replaceIn('{{$randomCompanyName}}'));\r",
+									"pm.collectionVariables.set(\"BranchDescription\", pm.variables.replaceIn('{{$randomJobDescriptor}}'));\r",
+									"pm.collectionVariables.set(\"BranchContactNumber\", pm.variables.replaceIn('{{$randomInt}}'));\r",
+									"pm.collectionVariables.set(\"BranchContactEmail\", pm.variables.replaceIn('{{$randomEmail}}'));\r",
+									"pm.collectionVariables.set(\"BranchAddress\", pm.variables.replaceIn('{{$randomStreetAddress}}'));\r",
+									"pm.collectionVariables.set(\"BranchCity\", pm.variables.replaceIn('{{$randomCity}}'));\r",
+									"pm.collectionVariables.set(\"BranchState\", pm.variables.replaceIn('{{$randomCity}}'));\r",
+									"pm.collectionVariables.set(\"BranchLatitude\", pm.variables.replaceIn('{{$randomLatitude}}'));\r",
+									"pm.collectionVariables.set(\"BranchLongitude\", pm.variables.replaceIn('{{$randomLongitude}}'));\r",
+									"pm.collectionVariables.set(\"BranchPincode\", pm.variables.replaceIn('{{$randomInt}}'));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"BranchId\", pm.response.json().data);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "multipart/form-data"
+							},
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "Address",
+									"value": "{{BranchAddress}}",
+									"description": "(Required) ",
+									"type": "text"
+								},
+								{
+									"key": "City",
+									"value": "{{BranchCity}}",
+									"description": "(Required) ",
+									"type": "text"
+								},
+								{
+									"key": "ContactEmail",
+									"value": "{{BranchContactEmail}}",
+									"description": "(Required) ",
+									"type": "text"
+								},
+								{
+									"key": "ContactNumber",
+									"value": "{{BranchContactNumber}}",
+									"description": "(Required) ",
+									"type": "text"
+								},
+								{
+									"key": "Name",
+									"value": "{{BranchName}}",
+									"description": "(Required) ",
+									"type": "text"
+								},
+								{
+									"key": "Pincode",
+									"value": "{{BranchPincode}}",
+									"description": "(Required) ",
+									"type": "text"
+								},
+								{
+									"key": "State",
+									"value": "{{BranchState}}",
+									"description": "(Required) ",
+									"type": "text"
+								},
+								{
+									"key": "Description",
+									"value": "{{BranchDescription}}",
+									"type": "text"
+								},
+								{
+									"key": "Latitude",
+									"value": "{{BranchLatitude}}",
+									"type": "text"
+								},
+								{
+									"key": "Longitude",
+									"value": "{{BranchLongitude}}",
+									"type": "text"
+								},
+								{
+									"key": "Photos",
+									"type": "file",
+									"src": "postman-cloud:///1ef81a09-b04d-43b0-83b7-65b9a4b777bc",
+									"disabled": true
+								},
+								{
+									"key": "Thumbnail",
+									"type": "file",
+									"src": "postman-cloud:///1ef81a06-6e10-4c70-b3e9-0cbaacc18b4b",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/branches",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"branches"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Branch by branch Id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/branches/:branchId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"branches",
+								":branchId"
+							],
+							"variable": [
+								{
+									"key": "branchId",
+									"value": "{{BranchId}}",
+									"description": "(Required) "
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Branches",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/branches?PageIndex={{pageIndex}}&pageSize={{pageSize}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"branches"
+							],
+							"query": [
+								{
+									"key": "PageIndex",
+									"value": "{{pageIndex}}"
+								},
+								{
+									"key": "pageSize",
+									"value": "{{pageSize}}"
+								},
+								{
+									"key": "sortColumn",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "ascending",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "searchTerm",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update the Branch Details",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const today = new Date();\r",
+									"\r",
+									"pm.collectionVariables.set(\"BranchName\", pm.variables.replaceIn('{{$randomCompanyName}}'));\r",
+									"pm.collectionVariables.set(\"BranchDescription\", pm.variables.replaceIn('{{$randomJobDescriptor}}'));\r",
+									"pm.collectionVariables.set(\"BranchContactNumber\", pm.variables.replaceIn('{{$randomInt}}'));\r",
+									"pm.collectionVariables.set(\"BranchContactEmail\", pm.variables.replaceIn('{{$randomEmail}}'));\r",
+									"pm.collectionVariables.set(\"BranchAddress\", pm.variables.replaceIn('{{$randomStreetAddress}}'));\r",
+									"pm.collectionVariables.set(\"BranchCity\", pm.variables.replaceIn('{{$randomCity}}'));\r",
+									"pm.collectionVariables.set(\"BranchState\", pm.variables.replaceIn('{{$randomState}}'));\r",
+									"pm.collectionVariables.set(\"BranchLatitude\", pm.variables.replaceIn('{{$randomLatitude}}'));\r",
+									"pm.collectionVariables.set(\"BranchLongitude\", pm.variables.replaceIn('{{$randomLongitude}}'));\r",
+									"pm.collectionVariables.set(\"BranchPincode\", pm.variables.replaceIn('{{$randomInt}}'));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "multipart/form-data"
+							},
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "Address",
+									"value": "{{BranchAddress}}",
+									"description": "(Required) ",
+									"type": "text"
+								},
+								{
+									"key": "City",
+									"value": "{{BranchCity}}",
+									"description": "(Required) ",
+									"type": "text"
+								},
+								{
+									"key": "ContactEmail",
+									"value": "{{BranchContactEmail}}",
+									"description": "(Required) ",
+									"type": "text"
+								},
+								{
+									"key": "ContactNumber",
+									"value": "{{BranchContactNumber}}",
+									"description": "(Required) ",
+									"type": "text"
+								},
+								{
+									"key": "Name",
+									"value": "{{BranchName}}",
+									"description": "(Required) ",
+									"type": "text"
+								},
+								{
+									"key": "Pincode",
+									"value": "{{BranchPincode}}",
+									"description": "(Required) ",
+									"type": "text"
+								},
+								{
+									"key": "State",
+									"value": "{{BranchState}}",
+									"description": "(Required) ",
+									"type": "text"
+								},
+								{
+									"key": "Description",
+									"value": "{{BranchDescription}}",
+									"type": "text"
+								},
+								{
+									"key": "Latitude",
+									"value": "{{BranchLatitude}}",
+									"type": "text"
+								},
+								{
+									"key": "Longitude",
+									"value": "{{BranchLongitude}}",
+									"type": "text"
+								},
+								{
+									"key": "Photos",
+									"type": "file",
+									"src": "postman-cloud:///1ef81a09-b04d-43b0-83b7-65b9a4b777bc",
+									"disabled": true
+								},
+								{
+									"key": "Thumbnail",
+									"type": "file",
+									"src": "postman-cloud:///1ef81a06-6e10-4c70-b3e9-0cbaacc18b4b",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/branches/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"branches",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{BranchId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get updated Branch Details by branch Id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/branches/:branchId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"branches",
+								":branchId"
+							],
+							"variable": [
+								{
+									"key": "branchId",
+									"value": "{{BranchId}}",
+									"description": "(Required) "
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{Token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Product Operations",
+			"item": [
+				{
+					"name": "Add Products",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"ProductBarcode\", pm.variables.replaceIn('{{$randomInt}}'));\r",
+									"pm.collectionVariables.set(\"ProductName\", pm.variables.replaceIn('{{$randomProductName}}'));\r",
+									"pm.collectionVariables.set(\"ProductDescription\", pm.variables.replaceIn('{{$randomLoremSentence}}'));\r",
+									"pm.collectionVariables.set(\"ProductCategory\", pm.variables.replaceIn('{{$randomWord}}'));\r",
+									"pm.collectionVariables.set(\"ProductRate\", pm.variables.replaceIn('{{$randomPrice}}'));\r",
+									"pm.collectionVariables.set(\"ProductInStock\", pm.variables.replaceIn('false')); // Default value\r",
+									"pm.collectionVariables.set(\"ProductIsRecommended\", pm.variables.replaceIn('false')); // Default value\r",
+									"pm.collectionVariables.set(\"ProductMaximumOrderPurchase\", pm.variables.replaceIn('{{$randomInt}}'));\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"ProductId\", pm.response.json().data);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "multipart/form-data"
+							},
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "Description",
+									"value": "{{ProductDescription}}",
+									"description": "(Required) ",
+									"type": "text"
+								},
+								{
+									"key": "Rate",
+									"value": "{{ProductRate}}",
+									"description": "(Required) ",
+									"type": "text"
+								},
+								{
+									"key": "Barcode",
+									"value": "{{ProductBarcode}}",
+									"type": "text"
+								},
+								{
+									"key": "Category",
+									"value": "{{ProductCategory}}",
+									"type": "text"
+								},
+								{
+									"key": "InStock",
+									"value": "{{ProductInStock}}",
+									"type": "text"
+								},
+								{
+									"key": "IsRecommended",
+									"value": "{{ProductIsRecommended}}",
+									"type": "text"
+								},
+								{
+									"key": "MaximumOrderPurchase",
+									"value": "{{ProductMaximumOrderPurchase}}",
+									"type": "text"
+								},
+								{
+									"key": "Products",
+									"type": "file",
+									"src": "postman-cloud:///1ef81a06-6e10-4c70-b3e9-0cbaacc18b4b",
+									"disabled": true
+								},
+								{
+									"key": "Thumbnail",
+									"type": "file",
+									"src": "postman-cloud:///1ef81a09-b04d-43b0-83b7-65b9a4b777bc",
+									"disabled": true
+								},
+								{
+									"key": "Name",
+									"value": "{{ProductName}}",
+									"description": "(Required) ",
+									"type": "text"
+								},
+								{
+									"key": "",
+									"value": "",
+									"contentType": "",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Products",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get product by id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Products/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Products",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{ProductId}}",
+									"description": "(Required) "
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All products",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Products?PageIndex={{pageIndex}}&pageSize={{pageSize}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Products"
+							],
+							"query": [
+								{
+									"key": "PageIndex",
+									"value": "{{pageIndex}}"
+								},
+								{
+									"key": "pageSize",
+									"value": "{{pageSize}}"
+								},
+								{
+									"key": "sortColumn",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "ascending",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "searchTerm",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"ProductBarcode\", pm.variables.replaceIn('{{$randomInt}}'));\r",
+									"pm.collectionVariables.set(\"ProductName\", pm.variables.replaceIn('{{$randomProductName}}'));\r",
+									"pm.collectionVariables.set(\"ProductDescription\", pm.variables.replaceIn('{{$randomLoremSentence}}'));\r",
+									"pm.collectionVariables.set(\"ProductCategory\", pm.variables.replaceIn('{{$randomWord}}'));\r",
+									"pm.collectionVariables.set(\"ProductRate\", pm.variables.replaceIn('{{$randomPrice}}'));\r",
+									"pm.collectionVariables.set(\"ProductInStock\", pm.variables.replaceIn('false')); // Default value\r",
+									"pm.collectionVariables.set(\"ProductIsRecommended\", pm.variables.replaceIn('false')); // Default value\r",
+									"pm.collectionVariables.set(\"ProductMaximumOrderPurchase\", pm.variables.replaceIn('{{$randomInt}}'));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "multipart/form-data"
+							},
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "Description",
+									"value": "{{ProductDescription}}",
+									"description": "(Required) ",
+									"type": "text"
+								},
+								{
+									"key": "Rate",
+									"value": "{{ProductRate}}",
+									"description": "(Required) ",
+									"type": "text"
+								},
+								{
+									"key": "Barcode",
+									"value": "{{ProductBarcode}}",
+									"type": "text"
+								},
+								{
+									"key": "Category",
+									"value": "{{ProductCategory}}",
+									"type": "text"
+								},
+								{
+									"key": "InStock",
+									"value": "{{ProductInStock}}",
+									"type": "text"
+								},
+								{
+									"key": "IsRecommended",
+									"value": "{{ProductIsRecommended}}",
+									"type": "text"
+								},
+								{
+									"key": "MaximumOrderPurchase",
+									"value": "{{ProductMaximumOrderPurchase}}",
+									"type": "text"
+								},
+								{
+									"key": "Products",
+									"type": "file",
+									"src": "postman-cloud:///1ef81a06-6e10-4c70-b3e9-0cbaacc18b4b",
+									"disabled": true
+								},
+								{
+									"key": "Thumbnail",
+									"type": "file",
+									"src": "postman-cloud:///1ef81a09-b04d-43b0-83b7-65b9a4b777bc",
+									"disabled": true
+								},
+								{
+									"key": "Name",
+									"value": "{{ProductName}}",
+									"description": "(Required) ",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Products/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Products",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{ProductId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get updated product by id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Products/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Products",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{ProductId}}",
+									"description": "(Required) "
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{Token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Employees",
+			"item": [
+				{
+					"name": "Add Employees",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"EmployeeId\", pm.response.json().data.userID);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"EmployeeFirstName\", pm.variables.replaceIn('{{$randomFirstName}}'));\r",
+									"pm.collectionVariables.set(\"EmployeeEmailID\", pm.variables.replaceIn('{{$randomEmail}}'));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"emailID\": \"{{EmployeeFirstName}}\",\n  \"firstName\": \"{{EmployeeEmailID}}\"\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Employees",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Employees"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Employee by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Employees/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Employees",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{EmployeeId}}",
+									"description": "(Required) "
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All employees",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Employees?PageIndex={{pageIndex}}&pageSize={{pageSize}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Employees"
+							],
+							"query": [
+								{
+									"key": "PageIndex",
+									"value": "{{pageIndex}}"
+								},
+								{
+									"key": "pageSize",
+									"value": "{{pageSize}}"
+								},
+								{
+									"key": "searchTerm",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sortColumn",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "ascending",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{Token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "MapProductsAndEmployees",
+			"item": [
+				{
+					"name": "Map Employee to Branches",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"outletId\": \"{{BranchId}}\",\n  \"addPersonId\": [\n    \"{{EmployeeId}}\"\n  ],\n  \"removedPersonId\": [\n  ]\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/branches/MapEmployees",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"branches",
+								"MapEmployees"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Employees For map Branch",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Employees/Map/:outletID",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Employees",
+								"Map",
+								":outletID"
+							],
+							"variable": [
+								{
+									"key": "outletID",
+									"value": "{{BranchId}}",
+									"description": "(Required) "
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Map Product For Branch",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"outletId\": \"{{BranchId}}\",\n  \"addProductsId\": [\n        \"{{ProductId}}\"\n  ],\n  \"removedProductsId\": [\n  ]\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/branches/MapProducts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"branches",
+								"MapProducts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Products For map branch",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Products/Map/:outletID",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Products",
+								"Map",
+								":outletID"
+							],
+							"variable": [
+								{
+									"key": "outletID",
+									"value": "{{BranchId}}",
+									"description": "(Required) "
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Order Product",
+			"item": [
+				{
+					"name": "Order Status Options",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var response = pm.response.json().data;\r",
+									"var orderPlacedStatusId = response.filter(c=> c.text == 'Order Placed')[0].value\r",
+									"var orderDeliveredstatusId = response.filter(c=> c.text == 'Delivered')[0].value\r",
+									"pm.collectionVariables.set(\"OrderPlacedStatusId\", orderPlacedStatusId);\r",
+									"pm.collectionVariables.set(\"orderDeliveredstatusId\", orderDeliveredstatusId);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Static/GetOderStatusOptions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Static",
+								"GetOderStatusOptions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Place Order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"\r",
+									"pm.collectionVariables.set(\"OrderID\",  pm.response.json().data);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"statusId\", pm.collectionVariables.get('OrderPlacedStatusId')); \r",
+									"pm.collectionVariables.set(\"customerName\", pm.variables.replaceIn('{{$randomFirstName}}'));\r",
+									"pm.collectionVariables.set(\"customerEmail\", pm.variables.replaceIn('{{$randomEmail}}'));\r",
+									"pm.collectionVariables.set(\"customerPhone\", pm.variables.replaceIn('{{$randomInt}}'));\r",
+									"let orderDetails = [\r",
+									"    { catalogID: pm.collectionVariables.get('ProductId'), quantity: Math.floor(Math.random() * 10) + 1 }\r",
+									"];\r",
+									"\r",
+									"// Set the order details as a JSON string\r",
+									"pm.collectionVariables.set(\"orderDetailsDtos\", JSON.stringify(orderDetails));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"outletId\": \"{{BranchId}}\",\n  \"paymentMode\": \"Cash\",\n  \"statusId\": {{statusId}},\n  \"customerName\": \"{{customerName}}\",\n  \"customerEmail\": \"{{customerEmail}}\",\n  \"customerPhone\": \"{{customerPhone}}\",\n  \"orderDetailsDtos\": {{orderDetailsDtos}}\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/Orders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Orders/:OrderId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Orders",
+								":OrderId"
+							],
+							"variable": [
+								{
+									"key": "OrderId",
+									"value": "{{OrderID}}",
+									"description": "(Required) "
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Orders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Orders?BranchId={{BranchId}}&PageIndex={{pageIndex}}&pageSize={{pageSize}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Orders"
+							],
+							"query": [
+								{
+									"key": "BranchId",
+									"value": "{{BranchId}}"
+								},
+								{
+									"key": "PageIndex",
+									"value": "{{pageIndex}}"
+								},
+								{
+									"key": "pageSize",
+									"value": "{{pageSize}}"
+								},
+								{
+									"key": "sortColumn",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "ascending",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "searchTerm",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order Status ID",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "text/plain"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/Orders/:OrderId?OrderStatusId={{orderDeliveredstatusId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"Orders",
+								":OrderId"
+							],
+							"query": [
+								{
+									"key": "OrderStatusId",
+									"value": "{{orderDeliveredstatusId}}"
+								}
+							],
+							"variable": [
+								{
+									"key": "OrderId",
+									"value": "{{OrderID}}",
+									"description": "(Required) "
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{Token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "BusinessCategoryText",
+			"value": ""
+		},
+		{
+			"key": "BusinessCategoryValue",
+			"value": ""
+		},
+		{
+			"key": "Token",
+			"value": ""
+		},
+		{
+			"key": "BusinessCategoryID",
+			"value": ""
+		},
+		{
+			"key": "BussinessName",
+			"value": ""
+		},
+		{
+			"key": "ContactNumber",
+			"value": ""
+		},
+		{
+			"key": "ContactEmail",
+			"value": ""
+		},
+		{
+			"key": "WebsiteURL",
+			"value": ""
+		},
+		{
+			"key": "Address",
+			"value": ""
+		},
+		{
+			"key": "State",
+			"value": ""
+		},
+		{
+			"key": "City",
+			"value": ""
+		},
+		{
+			"key": "Latitude",
+			"value": ""
+		},
+		{
+			"key": "Longitude",
+			"value": ""
+		},
+		{
+			"key": "PinCode",
+			"value": ""
+		},
+		{
+			"key": "Description",
+			"value": ""
+		},
+		{
+			"key": "EstablishedOn",
+			"value": ""
+		},
+		{
+			"key": "ProofType",
+			"value": ""
+		},
+		{
+			"key": "ProofNumber",
+			"value": ""
+		},
+		{
+			"key": "BusinessId",
+			"value": ""
+		},
+		{
+			"key": "BranchName",
+			"value": ""
+		},
+		{
+			"key": "BranchDescription",
+			"value": ""
+		},
+		{
+			"key": "BranchContactNumber",
+			"value": ""
+		},
+		{
+			"key": "BranchContactEmail",
+			"value": ""
+		},
+		{
+			"key": "BranchAddress",
+			"value": ""
+		},
+		{
+			"key": "BranchCity",
+			"value": ""
+		},
+		{
+			"key": "BranchState",
+			"value": ""
+		},
+		{
+			"key": "BranchLatitude",
+			"value": ""
+		},
+		{
+			"key": "BranchLongitude",
+			"value": ""
+		},
+		{
+			"key": "BranchPincode",
+			"value": ""
+		},
+		{
+			"key": "BranchId",
+			"value": ""
+		},
+		{
+			"key": "ProductBarcode",
+			"value": ""
+		},
+		{
+			"key": "ProductName",
+			"value": ""
+		},
+		{
+			"key": "ProductDescription",
+			"value": ""
+		},
+		{
+			"key": "ProductCategory",
+			"value": ""
+		},
+		{
+			"key": "ProductRate",
+			"value": ""
+		},
+		{
+			"key": "ProductInStock",
+			"value": ""
+		},
+		{
+			"key": "ProductIsRecommended",
+			"value": ""
+		},
+		{
+			"key": "ProductMaximumOrderPurchase",
+			"value": ""
+		},
+		{
+			"key": "ProductId",
+			"value": ""
+		},
+		{
+			"key": "EmployeeFirstName",
+			"value": ""
+		},
+		{
+			"key": "EmployeeEmailID",
+			"value": ""
+		},
+		{
+			"key": "EmployeeId",
+			"value": ""
+		},
+		{
+			"key": "OrderPlacedStatusId",
+			"value": ""
+		},
+		{
+			"key": "statusId",
+			"value": ""
+		},
+		{
+			"key": "customerName",
+			"value": ""
+		},
+		{
+			"key": "customerEmail",
+			"value": ""
+		},
+		{
+			"key": "customerPhone",
+			"value": ""
+		},
+		{
+			"key": "orderDetailsDtos",
+			"value": ""
+		},
+		{
+			"key": "OrderID",
+			"value": ""
+		},
+		{
+			"key": "orderDeliveredstatusId",
+			"value": ""
+		},
+		{
+			"key": "pageIndex",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "pageSize",
+			"value": "10",
+			"type": "string"
+		},
+		{
+			"key": "Email",
+			"value": ""
+		},
+		{
+			"key": "FirstName",
+			"value": ""
+		},
+		{
+			"key": "LastName",
+			"value": ""
+		},
+		{
+			"key": "Phone",
+			"value": ""
+		},
+		{
+			"key": "Password",
+			"value": ""
+		}
+	]
+}
