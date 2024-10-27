@@ -30,7 +30,7 @@
                         <h5 class="mb-0 text-info">Edit Catelog Details</h5>
                     </div>
                     <hr />
-                    <form asp-action="Edit">
+                    <form asp-action="Edit" enctype="multipart/form-data">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <input type="hidden" asp-for="ID" />
                         <input type="hidden" asp-for="OrderCount" />
@@ -131,6 +131,71 @@
                                 <span asp-validation-for="StatusId" class="text-danger"></span>
                             </div>
                         </div>
+
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Exisiting Thumbnails</label>
+                            <div class="col-sm-9">
+                                <div class="row" id="existingImagesContainer">
+                                    @if (ViewBag.thumbnails != null)
+                                    {
+                                        foreach (var imageKey in ViewBag.thumbnails as List<string>)
+                                        {
+                                            <div class="col-md-3 mb-3 position-relative" data-image-key="@imageKey">
+                                                <img src="@Url.Action("DisplayImage", "File", new { key = imageKey })" width="100%" height="150" class="img-fluid" />
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upload New Images -->
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Upload New Thumbnail</label>
+                            <div class="col-sm-9">
+                                <input type="file" class="form-control" id="newThumbnail" name="newThumbnail" />
+                            </div>
+                        </div>
+
+                        <input type="hidden" id="addedThumbnail" name="addedThumbnail" />
+
+
+                        <!-- Existing Images -->
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Existing Product Images</label>
+                            <div class="col-sm-9">
+                                <div class="row" id="existingImagesContainer">
+                                    @if (ViewBag.ProductImages != null)
+                                    {
+                                        foreach (var imageKey in ViewBag.ProductImages as List<string>)
+                                        {
+                                            <div class="col-md-3 mb-3 position-relative" data-image-key="@imageKey">
+                                                <img src="@Url.Action("DisplayImage", "File", new { key = imageKey })" width="100%" height="150" class="img-fluid" />
+                                                <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0" onclick="RemoveProductImage('@imageKey')">
+                                                    <i class="bx bx-trash"></i>
+                                                </button>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upload New Images -->
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Upload New Product Images</label>
+                            <div class="col-sm-9">
+                                <input type="file" multiple class="form-control" id="newProductImages" name="newProductImages" multiple />
+                            </div>
+                        </div>
+
+                        <!-- Hidden Fields for Removed and Added Images -->
+                        <input type="hidden" id="removedProductImages" name="removedProductImages" />
+                        <input type="hidden" id="addedProductImages" name="addedProductImages" />
+
+
+
+
                         <div class="row">
                             <label class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
@@ -151,6 +216,44 @@
 
 @section Scripts {
     <script>
+        //Thumbnail
+        document.getElementById('newThumbnail').addEventListener('change', function () {
+            const addedThumbnailInput = document.getElementById('addedThumbnail');
+            const files = this.files;
+            const fileNames = Array.from(files).map(file => file.name);
+            addedThumbnailInput.value = fileNames.join(',');
+        });
+
+        //ProductImages
+        function RemoveProductImage(imageKey) {
+            debugger
+            const removedProductImagesInput = document.getElementById('removedProductImages');
+            const existingImages = removedProductImagesInput.value.split(',');
+
+            if (existingImages[0] === '') {
+                existingImages.shift();
+            }
+
+            if (!existingImages.includes(imageKey)) {
+                existingImages.push(imageKey);
+            }
+            removedProductImagesInput.value = existingImages.join(',');
+            // Remove the image element from the DOM
+            const imageElement = document.querySelector(`div[data-image-key="${imageKey}"]`);
+            if (imageElement) {
+                imageElement.remove();
+            }
+        }
+
+        document.getElementById('newProductImages').addEventListener('change', function () {
+            const addedProductImagesInput = document.getElementById('addedProductImages');
+            const files = this.files;
+            const fileNames = Array.from(files).map(file => file.name);
+            addedProductImagesInput.value = fileNames.join(',');
+        });
+
+
+
         $('.single-select').select2({
             theme: 'bootstrap4',
             width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
