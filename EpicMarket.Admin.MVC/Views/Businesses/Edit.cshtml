@@ -31,7 +31,7 @@
                         <h5 class="mb-0 text-info">Edit Business Details</h5>
                     </div>
                     <hr />
-                     <form asp-action="Edit">
+                    <form asp-action="Edit" enctype="multipart/form-data">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <input type="hidden" asp-for="ID" />
                         <input type="hidden" asp-for="AddressID" />
@@ -72,20 +72,6 @@
                                 <span asp-validation-for="Description" class="text-danger"></span>
                         </div>
                     </div>
-                        <div class="row mb-3">
-                            <label asp-for="Banner" class="col-sm-3 col-form-label"></label>
-                            <div class="col-sm-9">
-                                <input asp-for="Banner" class="form-control" />
-                                <span asp-validation-for="Banner" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label asp-for="Logo" class="col-sm-3 col-form-label"></label>
-                            <div class="col-sm-9">
-                                <input asp-for="Logo" class="form-control" />
-                                <span asp-validation-for="Logo" class="text-danger"></span>
-                            </div>
-                        </div>
                         <div class="row mb-3">
                             <label asp-for="ContactNumber" class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
@@ -135,6 +121,66 @@
                                 <span asp-validation-for="StatusId" class="text-danger"></span>
                             </div>
                         </div>
+                        <!-- Existing Images -->
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Existing LOGO</label>
+                            <div class="col-sm-9">
+                                <div class="row" id="existingImagesContainer">
+                                    @if (ViewBag.attachments != null)
+                                    {
+                                        foreach (var imageKey in ViewBag.attachments as List<string>)
+                                        {
+                                            <div class="col-md-3 mb-3 position-relative" data-image-key="@imageKey">
+                                                <img src="@Url.Action("DisplayImage", "File", new { key = imageKey })" width="100%" height="150" class="img-fluid" />
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upload New Images -->
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Upload New Logo</label>
+                            <div class="col-sm-9">
+                                <input type="file" class="form-control" id="newLogo" name="newLogo" />
+                            </div>
+                        </div>
+                        <input type="hidden" id="addedLogos" name="addedLogos" />
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Existing Proofs</label>
+                            <div class="col-sm-9">
+                                <ul class="list-group" id="existingProofsContainer">
+                                    @if (ViewBag.Proofs != null)
+                                    {
+                                        foreach (var imageKey in ViewBag.Proofs as List<string>)
+                                        {
+                                            <li class="list-group-item d-flex justify-content-between align-items-center" data-image-key="@imageKey">
+                                                <a href="@Url.Action("DisplayImage", "File", new { key = imageKey })" target="_blank" class="text-decoration-none">
+                                                    <i class="bx bx-file me-2"></i>Proof @(((List<string>)ViewBag.Proofs).IndexOf(imageKey) + 1)
+                                                </a>
+                                                <button type="button" class="btn btn-link text-danger p-0" onclick="removedProof('@imageKey')">
+                                                    <i class="bx bx-x"></i>
+                                                </button>
+                                            </li>
+                                        }
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Upload New Images -->
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Upload New Proofs</label>
+                            <div class="col-sm-9">
+                                <input multiple type="file" class="form-control" id="newProofs" name="newProofs" />
+                            </div>
+                        </div>
+                        <!-- Hidden Fields for Removed and Added Images -->
+                        <input type="hidden" id="removedProofs" name="removedProofs" />
+                        <input type="hidden" id="addedProofs" name="addedProofs" />
+
+
                         <div class="row mb-3">
                             <label  class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
@@ -167,6 +213,42 @@
 
 @section Scripts {
     <script>
+  
+        document.getElementById('newLogo').addEventListener('change', function () {
+            const addedLogosInput = document.getElementById('addedLogos');
+            const files = this.files;
+            const fileNames = Array.from(files).map(file => file.name);
+            addedLogosInput.value = fileNames.join(',');
+        });
+
+        //proofs
+        function removedProof(imageKey) {
+            const removedProofsInput = document.getElementById('removedProofs');
+            const existingImages =removedProofsInput.value.split(',');
+
+            if (existingImages[0] === '') {
+                existingImages.shift();
+            }
+
+            if (!existingImages.includes(imageKey)) {
+                existingImages.push(imageKey);
+            }
+           removedProofsInput.value = existingImages.join(',');
+            // Remove the image element from the DOM
+            const listItem = document.querySelector(`#existingProofsContainer li[data-image-key="${imageKey}"]`);
+            if (listItem) {
+                listItem.remove();
+            }
+        }
+
+        document.getElementById('newProofs').addEventListener('change', function () {
+            const addedProofsInput = document.getElementById('addedProofs');
+            const files = this.files;
+            const fileNames = Array.from(files).map(file => file.name);
+            addedProofsInput.value = fileNames.join(',');
+        });
+
+
         $('.single-select').select2({
             theme: 'bootstrap4',
             width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
@@ -174,5 +256,6 @@
             allowClear: Boolean($(this).data('allow-clear')),
         });
     </script>
+
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

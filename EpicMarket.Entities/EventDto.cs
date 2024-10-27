@@ -15,6 +15,7 @@ namespace EpicMarket.Entities
         public string Description { get; set; }
         public string Data { get; set; }
         public int? RecordId { get; set; }
+        public int BusinessID { get; set; }
         public string LoggedInUserName { get; set; }
     }
 }

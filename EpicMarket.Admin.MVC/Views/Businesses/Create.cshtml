@@ -31,7 +31,7 @@
                         <h5 class="mb-0 text-info">Register Business Details</h5>
                     </div>
                     <hr />
-                    <form asp-action="Create">
+                    <form asp-action="Create" enctype="multipart/form-data">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <input type="hidden" asp-for="Rating" />
                         <input type="hidden" asp-for="ReviewCount" />
@@ -66,17 +66,15 @@
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <label asp-for="Banner" class="col-sm-3 col-form-label"></label>
+                            <label class="col-sm-3 col-form-label">Upload Logo</label>
                             <div class="col-sm-9">
-                                <input asp-for="Banner" class="form-control" />
-                                <span asp-validation-for="Banner" class="text-danger"></span>
+                                <input type="file"  class="form-control" id="Images" name="Images" />
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <label asp-for="Logo" class="col-sm-3 col-form-label"></label>
+                            <label class="col-sm-3 col-form-label">Upload Proofs</label>
                             <div class="col-sm-9">
-                                <input asp-for="Logo" class="form-control" />
-                                <span asp-validation-for="Logo" class="text-danger"></span>
+                                <input type="file" multiple class="form-control" id="Proofs" name="Proofs" />
                             </div>
                         </div>
                         <div class="row mb-3">

@@ -9,16 +9,21 @@ using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
 using System.Reflection.Metadata;
 using System.Security.Claims;
+using EpicMarket.Admin.MVC.Contracts;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
     public class AttachmentsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IAttachmentService _attachmentService;
+        private readonly IFileService _fileService;
 
-        public AttachmentsController(ApplicationDbContext context)
+        public AttachmentsController(IAttachmentService attachmentService ,IFileService fileService ,ApplicationDbContext context)
         {
             _context = context;
+            _attachmentService = attachmentService;
+            _fileService = fileService;
         }
 
         // GET: Attachments
@@ -44,6 +49,27 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
 
             return View(attachment);
+        }
+
+        public async Task<IActionResult> DownloadImage(string key)
+        {
+            try
+            {
+                var fileDto = await _fileService.GetFileByKeyAsync(key);
+
+                // Set the content disposition to attachment to prompt download in the browser
+                var result = new FileStreamResult(fileDto.fileStream, fileDto.contentType)
+                {
+                    FileDownloadName = key
+                };
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, "An error occurred while downloading the image.");
+            }
         }
 
         // GET: Attachments/Create
@@ -129,6 +155,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: Attachments/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             if (id == null)
             {
                 return NotFound();
@@ -136,6 +163,8 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             var attachment = await _context.Attachments
                 .FirstOrDefaultAsync(m => m.ID == id);
+            var key = attachment.DocumentFolderPath + attachment.DocumentFile;
+            await _fileService.DeleteImage([key], userName);
             if (attachment == null)
             {
                 return NotFound();

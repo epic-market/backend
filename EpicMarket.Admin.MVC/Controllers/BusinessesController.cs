@@ -13,6 +13,8 @@ using System.Security.Claims;
 using EpicMarket.Admin.MVC.Models;
 using EpicMarket.Entities.CustomModels;
 using System.Net.Mail;
+using EpicMarket.Admin.MVC.Contracts;
+using Microsoft.IdentityModel.Tokens;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -20,10 +22,14 @@ namespace EpicMarket.Admin.MVC.Controllers
     public class BusinessesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IAttachmentService attachmentService;
+        private readonly IFileService fileService;
 
-        public BusinessesController(ApplicationDbContext context)
+        public BusinessesController(ApplicationDbContext context,IAttachmentService attachmentService, IFileService fileService)
         {
             _context = context;
+            this.attachmentService = attachmentService;
+            this.fileService = fileService;
         }
 
         // GET: Businesses
@@ -70,8 +76,7 @@ namespace EpicMarket.Admin.MVC.Controllers
 							.ToListAsync();
 
 
-
-            var attachmentTypeID_LOGO = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.LOGO);
+			var attachmentTypeID_LOGO = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.LOGO);
             var attachmentTypeID_PROOF = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.PROOF);
 
 
@@ -92,12 +97,13 @@ namespace EpicMarket.Admin.MVC.Controllers
                             orderby attachment.CreateDate descending
                             select new
                             {
-                                ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
-                            };
+                                ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}",
+                                Name = $"{attachment.DocumentFile}"
+							};
 
 
             ViewBag.AttachmentLogo = attachments_logo.Select(a => a.ImagePath).FirstOrDefault();
-            ViewBag.AttachmentProof = attachments_proof.Select(a => a.ImagePath).ToList();
+            ViewBag.AttachmentProof = attachments_proof.ToList();
             businessDetailModel.Business = business;
 			businessDetailModel.Outlets = braches;
 			businessDetailModel.employees = employees;
@@ -125,7 +131,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,PersonID,BusinessCategoryID,Name,Description,Banner,Logo,ContactNumber,ContactEmail,AddressID,Rating,ReviewCount,IsOpen,Weight,Status,CreateDate,CreateBy,ModifiedDate,ModifiedBy,Address")] Business business)
+        public async Task<IActionResult> Create([Bind("ID,PersonID,BusinessCategoryID,Name,Description,Banner,Logo,ContactNumber,ContactEmail,AddressID,Rating,ReviewCount,IsOpen,Weight,StatusId,CreateDate,CreateBy,ModifiedDate,ModifiedBy,Address")] Business business,IFormFile[] Images , IFormFile[] Proofs)
         {
 
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -140,6 +146,35 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 _context.Add(business);
                 await _context.SaveChangesAsync();
+
+                if (Images?.Length > 0) {
+                    var attachmentLogo = new AttachmentModel()
+                    {
+                        Name = EntityConstants.Business,
+                        Comment = EntityConstants.Business,
+                        RecordID = business.ID,
+                        Entity = EntityConstants.Business,
+                        AttachmentType = AttachmentTypeConstants.LOGO,
+                        FolderPathConstant = FilePathConstants.LOGOPATH,
+                        Files = Images
+                    };
+                    await attachmentService.InsertAttachment(attachmentLogo);
+                }
+
+                if (Proofs?.Length > 0)
+                {
+                    var attachmentProofs = new AttachmentModel()
+                    {
+                        Name = EntityConstants.Business,
+                        Comment = EntityConstants.Business,
+                        RecordID = business.ID,
+                        Entity = EntityConstants.Business,
+                        AttachmentType = AttachmentTypeConstants.PROOF,
+                        FolderPathConstant = FilePathConstants.ProofPATH,
+                        Files = Proofs
+                    };
+                    await attachmentService.InsertAttachment(attachmentProofs);
+                }
                 return RedirectToAction(nameof(Index));
             }
             ViewData["BusinessCategoryID"] = new SelectList(_context.BusinessCategories, "ID", "Name");
@@ -157,6 +192,21 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
 
             var business = await _context.Businesses.Where(b=>b.ID == id).Include(c=>c.Address).FirstOrDefaultAsync();
+            ViewBag.attachments = await this.attachmentService.GetAttachmentLinks(new GetAttachmentLink()
+            {
+                AttachmentType = AttachmentTypeConstants.LOGO,
+                Entity = EntityConstants.Business,
+                RecordID = business.ID
+            });
+
+            ViewBag.Proofs = await this.attachmentService.GetAttachmentLinks(new GetAttachmentLink()
+            {
+                AttachmentType = AttachmentTypeConstants.PROOF,
+                Entity = EntityConstants.Business,
+                RecordID = business.ID
+            });
+
+
             if (business == null)
             {
                 return NotFound();
@@ -172,7 +222,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,PersonID,BusinessCategoryID,Name,Description,Banner,Logo,ContactNumber,ContactEmail,AddressID,Rating,ReviewCount,IsOpen,Weight,CreateDate,CreateBy,ModifiedDate,ModifiedBy,StatusId,Address,IsActive")] Business business)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,PersonID,BusinessCategoryID,Name,Description,Banner,Logo,ContactNumber,ContactEmail,AddressID,Rating,ReviewCount,IsOpen,Weight,CreateDate,CreateBy,ModifiedDate,ModifiedBy,StatusId,Address,IsActive")] Business business, IFormFile[] newLogo, string? addedLogos , IFormFile[] newProofs, string? removedProofs, string? addedProofs)
         {
 
 
@@ -197,6 +247,60 @@ namespace EpicMarket.Admin.MVC.Controllers
 
                     _context.Update(business);
                     await _context.SaveChangesAsync();
+
+                    // Handle added images
+                    if (addedLogos != null && newLogo?.Length > 0)
+                    {
+                        List<string> ExisitingLogo = await this.attachmentService.GetAttachmentLinks(new GetAttachmentLink()
+                        {
+                            AttachmentType = AttachmentTypeConstants.LOGO,
+                            Entity = EntityConstants.Business,
+                            RecordID = business.ID
+                        });
+                        if (ExisitingLogo?.Count > 0)
+                        {
+                            await this.fileService.DeleteImage(ExisitingLogo, userName);
+                        }
+
+                        var attachment = new AttachmentModel()
+                        {
+                            Name = EntityConstants.Business,
+                            Comment = EntityConstants.Business,
+                            RecordID = business.ID,
+                            Entity = EntityConstants.Business,
+                            AttachmentType = AttachmentTypeConstants.LOGO,
+                            FolderPathConstant = FilePathConstants.LOGOPATH,
+                            Files = newLogo
+                        };
+                        await attachmentService.InsertAttachment(attachment);
+
+                    }
+
+
+                    // Handle removed images
+                    if (!string.IsNullOrEmpty(removedProofs))
+                    {
+                        var removedImageUrls = removedProofs.Split(',').ToList();
+                        await this.fileService.DeleteImage(removedImageUrls, userName);
+                    }
+
+                    // Handle added images
+                    if (addedProofs != null && newProofs?.Length > 0)
+                    {
+
+                        var attachmentProofs = new AttachmentModel()
+                        {
+                            Name = EntityConstants.Business,
+                            Comment = EntityConstants.Business,
+                            RecordID = business.ID,
+                            Entity = EntityConstants.Business,
+                            AttachmentType = AttachmentTypeConstants.PROOF,
+                            FolderPathConstant = FilePathConstants.ProofPATH,
+                            Files = newProofs
+                        };
+                        await attachmentService.InsertAttachment(attachmentProofs);
+
+                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {

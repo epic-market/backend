@@ -349,5 +349,13 @@ namespace EpicMarket.Services
             return getData;
         }
 
+        public async Task<bool> AnyNewOrders(DateTime ordered_after, int businessid , int? outlet_id)
+        {
+          var listOfNewOrderPlacedAfterTheTimeStamp  = await _context.Orders.Include(c => c.Outlet).Where(c=>c.Outlet.BussinessID == businessid && c.OrderAt > ordered_after).ToListAsync();
+
+           return listOfNewOrderPlacedAfterTheTimeStamp?.Count > 0 ? true : false;
+
+
+        }
     }
 }

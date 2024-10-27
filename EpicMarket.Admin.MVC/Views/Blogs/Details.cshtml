@@ -48,14 +48,6 @@
                     </td>
                 </tr>
                 <tr>
-                    <th class="bg-light">@Html.DisplayNameFor(model => model.InnerHtml)</th>
-                    <td>
-                        <div style="max-height: 200px; overflow-y: auto;">
-                            @Html.Raw(Model.InnerHtml)
-                        </div>
-                    </td>
-                </tr>
-                <tr>
                     <th class="bg-light">@Html.DisplayNameFor(model => model.Authour)</th>
                     <td>@Html.DisplayFor(model => model.Authour)</td>
                 </tr>
@@ -78,6 +70,36 @@
             </table>
         </div>
     </div>
+    <div class="card">
+        <div class="card-header">
+            <p class="fw-bold">
+                @Html.DisplayNameFor(model => model.InnerHtml)
+            </p>
+
+        </div>
+        <div class="card-body">
+            <ul class="nav nav-tabs" id="descriptionTabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="preview-tab" data-bs-toggle="tab" href="#preview" role="tab" aria-controls="preview" aria-selected="true">Preview</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="raw-tab" data-bs-toggle="tab" href="#raw" role="tab" aria-controls="raw" aria-selected="false">Raw HTML</a>
+                </li>
+            </ul>
+            <div class="tab-content mt-3">
+                <div class="tab-pane fade show active" id="preview" role="tabpanel" aria-labelledby="preview-tab">
+                    <div style="overflow: auto; max-height: 400px; width: 100%;">
+                        @Html.Raw(Model.InnerHtml)
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="raw" role="tabpanel" aria-labelledby="raw-tab">
+                    <pre style="white-space: pre-wrap; max-width: 100%; overflow: auto; max-height: 400px;">@Model.InnerHtml</pre>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
     <div class="card-footer">
         <a asp-action="Index" class="btn btn-secondary">
             <i class="bx bx-arrow-back me-1"></i> Back to List

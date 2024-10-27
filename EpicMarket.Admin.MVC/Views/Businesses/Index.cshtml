@@ -40,15 +40,6 @@
                             @Html.DisplayNameFor(model => model.ContactEmail)
                         </th>
                         <th>
-                            @Html.DisplayNameFor(model => model.Rating)
-                        </th>
-                        <th>
-                            @Html.DisplayNameFor(model => model.IsOpen)
-                        </th>
-                        <th>
-                            @Html.DisplayNameFor(model => model.Weight)
-                        </th>
-                        <th>
                             @Html.DisplayNameFor(model => model.Status)
                         </th>
                         <th>
@@ -80,19 +71,11 @@
                                 @Html.DisplayFor(modelItem => item.ContactEmail)
                             </td>
                             <td>
-                                @Html.DisplayFor(modelItem => item.Rating)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.IsOpen)
-                            </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.Weight)
-                            </td>
-                            <td>
                                 @Html.DisplayFor(modelItem => item.Status.Status)
                             </td>
                             <td>
-                                @Html.DisplayFor(modelItem => item.Person.UserName)
+                                <a asp-controller="AppUsers" asp-action="Details" asp-route-id="@item.Person.Id"> @Html.DisplayFor(modelItem =>  item.Person.UserName)</a>
+
                             </td>
                             <td>
                                 @Html.DisplayFor(modelItem => item.BusinessCategory.Name)
