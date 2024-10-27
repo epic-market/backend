@@ -110,6 +110,21 @@ namespace EpicMarket.Admin.MVC.Controllers
                 {
                     _context.Update(orderDetail);
                     await _context.SaveChangesAsync();
+
+                    var Order = _context.Orders.Include(c=>c.OrderDetails).FirstOrDefault(c => c.ID == orderDetail.OrderID);
+                    double TotalPrice = 0;
+                    var TotalItems = 0;
+                    foreach (var Item in Order.OrderDetails) {
+                        TotalPrice = TotalPrice + Item.TotalPrice;
+                        TotalItems = TotalItems + Item.Quantity;
+                    }
+                    Order.TotalPrice = TotalPrice;
+                    Order.TotalItems = TotalItems;
+
+                    _context.Update(Order);
+                    await _context.SaveChangesAsync();
+
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
