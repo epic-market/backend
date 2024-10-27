@@ -177,6 +177,6 @@ namespace EpicMarket.Entities
     public class UpdateBrancheStatusParams
     {
         public int? BranchId { get; set; }
-        public bool? Is_Open { get; set; } = true;
+        public bool Is_Open { get; set; } = true;
     }
 }

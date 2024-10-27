@@ -29,6 +29,21 @@
                         </div>
                         <h5 class="mb-0 text-info">Edit Order Details</h5>
                     </div>
+                    <div class='card mb-4'>
+                        <div class='card-body'>
+                            <h5 class='card-title'>Order Details</h5>
+                            <div class='row'>
+                                <div class='col-md-6'>
+                                    <p class='mb-1'><strong>Order ID:</strong> @Model.OrderID</p>
+                                    <p class='mb-1'><strong>Catalog Name:</strong> @Model.Catalog.Name</p>
+                                </div>
+                                <div class='col-md-6'>
+                                    <p class='mb-1'><strong>Rate:</strong> ₹<span id="displayRate">@Model.Rate.ToString("F2")</span></p>
+                                    <p class='mb-1'><strong>Total Price:</strong> ₹<span id="displayTotalPrice">@Model.TotalPrice.ToString("F2")</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <hr />
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -37,41 +52,25 @@
             <input type="hidden" asp-for="CreateBy" />
             <input type="hidden" asp-for="ModifiedDate" />
             <input type="hidden" asp-for="ModifiedBy" />
-                        <input type="hidden" asp-for="IsActive" />
-            <div class="row mb-3">
-                <label asp-for="OrderID" class="col-sm-3 col-form-label"></label>
-                            <div class="col-sm-9">
-                <select asp-for="OrderID" class="form-control" asp-items="ViewBag.OrderID"></select>
-                <span asp-validation-for="OrderID" class="text-danger"></span>
-                            </div>
-            </div>
-            <div class="row mb-3">
-                <label asp-for="CatalogID" class="col-sm-3 col-form-label"></label>
-                                <div class="col-sm-9">
-                <select asp-for="CatalogID" class="form-control" asp-items="ViewBag.CatalogID"></select>
-                <span asp-validation-for="CatalogID" class="text-danger"></span>
-                            </div>
-            </div>
+             <input type="hidden" asp-for="IsActive" />
+            <input type="hidden" asp-for="CatalogID" />
+                        <input type="hidden" asp-for="OrderID" />
+            <input type="hidden" asp-for="Rate" id="Rate" />
+                        <input type="hidden" asp-for="TotalPrice" />
             <div class="row mb-3">
                 <label asp-for="Quantity" class="col-sm-3 col-form-label"></label>
-                                    <div class="col-sm-9">
-                <input asp-for="Quantity" class="form-control" />
-                <span asp-validation-for="Quantity" class="text-danger"></span>
-                            </div>
+                <div class="col-sm-9">
+                    <input asp-for="Quantity" class="form-control" oninput="updateTotalPrice()" />
+                    <span asp-validation-for="Quantity" class="text-danger"></span>
+                </div>
             </div>
-            <div class="row mb-3">
-                <label asp-for="Rate" class="col-sm-3 col-form-label"></label>
-                                        <div class="col-sm-9">
-                <input asp-for="Rate" class="form-control" />
-                <span asp-validation-for="Rate" class="text-danger"></span>
-                            </div>
-            </div>
+
             <div class="row mb-3">
                 <label asp-for="TotalPrice" class="col-sm-3 col-form-label"></label>
-                                            <div class="col-sm-9">
-                <input asp-for="TotalPrice" class="form-control" />
-                <span asp-validation-for="TotalPrice" class="text-danger"></span>
-                            </div>
+                <div class="col-sm-9">
+                    <input asp-for="TotalPrice" class="form-control" readonly disabled />
+                    <span asp-validation-for="TotalPrice" class="text-danger"></span>
+                </div>
             </div>
             <div class="row">
                 <label class="col-sm-3 col-form-label"></label>
@@ -91,5 +90,14 @@
 
 
 @section Scripts {
+    <script>
+        function updateTotalPrice() {
+            const quantity = parseFloat(document.getElementById('Quantity').value) || 0;
+            const rate = parseFloat(document.getElementById('Rate').value) || 0;
+            const totalPrice = quantity * rate;
+            document.getElementById('TotalPrice').value = totalPrice.toFixed(2);
+            document.getElementById('displayTotalPrice').textContent = totalPrice.toFixed(2);
+        }
+    </script>
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

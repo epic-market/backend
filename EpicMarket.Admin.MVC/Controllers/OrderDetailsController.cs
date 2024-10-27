@@ -82,7 +82,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var orderDetail = await _context.OrderDetails.FindAsync(id);
+            var orderDetail = await _context.OrderDetails.Include(c=>c.Catalog).FirstOrDefaultAsync(c=>c.ID == id);
             if (orderDetail == null)
             {
                 return NotFound();

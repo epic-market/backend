@@ -51,9 +51,6 @@
                         <th>
                             @Html.DisplayNameFor(model => model.Outlet)
                         </th>
-                        <th>
-                            @Html.DisplayNameFor(model => model.Address.City)
-                        </th>
                         <th></th>
                     </tr>
                 </thead>
@@ -86,9 +83,6 @@
                                 @Html.DisplayFor(modelItem => item.Outlet.Name)
                             </td>
                             <td>
-                                @Html.DisplayFor(modelItem => item.Address.City)
-                            </td>
-                            <td>
                                 <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
                                 <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
                                 <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
@@ -100,6 +94,8 @@
         </div>
     </div>
 </div>
+
+
 @section Scripts {
     <script>
         $(document).ready(function () {

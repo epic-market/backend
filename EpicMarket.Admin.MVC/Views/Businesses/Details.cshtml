@@ -27,21 +27,64 @@
 					<a asp-action="Edit" class="btn btn-primary px-5" asp-route-id="@Model?.Business.ID">Edit</a>
 				</div>
 				<h4 class="card-title d-flex align-items-center">
-					<a href="@Url.Action("DisplayImage", "File", new { key =  ViewBag.AttachmentLogo  })" target="_blank" class="ms-2">
-						<img src="@Url.Action("DisplayImage", "File", new { key =  ViewBag.AttachmentLogo })"
-							 alt="Business Logo"
-							 class="rounded-circle p-1"
-							 style="width: 40px; height: 40px; object-fit: cover;" />
-					</a>
+					@if (!string.IsNullOrEmpty(ViewBag.AttachmentLogo))
+					{
+						<a href="@Url.Action("DisplayImage", "File", new { key = ViewBag.AttachmentLogo })" target="_blank" class="me-2">
+							<img src="@Url.Action("DisplayImage", "File", new { key = ViewBag.AttachmentLogo })"
+								 alt="Business Logo"
+								 class="rounded-circle p-1"
+								 style="width: 40px; height: 40px; object-fit: cover; border: 1px solid #ddd;" />
+						</a>
+					}
+					else
+					{
+						<div class="me-2">
+							<div class="rounded-circle d-flex justify-content-center align-items-center bg-light"
+								 style="width: 40px; height: 40px; border: 1px solid #ddd;">
+								<i class="bx bx-building-house text-muted" style="font-size: 20px;"></i>
+							</div>
+						</div>
+					}
 					@Html.DisplayFor(model => model.Business.Name)
-					
 				</h4>
-				<div class="d-flex gap-3 py-3">
-					<div>@Html.DisplayFor(model => model.Business.Rating) @Html.DisplayNameFor(model => model.Business.Rating)</div>
-					<div>@Html.DisplayFor(model => model.Business.ReviewCount) @Html.DisplayNameFor(model => model.Business.ReviewCount)</div>
-					<div>@Html.DisplayFor(model => model.Business.IsOpen) @Html.DisplayNameFor(model => model.Business.IsOpen)</div>
-					<div>@Html.DisplayFor(model => model.Business.Weight) @Html.DisplayNameFor(model => model.Business.Weight)</div>
-					<div class="text-success"> @Html.DisplayFor(model => model.Business.Status.Status)</div>
+				<div class="d-flex flex-wrap gap-3 py-3">
+					<div class="d-flex align-items-center">
+						<i class="bx bx-star me-1 text-warning"></i>
+						<strong class="me-1">@Html.DisplayNameFor(model => model.Business.Rating):</strong>
+						<span>@Html.DisplayFor(model => model.Business.Rating)</span>
+					</div>
+					<div class="d-flex align-items-center">
+						<i class="bx bx-comment-dots me-1 text-info"></i>
+						<strong class="me-1">@Html.DisplayNameFor(model => model.Business.ReviewCount):</strong>
+						<span>@Html.DisplayFor(model => model.Business.ReviewCount)</span>
+					</div>
+					<div class="d-flex align-items-center">
+						@{
+							var isOpenIcon =
+			Model.Business.IsOpen ? "bx-door-open text-success" : "bx-door-closed text-danger";
+							var isOpenText =
+							Model.Business.IsOpen ? "Open" : "Closed";
+
+						}
+						<i class="bx @isOpenIcon me-1"></i>
+						<strong class="me-1">@Html.DisplayNameFor(model => model.Business.IsOpen):</strong>
+						<span>@isOpenText</span>
+					</div>
+					<div class="d-flex align-items-center">
+						<i class="bx bx-weight me-1 text-primary"></i>
+						<strong class="me-1">@Html.DisplayNameFor(model => model.Business.Weight):</strong>
+						<span>@Html.DisplayFor(model => model.Business.Weight)</span>
+					</div>
+					<div class="d-flex align-items-center">
+						@{
+							var isVerified = Model.Business.Status.Status.Equals("Verified", StringComparison.OrdinalIgnoreCase);
+							var statusColor = isVerified ? "success" : "danger";
+							var iconClass = isVerified ? "bx-check-circle" : "bx-x-circle";
+						}
+						<i class="bx @iconClass me-1 text-@statusColor"></i>
+						<strong class="me-1">Status:</strong>
+						<span class="badge bg-@statusColor">@Html.DisplayFor(model => model.Business.Status.Status)</span>
+					</div>
 				</div>
 				<p class="card-text fs-6"> @Html.DisplayFor(model => model.Business.Description) </p>
 				<div class="row">
@@ -129,19 +172,30 @@
 			<h5 class="card-title mb-0">Attachments</h5>
 		</div>
 		<div class="card-body">
-			<ul class="list-group list-group-flush">
-				@foreach (var attachment in ViewBag.AttachmentProof)
-				{
-					<li class="list-group-item d-flex align-items-center">
-						<i class="fas fa-paperclip me-2"></i>
-						<a href="@Url.Action("DisplayImage", "File", new { key = attachment.ImagePath })"
-						   target="_blank"
-						   class="text-decoration-none">
-							<span class="badge bg-secondary ms-2">@attachment.Name</span>
-						</a>
-					</li>
-				}
-			</ul>
+			@if (ViewBag.AttachmentProof != null && ViewBag.AttachmentProof.Count > 0)
+			{
+				<ul class="list-group list-group-flush">
+					@foreach (var attachment in ViewBag.AttachmentProof)
+					{
+						<li class="list-group-item d-flex align-items-center">
+							<i class="fas fa-paperclip me-2"></i>
+							<a href="@Url.Action("DisplayImage", "File", new { key = attachment.ImagePath })"
+							   target="_blank"
+							   class="text-decoration-none">
+								<span class="badge bg-secondary ms-2">@attachment.Name</span>
+							</a>
+						</li>
+					}
+				</ul>
+
+			}
+			else
+			{
+				<div class="alert alert-info" role="alert">
+					<i class="bx bx-info-circle me-1"></i>
+					No Attachments found.
+				</div>
+			}
 		</div>
 	</div>
 	<div class="card-body">
@@ -176,7 +230,7 @@
 					</div>
 				</a>
 			</li>
-			<li class="nav-item" role="presentation">
+	@* 		<li class="nav-item" role="presentation">
 				<a class="nav-link" data-bs-toggle="tab" href="#primaryactivity" role="tab" aria-selected="false">
 					<div class="d-flex align-items-center">
 						<div class="tab-icon">
@@ -185,7 +239,7 @@
 						<div class="tab-title"> Activity </div>
 					</div>
 				</a>
-			</li>
+			</li> *@
 		</ul>
 		<div class="tab-content pt-3">
 			<div class="tab-pane fade show active" id="primaryorders" role="tabpanel">
@@ -211,21 +265,6 @@
 											@Html.DisplayNameFor(model => model.Outlet.ContactEmail)
 										</th>
 										<th>
-											@Html.DisplayNameFor(model => model.Outlet.Rating)
-										</th>
-										<th>
-											@Html.DisplayNameFor(model => model.Outlet.ReviewCount)
-										</th>
-										<th>
-											@Html.DisplayNameFor(model => model.Outlet.IsOpen)
-										</th>
-										<th>
-											@Html.DisplayNameFor(model => model.Outlet.Weight)
-										</th>
-										<th>
-											@* @Html.DisplayNameFor(model => model.Outlet.Status) *@
-										</th>
-										<th>
 											@Html.DisplayNameFor(model => model.Outlet.Address.City)
 										</th>
 										<th></th>
@@ -249,21 +288,6 @@
 											</td>
 											<td>
 												@Html.DisplayFor(modelItem => item.ContactEmail)
-											</td>
-											<td>
-												@Html.DisplayFor(modelItem => item.Rating)
-											</td>
-											<td>
-												@Html.DisplayFor(modelItem => item.ReviewCount)
-											</td>
-											<td>
-												@Html.DisplayFor(modelItem => item.IsOpen)
-											</td>
-											<td>
-												@Html.DisplayFor(modelItem => item.Weight)
-											</td>
-											<td>
-												@* @Html.DisplayFor(modelItem => item.Status) *@
 											</td>
 											<td>
 												@Html.DisplayFor(modelItem => item.Address.City)
@@ -306,15 +330,6 @@
 										<th>
 											@Html.DisplayNameFor(model => model.Catalog.InStock)
 										</th>
-										<th>
-											@Html.DisplayNameFor(model => model.Catalog.Rating)
-										</th>
-										<th>
-											@Html.DisplayNameFor(model => model.Catalog.ReviewCount)
-										</th>
-										<th>
-								@* 			@Html.DisplayNameFor(model => model.Catalog.Status) *@
-										</th>
 										<th></th>
 									</tr>
 								</thead>
@@ -339,15 +354,6 @@
 											</td>
 											<td>
 												@Html.DisplayFor(modelItem => item.InStock)
-											</td>
-											<td>
-												@Html.DisplayFor(modelItem => item.Rating)
-											</td>
-											<td>
-												@Html.DisplayFor(modelItem => item.ReviewCount)
-											</td>
-											<td>
-											@* 	@Html.DisplayFor(modelItem => item.Status) *@
 											</td>
 											<td>
 												<a asp-controller="Catalogs" asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
@@ -414,7 +420,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="tab-pane fade" id="primaryactivity" role="tabpanel">
+		@* 	<div class="tab-pane fade" id="primaryactivity" role="tabpanel">
 				<div class="card">
 					<div class="card-body">
 						<div class="table-responsive">
@@ -465,7 +471,7 @@
 						</div>
 					</div>
 				</div>
-			</div>
+			</div> *@
 		</div>
 	</div>
 	<div class="card-footer">

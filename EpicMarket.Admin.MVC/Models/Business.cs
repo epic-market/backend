@@ -40,6 +40,8 @@
         public decimal TotalAmount { get; set; }
         public int TotalItems { get; set; }
         public string PaymentMode { get; set; }
+
+        public int OutletID { get; set; }
         public CustomerDetails CustomerDetails { get; set; }
     }
 

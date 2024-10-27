@@ -30,6 +30,23 @@
 
                     </div>
                     <hr />
+                    <div class='card mb-4'>
+                        <div class='card-body'>
+                            <h5 class='card-title'>Order Details</h5>
+                            <div class='row'>
+                                <div class='col-md-6'>
+                                    <p class='mb-1'><strong>Person Email:</strong> @Model.Person.Email</p>
+                                    <p class='mb-1'><strong>Outlet Name:</strong> @Model.Outlet.Name</p>
+                                    <p class='mb-1'><strong>Order At:</strong> @Model.OrderAt</p>
+                                </div>
+                                <div class='col-md-6'>
+                                    <p class='mb-1'><strong>Order Type Name:</strong> @Model.OrderTypesOptions.Ordertype</p>
+                                    <p class='mb-1'><strong>Total Items:</strong> ₹<span id="displayRate">@Model.TotalItems</span></p>
+                                    <p class='mb-1'><strong>Total Price:</strong> ₹<span id="displayTotalPrice">@Model.TotalPrice.ToString("F2")</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                      <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <input type="hidden" asp-for="ID" />
@@ -38,61 +55,30 @@
                 <input type="hidden" asp-for="ModifiedDate" />
                 <input type="hidden" asp-for="ModifiedBy" />
                 <input type="hidden" asp-for="AddressID" />
-                        <input type="hidden" asp-for="IsActive" />
+                 <input type="hidden" asp-for="IsActive" />
+                 <input type="hidden" asp-for="OrderAt" />
+                 <input type="hidden" asp-for="OutletID" />
+                <input type="hidden" asp-for="PersonID" />
+                <input type="hidden" asp-for="TotalPrice" />
+                 <input type="hidden" asp-for="TotalItems" />
+                  <input type="hidden" asp-for="OrderTypeId" />
+            
+        
                 <div class="row mb-3">
-                    <label asp-for="PersonID" class="col-sm-3 col-form-label"></label>
+                    <label asp-for="StatusId" class="col-sm-3 col-form-label"></label>
                     <div class="col-sm-9">
-                    <select asp-for="PersonID" class="form-control" asp-items="ViewBag.PersonID"></select>
-                    <span asp-validation-for="PersonID" class="text-danger"></span>
+                       <select asp-for="StatusId" class="form-control" asp-items="ViewBag.OrderStatusID"></select>
                     </div>
-                </div>
-                <div class="row mb-3">
-                    <label asp-for="OutletID" class="col-sm-3 col-form-label"></label>
-                        <div class="col-sm-9">
-                    <select asp-for="OutletID" class="form-control" asp-items="ViewBag.BusinessID"></select>
-                    <span asp-validation-for="OutletID" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    @* <label asp-for="OrderType" class="col-sm-3 col-form-label"></label>
-                    <div class="col-sm-9">
-                    <input asp-for="OrderType" class="form-control" />
-                    <span asp-validation-for="OrderType" class="text-danger"></span>
-                    </div> *@
-                </div>
-                <div class="row mb-3">
-                    <label asp-for="TotalPrice" class="col-sm-3 col-form-label"></label>
-                <div class="col-sm-9">
-                    <input asp-for="TotalPrice" class="form-control" />
-                    <span asp-validation-for="TotalPrice" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <label asp-for="TotalItems" class="col-sm-3 col-form-label"></label>
-                   <div class="col-sm-9">
-                    <input asp-for="TotalItems" class="form-control" />
-                    <span asp-validation-for="TotalItems" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <label asp-for="OrderAt" class="col-sm-3 col-form-label"></label>
-                     <div class="col-sm-9">
-                    <input asp-for="OrderAt" class="form-control" />
-                    <span asp-validation-for="OrderAt" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    @* <label asp-for="Status" class="col-sm-3 col-form-label"></label>
-                    <div class="col-sm-9">
-                    <input asp-for="Status" class="form-control" />
-                    <span asp-validation-for="Status" class="text-danger"></span>
-                    </div> *@
                 </div>
                 <div class="row mb-3">
                     <label asp-for="PaymentMode" class="col-sm-3 col-form-label"></label>
-                     <div class="col-sm-9">
-                    <input asp-for="PaymentMode" class="form-control" />
-                    <span asp-validation-for="PaymentMode" class="text-danger"></span>
+                    <div class="col-sm-9">
+                        <select asp-for="PaymentMode" class="form-select">
+                            <option value="Cash">Cash</option>
+                            <option value="UPI">UPI</option>
+                            <option value="Card">Card</option>
+                        </select>
+                        <span asp-validation-for="PaymentMode" class="text-danger"></span>
                     </div>
                 </div>
                 <div class="row mb-3">

@@ -55,7 +55,7 @@
                                 <a asp-controller="Orders" asp-action="Details" asp-route-id="@item.Order.ID">   @Html.DisplayFor(modelItem => item.Order.ID) </a>
                             </td>
                             <td>
-                                <a asp-controller="Catalogs" asp-action="Details" asp-route-id="@item.Catalog.ID"> @Html.DisplayFor(modelItem => item.Catalog.ID)</a>
+                                <a asp-controller="Catalogs" asp-action="Details" asp-route-id="@item.Catalog.ID"> @Html.DisplayFor(modelItem => item.Catalog.Name)</a>
                                
                             </td>
                             <td>
