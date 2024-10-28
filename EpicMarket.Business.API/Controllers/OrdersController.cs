@@ -115,7 +115,7 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpGet("Mobile/{OrderId}")]
         [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
-        public async Task<ActionResult<OperationResult<GetDataResult<OrderMobileDeatilsResult>>>> GetOrdersDetailsForMobile(int OrderId)
+        public async Task<ActionResult<OperationResult<OrderMobileDeatilsResult>>> GetOrdersDetailsForMobile(int OrderId)
         {
             var response = new OperationResult<GetDataResult<OrderMobileDeatilsResult>>();
 

@@ -257,6 +257,9 @@ namespace EpicMarket.Services
                 case "Status":
                     sortedOrders = orderParams.ascending ? sortedOrders.OrderBy(c => c.StatusId) : sortedOrders.OrderByDescending(c => c.StatusId);
                     break;
+                case "Ordered_At":
+                    sortedOrders = orderParams.ascending ? sortedOrders.OrderBy(c => c.OrderAt) : sortedOrders.OrderByDescending(c => c.OrderAt);
+                    break;
                 default:
                     break;
             }
