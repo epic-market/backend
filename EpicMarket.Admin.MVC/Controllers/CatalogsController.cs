@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using EpicMarket.Entities.CustomModels;
 using Microsoft.CodeAnalysis;
+using EpicMarket.Admin.MVC.Models;
+using EpicMarket.Admin.MVC.Contracts;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -17,10 +19,14 @@ namespace EpicMarket.Admin.MVC.Controllers
     public class CatalogsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IAttachmentService attachmentService;
+        private readonly IFileService fileService;
 
-        public CatalogsController(ApplicationDbContext context)
+        public CatalogsController(ApplicationDbContext context, IAttachmentService attachmentService, IFileService fileService)
         {
             _context = context;
+            this.attachmentService = attachmentService;
+            this.fileService = fileService;
         }
 
         // GET: Catalogs
@@ -96,9 +102,8 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,BusinessID,Barcode,Name,Description,Images,Category,Rate,IsActive,InStock,IsRecommended,MaximumOrderPurchase,Rating,ReviewCount,OrderCount,StatusId,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Catalog catalog)
+        public async Task<IActionResult> Create([Bind("ID,BusinessID,Barcode,Name,Description,Images,Category,Rate,InStock,IsRecommended,MaximumOrderPurchase,Rating,ReviewCount,OrderCount,StatusId,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Catalog catalog, IFormFile[] thumbnail, IFormFile[] ProductImages)
         {
-
 
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
 
@@ -113,6 +118,36 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 _context.Add(catalog);
                 await _context.SaveChangesAsync();
+
+                if (thumbnail?.Length > 0)
+                {
+                    var attachmentLogo = new AttachmentModel()
+                    {
+                        Name = EntityConstants.Catelog,
+                        Comment = EntityConstants.Catelog,
+                        RecordID = catalog.ID,
+                        Entity = EntityConstants.Catelog,
+                        AttachmentType = AttachmentTypeConstants.THUMBNAIL,
+                        FolderPathConstant = FilePathConstants.THUMBNAILPATH,
+                        Files = thumbnail
+                    };
+                    await attachmentService.InsertAttachment(attachmentLogo);
+                }
+
+                if (ProductImages?.Length > 0)
+                {
+                    var attachmentProofs = new AttachmentModel()
+                    {
+                        Name = EntityConstants.Catelog,
+                        Comment = EntityConstants.Catelog,
+                        RecordID = catalog.ID,
+                        Entity = EntityConstants.Catelog,
+                        AttachmentType = AttachmentTypeConstants.PRODUCTIMAGES,
+                        FolderPathConstant = FilePathConstants.PRODUCTPATH,
+                        Files = ProductImages
+                    };
+                    await attachmentService.InsertAttachment(attachmentProofs);
+                }
                 return RedirectToAction(nameof(Index));
             }
             ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID", catalog.BusinessID);
@@ -129,6 +164,19 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
 
             var catalog = await _context.Catalogs.FindAsync(id);
+            ViewBag.thumbnails = await this.attachmentService.GetAttachmentLinks(new GetAttachmentLink()
+            {
+                AttachmentType = AttachmentTypeConstants.THUMBNAIL,
+                Entity = EntityConstants.Catelog,
+                RecordID = catalog.ID
+            });
+
+            ViewBag.ProductImages = await this.attachmentService.GetAttachmentLinks(new GetAttachmentLink()
+            {
+                AttachmentType = AttachmentTypeConstants.PRODUCTIMAGES,
+                Entity = EntityConstants.Catelog,
+                RecordID = catalog.ID
+            });
             if (catalog == null)
             {
                 return NotFound();
@@ -143,7 +191,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,BusinessID,Barcode,Name,Description,Images,Category,Rate,IsActive,InStock,IsRecommended,MaximumOrderPurchase,Rating,ReviewCount,OrderCount,StatusId,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] Catalog catalog)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,BusinessID,Barcode,Name,Description,Images,Category,Rate,IsActive,InStock,IsRecommended,MaximumOrderPurchase,Rating,ReviewCount,OrderCount,StatusId,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] Catalog catalog, IFormFile[] newThumbnail, string? addedThumbnail, IFormFile[] newProductImages, string? removedProductImages, string? addedProductImages)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
 
@@ -161,6 +209,60 @@ namespace EpicMarket.Admin.MVC.Controllers
                 {
                     _context.Update(catalog);
                     await _context.SaveChangesAsync();
+
+                    // Handle added images
+                    if (addedThumbnail != null && addedThumbnail?.Length > 0)
+                    {
+                        List<string> ExisitingThumbnail = await this.attachmentService.GetAttachmentLinks(new GetAttachmentLink()
+                        {
+                            AttachmentType = AttachmentTypeConstants.THUMBNAIL,
+                            Entity = EntityConstants.Catelog,
+                            RecordID = catalog.ID
+                        });
+                        if (ExisitingThumbnail?.Count > 0)
+                        {
+                            await this.fileService.DeleteImage(ExisitingThumbnail, userName);
+                        }
+
+                        var attachmentThumbnail = new AttachmentModel()
+                        {
+                            Name = EntityConstants.Catelog,
+                            Comment = EntityConstants.Catelog,
+                            RecordID = catalog.ID,
+                            Entity = EntityConstants.Catelog,
+                            AttachmentType = AttachmentTypeConstants.THUMBNAIL,
+                            FolderPathConstant = FilePathConstants.THUMBNAILPATH,
+                            Files = newThumbnail
+                        };
+                        await attachmentService.InsertAttachment(attachmentThumbnail);
+
+                    }
+
+                    // Handle removed images
+                    if (!string.IsNullOrEmpty(removedProductImages))
+                    {
+                        var removedImageUrls = removedProductImages.Split(',').ToList();
+                        await this.fileService.DeleteImage(removedImageUrls, userName);
+                    }
+
+                    // Handle added images
+                    if (addedProductImages != null && newProductImages?.Length > 0)
+                    {
+
+                        var attachmentProductImages = new AttachmentModel()
+                        {
+                            Name = EntityConstants.Catelog,
+                            Comment = EntityConstants.Catelog,
+                            RecordID = catalog.ID,
+                            Entity = EntityConstants.Catelog,
+                            AttachmentType = AttachmentTypeConstants.PRODUCTIMAGES,
+                            FolderPathConstant = FilePathConstants.PRODUCTPATH,
+                            Files = newProductImages
+                        };
+                        await attachmentService.InsertAttachment(attachmentProductImages);
+
+                    }
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {

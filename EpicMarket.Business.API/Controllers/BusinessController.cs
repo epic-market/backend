@@ -112,8 +112,7 @@ namespace EpicMarket.Business.API.Controllers
                 BusinessId = id
             };
 
-
-			return Ok(response);
+            return CreatedAtAction(nameof(Register), response);
         }
 
         [HttpGet]

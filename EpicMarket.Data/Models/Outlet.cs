@@ -25,7 +25,7 @@ namespace EpicMarket.Data.Models
         public string ContactEmail { get; set; }
         public int? Rating { get; set; }
         public int? ReviewCount { get; set; }
-        public bool? IsOpen { get; set; }
+        public bool IsOpen { get; set; }
         public double? Weight { get; set; }
 
         [ForeignKey("StatusOptionSets")]

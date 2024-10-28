@@ -53,7 +53,7 @@
                 @Html.DisplayFor(modelItem => item.CreateDate)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Time)
+                 @item.Time.ToString(@"hh\:mm")
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.WhichApplication)

@@ -18,5 +18,10 @@ namespace EpicMarket.Admin.MVC.Models
 		public List<Catalog> Catalogs { get; set; }
 
 		public Catalog Catalog { get; set; }
+
+
+		public List<EventLog> EventLogs{ get; set; }
+
+		public EventLog EventLog { get; set; }
 	}
 }

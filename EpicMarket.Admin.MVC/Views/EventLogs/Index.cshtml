@@ -32,14 +32,6 @@
             <th>
                 @Html.DisplayNameFor(model => model.RecordID)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Source)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-          
-           
             <th></th>
         </tr>
     </thead>
@@ -54,12 +46,6 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.RecordID)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Source)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
             </td>
             <td>
                 <a asp-action="Details" asp-route-id="@item.ID">Details</a> 

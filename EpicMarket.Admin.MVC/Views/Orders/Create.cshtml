@@ -49,8 +49,8 @@
                         </select>
                     </div>
                     <div class="form-group mt-3">
-                        <label for="branchSelect">Select Branch:</label>
-                        <select id="branchSelect" class="form-control" disabled>
+                        <label for="OutletID">Select Branch:</label>
+                        <select id="OutletID" class="form-control" disabled>
                             <option value="">-- Select Branch --</option>
                         </select>
                     </div>
@@ -132,18 +132,18 @@
                 var businessId = $(this).val();
                 if (businessId) {
                     $.get('/Orders/GetBranches', { businessId: businessId }, function (data) {
-                        $('#branchSelect').prop('disabled', false).empty().append('<option value="">-- Select Branch --</option>');
+                        $('#OutletID').prop('disabled', false).empty().append('<option value="">-- Select Branch --</option>');
                         $.each(data, function (index, branch) {
-                            $('#branchSelect').append($('<option></option>').val(branch.id).text(branch.name));
+                            $('#OutletID').append($('<option></option>').val(branch.id).text(branch.name));
                         });
                     });
                 } else {
-                    $('#branchSelect').prop('disabled', true).empty().append('<option value="">-- Select Branch --</option>');
+                    $('#OutletID').prop('disabled', true).empty().append('<option value="">-- Select Branch --</option>');
                 }
                 $('#productTable tbody').empty();
                 updateTotals();
             });
-            $('#branchSelect').change(function () {
+            $('#OutletID').change(function () {
                 var branchId = $(this).val();
                 if (branchId) {
                     $.get('/Orders/GetProducts', { branchId: branchId }, function (data) {
@@ -210,7 +210,8 @@
                         name: $('#customerName').val(),
                         email: $('#customerEmail').val(),
                         phone: $('#customerPhone').val()
-                    }
+                    },
+                    OutletID: $('#OutletID').val()
                 };
 
                 $('#productTable tbody tr').each(function () {

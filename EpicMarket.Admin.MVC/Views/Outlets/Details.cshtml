@@ -22,10 +22,22 @@
 <div class="card">
 	<div class="row g-0">
 		<div class="col-md-4 border-end">
-			<a href="@Url.Action("DisplayImage", "File", new { key = ViewBag.thumbnail })" target="_blank" rel="noopener noreferrer">
+			@if (!string.IsNullOrEmpty(ViewBag.thumbnail))
+			{
+				<a href="@Url.Action("DisplayImage", "File", new { key = ViewBag.thumbnail })" target="_blank" rel="noopener noreferrer">
 				<img src="@Url.Action("DisplayImage", "File", new { key = ViewBag.thumbnail })" alt="Image"
 					 style="max-width: 100%; max-height: 100%; object-fit: contain; cursor: pointer;" />
-			</a>
+				</a>
+			}
+			else
+			{
+				<div class="d-flex justify-content-center align-items-center h-100">
+					<div class="text-center">
+						<i class="bx bx-image-alt" style="font-size: 48px; color: #ccc;"></i>
+						<p class="mt-2 text-muted">No thumbnail available</p>
+					</div>
+				</div>
+			}
 		</div>
 		<div class="col-md-8">
 			<div class="card-body">
@@ -33,12 +45,49 @@
 					<a asp-action="Edit" class="btn btn-primary px-5" asp-route-id="@Model?.Outlet.ID">Edit</a>
 				</div>
 				<h4 class="card-title"> @Html.DisplayFor(model => model.Outlet.Name)</h4>
-				<div class="d-flex gap-3 py-3">
+@* 				<div class="d-flex gap-3 py-3">
 					<div>@Html.DisplayFor(model => model.Outlet.Rating) @Html.DisplayNameFor(model => model.Outlet.Rating)</div>
 					<div>@Html.DisplayFor(model => model.Outlet.ReviewCount) @Html.DisplayNameFor(model => model.Outlet.ReviewCount)</div>
 					<div>@Html.DisplayFor(model => model.Outlet.IsOpen) @Html.DisplayNameFor(model => model.Outlet.IsOpen)</div>
 					<div>@Html.DisplayFor(model => model.Outlet.Weight) @Html.DisplayNameFor(model => model.Outlet.Weight)</div>
 					<div class="text-success"> @Html.DisplayFor(model => model.Outlet.StatusOptionSets.Status)</div>
+				</div> *@
+				<div class="d-flex flex-wrap gap-3 py-3">
+					<div class="d-flex align-items-center">
+						<i class="bx bx-star me-1 text-warning"></i>
+						<strong class="me-1">@Html.DisplayNameFor(model => model.Outlet.Rating):</strong>
+						<span>@Html.DisplayFor(model => model.Outlet.Rating)</span>
+					</div>
+					<div class="d-flex align-items-center">
+						<i class="bx bx-comment-dots me-1 text-info"></i>
+						<strong class="me-1">@Html.DisplayNameFor(model => model.Outlet.ReviewCount):</strong>
+						<span>@Html.DisplayFor(model => model.Outlet.ReviewCount)</span>
+					</div>
+					<div class="d-flex align-items-center">
+						@{
+							var isOpenIcon = Model.Outlet.IsOpen ? "bx-door-open text-success" : "bx-door-closed text-danger";
+							var isOpenText = Model.Outlet.IsOpen ? "Open" : "Closed";
+						
+						}
+						<i class="bx @isOpenIcon me-1"></i>
+						<strong class="me-1">@Html.DisplayNameFor(model => model.Outlet.IsOpen):</strong>
+						<span>@isOpenText</span>
+					</div>
+					<div class="d-flex align-items-center">
+						<i class="bx bx-weight me-1 text-primary"></i>
+						<strong class="me-1">@Html.DisplayNameFor(model => model.Outlet.Weight):</strong>
+						<span>@Html.DisplayFor(model => model.Outlet.Weight)</span>
+					</div>
+					<div class="d-flex align-items-center">
+						@{
+							var isVerified = Model.Outlet.StatusOptionSets.Status.Equals("Verified", StringComparison.OrdinalIgnoreCase);
+							var statusColor = isVerified ? "success" : "danger";
+							var iconClass = isVerified ? "bx-check-circle" : "bx-x-circle";
+						}
+						<i class="bx @iconClass me-1 text-@statusColor"></i>
+						<strong class="me-1">Status:</strong>
+						<span class="badge bg-@statusColor">@Html.DisplayFor(model => model.Outlet.StatusOptionSets.Status)</span>
+					</div>
 				</div>
 				<p class="card-text fs-6"> @Html.DisplayFor(model => model.Outlet.Description) </p>
 				<div class="row">
@@ -53,7 +102,7 @@
 							@Html.DisplayNameFor(model => model.Outlet.Bussiness.Name)
 						</dt>
 						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Outlet.Bussiness.Name)
+							<a asp-controller="Businesses" asp-action="Details" asp-route-id="@Model.Outlet.Bussiness.ID">	@Html.DisplayFor(model => model.Outlet.Bussiness.Name)</a>
 						</dd>
 						<dt class="col-sm-4">
 							@Html.DisplayNameFor(model => model.Outlet.ContactNumber)
@@ -113,21 +162,31 @@
 			<h5 class="card-title mb-0">Branch Images</h5>
 		</div>
 		<div class="card-body">
-			<div class="row row-cols-1 row-cols-md-4 g-4">
-				@foreach (var imageKey in ViewBag.attachments) // Assuming you have a collection of image keys
+				@if (ViewBag.attachments != null && ViewBag.attachments.Count > 0)
 				{
-					<div class="col">
-						<div class="card h-100">
-							<a href="@Url.Action("DisplayImage", "File", new { key = imageKey })" target="_blank" rel="noopener noreferrer">
-								<img src="@Url.Action("DisplayImage", "File", new { key = imageKey })"
-									 class="card-img-top"
-									 alt="Product Image"
-									 style="height: 200px; object-fit: cover; cursor: pointer;">
-							</a>
-						</div>
+					<div class="row row-cols-1 row-cols-md-4 g-4">
+						@foreach (var imageKey in ViewBag.attachments) // Assuming you have a collection of image keys
+						{
+							<div class="col">
+								<div class="card h-100">
+									<a href="@Url.Action("DisplayImage", "File", new { key = imageKey })" target="_blank" rel="noopener noreferrer">
+										<img src="@Url.Action("DisplayImage", "File", new { key = imageKey })"
+											 class="card-img-top"
+											 alt="Product Image"
+											 style="height: 200px; object-fit: cover; cursor: pointer;">
+									</a>
+								</div>
+							</div>
+						}
 					</div>
 				}
-			</div>
+				else
+				{
+					<div class="alert alert-info" role="alert">
+						<i class="bx bx-info-circle me-1"></i>
+						No images found.
+					</div>
+				}
 		</div>
 	</div>
 
@@ -177,13 +236,7 @@
 											@Html.DisplayNameFor(model => model.Order.ID)
 										</th>
 										<th>
-											@* @Html.DisplayNameFor(model => model.Order.OrderType) *@
-										</th>
-										<th>
 											@Html.DisplayNameFor(model => model.Order.OrderAt)
-										</th>
-										<th>
-											@* @Html.DisplayNameFor(model => model.Order.Status) *@
 										</th>
 										<th>
 											@Html.DisplayNameFor(model => model.Order.PaymentMode)
@@ -197,9 +250,6 @@
 										<th>
 											@Html.DisplayNameFor(model => model.Order.TotalPrice)
 										</th>
-										<th>
-											@Html.DisplayNameFor(model => model.Order.Address.City)
-										</th>
 										<th></th>
 									</tr>
 								</thead>
@@ -211,13 +261,7 @@
 												@Html.DisplayFor(modelItem => item.ID)
 											</td>
 											<td>
-									@* 			@Html.DisplayFor(modelItem => item.OrderType) *@
-											</td>
-											<td>
 												@Html.DisplayFor(modelItem => item.OrderAt)
-											</td>
-											<td>
-												@* @Html.DisplayFor(modelItem => item.Status) *@
 											</td>
 											<td>
 												@Html.DisplayFor(modelItem => item.PaymentMode)
@@ -230,9 +274,6 @@
 											</td>
 											<td>
 												@Html.DisplayFor(modelItem => item.TotalPrice)
-											</td>
-											<td>
-												@Html.DisplayFor(modelItem => item.Address.City)
 											</td>
 											<td>
 												<a asp-controller="Orders" asp-action="Edit" asp-route-id="@item.ID">Edit</a> |

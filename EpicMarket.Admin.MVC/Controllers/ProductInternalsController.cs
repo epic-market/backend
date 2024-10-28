@@ -29,6 +29,8 @@ namespace EpicMarket.Admin.MVC.Controllers
             this.fileService = fileService;
         }
 
+
+
         // GET: ProductInternals
         public async Task<IActionResult> Index()
         {

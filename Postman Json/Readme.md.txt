@@ -1,0 +1,1 @@
+newman run "Business Owner Web.postman_collection.json"  -e Development.postman_environment.json  --insecure --reporters cli,htmlextra

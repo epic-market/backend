@@ -71,7 +71,7 @@ namespace EpicMarket.Business.API.Controllers
                 Token = await _tokenService.CreateToken(user)
             };
 
-            return response;
+            return CreatedAtAction(nameof(Register), response);
         }
 
         [HttpPost("login")]

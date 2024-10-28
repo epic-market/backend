@@ -39,6 +39,10 @@
                         <input type="hidden" asp-for="ModifiedDate" />
                         <input type="hidden" asp-for="ModifiedBy" />
                         <input type="hidden" asp-for="IsActive" />
+                        <input type="hidden" asp-for="DocumentType" />
+                        <input type="hidden" asp-for="DocumentFileType" />
+                        <input type="hidden" asp-for="DocumentFolderPath" />
+                        <input type="hidden" asp-for="DocumentFile" />
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <div class="row mb-3">
                             <label asp-for="Name" class="col-sm-3 col-form-label"></label>
@@ -57,29 +61,25 @@
                         <div class="row mb-3">
                             <label asp-for="DocumentType" class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
-                                <input asp-for="DocumentType" class="form-control" />
-                                <span asp-validation-for="DocumentType" class="text-danger"></span>
+                                <input asp-for="DocumentType" class="form-control"  disabled />
                             </div>
                         </div>
                         <div class="row mb-3">
                             <label asp-for="DocumentFileType" class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
-                                <input asp-for="DocumentFileType" class="form-control" />
-                                <span asp-validation-for="DocumentFileType" class="text-danger"></span>
+                                <input asp-for="DocumentFileType" class="form-control"  disabled />
                             </div>
                         </div>
                         <div class="row mb-3">
                             <label asp-for="DocumentFolderPath" class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
-                                <input asp-for="DocumentFolderPath" class="form-control" />
-                                <span asp-validation-for="DocumentFolderPath" class="text-danger"></span>
+                                <input asp-for="DocumentFolderPath" class="form-control"  disabled />
                             </div>
                         </div>
                         <div class="row mb-3">
                             <label asp-for="DocumentFile" class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
-                                <input asp-for="DocumentFile" class="form-control" />
-                                <span asp-validation-for="DocumentFile" class="text-danger"></span>
+                                <input asp-for="DocumentFile" class="form-control"  disabled />
                             </div>
                         </div>
                         <div class="row">
@@ -94,6 +94,6 @@
                     </form>
                 </div>
             </div>
-
-
-
+        </div>
+    </div>
+</div>
