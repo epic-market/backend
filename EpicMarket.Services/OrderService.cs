@@ -312,10 +312,10 @@ namespace EpicMarket.Services
         }
 
 
-        public async Task<GetDataResult<OrderMobileDeatilsResult>> GetOrdersDetailsForMobile(int OrderId, int businessID)
+        public async Task<OrderMobileDeatilsResult> GetOrdersDetailsForMobile(int OrderId, int businessID)
         {
 
-            var getData = new GetDataResult<OrderMobileDeatilsResult>();
+            var getData = new OrderMobileDeatilsResult();
             
             var results = await _context.Orders.Include(c => c.Outlet).
                 Where(c => c.ID == OrderId).Include(c => c.Person).Select(c => new OrderMobileDeatilsResult()
@@ -348,7 +348,7 @@ namespace EpicMarket.Services
                 Total_price = c.TotalPrice
             }).FirstOrDefaultAsync();
 
-            getData.items = results;
+            getData = results;
             return getData;
         }
 
