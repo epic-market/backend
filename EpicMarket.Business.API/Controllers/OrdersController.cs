@@ -117,7 +117,7 @@ namespace EpicMarket.Business.API.Controllers
         [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
         public async Task<ActionResult<OperationResult<OrderMobileDeatilsResult>>> GetOrdersDetailsForMobile(int OrderId)
         {
-            var response = new OperationResult<GetDataResult<OrderMobileDeatilsResult>>();
+            var response = new OperationResult<OrderMobileDeatilsResult>();
 
             this.logger.LogInformation("Orders Controller -> GetOrdersDetailsForMobile()-> params {0}", JsonConvert.SerializeObject(new { Params = OrderId }));
 
