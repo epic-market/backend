@@ -52,6 +52,8 @@ namespace EpicMarket.Entities
         public bool ascending { get; set; } = true;
         public string searchTerm { get; set; } = string.Empty;
 
+        public int? statusID { get; set; }
+
     }
 
     public class OrderResult

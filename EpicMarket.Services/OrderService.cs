@@ -243,10 +243,20 @@ namespace EpicMarket.Services
                 Where(c => c.OutletID == orderParams.BranchId).Include(c => c.Person);
             }
 
+            if (orderParams.statusID != null) {
 
+                orders = orders.Where(c => c.StatusId == orderParams.statusID); 
+            }
+
+
+            var sortedOrders = orders;
             //2 . Appling Searching
-            var sortedOrders = orders.Where(row => row.Person.FirstName.Contains(orderParams.searchTerm.Trim()) || row.ID.ToString() == orderParams.searchTerm.Trim());
+            if (!String.IsNullOrEmpty(orderParams.searchTerm))
+            {
 
+                sortedOrders = orders.Where(row => (row.Person.FirstName.Contains(orderParams.searchTerm.Trim()) || row.ID.ToString().Contains(orderParams.searchTerm.Trim())));
+
+            }
 
             // 3 .Appying Sorting
             switch (orderParams.sortColumn)
