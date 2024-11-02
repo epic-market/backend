@@ -39,7 +39,6 @@ namespace EpicMarket.Business.API.Controllers
 
             reponse.Data = options;
 
-            //testing AB
 			return Ok(reponse);
         }
 
