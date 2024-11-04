@@ -10,13 +10,14 @@ namespace EpicMarket.Data.Models
     public class ProductInternal : BaseModel
     {
         public int ID { get; set; }
-
         public string BarCode { get; set; }
-
         public string Name { get; set; }
-
         public string Description { get; set; }
-
-        public string Images { get; set; }
+        public double PackedHeight { get; set; }
+        public double PackedWidhth { get; set; }
+        public double PackedDepth { get; set; }
+        public double Weight { get; set; }
+        public double CostPrice { get; set; }
+        public double Rate { get; set; }
     }
 }

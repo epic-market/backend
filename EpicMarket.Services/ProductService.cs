@@ -173,7 +173,7 @@ namespace EpicMarket.Services
                 ProductId = c.ID,
                 Name = c.Product.Name,
                 Rate = c.Product.Rate,
-                InStock = c.Product.InStock,
+                
                 Thumbnail = ((from attachment in _context.Attachments
                               join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
                               join entity in _context.Entity on link.EntityID equals entity.ID
@@ -200,8 +200,11 @@ namespace EpicMarket.Services
 
 
             //2 . Appling Searching
-            var sortedProducts = Products.Where(row => row.Name.Contains(productParams.searchTerm.Trim()) || row.Description.Contains(productParams.searchTerm.Trim()));
-
+            var sortedProducts = Products;
+            if (!String.IsNullOrEmpty(productParams.searchTerm))
+            {
+                sortedProducts = Products.Where(row => row.Name.Contains(productParams.searchTerm.Trim()) || row.Description.Contains(productParams.searchTerm.Trim()));
+            }
 
             // 3 .Appying Sorting
             switch (productParams.sortColumn)
@@ -232,13 +235,13 @@ namespace EpicMarket.Services
                 Name = c.Name,
                 Description = c.Description,
                 Rate = c.Rate,
-                InStock = c.InStock,
+                CostPrice = c.CostPrice,
                 Status = _context.StatusOptionSets.FirstOrDefault(s => s.Id == c.StatusId).Status,
-				Thumbnail = ((from attachment in _context.Attachments
-						   join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
-						   join entity in _context.Entity on link.EntityID equals entity.ID
-						   where entity.Name == EntityConstants.Catelog && link.RecordID == c.ID && link.AttachmentTypeID == attachmentTypeID.ID
-							  select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}").FirstOrDefault()),
+                Thumbnail = ((from attachment in _context.Attachments
+                              join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                              join entity in _context.Entity on link.EntityID equals entity.ID
+                              where entity.Name == EntityConstants.Catelog && link.RecordID == c.ID && link.AttachmentTypeID == attachmentTypeID.ID
+                              select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}").FirstOrDefault()),
                 Count = totalCount,
             }).ToListAsync();
 
@@ -283,9 +286,13 @@ namespace EpicMarket.Services
 				Name = c.Name,
 				Description = c.Description,
 				Rate = c.Rate,
-				InStock = c.InStock,
-				Category = c.Category,
-                IsActive = c.IsActive,
+				RequiresRefrigeration= c.RequiresRefrigeration,
+                PackedDepth = c.PackedDepth,
+                PackedHeight = c.PackedHeight,
+                PackedWidhth = c.PackedWidhth,
+                CostPrice = c.CostPrice,
+                Weight = c.Weight,
+                Category = c.Category,
                 Barcode = c.Barcode,
 				Status = _context.StatusOptionSets.FirstOrDefault(s => s.Id == c.StatusId).Status,
 				Images = attachments.Select(a => a.ImagePath).ToList(),
@@ -344,7 +351,7 @@ namespace EpicMarket.Services
             var catalog = await _context.Catalogs.FindAsync(quickActionsParams.ProductId);
 			if (catalog != null)
 			{
-				catalog.InStock= quickActionsParams.InStock == null ? catalog.InStock : quickActionsParams.InStock.Value;
+				//catalog.InStock= quickActionsParams.InStock == null ? catalog.InStock : quickActionsParams.InStock.Value;
                 catalog.IsRecommended = quickActionsParams.IsRecommended == null ? catalog.IsRecommended : quickActionsParams.IsRecommended.Value;
                 catalog.ModifiedDate = DateTime.Now;
                 catalog.ModifiedBy = UserName;
@@ -357,6 +364,22 @@ namespace EpicMarket.Services
 				throw new Exception("Product Not Found");
 			}
         }
+
+        public async Task UpdateAdvanceSetting(ProductAdvanced productAdvanced)
+        {
+           var outletCatelog =  _context.OutletProducts.FirstOrDefault(c=> c.ProductID == productAdvanced.CatelogId && c.OutletID == productAdvanced.BranchId);
+
+            if (outletCatelog != null){
+                outletCatelog.BackOrders = productAdvanced.BackOrders;
+                outletCatelog.MaximumStockLevel = productAdvanced.MaximumStockLevel;
+                outletCatelog.MinimumStockLevel = productAdvanced.MinimumStockLevel;
+                outletCatelog.QuantityAvailable = productAdvanced.QuantityAvailable;
+                outletCatelog.ReorderPoint = productAdvanced.ReorderPoint;
+            }
+            _context.Update(outletCatelog);
+            await unitOfWork.Complete();
+        }
+
     }
 
 

@@ -21,6 +21,8 @@ namespace EpicMarket.Data.Models
         [StringLength(500)]
         public string Description { get; set; }
 
+        public string Url { get; set; }
+
         [Required]
         public int ApplicationId { get; set; }
         public virtual ICollection<HelpItem> HelpItems { get; set; }

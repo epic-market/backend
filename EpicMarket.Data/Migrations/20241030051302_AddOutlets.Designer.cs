@@ -4,6 +4,7 @@ using EpicMarket.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EpicMarket.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241030051302_AddOutlets")]
+    partial class AddOutlets
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1395,7 +1398,7 @@ namespace EpicMarket.Data.Migrations
                     b.Property<string>("Message")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PageId")
+                    b.Property<int>("QuickLinkId")
                         .HasColumnType("int");
 
                     b.Property<int>("UserId")
@@ -1405,7 +1408,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("ContactMethodId");
 
-                    b.HasIndex("PageId");
+                    b.HasIndex("QuickLinkId");
 
                     b.HasIndex("UserId");
 
@@ -1423,7 +1426,7 @@ namespace EpicMarket.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("PageId")
+                    b.Property<int>("QuickLinkId")
                         .HasColumnType("int");
 
                     b.Property<string>("StepDescription")
@@ -1438,7 +1441,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PageId");
+                    b.HasIndex("QuickLinkId");
 
                     b.ToTable("OnboardingSteps");
                 });
@@ -1704,9 +1707,6 @@ namespace EpicMarket.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
-                    b.Property<bool>("BackOrders")
-                        .HasColumnType("bit");
-
                     b.Property<int>("MaximumStockLevel")
                         .HasColumnType("int");
 
@@ -1774,9 +1774,6 @@ namespace EpicMarket.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Url")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
 
@@ -1890,6 +1887,49 @@ namespace EpicMarket.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("PromotionalLeads");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.Quicklink", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CreateBy")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
+
+                    b.Property<DateTime>("CreateDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValueSql("1");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Quicklink");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.StatusOptionSet", b =>
@@ -2601,9 +2641,9 @@ namespace EpicMarket.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("EpicMarket.Data.Models.Page", "Page")
-                        .WithMany()
-                        .HasForeignKey("PageId")
+                    b.HasOne("EpicMarket.Data.Models.Quicklink", "Quicklink")
+                        .WithMany("Notifications")
+                        .HasForeignKey("QuickLinkId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -2615,20 +2655,20 @@ namespace EpicMarket.Data.Migrations
 
                     b.Navigation("ContactMethod");
 
-                    b.Navigation("Page");
+                    b.Navigation("Quicklink");
 
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.OnboardingStep", b =>
                 {
-                    b.HasOne("EpicMarket.Data.Models.Page", "Page")
-                        .WithMany()
-                        .HasForeignKey("PageId")
+                    b.HasOne("EpicMarket.Data.Models.Quicklink", "Quicklink")
+                        .WithMany("OnboardingProgress")
+                        .HasForeignKey("QuickLinkId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Page");
+                    b.Navigation("Quicklink");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Order", b =>
@@ -3070,6 +3110,13 @@ namespace EpicMarket.Data.Migrations
                     b.Navigation("SupportQuerys");
 
                     b.Navigation("SupportTickets");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.Quicklink", b =>
+                {
+                    b.Navigation("Notifications");
+
+                    b.Navigation("OnboardingProgress");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.StatusOptionSet", b =>

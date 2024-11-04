@@ -327,9 +327,9 @@
 										<th>
 											@Html.DisplayNameFor(model => model.Catalog.IsActive)
 										</th>
-										<th>
+									@* 	<th>
 											@Html.DisplayNameFor(model => model.Catalog.InStock)
-										</th>
+										</th> *@
 										<th></th>
 									</tr>
 								</thead>
@@ -352,9 +352,9 @@
 											<td>
 												@Html.DisplayFor(modelItem => item.IsActive)
 											</td>
-											<td>
+											@* <td>
 												@Html.DisplayFor(modelItem => item.InStock)
-											</td>
+											</td> *@
 											<td>
 												<a asp-controller="Catalogs" asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
 												<a asp-controller="Catalogs" asp-action="Details" asp-route-id="@item.ID">Details</a> |

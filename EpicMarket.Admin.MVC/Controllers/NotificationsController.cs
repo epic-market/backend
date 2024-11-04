@@ -22,7 +22,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: Notifications
         public async Task<IActionResult> Index()
         {
-            var authDbContext = _context.Notifications.Include(n => n.User).Include(n => n.Quicklink);
+            var authDbContext = _context.Notifications.Include(n => n.User).Include(n => n.Page);
             return View(await authDbContext.ToListAsync());
         }
 
@@ -36,7 +36,7 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             var notification = await _context.Notifications
                 .Include(n => n.User)
-                .Include(n => n.Quicklink)
+                .Include(n => n.Page)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (notification == null)
             {
@@ -50,7 +50,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         public IActionResult Create()
         {
             ViewData["ContactMethodId"] = new SelectList(_context.ContactMethod, "ID", "Name");
-            ViewData["QuickLinkId"] = new SelectList(_context.Quicklink, "Id", "Url");
+            ViewData["PageId"] = new SelectList(_context.Pages, "ID", "Url");
             return View();
         }
 
@@ -59,7 +59,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Message,DateCreated,ContactMethodId,QuickLinkId,IsRead,UserId")] Notification notification)
+        public async Task<IActionResult> Create([Bind("Id,Message,DateCreated,ContactMethodId,PageId,IsRead,UserId")] Notification notification)
         {
 
             notification.DateCreated = DateTime.Now;
@@ -70,7 +70,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["QuickLinkId"] = new SelectList(_context.Quicklink, "Id", "Url", notification.QuickLinkId);
+            ViewData["PageId"] = new SelectList(_context.Pages, "ID", "Url", notification.PageId);
             ViewData["ContactMethodId"] = new SelectList(_context.ContactMethod, "ID", "Name",notification.ContactMethodId);
             return View(notification);
         }
@@ -93,7 +93,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 ViewData["UserEmail"] = user.UserName; // Assuming the user has an Email property
             }
-            ViewData["QuickLinkId"] = new SelectList(_context.Quicklink, "Id", "Url",notification.QuickLinkId);
+            ViewData["PageId"] = new SelectList(_context.Pages, "ID", "Url",notification.PageId);
             ViewData["ContactMethodId"] = new SelectList(_context.ContactMethod, "ID", "Name", notification.ContactMethodId);
             return View(notification);
         }
@@ -103,7 +103,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Message,DateCreated,ContactMethodId,QuickLinkId,IsRead,UserId")] Notification notification)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Message,DateCreated,ContactMethodId,PageId,IsRead,UserId")] Notification notification)
         {
             if (id != notification.Id)
             {
@@ -130,7 +130,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["QuickLinkId"] = new SelectList(_context.Quicklink, "Id", "Url", notification.QuickLinkId);
+            ViewData["PageId"] = new SelectList(_context.Pages, "ID", "Url", notification.PageId);
             ViewData["ContactMethodId"] = new SelectList(_context.ContactMethod, "ID", "Name", notification.ContactMethodId);
             return View(notification);
         }
@@ -145,7 +145,7 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             var notification = await _context.Notifications
                 .Include(n => n.User)
-                .Include(n => n.Quicklink)
+                .Include(n => n.Page)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (notification == null)
             {
