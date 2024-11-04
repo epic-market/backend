@@ -141,7 +141,7 @@ namespace EpicMarket.Business.API.Controllers
 
             this.logger.LogInformation("Static Controller -> GetHelpItemsforBypage()");
 
-            var options = await staticService.GetHelpItemsforBypage(pagelinkI);
+            var options = await staticService.GetHelpItemsforBypage(pagelink);
             this.logger.LogInformation("Static Controller-> GetHelpItemsforBypage()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = options }));
 
             reponse.Data = options;
