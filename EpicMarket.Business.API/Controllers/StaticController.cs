@@ -135,13 +135,13 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpGet("GetHelpItemsforBypage")]
         [AllowAnonymous]
-        public async Task<ActionResult<OperationResult<List<HelpItemDTO>>>> GetHelpItemsforBypage(string pagename)
+        public async Task<ActionResult<OperationResult<List<HelpItemDTO>>>> GetHelpItemsforBypage(string pagelink)
         {
             var reponse = new OperationResult<List<HelpItemDTO>>();
 
             this.logger.LogInformation("Static Controller -> GetHelpItemsforBypage()");
 
-            var options = await staticService.GetHelpItemsforBypage(pagename);
+            var options = await staticService.GetHelpItemsforBypage(pagelinkI);
             this.logger.LogInformation("Static Controller-> GetHelpItemsforBypage()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = options }));
 
             reponse.Data = options;

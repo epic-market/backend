@@ -66,10 +66,10 @@ namespace EpicMarket.Services
             }).ToListAsync();
         }
 
-        public Task<List<HelpItemDTO>> GetHelpItemsforBypage(string pagename)
+        public Task<List<HelpItemDTO>> GetHelpItemsforBypage(string pagelink)
         {
             return _context.HelpItems
-                   .Where(h => h.Pages != null && h.Pages.Name == pagename)
+                   .Where(h => h.Pages != null && h.Pages.Url == pagelink)
                    .Select(c => new HelpItemDTO
                    {
                        ID = c.ID,
