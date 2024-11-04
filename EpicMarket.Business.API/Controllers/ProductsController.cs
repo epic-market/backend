@@ -112,7 +112,23 @@ namespace EpicMarket.Business.API.Controllers
 		}
 
 
-		[HttpPut("{id}")]
+
+        [HttpPost("Advanced")]
+        [Authorize(Roles = ROLES.BUSINESS_OWNER)]
+        public async Task<ActionResult<OperationResult<int>>> UpdateAdvanceSettings([FromBody]ProductAdvanced productAdvanced)
+        {
+
+            var response = new OperationResult<int>();
+            this.logger.LogInformation("Products Controller -> UpdateAdvanceSettings()-> params {0}", JsonConvert.SerializeObject(new { Params = productAdvanced }));
+            var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
+            await productService.UpdateAdvanceSetting(productAdvanced);
+            this.logger.LogInformation("Products Controller -> UpdateAdvanceSettings()-> updated Successfully");
+            return Ok(response);
+        }
+
+
+
+        [HttpPut("{id}")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<int>>> UpdateProduct([FromRoute] int id, [FromForm] AddProductsDto productsDto)
 		{

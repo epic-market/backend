@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -13,7 +15,7 @@ namespace EpicMarket.Entities
 
 	public class AddProductsDto
 	{
-		public long? Barcode { get; set; }
+        public long? Barcode { get; set; }
         [Required]
 		public string Name { get; set; }
 
@@ -23,10 +25,18 @@ namespace EpicMarket.Entities
 		
         [Required]
 		public double Rate { get; set; }
-        public bool InStock { get; set; } = false;
 		public bool IsRecommended { get; set; }= false;
 		public int? MaximumOrderPurchase { get; set; }
-		public IFormFile[] Products { get; set; }
+
+        [Required]
+        public double CostPrice { get; set; }
+
+        public double? PackedHeight { get; set; }
+        public double? PackedWidhth { get; set; }
+        public double? PackedDepth { get; set; }
+        public double? Weight { get; set; }
+        public bool RequiresRefrigeration { get; set; } = false;
+        public IFormFile[] Products { get; set; }
 		public IFormFile Thumbnail { get; set; }
 	}
 
@@ -38,19 +48,41 @@ namespace EpicMarket.Entities
         public string Description { get; set; }
         public string Category{ get; set; }
         public double Rate { get; set; }
-        public bool IsActive { get; set; }
-        public bool InStock { get; set; }
         public List<string> Images { get; set; } 
 		public bool IsRecommended { get; set; }
 		public int? MaximumOrderPurchase { get; set; }
         public string? Status { get; set; }
 		public string Thumbnail { get; set; }
-	}
+        public double CostPrice { get; set; }
+        public double? PackedHeight { get; set; }
+        public double? PackedWidhth { get; set; }
+        public double? PackedDepth { get; set; }
+        public double? Weight { get; set; }
+        public bool RequiresRefrigeration { get; set; }
+    }
+
+    public class ProductAdvanced
+    {
+        public int CatelogId { get; set; }
+
+        public int BranchId { get; set; }
+        public int QuantityAvailable { get; set; }
+
+        public int MinimumStockLevel { get; set; }
+
+        public int MaximumStockLevel { get; set; }
+
+        public int ReorderPoint { get; set; }
+
+        public bool BackOrders { get; set; }
+
+    }
 
 
 
 
-	public class ProductsMapOptionResult 
+
+    public class ProductsMapOptionResult 
     {
         public int Id { get; set; }
 
@@ -90,11 +122,9 @@ namespace EpicMarket.Entities
         public string Name { get; set; }
         public string Description { get; set; }
         public double Rate { get; set; }
-        public bool IsActive { get; set; }
-        public bool InStock { get; set; }
+        public double CostPrice { get; set; }
         public int Count { get; set; }
 		public string Thumbnail { get; set; }
-
 		public string? Status { get; set; }
 
 	}

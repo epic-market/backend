@@ -45,10 +45,18 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
 
             var catalog = await _context.Catalogs
-                .Include(c => c.Business)
+               .Include(c => c.Business)
                .Include(c=>c.StatusOptionSets)
-                .FirstOrDefaultAsync(m => m.ID == id);
+               .AsNoTracking()
+               .FirstOrDefaultAsync(m => m.ID == id);
 
+			var OutletProductsList = await _context.OutletProducts.Include(c => c.Outlet).Where(c => c.ProductID == id).ToListAsync();
+
+            var CatalogModel = new CatelogModel()
+            {
+                Catalog = catalog,
+                OutletProducts = OutletProductsList
+            };
 
 
 			var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
@@ -86,7 +94,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            return View(catalog);
+            return View(CatalogModel);
         }
 
         // GET: Catalogs/Create

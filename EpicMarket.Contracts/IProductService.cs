@@ -12,7 +12,8 @@ namespace EpicMarket.Contracts
     {
         Task<List<ProductsMapOptionResult>> GetAllProductForMap(int businessID, int outletID);
         Task<int> AddProduct(AddProductsDto productsDto,string UserName, int businessID,string PageSource);
-		Task<int> UpdateProducts(AddProductsDto productsDto,int id, string UserName, int businessID, string PageSource);
+        Task UpdateAdvanceSetting(ProductAdvanced productAdvanced);
+        Task<int> UpdateProducts(AddProductsDto productsDto,int id, string UserName, int businessID, string PageSource);
 		Task<GetDataResult<List<ProductResult>>> GetAllProducts(ProductParams productResult, int businessID);
         Task<ProductsDto> GetProductDetails(int productId);
 		Task<int> VerifyCatalog(VerifyDto verifyBranchDto, string UserName, int AdminPersonID, string PageSource);

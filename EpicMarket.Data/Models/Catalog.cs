@@ -19,13 +19,19 @@ namespace EpicMarket.Data.Models
         public string Description { get; set; }
         public string? Category { get; set; }
         public double Rate { get; set; }
-        public bool InStock { get; set; }
         public bool IsRecommended { get; set; }
         public int? MaximumOrderPurchase { get; set; }
         public double? Rating { get; set; }
         public int? ReviewCount { get; set; }
         public int? OrderCount { get; set; }
-        
+        public double PackedHeight { get; set; }
+        public double PackedWidhth { get; set; }
+        public double PackedDepth { get; set; }
+        public double Weight { get; set; }
+        public bool RequiresRefrigeration { get; set; }
+        public double CostPrice { get; set; }
+
+
         [ForeignKey("StatusOptionSets")]
         public int StatusId { get; set; }
 
