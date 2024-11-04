@@ -49,7 +49,7 @@ namespace EpicMarket.Services
                 IsRead = false,
                 Message = notification.Message,
                 UserId = userID,
-                QuickLinkId = notification.QuickLinkId,
+                PageId = notification.PageID,
             };
             await _context.Notifications.AddAsync(newNotification);
             await unitOfWork.Complete();
@@ -60,11 +60,11 @@ namespace EpicMarket.Services
         public async Task<List<NotificationResult>> GetAllUnReadNoticationForSpecificUser(int UserID)
         {
 
-          return await  _context.Notifications.Where(c => c.IsRead == false && c.UserId == UserID).Include(c=>c.Quicklink).Select(c => new NotificationResult()
+          return await  _context.Notifications.Where(c => c.IsRead == false && c.UserId == UserID).Include(c=>c.Page).Select(c => new NotificationResult()
             {
                 Id = c.Id,
                 Message = c.Message,
-                Link = c.Quicklink.Url,
+                Link = c.Page.Url,
                 CreateDate = c.DateCreated
             }).ToListAsync();
         }

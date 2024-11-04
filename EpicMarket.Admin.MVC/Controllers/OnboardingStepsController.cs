@@ -22,7 +22,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: OnboardingSteps
         public async Task<IActionResult> Index()
         {
-            return View(await _context.OnboardingSteps.Include(n => n.Quicklink).ToListAsync());
+            return View(await _context.OnboardingSteps.Include(n => n.Page).ToListAsync());
         }
 
         // GET: OnboardingSteps/Details/5
@@ -34,7 +34,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
 
             var onboardingStep = await _context.OnboardingSteps
-                   .Include(n => n.Quicklink)
+                   .Include(n => n.Page)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (onboardingStep == null)
             {
@@ -47,7 +47,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: OnboardingSteps/Create
         public IActionResult Create()
         {
-            ViewData["QuickLinkId"] = new SelectList(_context.Quicklink, "Id", "Url");
+            ViewData["PageId"] = new SelectList(_context.Pages, "ID", "Url");
             return View();
         }
 
@@ -56,7 +56,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,StepName,StepDescription,QuickLinkId,StepOrder,CreatedAt")] OnboardingStep onboardingStep)
+        public async Task<IActionResult> Create([Bind("Id,StepName,StepDescription,PageId,StepOrder,CreatedAt")] OnboardingStep onboardingStep)
         {
             onboardingStep.CreatedAt = DateTime.Now;
             if (ModelState.IsValid)
@@ -65,7 +65,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["QuickLinkId"] = new SelectList(_context.Quicklink, "Id", "Url", onboardingStep.QuickLinkId);
+            ViewData["PageId"] = new SelectList(_context.Pages, "ID", "Url", onboardingStep.Page);
             return View(onboardingStep);
         }
 
@@ -82,7 +82,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 return NotFound();
             }
-            ViewData["QuickLinkId"] = new SelectList(_context.Quicklink, "Id", "Url", onboardingStep.QuickLinkId);
+            ViewData["PageId"] = new SelectList(_context.Pages, "ID", "Url", onboardingStep.Page);
             return View(onboardingStep);
         }
 
@@ -91,7 +91,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,StepName,StepDescription,QuickLinkId,StepOrder,CreatedAt")] OnboardingStep onboardingStep)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,StepName,StepDescription,PageId,StepOrder,CreatedAt")] OnboardingStep onboardingStep)
         {
             if (id != onboardingStep.Id)
             {
@@ -118,7 +118,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["QuickLinkId"] = new SelectList(_context.Quicklink, "Id", "Url", onboardingStep.QuickLinkId);
+            ViewData["PageId"] = new SelectList(_context.Pages, "ID", "Url", onboardingStep.Page);
             return View(onboardingStep);
         }
 
@@ -131,7 +131,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
 
             var onboardingStep = await _context.OnboardingSteps
-                 .Include(n => n.Quicklink)
+                 .Include(n => n.Page)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (onboardingStep == null)
             {

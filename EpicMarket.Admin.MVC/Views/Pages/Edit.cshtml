@@ -48,6 +48,13 @@
                             </div>
                         </div>
                         <div class="row mb-3">
+                            <label asp-for="Url" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <input asp-for="Url" class="form-control" />
+                                <span asp-validation-for="Url" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
                             <label asp-for="Description" class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
                                 <input asp-for="Description" class="form-control" />

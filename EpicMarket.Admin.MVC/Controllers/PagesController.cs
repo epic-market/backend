@@ -48,9 +48,10 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Pages/Create
-        public IActionResult Create()
+        public IActionResult Create(string returnUrl = null)
         {
             ViewData["ApplicationId"] = new SelectList(_context.ApplicationsTable, "ID", "Name");
+            ViewBag.ReturnUrl = returnUrl;
             return View();
         }
 
@@ -59,7 +60,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Name,Description,ApplicationId,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Page page)
+        public async Task<IActionResult> Create([Bind("ID,Name,Description,ApplicationId,Url,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Page page, string returnUrl = null)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             page.CreateBy = userName;
@@ -68,10 +69,19 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 _context.Add(page);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (!string.IsNullOrEmpty(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+                else
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+
             }
+            ViewBag.ReturnUrl = returnUrl;
             ViewData["ApplicationId"] = new SelectList(_context.ApplicationsTable, "ID", "Name", page.ApplicationId);
-            return View(page);
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Pages/Edit/5
@@ -96,7 +106,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,ApplicationId,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] Page page)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,ApplicationId,Url,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] Page page)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             page.ModifiedBy = userName;

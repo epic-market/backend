@@ -15,8 +15,8 @@ namespace EpicMarket.Data.Models
         public bool IsRead { get; set; }
         public int UserId { get; set; }
         public int ContactMethodId { get; set; }
-        public int QuickLinkId { get; set; }
-        public Quicklink Quicklink { get; set; }
+        public int PageId { get; set; }
+        public Page Page { get; set; }
 
         public AppUser User { get; set; } // Navigation property for the user
         public ContactMethod ContactMethod { get; set; }

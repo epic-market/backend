@@ -34,7 +34,7 @@
                 @Html.DisplayNameFor(model => model.StepDescription)
             </th>
                         <th>
-                            @Html.DisplayNameFor(model => model.Quicklink)
+                            @Html.DisplayNameFor(model => model.Page)
                         </th>
             <th>
                 @Html.DisplayNameFor(model => model.StepOrder)
@@ -54,9 +54,9 @@
             <td>
                 @Html.DisplayFor(modelItem => item.StepDescription)
             </td>
-                            <td>
-                                @Html.DisplayFor(modelItem => item.Quicklink.Url)
-                            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Page.Url)
+            </td>
             <td>
                 @Html.DisplayFor(modelItem => item.StepOrder)
             </td>
