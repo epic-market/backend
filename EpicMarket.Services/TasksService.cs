@@ -34,21 +34,25 @@ namespace EpicMarket.Services
             this.unitOfWork = unitOfWork;
             this._userManager = _userManager;
         }
-        public async Task<long> SaveTask(TasksDTO tasksDTO, int AdminPersonID, string LoggedInUserName)
+        public async Task<long> SaveTask(TasksParams tasksDTO, int AdminPersonID, string LoggedInUserName)
         {
             var taskStatusTypes = _context.TaskStatusTypes.Where(row => row.Status == TaskStatusTypesConstants.NEW).FirstOrDefault();
-            var GetTaskType = _context.TaskTypes.Where(row => row.ID == tasksDTO.TaskTypeID).FirstOrDefault();
+            var GetTaskType = _context.TaskTypes.Where(row => row.Name == tasksDTO.TaskType).FirstOrDefault();
+            var taskEntity = string.IsNullOrEmpty(tasksDTO.TaskEntity) ? null : await _context.Entity.Where(row => row.Name == tasksDTO.TaskEntity).FirstOrDefaultAsync();
             var user = await GetUser(LoggedInUserName);
             var taskToSave = new Tasks
             {
                 Name = tasksDTO.Name,
                 Description = tasksDTO.Description,
-                TaskTypeID = tasksDTO.TaskTypeID,
+                TaskTypeID = GetTaskType.ID,
                 TaskStatusID = taskStatusTypes.Id,
-                TaskPriorityID = 1,//TODO hardcoded
+                TaskPriorityID = tasksDTO.TaskPriorityID,
                 PrimaryAssignedToPersonID = AdminPersonID,
                 DateAssigned = DateTime.Now,
-                DateDue = DateTime.Now.AddHours((double)GetTaskType.DefaultDueDateHours),
+                TaskEntityID = taskEntity?.ID,
+                DateDue = GetTaskType.DefaultDueDateHours.HasValue
+                            ? DateTime.Now.AddHours((double)GetTaskType.DefaultDueDateHours)
+                            : DateTime.Now.AddDays(7),
                 DateStarted = null,
                 DateCompleted = null,
                 SubmittedByPersonID = user.Id,
@@ -159,13 +163,14 @@ namespace EpicMarket.Services
         public async Task<long> AddSupportTask(SupportDTO supportDTO, int AdminPersonID)
         {
             var supportQuery = _context.SupportQuerys.Where(row => row.ID == supportDTO.QueryId).FirstOrDefault();
-            var taskID = await this.SaveTask(new TasksDTO
+            var taskParam = new TasksParams
             {
                 Name = "Support Query",
                 Description = supportQuery.Query,
-                TaskTypeID = supportQuery.TaskTypeID,
-                TaskData = supportDTO.Comment,
-            }, AdminPersonID, supportDTO.Email);
+                TaskType = TaskTypeConstants.Support,
+                TaskData = supportDTO.Comment
+            };
+            var taskID = await this.SaveTask(taskParam, AdminPersonID, supportDTO.Email);
 
             SupportTicket supportTicket;
             supportTicket = new SupportTicket

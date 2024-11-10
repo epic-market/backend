@@ -55,7 +55,7 @@ namespace EpicMarket.Business.API.Controllers
 			this.logger.LogInformation("Business Controller -> Register()-> params {0}", JsonConvert.SerializeObject(new { Params = businessRegisterDto }));
             var UserID = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value) ;
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-            var id =  await businessService.RegisterBusiness(businessRegisterDto, UserName , UserID,this.PageSource);
+            var id =  await businessService.RegisterBusiness(businessRegisterDto, UserName ,this.AdminPersonID, UserID,this.PageSource);
 
             var appuser =  userManager.Users.Where(c=>c.Id == UserID).FirstOrDefault();
 
@@ -139,7 +139,7 @@ namespace EpicMarket.Business.API.Controllers
             var response = new OperationResult<int>();
             this.logger.LogInformation("Business Controller -> UpdateBusiness()-> params {0}", JsonConvert.SerializeObject(new { Params = businessRegisterDto }));
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-            var branchID = await businessService.UpdateBusiness(this.BusinessId, businessRegisterDto, UserName, this.PageSource);
+            var branchID = await businessService.UpdateBusiness(this.BusinessId, businessRegisterDto, UserName, this.AdminPersonID,this.PageSource);
             if (businessRegisterDto.LogoFile?.Length > 0)
             {
                 var filinsertOutput = await this.SaveFileGlobalAsync(businessRegisterDto.LogoFile, FilePathConstants.LOGOPATH, this.fileStoreService, this.applicationConfigurationService, this.BusinessId);

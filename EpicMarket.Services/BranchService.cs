@@ -317,6 +317,8 @@ namespace EpicMarket.Services
             var newTaskStatus = _context.TaskStatusTypes.Where(row => row.Status == "New").FirstOrDefault();
             var taskTypeID = _context.TaskTypes.Where(row => row.Name == "Verification").FirstOrDefault();
             var userName = _context.Users.Where(row => row.UserName == UserName).FirstOrDefault();
+            var taskEntity = await _context.Entity.Where(row => row.Name == EntityConstants.Branch).FirstOrDefaultAsync();
+
             Tasks taskToSave;
                 taskToSave = new Tasks
                 {
@@ -325,6 +327,7 @@ namespace EpicMarket.Services
                     TaskTypeID = taskTypeID.ID,
                     ParentID = null,
                     TaskStatusID = newTaskStatus.Id,
+                    TaskEntityID = taskEntity.ID,
                     TaskPriorityID = 1,
                     PrimaryAssignedToPersonID = AdminPersonID,
                     DateAssigned = DateTime.Now,

@@ -22,6 +22,7 @@ namespace EpicMarket.Services
         private readonly IAddressService addressService;
         private readonly IEventLogService eventLogService;
         private readonly ICommunicationQueueService communicationQueueService;
+        private readonly ITasksService tasksService;
         private readonly IUnitOfWork unitOfWork;
         private static readonly object _lock = new object();
 		public BusinessService(
@@ -30,6 +31,7 @@ namespace EpicMarket.Services
                                 IAddressService addressService,
                                 IEventLogService eventLogService,
                                 ICommunicationQueueService communicationQueueService,
+                                ITasksService tasksService,
                                 IUnitOfWork unitOfWork)
         {
             _context = context;
@@ -37,9 +39,10 @@ namespace EpicMarket.Services
             this.addressService = addressService;
             this.eventLogService = eventLogService;
             this.communicationQueueService = communicationQueueService;
+            this.tasksService = tasksService;
             this.unitOfWork = unitOfWork;
         }
-        public async Task<int> RegisterBusiness(BusinessRegisterDto businessRegisterDto, string UserName , int userid, string PageSource)
+        public async Task<int> RegisterBusiness(BusinessRegisterDto businessRegisterDto, string UserName ,int AdminPersonId ,int userid, string PageSource)
         {
 			var statusid = await _context.StatusOptionSets.FirstOrDefaultAsync(c => c.Status == Business_Status.BUSINESS_UNVERIFIED);
 			var addressModel = new AddressDto();
@@ -68,6 +71,19 @@ namespace EpicMarket.Services
                  
 			await _context.Businesses.AddAsync(businessModel);
 			await _context.SaveChangesAsync();
+
+
+            var BusinssID = new List<int>() { businessModel.ID };
+
+            var taskID = await tasksService.SaveTask(new TasksParams()
+            {
+                TaskPriorityID = 5,
+                TaskEntity = EntityConstants.Business,
+                TaskData = string.Join(",", BusinssID),
+                Name = EntityConstants.Business,
+                Description = TaskDescriptions.Business,
+                TaskType = TaskTypeConstants.Verification
+            }, AdminPersonId, UserName);
 
             string savedJson = JsonConvert.SerializeObject(businessModel, new JsonSerializerSettings
             {
@@ -133,7 +149,7 @@ namespace EpicMarket.Services
                 Thumbnail = thumbnail.Select(a => a.ImagePath).FirstOrDefault(),
             }).FirstOrDefaultAsync();
         }
-        public async Task<int> UpdateBusiness(int id, UpdateBusinessRegisterDto businessRegisterDto, string UserName, string PageSource)
+        public async Task<int> UpdateBusiness(int id, UpdateBusinessRegisterDto businessRegisterDto, string UserName, int AdminPersonId , string PageSource)
         {
             var addressModel = new AddressDto();
             var events = "";
@@ -163,6 +179,20 @@ namespace EpicMarket.Services
             _context.Businesses.Update(businessModel);
 
             await unitOfWork.Complete();
+
+
+            var BusinssID = new List<int>() { businessModel.ID };
+            var taskID = await tasksService.SaveTask(new TasksParams()
+            {
+                TaskPriorityID = 5,
+                TaskEntity = EntityConstants.Business,
+                TaskData = string.Join(",", BusinssID),
+                Name = EntityConstants.Business,
+                Description = TaskDescriptions.Business,
+                TaskType = TaskTypeConstants.Verification
+            }, AdminPersonId, UserName);
+
+
             var savedOutletModel = _context.Businesses.FirstOrDefault(o => o.ID == businessModel.ID);
             string outletModelJson = JsonConvert.SerializeObject(savedOutletModel, new JsonSerializerSettings
             {

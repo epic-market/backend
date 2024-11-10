@@ -13,14 +13,14 @@ namespace EpicMarket.Business.API.Controllers
 {
     public class SupportController : BaseApiController
     {
-
+        private readonly ApplicationDbContext context;
         private readonly ILogger<SupportController> logger;
         private readonly ITasksService tasksService;
         private readonly IFileService fileStoreService;
         private readonly IApplicationConfigurationService applicationConfigurationService;
         private readonly IAttachmentService attachmentService;
 
-        public SupportController(
+        public SupportController(  ApplicationDbContext context,
                                     ILogger<SupportController> logger,
                                     ITasksService tasksService,
                                     ApplicationDbContext dbContext,
@@ -30,6 +30,7 @@ namespace EpicMarket.Business.API.Controllers
                                     IAttachmentService attachmentService
                                 ) : base(dbContext, httpContextAccessor)
         {
+            this.context = context;
             this.logger = logger;
             this.tasksService = tasksService;
             this.fileStoreService = fileStoreService;
@@ -79,7 +80,17 @@ namespace EpicMarket.Business.API.Controllers
             var response = new OperationResult<int>();
 
             this.logger.LogInformation("Support Controller -> AddTask()-> params {0}", JsonConvert.SerializeObject(new { Params = tasksDTO }));
-            var results = await tasksService.SaveTask(tasksDTO,this.AdminPersonID,this.LoggedInUserName);
+            var GetTaskType = context.TaskTypes.Where(row => row.ID == tasksDTO.TaskTypeID).FirstOrDefault();
+            var taskParams = new TasksParams()
+            {
+                Name = tasksDTO.Name,
+                Description = tasksDTO.Description,
+                TaskData = null,
+                TaskEntity = null,
+                TaskPriorityID = 1,
+                TaskType = GetTaskType.Name
+            };
+            var results = await tasksService.SaveTask(taskParams, this.AdminPersonID,this.LoggedInUserName);
             if (tasksDTO.UploadFiles?.Length > 0)
             {
                 foreach (var proof in tasksDTO.UploadFiles)

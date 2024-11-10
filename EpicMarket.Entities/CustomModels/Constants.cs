@@ -73,6 +73,20 @@ namespace EpicMarket.Entities.CustomModels
         public const string TASKPATH = "TaskPath";
 
     }
+
+    public static class TaskTypeConstants
+    {
+        public const string Verification = "Verification";
+        public const string Grievance = "Grievance";
+        public const string Issues = "Issues";
+        public const string Support = "Support";
+    }
+
+        public static class TaskDescriptions
+    {
+        public const string Business = "Verification For the Business";
+
+    }
     public static class EntityConstants
     {
         public const string Catelog = "Catelog";
