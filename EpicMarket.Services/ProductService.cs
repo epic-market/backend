@@ -302,6 +302,9 @@ namespace EpicMarket.Services
 			}).FirstOrDefaultAsync();
 
 		}
+
+
+     
         public async Task<int> VerifyCatalog(VerifyDto verifyBranchDto, string UserName, int AdminPersonID, string PageSource)
         {
             var newTaskStatus = await _context.TaskStatusTypes.Where(row => row.Status == "New").FirstOrDefaultAsync();
@@ -382,6 +385,20 @@ namespace EpicMarket.Services
             await unitOfWork.Complete();
         }
 
+        public async Task<ProductAdvanced> GetProductInventoryDetails(int productId, int branchId)
+        {
+           var productAdvanced = await _context.OutletProducts.Where(c => c.OutletID == branchId && c.ProductID == productId).Select(c=> new ProductAdvanced {
+              BackOrders = c.BackOrders,
+              MaximumStockLevel = c.MaximumStockLevel,  
+              MinimumStockLevel = c.MinimumStockLevel,
+              QuantityAvailable = c.QuantityAvailable,
+              ReorderPoint = c.ReorderPoint,    
+              CatelogId = c.ProductID,
+              BranchId = branchId
+            }).FirstOrDefaultAsync();
+
+            return productAdvanced;
+        }
     }
 
 

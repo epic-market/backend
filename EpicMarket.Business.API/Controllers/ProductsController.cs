@@ -113,7 +113,7 @@ namespace EpicMarket.Business.API.Controllers
 
 
 
-        [HttpPost("Advanced")]
+        [HttpPost("Inventory")]
         [Authorize(Roles = ROLES.BUSINESS_OWNER)]
         public async Task<ActionResult<OperationResult<int>>> UpdateAdvanceSettings([FromBody]ProductAdvanced productAdvanced)
         {
@@ -123,6 +123,19 @@ namespace EpicMarket.Business.API.Controllers
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
             await productService.UpdateAdvanceSetting(productAdvanced);
             this.logger.LogInformation("Products Controller -> UpdateAdvanceSettings()-> updated Successfully");
+            return Ok(response);
+        }
+
+
+        [HttpGet("Inventory/{id}")]
+        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
+        public async Task<ActionResult<OperationResult<ProductAdvanced>>> GetProductInventoryDetails(int id,int branchId)
+        {
+            var response = new OperationResult<ProductAdvanced>();
+            this.logger.LogInformation("Products Controller -> GetProductInventoryDetails()-> params {0}", JsonConvert.SerializeObject(new { Params = id }));
+            var results = await productService.GetProductInventoryDetails(id, branchId);
+            this.logger.LogInformation("Products Controller -> GetProductInventoryDetails()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
+            response.Data = results;
             return Ok(response);
         }
 
@@ -246,6 +259,8 @@ namespace EpicMarket.Business.API.Controllers
 			 await productService.deleteCatelog(id, UserName);
 			return Ok(response);
 		}
+
+
 
         [HttpGet("POS/{outletID}")]
         [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]

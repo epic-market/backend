@@ -146,7 +146,7 @@ namespace EpicMarket.Entities
     }
     public class VerifyDto
     {
-        public List<int> ListOfProductIDs { get; set; }
+        public List<int> ListOfBranchIDs { get; set; }
 
     }
     public class QuickActionsParams
