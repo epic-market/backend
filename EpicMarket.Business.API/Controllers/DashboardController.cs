@@ -31,18 +31,40 @@ namespace EpicMarket.Business.API.Controllers
 
                 var reponse = new OperationResult<List<OnboardingStepResult>>();
 
-                this.logger.LogInformation("Dashboard Controller -> GetStatusOptions()");
+                this.logger.LogInformation("Dashboard Controller -> OnboardingSteps()");
 
                 var UserID = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
                 var steps = await this.onboardingService.GetAllOnboardingSteps(UserID);
 
-                this.logger.LogInformation("Dashboard Controller-> GetStatusOptions()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = steps }));
+                this.logger.LogInformation("Dashboard Controller-> OnboardingSteps()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = steps }));
 
                 reponse.Data = steps;
 
                 return Ok(reponse);
 
             }
-        }
+
+
+
+            [HttpPost("completed")]
+            public async Task<IActionResult> UpdateStatusOfOnBoardingStep(int stepId)
+            {
+
+                var reponse = new OperationResult<bool>();
+
+                this.logger.LogInformation("Dashboard Controller -> UpdateStatusOfOnBoardingStep()");
+
+                var UserID = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                
+                await this.onboardingService.CompleteStepForUserID(UserID,stepId);
+
+                this.logger.LogInformation("Dashboard Controller-> UpdateStatusOfOnBoardingStep()");
+
+                reponse.Data = true;
+
+                return Ok(reponse);
+
+            }
+    }
 }

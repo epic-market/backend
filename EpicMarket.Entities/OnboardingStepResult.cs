@@ -14,4 +14,5 @@ namespace EpicMarket.Entities
         public string NavigationURL { get; set; }
         public int StepOrder { get; set; }
     }
+
 }

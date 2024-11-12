@@ -24,7 +24,6 @@ namespace EpicMarket.Services
         private readonly ICommunicationQueueService communicationQueueService;
         private readonly ITasksService tasksService;
         private readonly IUnitOfWork unitOfWork;
-        private static readonly object _lock = new object();
 		public BusinessService(
                                 ApplicationDbContext context,
                                 IMapper mapper ,
