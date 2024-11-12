@@ -323,7 +323,7 @@ namespace EpicMarket.Services
                 TaskEntityID = taskEntity.ID,
                 DateAssigned = DateTime.Now,
                 SubmittedByPersonID = userName.Id,
-                TaskData = string.Join(",", verifyBranchDto.ListOfProductIDs),
+                TaskData = string.Join(",", verifyBranchDto.ListOfBranchIDs),
                 ReceivedDate = DateTime.Now,
                 CreateDate = DateTime.Now,
                 CreateBy = userName.Email
