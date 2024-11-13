@@ -5,7 +5,7 @@
 }
 
 <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-    <div class="breadcrumb-title pe-3">Oultet Products</div>
+    <div class="breadcrumb-title pe-3">Outlet Products</div>
     <div class="ps-3">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0 p-0">
@@ -28,33 +28,84 @@
                         <div>
                             <i class="bx bxs-user me-1 font-22 text-info"></i>
                         </div>
-                        <h5 class="mb-0 text-info">Edit Oultet Product Map</h5>
+                        <h5 class="mb-0 text-info">Edit Outlet Product</h5>
                     </div>
                     <hr />
-                    <form asp-action="Edit">
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                        <input type="hidden" asp-for="ID" />
-                        <div class="row mb-3">
-                            <label asp-for="OutletID" class="col-sm-3 col-form-label"></label>
+
+                    <!-- Static Information Display -->
+                    <div class="alert alert-light border mb-4">
+                        <div class="row mb-2">
+                            <label class="col-sm-3 fw-bold">Outlet:</label>
                             <div class="col-sm-9">
-                            <input asp-for="OutletID" class="form-control" />
-                            <span asp-validation-for="OutletID" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label asp-for="ProductID" class="col-sm-3 col-form-label"></label>
-                            <div class="col-sm-9">
-                                <select asp-for="ProductID" class="form-control" asp-items="ViewBag.ProductID"></select>
-                                <span asp-validation-for="ProductID" class="text-danger"></span>
+                                @Html.DisplayFor(model => model.Outlet.Name)
                             </div>
                         </div>
                         <div class="row">
+                            <label class="col-sm-3 fw-bold">Product:</label>
+                            <div class="col-sm-9">
+                                @Html.DisplayFor(model => model.Product.Name)
+                            </div>
+                        </div>
+                    </div>
+
+                    <form asp-action="Edit">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="ID" />
+                        <input type="hidden" asp-for="OutletID" />
+                        <input type="hidden" asp-for="ProductID" />
+
+                        <div class="row mb-3">
+                            <label asp-for="QuantityAvailable" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <input asp-for="QuantityAvailable" class="form-control" />
+                                <span asp-validation-for="QuantityAvailable" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label asp-for="MinimumStockLevel" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <input asp-for="MinimumStockLevel" class="form-control" />
+                                <span asp-validation-for="MinimumStockLevel" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label asp-for="MaximumStockLevel" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <input asp-for="MaximumStockLevel" class="form-control" />
+                                <span asp-validation-for="MaximumStockLevel" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label asp-for="ReorderPoint" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <input asp-for="ReorderPoint" class="form-control" />
+                                <span asp-validation-for="ReorderPoint" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label asp-for="BackOrders" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <div class="form-check">
+                                    <input asp-for="BackOrders" class="form-check-input" />
+                                    <label class="form-check-label" asp-for="BackOrders"></label>
+                                </div>
+                                <span asp-validation-for="BackOrders" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
                             <label class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
-                                <button type="submit" class="btn btn-info px-5"> Save</button>
-                            </div>
-                            <div>
-                                <a asp-action="Index">Back to List</a>
+                                <button type="submit" class="btn btn-info px-5">
+                                    <i class="bx bx-save me-1"></i> Save
+                                </button>
+                                <a asp-action="Index" class="btn btn-secondary ms-2">
+                                    <i class="bx bx-arrow-back me-1"></i> Back to List
+                                </a>
                             </div>
                         </div>
                     </form>
@@ -64,7 +115,8 @@
     </div>
 </div>
 
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

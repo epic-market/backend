@@ -33,33 +33,80 @@
                         <h5 class="mb-0 text-info">Create Oultet Product Map</h5>
                     </div>
                     <hr />
-                    <form asp-action="Create">
+                    @using (Html.BeginForm("CreateOutletProduct", "OutletProducts", new { productID = ViewBag.productID, redirectUrl = ViewBag.redirectUrl }, FormMethod.Post))
+                    {
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                        <input type="hidden" asp-for="ID" />
+
                         <div class="row mb-3">
                             <label asp-for="OutletID" class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
-                                <input asp-for="OutletID" class="form-control" />
+                                <select asp-for="OutletID" class="form-control" asp-items="ViewBag.Outlets"></select>
                                 <span asp-validation-for="OutletID" class="text-danger"></span>
                             </div>
                         </div>
+
                         <div class="row mb-3">
+                            <input type="hidden" asp-for="ProductID" />
                             <label asp-for="ProductID" class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
-                                <select asp-for="ProductID" class="form-control" asp-items="ViewBag.ProductID"></select>
+                                <select asp-for="ProductID" class="form-control" asp-items="ViewBag.Products" disabled></select>
                                 <span asp-validation-for="ProductID" class="text-danger"></span>
                             </div>
                         </div>
+
+                        <div class="row mb-3">
+                            <label asp-for="QuantityAvailable" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <input asp-for="QuantityAvailable" class="form-control" />
+                                <span asp-validation-for="QuantityAvailable" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label asp-for="MinimumStockLevel" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <input asp-for="MinimumStockLevel" class="form-control" />
+                                <span asp-validation-for="MinimumStockLevel" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label asp-for="MaximumStockLevel" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <input asp-for="MaximumStockLevel" class="form-control" />
+                                <span asp-validation-for="MaximumStockLevel" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label asp-for="ReorderPoint" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <input asp-for="ReorderPoint" class="form-control" />
+                                <span asp-validation-for="ReorderPoint" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label asp-for="BackOrders" class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <div class="form-check">
+                                    <input asp-for="BackOrders" class="form-check-input" />
+                                    <label class="form-check-label" asp-for="BackOrders"></label>
+                                </div>
+                                <span asp-validation-for="BackOrders" class="text-danger"></span>
+                            </div>
+                        </div>
+
                         <div class="row">
                             <label class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
-                                <button type="submit" class="btn btn-info px-5"> Save</button>
-                            </div>
-                            <div>
-                                <a asp-action="Index">Back to List</a>
+                                <a href="javascript:history.go(-1)" class="btn btn-secondary">
+                                    <i class="bx bx-arrow-back me-1"></i> Back
+                                </a>
+                                <button type="submit" class="btn btn-info px-5">Save</button>
                             </div>
                         </div>
-                    </form>
+                    }
                 </div>
             </div>
         </div>
