@@ -20,7 +20,11 @@ builder.Configuration
 var connectionString = builder.Configuration.GetConnectionString("AuthDbContextConnection") ?? throw new InvalidOperationException("Connection string 'AuthDbContextConnection' not found.");
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    });
 builder.Services.AddDbContext<ApplicationDbContext>();
 builder.Services.AddScoped<IAttachmentService,AttachmentService>();
 builder.Services.AddScoped<IApplicationConfigurationService, ApplicationConfigurationService>();
