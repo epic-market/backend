@@ -26,5 +26,7 @@ namespace EpicMarket.Contracts
         Task<List<BranchsDropDownOptions>> GetAllOutletsForDropDown(int personID, int businessID);
 
         Task DeleteBranch(int branchId, string UserName);
+
+        Task<GetDataResult<List<OutletSeachDto>>> GetNearbyOutletsAsync(OutletSearchRequest request);
     }
 }

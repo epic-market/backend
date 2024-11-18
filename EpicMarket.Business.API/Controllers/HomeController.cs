@@ -105,5 +105,21 @@ namespace EpicMarket.Business.API.Controllers
 
             return Ok(list);
         }
+
+        [HttpGet("FAQ/Customer")]
+        public async Task<ActionResult<OperationResult<List<FaqDto>>>> GetAllFaqsCustomerAsync()
+        {
+            var reponse = new OperationResult<List<FaqDto>>();
+
+            this.logger.LogInformation("Home Controller -> GetAllFaqsCustomerAsync()");
+
+            var list = await homeService.GetAllFaqsCustomerAsync();
+
+            this.logger.LogInformation("Home Controller-> GetAllFaqsCustomerAsync()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = list }));
+
+            reponse.Data = list;
+
+            return Ok(list);
+        }
     }
 }

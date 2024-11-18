@@ -17,5 +17,7 @@ namespace EpicMarket.Contracts
         List<AccessControlList_Result> GetAccessControlList(Profile_SearchParams searchParams);
 
         Task<List<CustomerDetails>> GetCustomerDetails(string PhoneOrUserName);
+
+        Task<CustomerBasicDetailsDto> GetCustomerBasicDetailsAsync(string UserName);
     }
 }

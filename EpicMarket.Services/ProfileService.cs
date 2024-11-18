@@ -59,5 +59,34 @@ namespace EpicMarket.Services
 
             return result;
         }
+
+
+
+        public async Task<CustomerBasicDetailsDto> GetCustomerBasicDetailsAsync(string UserName)
+        {
+            var AttachmentType = await context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.Profile);
+            var customerDetails = await context.Users
+                .Where(c => c.UserName == UserName)
+                .Select(c => new CustomerBasicDetailsDto
+                {
+                    Id = c.Id,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName,
+                    Email = c.Email,
+                    PhoneNumber = c.PhoneNumber,
+                    ProfilePhoto = (from attachment in context.Attachments
+                                    join link in context.AttachmentLinks
+                                    on attachment.ID equals link.AttachmentID
+                                    join entity in context.Entity
+                                    on link.EntityID equals entity.ID
+                                    where entity.Name == EntityConstants.Profile
+                                    && link.RecordID == c.Id
+                                    && link.AttachmentTypeID == attachment.ID
+                                    select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}").FirstOrDefault()
+                })
+                .FirstOrDefaultAsync();
+
+            return customerDetails;
+        }
     }
 }

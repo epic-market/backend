@@ -17,11 +17,13 @@ namespace EpicMarket.Business.API.Controllers
     {
         private readonly ILogger<OrdersController> logger;
         private readonly IOrderService orderService;
+        private readonly ApplicationDbContext dbContext;
 
         public OrdersController(ILogger<OrdersController> logger, IOrderService orderService, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
         {
             this.logger = logger;
             this.orderService = orderService;
+            this.dbContext = dbContext;
         }
 
        
@@ -121,7 +123,7 @@ namespace EpicMarket.Business.API.Controllers
 
             this.logger.LogInformation("Orders Controller -> GetOrdersDetailsForMobile()-> params {0}", JsonConvert.SerializeObject(new { Params = OrderId }));
 
-            var orderResults = await orderService.GetOrdersDetailsForMobile(OrderId, this.BusinessId);
+            var orderResults = await orderService.GetOrdersDetailsForMobile(OrderId);
 
             this.logger.LogInformation("Orders Controller -> GetOrdersDetailsForMobile()-> return {0}", JsonConvert.SerializeObject(new { Value = orderResults }));
 
@@ -157,5 +159,56 @@ namespace EpicMarket.Business.API.Controllers
 
 
 
+        [HttpGet("new")]
+        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
+        public async Task<ActionResult<OperationResult<GetDataResult<List<OrderMobileResult>>>>> GetNewOrders(DateTime ordered_after, int? outlet_id)
+        {
+            var response = new OperationResult<object>();
+
+            this.logger.LogInformation("Orders Controller -> GetOrdersDetailsForMobile()-> params {0}", JsonConvert.SerializeObject(new { ordered_after = ordered_after, outlet_id = outlet_id }));
+
+            var orderResults = await orderService.AnyNewOrders(ordered_after, this.BusinessId, outlet_id);
+
+            this.logger.LogInformation("Orders Controller -> GetOrdersDetailsForMobile()-> return {0}", JsonConvert.SerializeObject(new { Value = orderResults }));
+
+            response.Data = new { newOrders = orderResults };
+
+            if (orderResults)
+            {
+                return Ok(response);
+            }
+            else
+            {
+                return NotFound(response);
+            }
+
+        }
+
+        [HttpGet("Customer/OrderHistory")]
+        public async Task<ActionResult<GetDataResult<CustomerOrderDto>>> GetOrderHistory([FromQuery] OrderHistoryRequest request)
+        {
+            var UserID = dbContext.Users.Where(c => c.UserName == this.LoggedInUserName).FirstOrDefault().Id;
+            if (request.Page < 1)
+                return BadRequest("Page number must be greater than 0");
+
+            if (request.PageSize < 1)
+                return BadRequest("Page size must be greater than 0");
+
+            // Validate sort parameters
+            var validSortFields = new[] { "date", "amount", "status" };
+            var validSortOrders = new[] { "asc", "desc" };
+
+            if (!string.IsNullOrEmpty(request.SortBy) && !validSortFields.Contains(request.SortBy.ToLower()))
+                return BadRequest($"Invalid sort field. Valid values are: {string.Join(", ", validSortFields)}");
+
+            if (!string.IsNullOrEmpty(request.SortOrder) && !validSortOrders.Contains(request.SortOrder.ToLower()))
+                return BadRequest($"Invalid sort order. Valid values are: {string.Join(", ", validSortOrders)}");
+
+            var result = await orderService.GetCustomerOrderHistoryAsync(UserID, request);
+
+            return Ok(result);
+        }
     }
+
+}
 }

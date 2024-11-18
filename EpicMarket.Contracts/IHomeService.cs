@@ -1,4 +1,5 @@
 ﻿using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using System;
 using System.Collections.Generic;
@@ -18,5 +19,7 @@ namespace EpicMarket.Contracts
         Task<List<BlogDto>> GetAllBlogsByCategory(BlogsByCategoryParams blogParams);
 
         Task<BlogDto> GetBlogDetails(int blogId);
+
+        Task<List<FaqDto>> GetAllFaqsCustomerAsync();
     }
 }

@@ -4,8 +4,10 @@ using EpicMarket.Data.Models;
 using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -322,7 +324,7 @@ namespace EpicMarket.Services
         }
 
 
-        public async Task<OrderMobileDeatilsResult> GetOrdersDetailsForMobile(int OrderId, int businessID)
+        public async Task<OrderMobileDeatilsResult> GetOrdersDetailsForMobile(int OrderId)
         {
 
             var getData = new OrderMobileDeatilsResult();
@@ -370,5 +372,72 @@ namespace EpicMarket.Services
 
 
         }
+
+        public async Task<GetDataResult<List<CustomerOrderDto>>> GetCustomerOrderHistoryAsync(
+       int customerId,
+       OrderHistoryRequest request)
+        {
+            var query = _context.Orders
+                .Include(o => o.OrderDetails)
+                .Include(o=>o.OrderStatusOptions)
+                 .Include(o => o.Outlet)
+                .Where(o => o.PersonID == customerId)
+                .AsQueryable();
+
+            // Apply filters
+            if (request.StartDate.HasValue)
+            {
+                query = query.Where(o => o.OrderAt >= request.StartDate.Value);
+            }
+
+            if (request.EndDate.HasValue)
+            {
+                query = query.Where(o => o.OrderAt <= request.EndDate.Value);
+            }
+
+            if (request.StatusId != null)
+            {
+                query = query.Where(o => o.StatusId == request.StatusId);
+            }
+
+            // Apply sorting
+            query = (request.SortBy?.ToLower(), request.SortOrder?.ToLower()) switch
+            {
+            ("date", "asc") => query.OrderBy(o => o.OrderAt),
+            ("date", "desc") => query.OrderByDescending(o => o.OrderAt),
+            ("amount", "asc") => query.OrderBy(o => o.TotalPrice),
+            ("amount", "desc") => query.OrderByDescending(o => o.TotalPrice),
+            ("status", "asc") => query.OrderBy(o => o.StatusId),
+            ("status", "desc") => query.OrderByDescending(o => o.StatusId),
+            _ => query.OrderByDescending(o => o.OrderAt)
+            };
+          
+            // Get total count
+            var totalItems = await query.CountAsync();
+
+            // Apply pagination
+            var orders = await query
+                .Skip((request.Page - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .Select(o => new CustomerOrderDto
+                {
+                    OrderId = o.ID,
+                    OrderDate = o.OrderAt,
+                    Status = o.OrderStatusOptions.OrderStatus,
+                    TotalAmount = o.TotalPrice,
+                    ItemCount = o.OrderDetails.Count,
+                    OutletName = o.Outlet.Name,
+                    OutletId = o.OutletID,
+                    PaymentMethod = o.PaymentMode
+                })
+                .ToListAsync();
+
+            return new GetDataResult<List<CustomerOrderDto>>
+            {
+                items = orders,
+                Count = totalItems
+            };
+        }
+
     }
 }

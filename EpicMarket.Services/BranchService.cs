@@ -25,8 +25,8 @@ namespace EpicMarket.Services
         private readonly IEventLogService eventLogService;
         private readonly ICommunicationQueueService communicationQueueService;
 		private readonly IUnitOfWork unitOfWork;
-
-		public BranchService(
+        private const double EarthRadiusKm = 6371;
+        public BranchService(
                                 ApplicationDbContext context,
                                 IMapper mapper,
                                 IAddressService addressService,
@@ -386,6 +386,102 @@ namespace EpicMarket.Services
             }
             
       
+        }
+
+
+        public async Task<GetDataResult<List<OutletSeachDto>>> GetNearbyOutletsAsync(OutletSearchRequest request)
+        {
+            var attachmentTypeID = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.BRANCH_THUMBNAIL);
+            var query = _context.Outlets.Include(c=>c.Address).Include(c=>c.Bussiness.BusinessCategory.Name).AsQueryable();
+
+            // Apply location filter
+            if (request.Latitude.HasValue && request.Longitude.HasValue)
+            {
+                query = query.Where(o =>
+                    CalculateDistance(
+                        request.Latitude.Value,
+                        request.Longitude.Value,
+                        o.Address.Latitude,
+                        o.Address.Longitude) <= request.RadiusKm);
+            }
+
+            // Apply category filter
+            if (!string.IsNullOrEmpty(request.Category))
+            {
+                query = query.Where(o => o.Bussiness.BusinessCategory.Name == request.Category);
+            }
+
+            // Apply rating filter
+            if (request.MinRating.HasValue)
+            {
+                query = query.Where(o => o.Rating >= request.MinRating.Value);
+            }
+
+            // Apply sorting
+            query = request.SortBy?.ToLower() switch
+            {
+                "rating" => request.SortDirection == SortDirection.Desc
+                    ? query.OrderByDescending(o => o.Rating)
+                    : query.OrderBy(o => o.Rating),
+                "distance" => query.OrderBy(o =>
+                    CalculateDistance(
+                        request.Latitude.Value,
+                        request.Longitude.Value,
+                        o.Address.Latitude,
+                        o.Address.Longitude)),
+                _ => query.OrderByDescending(o => o.Rating)
+            };
+
+            // Get total count
+            var totalItems = await query.CountAsync();
+
+            // Apply pagination
+            var outlets = await query
+                .Skip((request.Page - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .Select(o => new OutletSeachDto
+                {
+                    Id = o.ID,
+                    Name = o.Name,
+                    Category = o.Bussiness.BusinessCategory.Name,
+                    Rating = o.Rating,
+                    ReviewCount = o.ReviewCount,
+                    Distance = CalculateDistance(
+                        request.Latitude.Value,
+                        request.Longitude.Value,
+                        o.Address.Latitude,
+                        o.Address.Longitude),
+                    Thumbnail = ((from attachment in _context.Attachments
+                                    join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                                    join entity in _context.Entity on link.EntityID equals entity.ID
+                                    where entity.Name == EntityConstants.Branch && link.RecordID == o.ID && link.AttachmentTypeID == attachmentTypeID.ID
+                                    select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}").FirstOrDefault())
+                })
+                .ToListAsync();
+
+            return new GetDataResult<List<OutletSeachDto>>
+            {
+                items = outlets,
+                Count = totalItems
+            };
+        }
+
+        private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
+        {
+            var dLat = ToRadian(lat2 - lat1);
+            var dLon = ToRadian(lon2 - lon1);
+
+            var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                    Math.Cos(ToRadian(lat1)) * Math.Cos(ToRadian(lat2)) *
+                    Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+
+            var c = 2 * Math.Asin(Math.Sqrt(a));
+            return EarthRadiusKm * c;
+        }
+
+        private double ToRadian(double degree)
+        {
+            return degree * Math.PI / 180;
         }
 
     }

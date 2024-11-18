@@ -215,8 +215,6 @@ namespace EpicMarket.Business.API.Controllers
             return response;
         }
 
-
-
         [HttpGet("PersonDetails/{PhoneOrUserName}")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<List<CustomerDetails>>>> getPersonDetails(string PhoneOrUserName)
@@ -268,6 +266,16 @@ namespace EpicMarket.Business.API.Controllers
 		}
 
 
+        [HttpGet("ProfileDetails")]
+        public async Task<ActionResult<CustomerBasicDetailsDto>> GetCustomerBasicDetails()
+        {
+            var customerDetails = await profileService.GetCustomerBasicDetailsAsync(this.LoggedInUserName);
 
-	}
+            if (customerDetails == null)
+                return NotFound();
+
+            return Ok(customerDetails);
+        }
+
+    }
 }

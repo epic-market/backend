@@ -96,6 +96,8 @@ namespace EpicMarket.Entities.CustomModels
         public const string Business = "Business";
 		public const string Tasks = "Tasks";
         public const string ProductInternal = "ProductInternal";//
+
+        public const string Profile = "Profile";//
     }
     public static class AttachmentTypeConstants
     {
@@ -107,6 +109,8 @@ namespace EpicMarket.Entities.CustomModels
         public const string BRANCH_THUMBNAIL = "BranchThumbnail";
         public const string TASK = "Task";
         public const string ProductInternal = "ProductInternal";//
+
+        public const string Profile = "Profile";//
     }
     public static class DocumentTypeConstants
     {
@@ -147,9 +151,25 @@ namespace EpicMarket.Entities.CustomModels
         public const string AddCatelog = "Catelog added sucessfully ";
         public const string EditCatelog = "Catelog  updated sucessfully";
     }
+    public static class OrderStatusConstants
+    {
+        public const string OrderPlaced = "Order Placed";
+        public const string OrderConfirmed = "Order Confirmed";
+        public const string OrderProcessing = "Order Processing";
+        public const string Canceled = "Canceled";
+        public const string AwaitingPickUp = "Awaiting Pickup";
+        public const string Delivered = "Delivered";
+    }
+
+
     public static class TaskStatusTypesConstants
     {
         public const string NEW = "New";
+    }
+
+    public static class FAQRoleType
+    {
+        public const string Customer = "Customer";
     }
 }
 

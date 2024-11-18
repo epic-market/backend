@@ -314,5 +314,34 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
+        [HttpGet] 
+         public async Task<ActionResult<GetDataResult<List<OutletSeachDto>>>> GetNearbyOutlets(
+          [FromQuery] double? latitude,
+          [FromQuery] double? longitude,
+          [FromQuery] double radiusKm = 10,
+          [FromQuery] string category = null,
+          [FromQuery] double? minRating = null,
+          [FromQuery] string sortBy = "rating",
+          [FromQuery] SortDirection sortDirection = SortDirection.Desc,
+          [FromQuery] int page = 1,
+          [FromQuery] int pageSize = 10)
+        {
+            var request = new OutletSearchRequest
+            {
+                Latitude = latitude,
+                Longitude = longitude,
+                RadiusKm = radiusKm,
+                Category = category,
+                MinRating = minRating,
+                SortBy = sortBy,
+                SortDirection = sortDirection,
+                Page = page,
+                PageSize = pageSize
+            };
+
+            var result = await branchService.GetNearbyOutletsAsync(request);
+            return Ok(result);
+        }
+
     }
 }

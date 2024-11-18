@@ -121,4 +121,30 @@ namespace EpicMarket.Entities
         public double? Total_price { get; set; }
     }
 
+    public class OrderHistoryRequest
+    {
+        public int Page { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public int? StatusId { get; set; }
+        public string SortBy { get; set; }
+
+        public string SortOrder { get; set; }   
+    }
+
+    public class CustomerOrderDto
+    {
+        public int OrderId { get; set; }
+        public string OrderNumber { get; set; }
+        public DateTime OrderDate { get; set; }
+        public string Status { get; set; }
+        public double TotalAmount { get; set; }
+        public int ItemCount { get; set; }
+        public string OutletName { get; set; }
+        public int OutletId { get; set; }
+        public string PaymentMethod { get; set; }
+        public string DeliveryAddress { get; set; }
+    }
+
 }
