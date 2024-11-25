@@ -20,6 +20,8 @@ namespace EpicMarket.Contracts
         Task<ProductAdvanced> GetProductInventoryDetails(int productId, int branchId);
         Task<int> VerifyCatalog(VerifyDto verifyBranchDto, string UserName, int AdminPersonID, string PageSource);
         Task<int> QuickActions(QuickActionsParams quickActionsParams ,string UserName);
+
+        Task<GetDataResult<List<CustomerResultBaseOnCatefory>>> GetAllProductsForMobile(ProductMobileParams parameters);
         Task<GetDataResult<List<ProductResult>>> GetAllProductsForPOS(ProductPOSParams productParams, int outletId);
         Task deleteCatelog(int id,string UserName);
 	}

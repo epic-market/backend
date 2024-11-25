@@ -219,6 +219,21 @@ namespace EpicMarket.Data.Models
 
         public DbSet<OnboardingStep> OnboardingSteps { get; set; }
         public DbSet<UserOnboardingProgress> UserOnboardingProgresses { get; set; }
+
+        public DbSet<Subscription> Subscriptions { get; set; }
+
+        public DbSet<SusbcriptionStatus> SusbcriptionStatuses{ get; set; }
+
+
+        public DbSet<Rating> Ratings { get; set; }
+
+        public DbSet<MerchantBankAccount> MerchantBankAccounts { get; set; }
+
+        public DbSet<MerchantUpiAccount> MerchantUpiAccounts { get; set; }
+
+        public DbSet<MerchantFinance> Finances { get; set; }
+
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
@@ -230,7 +245,6 @@ namespace EpicMarket.Data.Models
         
  
             base.OnModelCreating(modelBuilder);
-            // Business-level filters
 
             // Business-level filters
             modelBuilder.Entity<Catalog>()
@@ -250,6 +264,10 @@ namespace EpicMarket.Data.Models
                 .HasQueryFilter(p => IsUserAdmin ||
                     ((!AllowedBusinessIds.Any() || AllowedBusinessIds.Contains(p.BussinessID)) &&
                     (!AllowedBranchIds.Any() || AllowedBranchIds.Contains(p.ID))));
+
+            modelBuilder.Entity<MerchantFinance>()
+                .HasQueryFilter(o => IsUserAdmin || !AllowedBranchIds.Any() ||
+                    AllowedBranchIds.Contains(o.OutletID));
 
             // Branch-level filters
             modelBuilder.Entity<OutletProduct>()

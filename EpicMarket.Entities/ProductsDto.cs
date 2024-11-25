@@ -108,6 +108,20 @@ namespace EpicMarket.Entities
     }
 
 
+    public class ProductMobileParams
+    {
+        public int OutletId { get; set; }
+        public string Category { get; set; }
+        public string SearchTerm { get; set; }
+        public string SortBy { get; set; } = "name"; // name, price, newest
+        public string SortOrder { get; set; } = "asc"; // asc, desc
+        public int Page { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+
+    }
+
+
+
     public class ProductPOSParams
     {
         public int PageIndex { get; set; } = 1;
@@ -129,7 +143,32 @@ namespace EpicMarket.Entities
 
 	}
 
-	public class ListOfImages
+
+    public class CustomerProductResult
+    {
+        public int ProductId { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public double Rate { get; set; }
+        public string Thumbnail { get; set; }
+        public double? Rating { get; set; }
+        public int?  RatingCount { get; set; }
+    }
+
+    public class CustomerResultBaseOnCatefory
+    {
+        public string Category { get; set; }
+
+        public List<CustomerProductResult> CustomerProductResults { get; set; }
+    }
+
+
+
+
+
+
+
+    public class ListOfImages
 	{
 		public List<string> ImageKeys { get; set; } 
 

@@ -399,6 +399,150 @@ namespace EpicMarket.Services
 
             return productAdvanced;
         }
+
+
+        public async Task<GetDataResult<List<CustomerResultBaseOnCatefory>>> GetAllProductsForMobile(ProductMobileParams parameters)
+        {  
+
+                var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
+
+                var VerifiedStatusID = _context.StatusOptionSets.FirstOrDefault(c => c.Status == Business_Status.BUSINESS_VERIFIED).Id;
+                var query = _context.OutletProducts
+                    .Include(p => p.Outlet)
+                    .Include(p => p.Product)
+                    .Where(p => p.Outlet.ID == parameters.OutletId && p.Product.StatusId == VerifiedStatusID)
+                    .AsQueryable();
+
+                // Apply Category Filter
+                if (!string.IsNullOrEmpty(parameters.Category))
+                {
+                    query = query.Where(p => p.Product.Category == parameters.Category);
+                }
+
+                // Apply Search
+                if (!string.IsNullOrWhiteSpace(parameters.SearchTerm))
+                {
+                    var searchTerm = parameters.SearchTerm.Trim().ToLower();
+                    query = query.Where(p =>
+                        p.Product.Name.ToLower().Contains(searchTerm) ||
+                        p.Product.Description.ToLower().Contains(searchTerm));
+                }
+
+                // Apply Sorting
+                query = ApplySorting(query, parameters.SortBy, parameters.SortOrder);
+
+                // Get total count for pagination
+                var totalItems = await query.CountAsync();
+
+            var recommendedProducts = await query
+                                    .Where(p => p.Product.IsRecommended)
+                                    .Select(p => new CustomerProductResult
+                                    {
+                                        ProductId = p.ProductID,
+                                        Name = p.Product.Name,
+                                        Description = p.Product.Description,
+                                        Rate = p.Product.CostPrice,
+                                        Thumbnail = ((from attachment in _context.Attachments
+                                                      join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                                                      join entity in _context.Entity on link.EntityID equals entity.ID
+                                                      where entity.Name == EntityConstants.Catelog && link.RecordID == p.Product.ID && link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
+                                                      select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}").FirstOrDefault()),
+                                        Rating = p.Product.Rating,
+                                        RatingCount = p.Product.ReviewCount
+                                    })
+                                    .ToListAsync();
+
+            var categoryProducts = await query
+                    .Skip((parameters.Page - 1) * parameters.PageSize)
+                    .Take(parameters.PageSize)
+                    .GroupBy(p => p.Product.Category)
+                    .Select(g => new CustomerResultBaseOnCatefory
+                    {
+                        Category = g.Key,
+                        CustomerProductResults = g.Select(p => new CustomerProductResult
+                        {
+                            ProductId = p.ProductID,
+                            Name = p.Product.Name,
+                            Description = p.Product.Description,
+                            Rate = p.Product.CostPrice,
+                            Thumbnail = ((from attachment in _context.Attachments
+                                          join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                                          join entity in _context.Entity on link.EntityID equals entity.ID
+                                          where entity.Name == EntityConstants.Catelog && link.RecordID == p.Product.ID && link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
+                                          select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}").FirstOrDefault()),
+                            Rating = p.Product.Rating,
+                            RatingCount = p.Product.ReviewCount
+                        }).ToList()
+                    })
+                    .ToListAsync();
+
+
+            var finalResults = new List<CustomerResultBaseOnCatefory>();
+
+
+            if (recommendedProducts.Any())
+            {
+                finalResults.Add(new CustomerResultBaseOnCatefory
+                {
+                    Category = "Recommended",
+                    CustomerProductResults = recommendedProducts
+                });
+            }
+            finalResults.AddRange(categoryProducts);
+
+
+            return new GetDataResult<List<CustomerResultBaseOnCatefory>>
+                {
+                   items = finalResults,
+                   Count = totalItems
+                };
+        }
+     
+        private IQueryable<T> ApplySorting<T>(
+            IQueryable<T> query,
+            string sortBy,
+            string  sortOrder) where T : class
+        {
+            return (sortBy?.ToLower(), sortOrder?.ToLower()) switch
+            {
+                ("name", "ascending") =>
+                    query.OrderBy(p => EF.Property<string>(p, "Name")),
+
+                ("name", "descending") =>
+                    query.OrderByDescending(p => EF.Property<string>(p, "Name")),
+
+                ("price", "ascending") =>
+                    query.OrderBy(p => EF.Property<decimal>(p, "Price")),
+
+                ("price", "descending") =>
+                    query.OrderByDescending(p => EF.Property<decimal>(p, "Price")),
+
+                ("rating", "ascending") =>
+                    query.OrderBy(p => EF.Property<double>(p, "AverageRating")),
+
+                ("rating", "descending") =>
+                    query.OrderByDescending(p => EF.Property<double>(p, "AverageRating")),
+
+                ("newest", "ascending") =>
+                    query.OrderBy(p => EF.Property<DateTime>(p, "CreatedAt")),
+
+                ("newest", "descending") =>
+                    query.OrderByDescending(p => EF.Property<DateTime>(p, "CreatedAt")),
+
+                ("popular", "ascending") =>
+                    query.OrderBy(p => EF.Property<int>(p, "OrderCount")),
+
+                ("popular", "descending") =>
+                    query.OrderByDescending(p => EF.Property<int>(p, "OrderCount")),
+
+                // Default sorting by name ascending
+                _ => query.OrderBy(p => EF.Property<string>(p, "Name"))
+            };
+        }
+
+        
+
+
     }
 
 

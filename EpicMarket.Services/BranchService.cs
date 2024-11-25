@@ -392,15 +392,21 @@ namespace EpicMarket.Services
         public async Task<GetDataResult<List<OutletSeachDto>>> GetNearbyOutletsAsync(OutletSearchRequest request)
         {
             var attachmentTypeID = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.BRANCH_THUMBNAIL);
-            var query = _context.Outlets.Include(c=>c.Address).Include(c=>c.Bussiness.BusinessCategory.Name).AsQueryable();
+            var query = _context.Outlets
+                .Include(c => c.Address)
+                .Include(c => c.Bussiness)
+                .ThenInclude(b => b.BusinessCategory)
+                .AsQueryable();
 
             // Apply location filter
             if (request.Latitude.HasValue && request.Longitude.HasValue)
             {
+                var lat = request.Latitude.Value;
+                var lon = request.Longitude.Value;
                 query = query.Where(o =>
                     CalculateDistance(
-                        request.Latitude.Value,
-                        request.Longitude.Value,
+                        lat,
+                        lon,
                         o.Address.Latitude,
                         o.Address.Longitude) <= request.RadiusKm);
             }
@@ -418,24 +424,32 @@ namespace EpicMarket.Services
             }
 
             // Apply sorting
-            query = request.SortBy?.ToLower() switch
+            if (request.SortBy?.ToLower() == "rating")
             {
-                "rating" => request.SortDirection == SortDirection.Desc
+                query = request.SortDirection == SortDirection.Desc
                     ? query.OrderByDescending(o => o.Rating)
-                    : query.OrderBy(o => o.Rating),
-                "distance" => query.OrderBy(o =>
+                    : query.OrderBy(o => o.Rating);
+            }
+            else if (request.SortBy?.ToLower() == "distance" && request.Latitude.HasValue && request.Longitude.HasValue)
+            {
+                var lat = request.Latitude.Value;
+                var lon = request.Longitude.Value;
+                query = query.OrderBy(o => 
                     CalculateDistance(
-                        request.Latitude.Value,
-                        request.Longitude.Value,
+                        lat,
+                        lon,
                         o.Address.Latitude,
-                        o.Address.Longitude)),
-                _ => query.OrderByDescending(o => o.Rating)
-            };
+                        o.Address.Longitude ));
+            }
+            else
+            {
+                query = query.OrderByDescending(o => o.Rating);
+            }
 
             // Get total count
             var totalItems = await query.CountAsync();
 
-            // Apply pagination
+            // Apply pagination and select fields
             var outlets = await query
                 .Skip((request.Page - 1) * request.PageSize)
                 .Take(request.PageSize)
@@ -446,16 +460,17 @@ namespace EpicMarket.Services
                     Category = o.Bussiness.BusinessCategory.Name,
                     Rating = o.Rating,
                     ReviewCount = o.ReviewCount,
-                    Distance = CalculateDistance(
-                        request.Latitude.Value,
-                        request.Longitude.Value,
-                        o.Address.Latitude,
-                        o.Address.Longitude),
-                    Thumbnail = ((from attachment in _context.Attachments
-                                    join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
-                                    join entity in _context.Entity on link.EntityID equals entity.ID
-                                    where entity.Name == EntityConstants.Branch && link.RecordID == o.ID && link.AttachmentTypeID == attachmentTypeID.ID
-                                    select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}").FirstOrDefault())
+                    Distance =CalculateDistance(
+                            request.Latitude.Value,
+                            request.Longitude.Value,
+                            o.Address.Latitude,
+                            o.Address.Longitude),
+                    Thumbnail = _context.AttachmentLinks
+                        .Where(link => link.AttachmentTypeID == attachmentTypeID.ID &&
+                                     link.RecordID == o.ID &&
+                                     link.Entity.Name == EntityConstants.Branch)
+                        .Select(link => $"{link.Attachments.DocumentFolderPath}{link.Attachments.DocumentFile}")
+                        .FirstOrDefault()
                 })
                 .ToListAsync();
 
@@ -465,6 +480,110 @@ namespace EpicMarket.Services
                 Count = totalItems
             };
         }
+
+
+
+        public async Task<GetDataResult<List<SubscribedOutletDto>>> GetSubscribedOutletsAsync(
+            string customerUserName,
+            int page = 1,
+            int pageSize = 10)
+        {
+            var attachmentTypeID = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.BRANCH_THUMBNAIL);
+            var subscribedStatusID = _context.SusbcriptionStatuses.FirstOrDefault(c => c.Name == SubscriptionStatusConstants.Subscribed).ID;
+            var query = _context.Subscriptions
+                .Include(s => s.Outlet)
+                .Include(s => s.Outlet.Address)
+                .Include(s=>s.Customer)
+                .Where(s => s.Customer.UserName == customerUserName && s.StatusID == subscribedStatusID)
+                .AsQueryable();
+
+            var totalItems = await query.CountAsync();
+
+            var subscribedOutlets = await query
+                .OrderByDescending(s => s.SubscribedDate)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(s => new SubscribedOutletDto
+                {
+                    OutletId = s.OutletId,
+                    OutletName = s.Outlet.Name,
+                    SubscribedDate = s.SubscribedDate,
+                    Address = s.Outlet.Address.Address1,
+                    City = s.Outlet.Address.City,  
+                    Thumbnail = ((from attachment in _context.Attachments
+                                  join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                                  join entity in _context.Entity on link.EntityID equals entity.ID
+                                  where entity.Name == EntityConstants.Branch && link.RecordID == s.OutletId && link.AttachmentTypeID == attachmentTypeID.ID
+                                  select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}").FirstOrDefault())
+                })
+                .ToListAsync();
+
+            return new GetDataResult<List<SubscribedOutletDto>>
+            {
+                items = subscribedOutlets,
+                Count = totalItems,
+            };
+        }
+
+
+        public async Task<bool> SubscribeOutletAsync(int outletId, string customerUserName)
+        {
+            var customer = await _context.Users.FirstOrDefaultAsync(c => c.UserName == customerUserName);
+            if (customer == null)
+                return false;
+
+            var outlet = await _context.Outlets.FirstOrDefaultAsync(o => o.ID == outletId);
+            if (outlet == null) 
+                return false;
+
+            var subscribedStatusID = _context.SusbcriptionStatuses
+                .FirstOrDefault(c => c.Name == SubscriptionStatusConstants.Subscribed)?.ID;
+
+            if (subscribedStatusID == null)
+                return false;
+
+            // Check if subscription already exists
+            var existingSubscription = await _context.Subscriptions
+                .FirstOrDefaultAsync(s => s.OutletId == outletId && 
+                                        s.CustomerId == customer.Id);
+
+            if (existingSubscription != null)
+            {
+                // Update existing subscription
+                existingSubscription.StatusID = (int)subscribedStatusID;
+                existingSubscription.SubscribedDate = DateTime.UtcNow;
+            }
+            else
+            {
+                // Create new subscription
+                var subscription = new Subscription
+                {
+                    OutletId = outletId,
+                    CustomerId = customer.Id,
+                    StatusID = (int)subscribedStatusID,
+                    SubscribedDate = DateTime.UtcNow
+                };
+                await _context.Subscriptions.AddAsync(subscription);
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
         {

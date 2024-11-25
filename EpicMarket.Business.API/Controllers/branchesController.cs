@@ -5,6 +5,7 @@ using EpicMarket.Entities.CustomModels;
 using EpicMarket.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Security.Claims;
@@ -18,6 +19,7 @@ namespace EpicMarket.Business.API.Controllers
 
         private readonly ILogger<branchesController> logger;
         private readonly IBranchService branchService;
+        private readonly IRatingService ratingService;
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly IAttachmentService attachmentService;
         private readonly IFileService fileStoreService;
@@ -28,6 +30,7 @@ namespace EpicMarket.Business.API.Controllers
                                     ILogger<branchesController> logger,
                                     IBranchService branchService,
                                     ApplicationDbContext dbContext,
+                                    IRatingService ratingService,
                                     IHttpContextAccessor httpContextAccessor,
                                     IAttachmentService attachmentService,
                                     IFileService fileStoreService,
@@ -36,6 +39,7 @@ namespace EpicMarket.Business.API.Controllers
 		{
             this.logger = logger;
             this.branchService = branchService;
+            this.ratingService = ratingService;
             this.httpContextAccessor = httpContextAccessor;
             this.attachmentService = attachmentService;
             this.fileStoreService = fileStoreService;
@@ -314,7 +318,7 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
-        [HttpGet] 
+        [HttpGet("NearBy/Outlets")] 
          public async Task<ActionResult<GetDataResult<List<OutletSeachDto>>>> GetNearbyOutlets(
           [FromQuery] double? latitude,
           [FromQuery] double? longitude,
@@ -342,6 +346,40 @@ namespace EpicMarket.Business.API.Controllers
             var result = await branchService.GetNearbyOutletsAsync(request);
             return Ok(result);
         }
+
+        [HttpGet("subscribed-outlets")]
+        public async Task<ActionResult<GetDataResult<SubscribedOutletDto>>> GetSubscribedOutlets([FromQuery] int page = 1,[FromQuery] int pageSize = 10)
+        {
+            var customerUserName = this.LoggedInUserName;
+            var result = await branchService.GetSubscribedOutletsAsync(customerUserName, page, pageSize);
+            return Ok(result);
+        }
+
+        [HttpGet("Mobile/Outlet/Rating")]
+        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
+        public async Task<ActionResult<bool>> AddRatingToOutlet([FromQuery] AddOutletRatingRequest request)
+        {
+            var response = new OperationResult<bool>();
+            this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = request }));
+            await ratingService.AddOutletRatingAsync(request, this.LoggedInUserName);
+            response.Data = true;
+            return Ok(response);
+        }
+
+        [HttpPost("{outletId}/subscribe")]
+        public async Task<ActionResult<bool>> SubscribeOutlet(int outletId)
+        {
+            var customerUserName = this.LoggedInUserName;
+            var result = await branchService.SubscribeOutletAsync(outletId, customerUserName);
+            
+            if (!result)
+            {
+                return BadRequest("Failed to subscribe to outlet");
+            }
+
+            return Ok(result);
+        }
+
 
     }
 }

@@ -19,19 +19,21 @@ namespace EpicMarket.Business.API.Controllers
 		private readonly ILogger<ProductsController> logger;
 		private readonly IProductService productService;
 		private readonly IApplicationConfigurationService applicationConfigurationService;
-		private readonly IAttachmentService attachmentService;
+        private readonly IRatingService ratingService;
+        private readonly IAttachmentService attachmentService;
 		private readonly IFileService fileStoreService;
 		private readonly ApplicationDbContext dbContext;
 		private readonly IHttpContextAccessor httpContextAccessor;
 		private readonly IBranchService branchService;
 
-		public ProductsController(ILogger<ProductsController> logger, IProductService productService, IApplicationConfigurationService applicationConfigurationService,
+		public ProductsController(ILogger<ProductsController> logger, IProductService productService, IApplicationConfigurationService applicationConfigurationService,IRatingService ratingService,
 			IAttachmentService attachmentService, IFileService fileStoreService, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
 		{
 			this.logger = logger;
 			this.productService = productService;
 			this.applicationConfigurationService = applicationConfigurationService;
-			this.attachmentService = attachmentService;
+            this.ratingService = ratingService;
+            this.attachmentService = attachmentService;
 			this.fileStoreService = fileStoreService;
 			this.dbContext = dbContext;
 			this.httpContextAccessor = httpContextAccessor;
@@ -287,5 +289,31 @@ namespace EpicMarket.Business.API.Controllers
             response.Data = id;
             return Ok(response);
         }
+
+
+
+		[HttpGet("Mobile/Products")]
+		[Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
+		public async Task<ActionResult<OperationResult<GetDataResult<List<ProductResult>>>>> GetAllProductsForMobile([FromQuery] ProductMobileParams productResult)
+		{
+			var response = new OperationResult<GetDataResult<List<CustomerResultBaseOnCatefory>>> ();
+			this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = productResult }));
+			var results = await productService.GetAllProductsForMobile(productResult);
+			this.logger.LogInformation("Products Controller -> GetAllProducts()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
+			response.Data = results;
+			return Ok(response);
+		}
+
+        [HttpGet("Mobile/Products/Rating")]
+        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
+        public async Task<ActionResult<bool>> AddRatingToProduct([FromQuery] AddProductRatingRequest request)
+        {
+            var response = new OperationResult<bool> ();
+            this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = request }));
+			await ratingService.AddProductRatingAsync(request,this.LoggedInUserName);
+            response.Data = true;
+            return Ok(response);
+        }
+
     }
 }

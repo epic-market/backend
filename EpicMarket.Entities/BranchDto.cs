@@ -179,4 +179,21 @@ namespace EpicMarket.Entities
         public int? BranchId { get; set; }
         public bool Is_Open { get; set; } = true;
     }
+
+
+
+    public class SubscribedOutletDto
+    {
+        public int? OutletId { get; set; }
+
+        public string? OutletName { get; set; }
+
+        public string Address { get; set; }
+
+        public string City { get; set; }
+
+        public string Thumbnail { get; set; }
+
+        public DateTime? SubscribedDate { get; set; }
+    }
 }

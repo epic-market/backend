@@ -28,5 +28,10 @@ namespace EpicMarket.Contracts
         Task DeleteBranch(int branchId, string UserName);
 
         Task<GetDataResult<List<OutletSeachDto>>> GetNearbyOutletsAsync(OutletSearchRequest request);
+
+
+        Task<GetDataResult<List<SubscribedOutletDto>>> GetSubscribedOutletsAsync(string customerUserName, int page = 1, int pageSize = 10);
+
+        Task<bool> SubscribeOutletAsync(int outletId, string customerUserName);
     }
 }

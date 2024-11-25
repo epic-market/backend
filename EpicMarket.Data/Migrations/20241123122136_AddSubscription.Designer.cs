@@ -4,6 +4,7 @@ using EpicMarket.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EpicMarket.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241123122136_AddSubscription")]
+    partial class AddSubscription
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1375,136 +1378,6 @@ namespace EpicMarket.Data.Migrations
                     b.ToTable("HelpItems");
                 });
 
-            modelBuilder.Entity("EpicMarket.Data.Models.MerchantBankAccount", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<string>("AccountHolderName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("AccountNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("BankName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("BranchName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("IfscCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsPrimaryAccount")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("MerchantFinanceId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("MerchantFinanceId");
-
-                    b.ToTable("MerchantBankAccounts");
-                });
-
-            modelBuilder.Entity("EpicMarket.Data.Models.MerchantFinance", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("OutletID")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OutletID")
-                        .IsUnique();
-
-                    b.ToTable("Finances");
-                });
-
-            modelBuilder.Entity("EpicMarket.Data.Models.MerchantUpiAccount", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsPrimaryAccount")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("MerchantFinanceId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("MerchantName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("QrCodeUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UpiIdentifier")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("MerchantFinanceId");
-
-                    b.ToTable("MerchantUpiAccounts");
-                });
-
             modelBuilder.Entity("EpicMarket.Data.Models.Notification", b =>
                 {
                     b.Property<int>("Id")
@@ -2819,39 +2692,6 @@ namespace EpicMarket.Data.Migrations
                     b.Navigation("Pages");
                 });
 
-            modelBuilder.Entity("EpicMarket.Data.Models.MerchantBankAccount", b =>
-                {
-                    b.HasOne("EpicMarket.Data.Models.MerchantFinance", "MerchantFinance")
-                        .WithMany("BankAccounts")
-                        .HasForeignKey("MerchantFinanceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("MerchantFinance");
-                });
-
-            modelBuilder.Entity("EpicMarket.Data.Models.MerchantFinance", b =>
-                {
-                    b.HasOne("EpicMarket.Data.Models.Outlet", "Outlet")
-                        .WithOne("MerchantFinances")
-                        .HasForeignKey("EpicMarket.Data.Models.MerchantFinance", "OutletID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Outlet");
-                });
-
-            modelBuilder.Entity("EpicMarket.Data.Models.MerchantUpiAccount", b =>
-                {
-                    b.HasOne("EpicMarket.Data.Models.MerchantFinance", "MerchantFinance")
-                        .WithMany("UpiAccounts")
-                        .HasForeignKey("MerchantFinanceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("MerchantFinance");
-                });
-
             modelBuilder.Entity("EpicMarket.Data.Models.Notification", b =>
                 {
                     b.HasOne("EpicMarket.Data.Models.ContactMethod", "ContactMethod")
@@ -3346,13 +3186,6 @@ namespace EpicMarket.Data.Migrations
                     b.Navigation("FAQs");
                 });
 
-            modelBuilder.Entity("EpicMarket.Data.Models.MerchantFinance", b =>
-                {
-                    b.Navigation("BankAccounts");
-
-                    b.Navigation("UpiAccounts");
-                });
-
             modelBuilder.Entity("EpicMarket.Data.Models.OnboardingStep", b =>
                 {
                     b.Navigation("OnboardingProgress");
@@ -3375,8 +3208,6 @@ namespace EpicMarket.Data.Migrations
 
             modelBuilder.Entity("EpicMarket.Data.Models.Outlet", b =>
                 {
-                    b.Navigation("MerchantFinances");
-
                     b.Navigation("Orders");
 
                     b.Navigation("OutletPeople");

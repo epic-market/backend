@@ -159,31 +159,6 @@ namespace EpicMarket.Business.API.Controllers
 
 
 
-        [HttpGet("new")]
-        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
-        public async Task<ActionResult<OperationResult<GetDataResult<List<OrderMobileResult>>>>> GetNewOrders(DateTime ordered_after, int? outlet_id)
-        {
-            var response = new OperationResult<object>();
-
-            this.logger.LogInformation("Orders Controller -> GetOrdersDetailsForMobile()-> params {0}", JsonConvert.SerializeObject(new { ordered_after = ordered_after, outlet_id = outlet_id }));
-
-            var orderResults = await orderService.AnyNewOrders(ordered_after, this.BusinessId, outlet_id);
-
-            this.logger.LogInformation("Orders Controller -> GetOrdersDetailsForMobile()-> return {0}", JsonConvert.SerializeObject(new { Value = orderResults }));
-
-            response.Data = new { newOrders = orderResults };
-
-            if (orderResults)
-            {
-                return Ok(response);
-            }
-            else
-            {
-                return NotFound(response);
-            }
-
-        }
-
         [HttpGet("Customer/OrderHistory")]
         public async Task<ActionResult<GetDataResult<CustomerOrderDto>>> GetOrderHistory([FromQuery] OrderHistoryRequest request)
         {
@@ -210,5 +185,4 @@ namespace EpicMarket.Business.API.Controllers
         }
     }
 
-}
 }

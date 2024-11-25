@@ -171,5 +171,10 @@ namespace EpicMarket.Entities.CustomModels
     {
         public const string Customer = "Customer";
     }
+
+    public static class SubscriptionStatusConstants
+    {
+        public const string Subscribed = "Subscribed";
+    }
 }
 
