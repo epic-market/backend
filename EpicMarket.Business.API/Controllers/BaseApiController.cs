@@ -14,8 +14,7 @@ using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext
 
 namespace EpicMarket.Business.API.Controllers
 {
-    //[ServiceFilter(typeof(LogUserActivity))]
-    [Route("api/[controller]")]
+	//[ServiceFilter(typeof(LogUserActivity))]
     [ApiController]
     public class BaseApiController : ControllerBase
     {

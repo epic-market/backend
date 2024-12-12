@@ -10,8 +10,10 @@ using Newtonsoft.Json;
 using System.Security.Claims;
 using EpicMarket.Services;
 
+
 namespace EpicMarket.Business.API.Controllers
 {
+    [Route("api/search")]
     public class SearchController : BaseApiController
     {
         private readonly ILogger<SearchController> logger;

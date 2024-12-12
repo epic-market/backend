@@ -11,6 +11,7 @@ namespace EpicMarket.Business.API.Controllers
 {
 
     [AllowAnonymous]
+    [Route("api/home")]
     public class HomeController : BaseApiController
     {
         private readonly ILogger<HomeController> logger;

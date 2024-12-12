@@ -11,6 +11,7 @@ using System.Security.Claims;
 
 namespace EpicMarket.Business.API.Controllers
 {
+    [Route("api/support")]
     public class SupportController : BaseApiController
     {
         private readonly ApplicationDbContext context;

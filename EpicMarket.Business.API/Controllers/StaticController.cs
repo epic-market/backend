@@ -12,7 +12,7 @@ using System.Security.Claims;
 
 namespace EpicMarket.Business.API.Controllers
 {
-
+    [Route("api/static")]
     public class StaticController : BaseApiController
     {
         private readonly ILogger<StaticController> logger;

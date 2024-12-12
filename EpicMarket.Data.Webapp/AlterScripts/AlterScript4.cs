@@ -20,6 +20,9 @@ namespace EpicMarket.Data.Webapp.AlterScripts
 
         public void Execute()
         {
+			 Console.WriteLine("Started Executing " + this.GetType().Name);
+
+
 			if (!dbContext.ApplicationConfigurations.Any(cm => cm.Name == "ProductPath"))
 			{
 				var personType = new ApplicationConfiguration
@@ -107,6 +110,8 @@ namespace EpicMarket.Data.Webapp.AlterScripts
 			}
 
 			this.updateDatabaseVersion(this.GetType().Name);
+
+			Console.WriteLine("Completed Executing " + this.GetType().Name);
         }
 
         //update the same row that it is complete the running 

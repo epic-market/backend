@@ -14,6 +14,7 @@ namespace EpicMarket.Business.API.Controllers
 {
 
     [Authorize]
+    [Route("api/branches")]
     public class branchesController : BaseApiController
     {
 

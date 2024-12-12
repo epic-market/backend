@@ -12,7 +12,8 @@ using System;
 using System.Security.Claims;
 
 namespace EpicMarket.Business.API.Controllers
-{
+{   
+    [Route("api/orders")]
     public class OrdersController : BaseApiController
     {
         private readonly ILogger<OrdersController> logger;

@@ -22,8 +22,8 @@ namespace EpicMarket.Data.Webapp.AlterScripts
 
         public void Execute()
         {
-
             Console.WriteLine("Started Executing " + this.GetType().Name);
+
 
             if (!dbContext.ApplicationConfigurations.Any(cm => cm.Name == "BranchPhotos"))
 			{
@@ -73,12 +73,10 @@ namespace EpicMarket.Data.Webapp.AlterScripts
 				dbContext.SaveChanges();
 			}
 
-
-            Console.WriteLine("Completed Executing " + this.GetType().Name);
-
-
-
             this.updateDatabaseVersion(this.GetType().Name);
+
+			Console.WriteLine("Completed Executing " + this.GetType().Name);
+
         }
 
         //update the same row that it is complete the running 

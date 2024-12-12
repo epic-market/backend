@@ -460,17 +460,19 @@ namespace EpicMarket.Services
                     Category = o.Bussiness.BusinessCategory.Name,
                     Rating = o.Rating,
                     ReviewCount = o.ReviewCount,
-                    Distance =CalculateDistance(
+                    Distance = request.Latitude.HasValue && request.Longitude.HasValue ? 
+                        CalculateDistance(
                             request.Latitude.Value,
                             request.Longitude.Value,
                             o.Address.Latitude,
-                            o.Address.Longitude),
-                    Thumbnail = _context.AttachmentLinks
-                        .Where(link => link.AttachmentTypeID == attachmentTypeID.ID &&
+                            o.Address.Longitude) : 0,
+                    Thumbnail = (from link in _context.AttachmentLinks
+                               join attachment in _context.Attachments on link.AttachmentID equals attachment.ID
+                               where link.AttachmentTypeID == attachmentTypeID.ID &&
                                      link.RecordID == o.ID &&
-                                     link.Entity.Name == EntityConstants.Branch)
-                        .Select(link => $"{link.Attachments.DocumentFolderPath}{link.Attachments.DocumentFile}")
-                        .FirstOrDefault()
+                                     link.Entity.Name == EntityConstants.Branch
+                               select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}")
+                               .FirstOrDefault()
                 })
                 .ToListAsync();
 

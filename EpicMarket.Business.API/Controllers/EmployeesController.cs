@@ -14,7 +14,7 @@ using System.Security.Claims;
 namespace EpicMarket.Business.API.Controllers
 {
 
-
+    [Route("api/employees")]
     public class EmployeesController : BaseApiController
     {
         private readonly ILogger<EmployeesController> logger;

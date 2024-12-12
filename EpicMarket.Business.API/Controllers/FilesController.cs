@@ -14,7 +14,7 @@ using System.Security.Claims;
 
 namespace EpicMarket.Business.API.Controllers
 {
-
+	[Route("api/files")]
 	public class FilesController : BaseApiController
 	{
 

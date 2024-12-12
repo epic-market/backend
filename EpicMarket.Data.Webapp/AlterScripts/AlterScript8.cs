@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace EpicMarket.Data.Webapp.AlterScripts
 {
-    public class AlterScript7 : BaseAlterScript,IAlterScript
+    public class AlterScript8 : BaseAlterScript,IAlterScript
     {
         private readonly ApplicationDbContext dbContext;
 
-        public AlterScript7(ApplicationDbContext dbContext):base(dbContext)
+        public AlterScript8(ApplicationDbContext dbContext):base(dbContext)
         {
             this.dbContext = dbContext;
         }
@@ -26,37 +26,37 @@ namespace EpicMarket.Data.Webapp.AlterScripts
             Console.WriteLine("Started Executing " + this.GetType().Name);
 
            
-            if (!dbContext.ApplicationConfigurations.Any(cm => cm.Name == "PRODUCTINTERNAL"))
+            if (!dbContext.ApplicationConfigurations.Any(cm => cm.Name == "Profile"))
             {
                 var applicationConfiguration = new ApplicationConfiguration
                 {
-                    Name = "PRODUCTINTERNAL",
-                    Value = "PRODUCTINTERNAL",
+                    Name = "Profile",
+                    Value = "Profile",
                 };
 
                 dbContext.ApplicationConfigurations.Add(applicationConfiguration);
                 dbContext.SaveChanges();
             }
 
-            if (!dbContext.AttachmentTypes.Any(cm => cm.Name == "ProductInternal"))
+            if (!dbContext.AttachmentTypes.Any(cm => cm.Name == "Profile"))
             {
-                var personType = new AttachmentType
+                var attachmentType = new AttachmentType
                 {
-                    Name = "ProductInternal",
-                    Description = "ProductInternal",
+                    Name = "Profile",
+                    Description = "Profile",
                 };
 
-                dbContext.AttachmentTypes.Add(personType);
+                dbContext.AttachmentTypes.Add(attachmentType);
                 dbContext.SaveChanges();
             }
 
 
-            if (!dbContext.Entity.Any(cm => cm.Name == "ProductInternal"))
+            if (!dbContext.Entity.Any(cm => cm.Name == "AppUser"))
             {
                 var entity = new Entity
                 {
-                    Name = "ProductInternal",
-                    Description = "ProductInternal",
+                    Name = "AppUser",
+                    Description = "AppUser",
                 };
 
                 dbContext.Entity.Add(entity);

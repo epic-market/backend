@@ -41,7 +41,12 @@ namespace EpicMarket.Services
 
         public async Task<string> CreateToken(AppUser user)
         {
-	
+            // Check for null user
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user), "User cannot be null");
+            }
+
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.NameId, user.Id.ToString()),
@@ -72,68 +77,91 @@ namespace EpicMarket.Services
         {
             try
             {
+                // Check for null or empty email
+                if (string.IsNullOrEmpty(resetPassword.Email))
+                {
+                    throw new ArgumentException("Email cannot be null or empty", nameof(resetPassword.Email));
+                }
+
                 var User = dbContext.Users.Where(u => resetPassword.Email == u.UserName).FirstOrDefault();
+                if (User == null)
+                {
+                    throw new Exception("User not found");
+                }
+
                 var UniqueGuid = Guid.NewGuid();
                 User.UniqueGuid = UniqueGuid.ToString();
                 dbContext.Users.Update(User);
+
                 var intialURL = applicationConfiguration.GetApplicationConfigurationValue("BusinessOwnerBaseURL");
-                string queryToken = intialURL+ resetPassword.Path + "/"+ User.Id+"." + UniqueGuid;
+                string queryToken = intialURL + resetPassword.Path + "/" + User.Id + "." + UniqueGuid;
                 await this.communicationQueueService.InsertCommunicationQueue(
                     new Entities.CommunicationQueueDTO()
                     {
-                        MessageData= queryToken,
-                        Subject="Password Reset",
-                        NotificationRecipient= resetPassword.Email,
-                        ContactMethod= ContactMethodConstants.EMAIL,
-                        CreateBy= resetPassword.Email
+                        MessageData = queryToken,
+                        Subject = "Password Reset",
+                        NotificationRecipient = resetPassword.Email,
+                        ContactMethod = ContactMethodConstants.EMAIL,
+                        CreateBy = resetPassword.Email
                     });
 
                 return "Reset Link sent to registered Email";
-
             }
             catch (Exception ex)
             {
+                // Log the error for debugging purposes
+                Console.Error.WriteLine("Error resetting password: " + ex.Message);
                 return ex.Message;
             }
-            
         }
-        public async Task<string> setNewPassword(SetNewPasswordParams setNewPasswordParams)
+        public async Task<string> SetNewPassword(SetNewPasswordParams setNewPasswordParams)
         {
 
-		    	string[] tokenParts = setNewPasswordParams.token.Split('.');
-			    string uniqueGuid = tokenParts[1];
-			    var User = dbContext.Users.Where(u => uniqueGuid == u.UniqueGuid).FirstOrDefault();
-                if (User != null)
-                {
-				var result = await _userManager.RemovePasswordAsync(User);
-				if (!result.Succeeded)
+            // Check for null or empty token
+            if (string.IsNullOrEmpty(setNewPasswordParams.token))
+            {
+                throw new ArgumentException("Token cannot be null or empty", nameof(setNewPasswordParams.token));
+            }
+
+            string[] tokenParts = setNewPasswordParams.token.Split('.');
+            string uniqueGuid = tokenParts[1];
+            var User = dbContext.Users.Where(u => uniqueGuid == u.UniqueGuid).FirstOrDefault();
+            if (User != null)
+            {
+                var result = await _userManager.RemovePasswordAsync(User);
+                if (!result.Succeeded)
                 {
                     throw new Exception("Failed try again after some time");
                 }
                 else
-				{
-					result = await _userManager.AddPasswordAsync(User, setNewPasswordParams.password);
+                {
+                    result = await _userManager.AddPasswordAsync(User, setNewPasswordParams.password);
                     if (!result.Succeeded)
                     {
                         throw new Exception("Failed try again after some time");
                     }
-                    else {
-						var UniqueGuid = Guid.NewGuid();
-						User.UniqueGuid = null;
-						dbContext.Users.Update(User);
-						return "Successfull";
-					}
-				}
-					
+                    else
+                    {
+                        var UniqueGuid = Guid.NewGuid();
+                        User.UniqueGuid = null;
+                        dbContext.Users.Update(User);
+                        return "Successfull";
+                    }
                 }
-                else
-                {
-                    throw new Exception("Something went worng try again after some time");
-                   
-                }
+            }
+            else
+            {
+                throw new Exception("Something went wrong try again after some time");
+            }
         }
         public CheckResetLinkResult CheckResetPasswordLink(string queryParam)
         {
+            // Check for null or empty queryParam
+            if (string.IsNullOrEmpty(queryParam))
+            {
+                throw new ArgumentException("Query parameter cannot be null or empty", nameof(queryParam));
+            }
+
             string[] tokenParts = queryParam.Split('.');
 
             string userId = tokenParts[0];
@@ -142,9 +170,9 @@ namespace EpicMarket.Services
             int.TryParse(userId, out UserID);
             var User = dbContext.Users.Find(UserID);
 
-            if (User.UniqueGuid == uniqueGuid)
+            if (User != null && User.UniqueGuid == uniqueGuid)
             {
-               var result = new CheckResetLinkResult()
+                var result = new CheckResetLinkResult()
                 {
 
                     UserID = userId,

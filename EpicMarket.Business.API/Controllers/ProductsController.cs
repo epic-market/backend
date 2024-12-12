@@ -14,7 +14,8 @@ using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext
 namespace EpicMarket.Business.API.Controllers
 {
 
-	public class ProductsController : BaseApiController
+    [Route("api/products")]
+    public class ProductsController : BaseApiController
 	{
 		private readonly ILogger<ProductsController> logger;
 		private readonly IProductService productService;

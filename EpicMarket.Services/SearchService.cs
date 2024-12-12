@@ -108,17 +108,23 @@ namespace EpicMarket.Services
         {
             var last24Hours = DateTime.UtcNow.AddHours(-24);
 
-            var trendingStores = await _context.Orders
+            // First get all orders and outlets in memory
+            var orders = await _context.Orders
                 .Include(o => o.OrderStatusOptions)
                 .Include(o => o.Outlet)
                 .Include(o => o.Outlet.Address)
                 .Where(o => o.OrderAt >= last24Hours &&
                            o.OrderStatusOptions.OrderStatus != OrderStatusConstants.Canceled)
-                .Where(o => CalculateDistance(
+                .ToListAsync();
+
+            // Then do distance calculation and filtering in memory
+            var filteredOrders = orders.Where(o => CalculateDistance(
                     latitude,
                     longitude,
                     o.Outlet.Address.Latitude,
-                    o.Outlet.Address.Longitude) <= radiusKm)
+                    o.Outlet.Address.Longitude) <= radiusKm);
+
+            var trendingStores = filteredOrders
                 .GroupBy(o => new
                 {
                     o.OutletID,
@@ -140,7 +146,7 @@ namespace EpicMarket.Services
                 })
                 .OrderByDescending(s => s.OrderCount)
                 .Take(3)
-                .ToListAsync();
+                .ToList();
 
             return trendingStores;
         }

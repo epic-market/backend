@@ -11,6 +11,7 @@ using System.Security.Claims;
 namespace EpicMarket.Business.API.Controllers
 {
 
+    [Route("api/notification")]
     public class NotificationController : BaseApiController
     {
         private readonly ILogger<NotificationController> logger;

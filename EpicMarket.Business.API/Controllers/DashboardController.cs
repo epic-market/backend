@@ -10,7 +10,7 @@ using EpicMarket.Contracts;
 
 namespace EpicMarket.Business.API.Controllers
 {
-
+    [Route("api/dashboard")]
     public class DashboardController : BaseApiController
     {
         private readonly ILogger<DashboardController> logger;

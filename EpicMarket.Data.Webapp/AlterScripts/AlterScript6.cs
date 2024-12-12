@@ -87,11 +87,10 @@ namespace EpicMarket.Data.Webapp.AlterScripts
                 dbContext.SaveChanges();
             }
 
-            Console.WriteLine("Completed Executing " + this.GetType().Name);
-
-
 
             this.updateDatabaseVersion(this.GetType().Name);
+
+            Console.WriteLine("Completed Executing " + this.GetType().Name);
         }
 
         //update the same row that it is complete the running 

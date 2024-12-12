@@ -13,7 +13,7 @@ namespace EpicMarket.Contracts
     {
         Task<string> CreateToken(AppUser user);
         Task<string> ResetPassword(ResetPasswordParams resetPassword);
-        Task<string> setNewPassword(SetNewPasswordParams setNewPasswordParams);
+        Task<string> SetNewPassword(SetNewPasswordParams setNewPasswordParams);
         CheckResetLinkResult CheckResetPasswordLink(string queryParam);
 
     }
