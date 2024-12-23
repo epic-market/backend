@@ -9,6 +9,6 @@ namespace EpicMarket.Contracts
 {
     public interface IAddressService
     {
-        Task<int> AddAddress(AddressDto addressDto);
+        Task<int> AddUpdateAddress(AddressDto addressDto);
     }
 }

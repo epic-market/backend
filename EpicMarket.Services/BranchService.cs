@@ -56,7 +56,7 @@ namespace EpicMarket.Services
                     CreateDate = DateTime.Now
                 };
             
-                int addressId = await addressService.AddAddress(addressModel);
+                int addressId = await addressService.AddUpdateAddress(addressModel);
 
                 var outletModel = new Outlet
                 {
@@ -69,7 +69,7 @@ namespace EpicMarket.Services
                     CreateBy = UserName,
                     CreateDate = DateTime.Now
                 };
-                var status = await _context.StatusOptionSets.FirstOrDefaultAsync(c => c.Status == Business_Status.BUSINESS_UNVERIFIED);
+                var status = await _context.StatusOptionSets.FirstOrDefaultAsync(c => c.Status == StatusConstants.UNVERIFIED);
                 outletModel.StatusId = status.Id;
 
 
@@ -101,8 +101,6 @@ namespace EpicMarket.Services
                 return outletModel.ID;
         
         }
-
-
         public async Task<int> UpdateBranch(int id, BranchDto branchDto, string UserName, int BusinessID, string PageSource)
         {
             var addressModel = new AddressDto();
@@ -116,17 +114,26 @@ namespace EpicMarket.Services
             addressModel.Longitude = branchDto.Longitude;
             addressModel.ID = _context.Outlets.Include(o => o.Address).AsNoTracking().FirstOrDefault(o => o.ID == id).AddressID;
 
-            int addressId = await addressService.AddAddress(addressModel);
+            // Assuming AddAddress method updates the existing address if ID is provided, or adds a new one if ID is 0
+            int addressId = await addressService.AddUpdateAddress(addressModel);
 
             var outletModel = _context.Outlets.Find(id);
-            outletModel.AddressID  = addressId;
+            if (outletModel == null)
+            {
+                throw new Exception("Branch not found.");
+            }
+            if (!outletModel.IsActive)
+            {
+                throw new Exception("This branch is already deleted.");
+            }
+            outletModel.AddressID = addressId;
             outletModel.BussinessID = BusinessID;
             outletModel.Name = branchDto.Name;
             outletModel.Description = branchDto.Description;
             outletModel.ContactEmail = branchDto.ContactEmail;
             outletModel.ContactNumber = branchDto.ContactNumber;
             outletModel.ID = (int)id;
-            outletModel.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == Business_Status.BUSINESS_UNVERIFIED).Id;
+            outletModel.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == StatusConstants.UNVERIFIED).Id;
             outletModel.ModifiedBy = UserName;
             outletModel.ModifiedDate = DateTime.Now;
             events = EventConstants.EditBranch;
@@ -151,7 +158,6 @@ namespace EpicMarket.Services
                     });
             return outletModel.ID;
         }
-
 
         public async Task<int> MapBranchToPeople(BranchPeopleMapParams branchPeopleMapParams)
         {
@@ -312,35 +318,63 @@ namespace EpicMarket.Services
             }).FirstOrDefaultAsync();
         }
 
-        public async Task<int> VerifyBranchs (VerifyDto verifyBranchDto, string UserName, int AdminPersonID, string PageSource)
+        public async Task<int> VerifyBranchs(VerifyDto verifyBranchDto, string UserName, int AdminPersonID, string PageSource)
         {
             var newTaskStatus = _context.TaskStatusTypes.Where(row => row.Status == "New").FirstOrDefault();
             var taskTypeID = _context.TaskTypes.Where(row => row.Name == "Verification").FirstOrDefault();
             var userName = _context.Users.Where(row => row.UserName == UserName).FirstOrDefault();
             var taskEntity = await _context.Entity.Where(row => row.Name == EntityConstants.Branch).FirstOrDefaultAsync();
 
+            // Check if all branches exist and are active
+            var allBranchesExist = verifyBranchDto.ListOfBranchIDs.All(id => _context.Outlets.Any(o => o.ID == id && o.IsActive));
+            if (!allBranchesExist)
+            {
+                throw new Exception("One or more branches do not exist or are deleted.");
+            }
+
+            // Check if all branches are in not verified state
+            var allBranchesNotVerifiedOrPending = verifyBranchDto.ListOfBranchIDs.All(id => !_context.Outlets.Any(o => o.ID == id && (o.StatusId == _context.StatusOptionSets.Where(s => s.Status == StatusConstants.VERIFIED).FirstOrDefault().Id || o.StatusId == _context.StatusOptionSets.Where(s => s.Status == StatusConstants.PENDING).FirstOrDefault().Id)));
+            if (!allBranchesNotVerifiedOrPending)
+            {
+                throw new Exception("One or more branches are already in the 'Verified' or 'Pending' state.");
+            }
+
+            //we need to check if any are is already in send to verification state
+            var anyBranchInSendToVerification = verifyBranchDto.ListOfBranchIDs.Any(id => _context.Outlets.Any(o => o.ID == id && o.StatusId == _context.StatusOptionSets.Where(s => s.Status == StatusConstants.SENDTOVERIFICATION).FirstOrDefault().Id));
+            if (anyBranchInSendToVerification)
+            {
+                throw new Exception("One or more branches are already in the 'Send To Verification' state.");
+            }
+
+            //now we need to update all the braches status to send for verification state
+            foreach(var id in verifyBranchDto.ListOfBranchIDs)
+            {
+                var outlet = await _context.Outlets.FindAsync(id);
+                outlet.StatusId = _context.StatusOptionSets.Where(s => s.Status == StatusConstants.SENDTOVERIFICATION).FirstOrDefault().Id;
+                _context.Outlets.Update(outlet);
+            }
+
             Tasks taskToSave;
-                taskToSave = new Tasks
-                {
-                    Name = VerificationConstants.BranchName,
-                    Description = VerificationConstants.BranchDescription,
-                    TaskTypeID = taskTypeID.ID,
-                    ParentID = null,
-                    TaskStatusID = newTaskStatus.Id,
-                    TaskEntityID = taskEntity.ID,
-                    TaskPriorityID = 1,
-                    PrimaryAssignedToPersonID = AdminPersonID,
-                    DateAssigned = DateTime.Now,
-                    SubmittedByPersonID = userName.Id,
-                    TaskData = string.Join(",", verifyBranchDto.ListOfBranchIDs),
-                    ReceivedDate = DateTime.Now,
-                    CreateDate = DateTime.Now,
-                    CreateBy = userName.Email
-                };
-                _context.Tasks.Add(taskToSave);
-			await unitOfWork.Complete(); ;
+            taskToSave = new Tasks
+            {
+                Name = VerificationConstants.BranchName,
+                Description = VerificationConstants.BranchDescription,
+                TaskTypeID = taskTypeID.ID,
+                ParentID = null,
+                TaskStatusID = newTaskStatus.Id,
+                TaskEntityID = taskEntity.ID,
+                TaskPriorityID = 1,
+                PrimaryAssignedToPersonID = AdminPersonID,
+                DateAssigned = DateTime.Now,
+                SubmittedByPersonID = userName.Id,
+                TaskData = string.Join(",", verifyBranchDto.ListOfBranchIDs),
+                ReceivedDate = DateTime.Now,
+                CreateDate = DateTime.Now,
+                CreateBy = userName.Email
+            };
+            _context.Tasks.Add(taskToSave);
+            await unitOfWork.Complete();
             return taskToSave.ID;
-               
         }
 
         public async Task DeleteBranch(int branchId, string UserName)
@@ -357,7 +391,6 @@ namespace EpicMarket.Services
                 throw new Exception("Branch Not Found");
             }
         }
-
 
         public async Task<List<BranchsDropDownOptions>> GetAllOutletsForDropDown(int personID , int businessID)
         {
@@ -389,68 +422,82 @@ namespace EpicMarket.Services
         }
 
 
+        // Haversine formula to calculate the great-circle distance between two points on a sphere (Earth)
+        // d = 2 * R * arcsin(sqrt(a + b)) where:
+        // d is the distance between two points
+        // R is Earth's radius (6371 km)
+        // a is the latitude difference component
+        // b is the longitude component
+        // This formula accounts for Earth's spherical shape and provides distances in kilometers when using 6371 as the radius.
         public async Task<GetDataResult<List<OutletSeachDto>>> GetNearbyOutletsAsync(OutletSearchRequest request)
         {
-            var attachmentTypeID = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.BRANCH_THUMBNAIL);
+            var attachmentTypeID = await _context.AttachmentTypes
+                .Where(c => c.Name == AttachmentTypeConstants.BRANCH_THUMBNAIL)
+                .Select(c => c.ID)
+                .FirstOrDefaultAsync();
+
             var query = _context.Outlets
+                .IgnoreQueryFilters()
                 .Include(c => c.Address)
                 .Include(c => c.Bussiness)
                 .ThenInclude(b => b.BusinessCategory)
                 .AsQueryable();
 
-            // Apply location filter
-            if (request.Latitude.HasValue && request.Longitude.HasValue)
-            {
-                var lat = request.Latitude.Value;
-                var lon = request.Longitude.Value;
-                query = query.Where(o =>
-                    CalculateDistance(
-                        lat,
-                        lon,
-                        o.Address.Latitude,
-                        o.Address.Longitude) <= request.RadiusKm);
-            }
-
-            // Apply category filter
+            // Apply filters
             if (!string.IsNullOrEmpty(request.Category))
             {
                 query = query.Where(o => o.Bussiness.BusinessCategory.Name == request.Category);
             }
 
-            // Apply rating filter
             if (request.MinRating.HasValue)
             {
                 query = query.Where(o => o.Rating >= request.MinRating.Value);
             }
 
-            // Apply sorting
-            if (request.SortBy?.ToLower() == "rating")
-            {
-                query = request.SortDirection == SortDirection.Desc
-                    ? query.OrderByDescending(o => o.Rating)
-                    : query.OrderBy(o => o.Rating);
-            }
-            else if (request.SortBy?.ToLower() == "distance" && request.Latitude.HasValue && request.Longitude.HasValue)
+            // Calculate distance if coordinates provided
+            if (request.Latitude.HasValue && request.Longitude.HasValue)
             {
                 var lat = request.Latitude.Value;
                 var lon = request.Longitude.Value;
-                query = query.OrderBy(o => 
-                    CalculateDistance(
-                        lat,
-                        lon,
-                        o.Address.Latitude,
-                        o.Address.Longitude ));
-            }
-            else
-            {
-                query = query.OrderByDescending(o => o.Rating);
+
+                // Handle distance calculation safely
+                query = query.Where(o =>
+                    6371 * 2 * Math.Asin(Math.Sqrt(
+                        Math.Pow(Math.Sin((o.Address.Latitude - lat) * Math.PI / 180 / 2), 2) +
+                        Math.Cos(lat * Math.PI / 180) * Math.Cos(o.Address.Latitude * Math.PI / 180) *
+                        Math.Pow(Math.Sin((o.Address.Longitude - lon) * Math.PI / 180 / 2), 2)
+                    )) <= request.RadiusKm);
+
+                // Sort by distance if requested
+                if (request.SortBy?.ToLower() == "distance")
+                {
+                    query = request.SortDirection == SortDirection.Asc ?
+                        query.OrderBy(o => 
+                            6371 * 2 * Math.Asin(Math.Sqrt(
+                                Math.Pow(Math.Sin((o.Address.Latitude - lat) * Math.PI / 180 / 2), 2) +
+                                Math.Cos(lat * Math.PI / 180) * Math.Cos(o.Address.Latitude * Math.PI / 180) *
+                                Math.Pow(Math.Sin((o.Address.Longitude - lon) * Math.PI / 180 / 2), 2)
+                            ))) :
+                        query.OrderByDescending(o =>
+                            6371 * 2 * Math.Asin(Math.Sqrt(
+                                Math.Pow(Math.Sin((o.Address.Latitude - lat) * Math.PI / 180 / 2), 2) +
+                                Math.Cos(lat * Math.PI / 180) * Math.Cos(o.Address.Latitude * Math.PI / 180) *
+                                Math.Pow(Math.Sin((o.Address.Longitude - lon) * Math.PI / 180 / 2), 2)
+                            )));
+                }
             }
 
-            // Get total count
+            // Apply rating sort if requested or as default
+            if (request.SortBy?.ToLower() != "distance")
+            {
+                query = request.SortBy?.ToLower() == "rating" && request.SortDirection == SortDirection.Asc
+                    ? query.OrderBy(o => o.Rating)
+                    : query.OrderByDescending(o => o.Rating);
+            }
+
             var totalItems = await query.CountAsync();
 
-            // Apply pagination and select fields
-            var outlets = await query
+            var pagedOutlets = await query
                 .Skip((request.Page - 1) * request.PageSize)
                 .Take(request.PageSize)
                 .Select(o => new OutletSeachDto
@@ -458,27 +505,30 @@ namespace EpicMarket.Services
                     Id = o.ID,
                     Name = o.Name,
                     Category = o.Bussiness.BusinessCategory.Name,
+                    Discription = o.Description,
                     Rating = o.Rating,
                     ReviewCount = o.ReviewCount,
-                    Distance = request.Latitude.HasValue && request.Longitude.HasValue ? 
-                        CalculateDistance(
-                            request.Latitude.Value,
-                            request.Longitude.Value,
-                            o.Address.Latitude,
-                            o.Address.Longitude) : 0,
-                    Thumbnail = (from link in _context.AttachmentLinks
-                               join attachment in _context.Attachments on link.AttachmentID equals attachment.ID
-                               where link.AttachmentTypeID == attachmentTypeID.ID &&
+                    Distance = request.Latitude.HasValue && request.Longitude.HasValue ?
+                        6371 * 2 * Math.Asin(Math.Sqrt(
+                            Math.Pow(Math.Sin((o.Address.Latitude - request.Latitude.Value) * Math.PI / 180 / 2), 2) +
+                            Math.Cos(request.Latitude.Value * Math.PI / 180) * Math.Cos(o.Address.Latitude * Math.PI / 180) *
+                            Math.Pow(Math.Sin((o.Address.Longitude - request.Longitude.Value) * Math.PI / 180 / 2), 2)
+                        )) : 0,
+                    Thumbnail = _context.AttachmentLinks
+                        .Where(link => link.AttachmentTypeID == attachmentTypeID &&
                                      link.RecordID == o.ID &&
-                                     link.Entity.Name == EntityConstants.Branch
-                               select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}")
-                               .FirstOrDefault()
+                                     link.Entity.Name == EntityConstants.Branch)
+                        .Join(_context.Attachments,
+                            link => link.AttachmentID,
+                            attachment => attachment.ID,
+                            (link, attachment) => $"{attachment.DocumentFolderPath}{attachment.DocumentFile}")
+                        .FirstOrDefault()
                 })
                 .ToListAsync();
 
             return new GetDataResult<List<OutletSeachDto>>
             {
-                items = outlets,
+                items = pagedOutlets,
                 Count = totalItems
             };
         }
@@ -527,21 +577,24 @@ namespace EpicMarket.Services
             };
         }
 
-
+    
         public async Task<bool> SubscribeOutletAsync(int outletId, string customerUserName)
         {
             var customer = await _context.Users.FirstOrDefaultAsync(c => c.UserName == customerUserName);
             if (customer == null)
                 return false;
 
-            var outlet = await _context.Outlets.FirstOrDefaultAsync(o => o.ID == outletId);
+            var outlet = await _context.Outlets.FirstOrDefaultAsync(o => o.ID == outletId && o.IsActive);
             if (outlet == null) 
                 return false;
 
             var subscribedStatusID = _context.SusbcriptionStatuses
                 .FirstOrDefault(c => c.Name == SubscriptionStatusConstants.Subscribed)?.ID;
 
-            if (subscribedStatusID == null)
+            var unsubscribedStatusID = _context.SusbcriptionStatuses
+                .FirstOrDefault(c => c.Name == SubscriptionStatusConstants.Unsubscribed)?.ID;
+
+            if (subscribedStatusID == null || unsubscribedStatusID == null)
                 return false;
 
             // Check if subscription already exists
@@ -551,13 +604,19 @@ namespace EpicMarket.Services
 
             if (existingSubscription != null)
             {
-                // Update existing subscription
-                existingSubscription.StatusID = (int)subscribedStatusID;
-                existingSubscription.SubscribedDate = DateTime.UtcNow;
+                // Update existing subscription status to subscribed if it's not already subscribed
+                if (existingSubscription.StatusID != (int)subscribedStatusID)
+                {
+                    existingSubscription.StatusID = (int)subscribedStatusID;
+                    existingSubscription.SubscribedDate = DateTime.UtcNow;
+                }else{
+                    existingSubscription.StatusID = (int)unsubscribedStatusID;
+                    existingSubscription.UnsubscribedDate = DateTime.UtcNow;
+                }
             }
             else
             {
-                // Create new subscription
+                // Create new subscription with subscribed status
                 var subscription = new Subscription
                 {
                     OutletId = outletId,
@@ -571,21 +630,6 @@ namespace EpicMarket.Services
             await _context.SaveChangesAsync();
             return true;
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
         {

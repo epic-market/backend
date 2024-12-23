@@ -23,12 +23,13 @@ namespace EpicMarket.Entities.CustomModels
         public const string ACCESSTYPE_READWRITE = "ReadWrite";
 	}
 
-	public static class Business_Status
+	public static class StatusConstants
 	{
-		public const string BUSINESS_UNVERIFIED = "Unverified";
-		public const string BUSINESS_PENDING = "Pending";
-		public const string BUSINESS_VERIFIED = "Verified";
-		public const string BUSINESS_REJECTED = "Rejected";
+		public const string UNVERIFIED = "Unverified";
+        public const string SENDTOVERIFICATION = "SendToVerification";
+		public const string PENDING = "Pending";
+		public const string VERIFIED = "Verified";
+		public const string REJECTED = "Rejected";
 	}
 
 
@@ -175,6 +176,7 @@ namespace EpicMarket.Entities.CustomModels
     public static class SubscriptionStatusConstants
     {
         public const string Subscribed = "Subscribed";
+        public const string Unsubscribed = "Unsubscribed";
     }
 }
 

@@ -58,7 +58,7 @@ namespace EpicMarket.Services
                 throw new ArgumentNullException(nameof(businessRegisterDto), "Business registration details are missing or invalid.");
             }
 
-            var statusid = await _context.StatusOptionSets.FirstOrDefaultAsync(c => c.Status == Business_Status.BUSINESS_UNVERIFIED);
+            var statusid = await _context.StatusOptionSets.FirstOrDefaultAsync(c => c.Status == StatusConstants.UNVERIFIED);
             if (statusid == null)
             {
                 throw new InvalidOperationException("Business status option set is missing.");
@@ -73,7 +73,7 @@ namespace EpicMarket.Services
             addressModel.Longitude = businessRegisterDto.Longitude;
             addressModel.CreateBy = UserName;
             addressModel.CreateDate = DateTime.Now;
-            int addressId = await addressService.AddAddress(addressModel);
+            int addressId = await addressService.AddUpdateAddress(addressModel);
 
             var businessModel = new Business();
             businessModel.AddressID = addressId;
@@ -191,7 +191,7 @@ namespace EpicMarket.Services
             addressModel.Longitude = businessRegisterDto.Longitude;
             addressModel.ID = _context.Businesses.Include(o => o.Address).AsNoTracking().FirstOrDefault(o => o.ID == id).AddressID;
 
-            int addressId = await addressService.AddAddress(addressModel);
+            int addressId = await addressService.AddUpdateAddress(addressModel);
 
             var businessModel = _context.Businesses.Find(id);
             businessModel.AddressID = addressId;
@@ -200,7 +200,7 @@ namespace EpicMarket.Services
             businessModel.ContactEmail = businessRegisterDto.ContactEmail;
             businessModel.ContactNumber = businessRegisterDto.ContactNumber;
             businessModel.ID = (int)id;
-            businessModel.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == Business_Status.BUSINESS_UNVERIFIED).Id;
+            businessModel.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == StatusConstants.UNVERIFIED).Id;
             businessModel.ModifiedBy = UserName;
             businessModel.ModifiedDate = DateTime.Now;
             events = EventConstants.EditBusiness;

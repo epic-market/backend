@@ -60,15 +60,24 @@ namespace EpicMarket.Services
 
         public async Task AddOutletRatingAsync(AddOutletRatingRequest request, string CustomerUserName)
         {
+            // Commented out as per instructions
             // Validate if customer has ordered from this outlet
-            var hasOrdered = await _context.Orders.Include(c => c.Person).AnyAsync(oi => oi.Person.UserName == CustomerUserName && oi.OutletID == request.OutletID);
+            // var hasOrdered = await _context.Orders.Include(c => c.Person).AnyAsync(oi => oi.Person.UserName == CustomerUserName && oi.OutletID == request.OutletID);
 
-            if (!hasOrdered)
-                throw new UnauthorizedAccessException("Can only rate outlets you've ordered from");
-
-
+            // if (!hasOrdered)
+            //     throw new UnauthorizedAccessException("Can only rate outlets you've ordered from");
 
             var CustomerID = _context.Users.FirstOrDefault(c => c.UserName == CustomerUserName).Id;
+            //we need to check if the customer have already rated this outlet
+            var hasRated = await _context.Ratings.AnyAsync(r => r.CustomerId == CustomerID && r.OutletId == request.OutletID);
+            if (hasRated)
+                throw new UnauthorizedAccessException("Can only rate outlets once");
+
+            //we should not allow to rate if the outlet is not active
+            var outlet = await _context.Outlets.IgnoreQueryFilters().Where(o => o.ID == request.OutletID && o.IsActive).FirstOrDefaultAsync();
+            if(outlet == null){
+                throw new UnauthorizedAccessException("Outlet not found");
+            }
 
             var rating = new Rating
             {
@@ -82,14 +91,20 @@ namespace EpicMarket.Services
 
             _context.Ratings.Add(rating);
             await _context.SaveChangesAsync();
-
-            var Outlet = _context.Outlets.Find(request.OutletID);
-            if (Outlet != null)
+            if (outlet != null)
             {
-                var NewAverage = ((Outlet.Rating * Outlet.ReviewCount) + request.Rating) / Outlet.ReviewCount + 1;
-                Outlet.Rating = NewAverage;
-                Outlet.ReviewCount = Outlet.ReviewCount + 1;
-                _context.Update(Outlet);
+                if (outlet.ReviewCount == null || outlet.ReviewCount == 0)
+                {
+                    outlet.Rating = request.Rating;
+                    outlet.ReviewCount = 1;
+                }
+                else
+                {
+                    var NewAverage = ((outlet.Rating * outlet.ReviewCount) + request.Rating) / (outlet.ReviewCount + 1);
+                    outlet.Rating = NewAverage;
+                    outlet.ReviewCount = outlet.ReviewCount + 1;
+                }
+                _context.Update(outlet);
                 await _context.SaveChangesAsync();
             }
         }

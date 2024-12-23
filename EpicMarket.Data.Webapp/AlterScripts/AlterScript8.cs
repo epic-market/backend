@@ -90,6 +90,35 @@ namespace EpicMarket.Data.Webapp.AlterScripts
                     dbContext.ProofTypes.Add(proofType);
                 }
             }
+            //now we need to add the status option set for send to verification
+            if (!dbContext.StatusOptionSets.Any(cm => cm.Status == "SendToVerification"))
+            {
+                var statusOptionSet = new StatusOptionSet
+                {
+                    Status = "SendToVerification",
+                    StatusDescription = "Send To Verification",
+                };
+                dbContext.StatusOptionSets.Add(statusOptionSet);
+            }
+
+            //add the status option set for unsubscribed
+            if (!dbContext.SusbcriptionStatuses.Any(cm => cm.Name == "Subscribed"))
+            {
+                var statusOptionSet = new SusbcriptionStatus
+                {
+                    Name = "Subscribed",
+                };
+                dbContext.SusbcriptionStatuses.Add(statusOptionSet);
+            }
+
+            if (!dbContext.SusbcriptionStatuses.Any(cm => cm.Name == "Unsubscribed"))
+            {
+                var statusOptionSet = new SusbcriptionStatus
+                {
+                    Name = "Unsubscribed",
+                };
+                dbContext.SusbcriptionStatuses.Add(statusOptionSet);
+            }
 
     dbContext.SaveChanges();    
 

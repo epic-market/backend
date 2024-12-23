@@ -55,7 +55,7 @@ namespace EpicMarket.Services
             product.BusinessID = businessID;
             product.CreateBy = UserName;
             product.CreateDate = DateTime.Now;
-            var status = await _context.StatusOptionSets.FirstOrDefaultAsync(c => c.Status == Business_Status.BUSINESS_UNVERIFIED);
+            var status = await _context.StatusOptionSets.FirstOrDefaultAsync(c => c.Status == StatusConstants.UNVERIFIED);
 		    product.StatusId = status.Id;
             var events = EventConstants.AddCatelog;
             var mailevent = MessageDataConstants.AddCatelog;
@@ -406,7 +406,7 @@ namespace EpicMarket.Services
 
                 var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
 
-                var VerifiedStatusID = _context.StatusOptionSets.FirstOrDefault(c => c.Status == Business_Status.BUSINESS_VERIFIED).Id;
+                var VerifiedStatusID = _context.StatusOptionSets.FirstOrDefault(c => c.Status == StatusConstants.VERIFIED).Id;
                 var query = _context.OutletProducts
                     .Include(p => p.Outlet)
                     .Include(p => p.Product)

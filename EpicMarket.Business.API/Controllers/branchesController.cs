@@ -66,7 +66,7 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
-        [HttpGet("DropDown")]
+        [HttpGet("dropdown-options")]
         [Authorize(Roles = ROLES.BUSINESS_OWNER)]
         public async Task<ActionResult<List<BranchsDropDownOptions>>> GetAllOutletsForDropDown()
         {
@@ -356,9 +356,9 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(result);
         }
 
-        [HttpGet("Mobile/Outlet/Rating")]
+        [HttpPost("rating")]
         [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
-        public async Task<ActionResult<bool>> AddRatingToOutlet([FromQuery] AddOutletRatingRequest request)
+        public async Task<ActionResult<bool>> AddRatingToOutlet([FromBody] AddOutletRatingRequest request)
         {
             var response = new OperationResult<bool>();
             this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = request }));
@@ -367,7 +367,7 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
-        [HttpPost("{outletId}/subscribe")]
+        [HttpPost("subscribe/{outletId}")]
         public async Task<ActionResult<bool>> SubscribeOutlet(int outletId)
         {
             var customerUserName = this.LoggedInUserName;
