@@ -232,7 +232,8 @@ namespace EpicMarket.Data.Models
         public DbSet<MerchantUpiAccount> MerchantUpiAccounts { get; set; }
 
         public DbSet<MerchantFinance> Finances { get; set; }
-
+        public DbSet<Proof> Proofs { get; set; }
+        public DbSet<ProofType> ProofTypes { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

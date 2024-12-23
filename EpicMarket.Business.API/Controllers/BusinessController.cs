@@ -47,28 +47,55 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
-        [HttpPost("RegisterDetails")]
+        [HttpPost]
         [Authorize]
-        public async Task<ActionResult<OperationResult<BusinessDTO_Result>>> Register([FromForm] BusinessRegisterDto businessRegisterDto)
+        public async Task<ActionResult<OperationResult<BusinessDTO_Result>>> RegisterBusiness([FromForm] BusinessRegisterDto businessRegisterDto)
         {
+            // Check for null reference cases
+            if (businessRegisterDto == null)
+            {
+                this.logger.LogError("BusinessRegisterDto is null");
+                return BadRequest("Invalid request");
+            }
+
             var response = new OperationResult<BusinessDTO_Result>();
 
-			this.logger.LogInformation("Business Controller -> Register()-> params {0}", JsonConvert.SerializeObject(new { Params = businessRegisterDto }));
-            var UserID = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value) ;
+            this.logger.LogInformation("Business Controller -> RegisterBusiness()-> params {0}", JsonConvert.SerializeObject(new { Params = businessRegisterDto }));
+
+            // Safely parse UserID from claims
+            var UserID = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-            var id =  await businessService.RegisterBusiness(businessRegisterDto, UserName ,this.AdminPersonID, UserID,this.PageSource);
+            var result = await businessService.RegisterBusiness(businessRegisterDto, UserName, this.AdminPersonID, UserID, this.PageSource) as BusinessDTO_Result;
 
-            var appuser =  userManager.Users.Where(c=>c.Id == UserID).FirstOrDefault();
-
-			await userManager.AddToRoleAsync(appuser, ROLES.BUSINESS_OWNER);
-
-            this.logger.LogInformation("Business Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
-            if (businessRegisterDto.LogoFile?.Length>0)
+            // Check if business registration was successful
+            if (result == null)
             {
-                var filinsertOutput = await this.SaveFileGlobalAsync(businessRegisterDto.LogoFile, FilePathConstants.LOGOPATH, this.fileStoreService, this.applicationConfigurationService, id);
+                this.logger.LogError("Failed to register business");
+                return BadRequest("Failed to register business");
+            }
+
+            // Add user to BUSINESS_OWNER role
+            var appuser = userManager.Users.Where(c => c.Id == UserID).FirstOrDefault();
+            if (appuser == null)
+            {
+                this.logger.LogError("User not found for ID: {0}", UserID);
+                return BadRequest("User not found");
+            }
+            await userManager.AddToRoleAsync(appuser, ROLES.BUSINESS_OWNER);
+
+            this.logger.LogInformation("Business Controller -> RegisterBusiness()-> return {0}", JsonConvert.SerializeObject(new { Value = result }));
+
+            // Handle logo file upload
+            if (businessRegisterDto.LogoFile?.Length > 0)
+            {
+                var filinsertOutput = await this.SaveFileGlobalAsync(businessRegisterDto.LogoFile, FilePathConstants.LOGOPATH, this.fileStoreService, this.applicationConfigurationService, result.BusinessId);
+                if (filinsertOutput == null)
+                {
+                    this.logger.LogError("Failed to save logo file");
+                    return BadRequest("Failed to save logo file");
+                }
                 var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
                 {
-                   
                     Name = EntityConstants.Business + AttachmentTypeConstants.LOGO,
                     Comment = null,
                     DocumentType = DocumentTypeConstants.FILE,
@@ -76,22 +103,33 @@ namespace EpicMarket.Business.API.Controllers
                     DocumentFolderPath = filinsertOutput.FullPathLocation,
                     DocumentFile = filinsertOutput.FileName,
                 });
+                if (attachmentId == 0)
+                {
+                    this.logger.LogError("Failed to insert logo attachment");
+                    return BadRequest("Failed to insert logo attachment");
+                }
                 await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
-				{
-					AttachmentTypeName = AttachmentTypeConstants.LOGO,
-					AttachmentID = attachmentId,
+                {
+                    AttachmentTypeName = AttachmentTypeConstants.LOGO,
+                    AttachmentID = attachmentId,
                     Entity = EntityConstants.Business,
-                    RecordID = id
+                    RecordID = result.BusinessId
                 });
             }
-            if (businessRegisterDto.ProofFile?.Length>0)
+
+            // Handle proof files upload
+            if (businessRegisterDto.ProofFile?.Length > 0)
             {
                 foreach (var proof in businessRegisterDto.ProofFile)
                 {
-                    var filinsertOutput = await this.SaveFileGlobalAsync(proof, FilePathConstants.ProofPATH, this.fileStoreService, this.applicationConfigurationService, id);
+                    var filinsertOutput = await this.SaveFileGlobalAsync(proof, FilePathConstants.ProofPATH, this.fileStoreService, this.applicationConfigurationService, result.BusinessId);
+                    if (filinsertOutput == null)
+                    {
+                        this.logger.LogError("Failed to save proof file");
+                        return BadRequest("Failed to save proof file");
+                    }
                     var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
                     {
-
                         Name = EntityConstants.Business + AttachmentTypeConstants.PROOF,
                         Comment = null,
                         DocumentType = DocumentTypeConstants.FILE,
@@ -99,37 +137,57 @@ namespace EpicMarket.Business.API.Controllers
                         DocumentFolderPath = filinsertOutput.FullPathLocation,
                         DocumentFile = filinsertOutput.FileName,
                     });
+                    if (attachmentId == 0)
+                    {
+                        this.logger.LogError("Failed to insert proof attachment");
+                        return BadRequest("Failed to insert proof attachment");
+                    }
                     await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
                     {
                         AttachmentTypeName = AttachmentTypeConstants.PROOF,
                         AttachmentID = attachmentId,
-                        Entity = EntityConstants.Business,
-                        RecordID = id
+                        Entity = EntityConstants.Proof,
+                        RecordID = result.ProofId
                     });
                 }
             }
+
             response.Data = new BusinessDTO_Result
             {
-                BusinessId = id
+                BusinessId = result.BusinessId,
+                ProofId = result.ProofId
             };
 
-            return CreatedAtAction(nameof(Register), response);
+            return CreatedAtAction(nameof(RegisterBusiness), new { result.BusinessId }, response);
         }
 
         [HttpGet]
         [Authorize]
         public async Task<ActionResult<OperationResult<BusinessDetailResult>>> GetBusinessByID()
         {
+            // Initialize the response object
             var response = new OperationResult<BusinessDetailResult>();
 
+            // Log the request parameters
             this.logger.LogInformation("Business Controller -> GetBusinessByID()-> params {0}", JsonConvert.SerializeObject(new { Params = new { businessId = this.BusinessId } }));
 
+            // Attempt to retrieve the business details by ID
             var results = await businessService.GetBusinessByID(this.BusinessId);
 
+            // Check if the result is null and log the error if so
+            if (results == null)
+            {
+                this.logger.LogError("Failed to retrieve business details for ID {0}", this.BusinessId);
+                return NotFound("Business details not found");
+            }
+
+            // Log the successful retrieval of business details
             this.logger.LogInformation("Business Controller -> GetBusinessByID()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
 
+            // Set the response data
             response.Data = results;
 
+            // Return the response
             return Ok(response);
         }
 

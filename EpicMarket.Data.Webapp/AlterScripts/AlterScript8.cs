@@ -63,6 +63,37 @@ namespace EpicMarket.Data.Webapp.AlterScripts
                 dbContext.SaveChanges();
             }
 
+
+            if (!dbContext.Entity.Any(cm => cm.Name == "Proof"))
+            {
+                var entity = new Entity
+                {
+                    Name = "Proof",
+                    Description = "Proof",
+                };
+
+                dbContext.Entity.Add(entity);
+                dbContext.SaveChanges();
+            }
+
+            var proofTypes = new List<ProofType>
+            {
+                new ProofType { Name = "GST Certificate" },
+                new ProofType { Name = "PAN Card" },
+                new ProofType { Name = "Aadhaar Card" }
+            };
+
+            foreach (var proofType in proofTypes)
+            {
+                if (!dbContext.ProofTypes.Any(cm => cm.Name == proofType.Name))
+                {
+                    dbContext.ProofTypes.Add(proofType);
+                }
+            }
+
+    dbContext.SaveChanges();    
+
+
             this.updateDatabaseVersion(this.GetType().Name);
 
             Console.WriteLine("Completed Executing " + this.GetType().Name);

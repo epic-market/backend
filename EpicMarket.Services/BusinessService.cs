@@ -41,12 +41,32 @@ namespace EpicMarket.Services
             this.tasksService = tasksService;
             this.unitOfWork = unitOfWork;
         }
-        public async Task<int> RegisterBusiness(BusinessRegisterDto businessRegisterDto, string UserName ,int AdminPersonId ,int userid, string PageSource)
+        /// <summary>
+        /// Registers a new business in the system.
+        /// </summary>
+        /// <param name="businessRegisterDto">The business registration details.</param>
+        /// <param name="UserName">The username of the user registering the business.</param>
+        /// <param name="AdminPersonId">The ID of the admin person.</param>
+        /// <param name="userid">The ID of the user.</param>
+        /// <param name="PageSource">The source of the page.</param>
+        /// <returns>The ID of the newly registered business.</returns>
+        public async Task<BusinessDTO_Result> RegisterBusiness(BusinessRegisterDto businessRegisterDto, string UserName, int AdminPersonId, int userid, string PageSource)
         {
-			var statusid = await _context.StatusOptionSets.FirstOrDefaultAsync(c => c.Status == Business_Status.BUSINESS_UNVERIFIED);
-			var addressModel = new AddressDto();
+            // Check for null or missing required fields in businessRegisterDto
+            if (businessRegisterDto == null || string.IsNullOrEmpty(businessRegisterDto.BusinessName) || string.IsNullOrEmpty(businessRegisterDto.Address) || string.IsNullOrEmpty(businessRegisterDto.State) || string.IsNullOrEmpty(businessRegisterDto.City) || businessRegisterDto.PinCode == 0 || businessRegisterDto.Latitude == 0 || businessRegisterDto.Longitude == 0)
+            {
+                throw new ArgumentNullException(nameof(businessRegisterDto), "Business registration details are missing or invalid.");
+            }
+
+            var statusid = await _context.StatusOptionSets.FirstOrDefaultAsync(c => c.Status == Business_Status.BUSINESS_UNVERIFIED);
+            if (statusid == null)
+            {
+                throw new InvalidOperationException("Business status option set is missing.");
+            }
+
+            var addressModel = new AddressDto();
             addressModel.Address1 = businessRegisterDto.Address;
-            addressModel.City  = businessRegisterDto.City;
+            addressModel.City = businessRegisterDto.City;
             addressModel.State = businessRegisterDto.State;
             addressModel.Pincode = businessRegisterDto.PinCode;
             addressModel.Latitude = businessRegisterDto.Latitude;
@@ -57,20 +77,27 @@ namespace EpicMarket.Services
 
             var businessModel = new Business();
             businessModel.AddressID = addressId;
-            businessModel.PersonID  = userid;
+            businessModel.PersonID = userid;
             businessModel.BusinessCategoryID = businessRegisterDto.BusinessCategoryID;
-            businessModel.Name = businessRegisterDto.BussinessName;
+            businessModel.Name = businessRegisterDto.BusinessName;
             businessModel.Description = businessRegisterDto.Description;
-           // businessModel.Logo = businessRegisterDto.LogoURL;
             businessModel.ContactNumber = businessRegisterDto.ContactNumber;
             businessModel.ContactEmail = businessRegisterDto.ContactEmail;
             businessModel.CreateBy = UserName;
             businessModel.CreateDate = DateTime.Now;
-			businessModel.StatusId = statusid.Id;
-                 
-			await _context.Businesses.AddAsync(businessModel);
-			await _context.SaveChangesAsync();
+            businessModel.StatusId = statusid.Id;
 
+            var proofEntity = new Proof
+            {
+                EntityType = EntityConstants.Business,
+                EntityId = businessModel.ID,
+                ProofTypeId = businessRegisterDto.ProofTypeId,
+                ProofNumber = businessRegisterDto.ProofNumber
+            };
+
+            await _context.Proofs.AddAsync(proofEntity);
+            await _context.Businesses.AddAsync(businessModel);
+            await _context.SaveChangesAsync();
 
             var BusinssID = new List<int>() { businessModel.ID };
 
@@ -89,6 +116,7 @@ namespace EpicMarket.Services
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             });
             await this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = businessModel.ID, Data = savedJson, Description = null, EventName = EventConstants.AddBusiness, EntityName = EntityConstants.Business, Source = PageSource });
+
             await this.communicationQueueService.InsertCommunicationQueue(
                     new Entities.CommunicationQueueDTO()
                     {
@@ -99,16 +127,16 @@ namespace EpicMarket.Services
                         CreateBy = UserName
                     });
 
-            return businessModel.ID;
+
+            return new BusinessDTO_Result(){BusinessId = businessModel.ID , ProofId = proofEntity.Id };
         }
+
 
         public async Task<BusinessDetailResult> GetBusinessByID(int businessId)
         {
 
             var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.LOGO);
             var attachmentTypeID_Product = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.PROOF);
-
-
 
             var attachments = from attachment in _context.Attachments
                               join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
@@ -148,6 +176,8 @@ namespace EpicMarket.Services
                 Thumbnail = thumbnail.Select(a => a.ImagePath).FirstOrDefault(),
             }).FirstOrDefaultAsync();
         }
+
+
         public async Task<int> UpdateBusiness(int id, UpdateBusinessRegisterDto businessRegisterDto, string UserName, int AdminPersonId , string PageSource)
         {
             var addressModel = new AddressDto();
@@ -165,7 +195,7 @@ namespace EpicMarket.Services
 
             var businessModel = _context.Businesses.Find(id);
             businessModel.AddressID = addressId;
-            businessModel.Name = businessRegisterDto.BussinessName;
+            businessModel.Name = businessRegisterDto.BusinessName;
             businessModel.Description = businessRegisterDto.Description;
             businessModel.ContactEmail = businessRegisterDto.ContactEmail;
             businessModel.ContactNumber = businessRegisterDto.ContactNumber;

@@ -97,5 +97,10 @@ namespace EpicMarket.Services
 			return newLead.Id;
 
         }
+
+        public async Task<List<DropDownOptions>> GetProofTypes()
+        {
+            return await _context.ProofTypes.Select(c => new DropDownOptions { Text = c.Name, Value = c.Id }).ToListAsync();
+        }
     }
 }

@@ -96,8 +96,8 @@ namespace EpicMarket.Entities.CustomModels
         public const string Business = "Business";
 		public const string Tasks = "Tasks";
         public const string ProductInternal = "ProductInternal";//
-
         public const string Profile = "Profile";//
+        public const string Proof = "Proof";
     }
     public static class AttachmentTypeConstants
     {

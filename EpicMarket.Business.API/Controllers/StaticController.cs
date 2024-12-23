@@ -26,7 +26,7 @@ namespace EpicMarket.Business.API.Controllers
             this.staticService = staticService;
         }
 
-        [HttpGet("GetBusinessCategoriesOptions")]
+        [HttpGet("business-categories-options")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetBusinessCategoriesOptions()
         {
@@ -176,24 +176,6 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(reponse);
         }
 
-        [HttpGet("proofType")]
-        [AllowAnonymous]
-        public ActionResult<OperationResult<List<DropDownOptions>>> GetProofTypes()
-        {
-            var response = new OperationResult<List<DropDownOptions>>();
-            this.logger.LogInformation("Static Controller -> GetProofTypes()");
-
-            var options = new List<DropDownOptions>
-            {
-                 new DropDownOptions { Value = 1, Text = "PAN" },
-                 new DropDownOptions { Value = 2, Text = "Aadhaar" }
-            };
-
-            this.logger.LogInformation("Static Controller-> GetProofTypes()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = options }));
-
-            response.Data = options;
-            return Ok(response);
-        }
 
 
         [HttpGet("GetOrderStatusOptions")]
@@ -212,6 +194,24 @@ namespace EpicMarket.Business.API.Controllers
 
             return Ok(response);
         }
+
+        //need to create new endpoint to get the proof types with logs 
+        [HttpGet("proof-types")]
+        [AllowAnonymous]
+        public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetProofTypes()
+        {
+            var response = new OperationResult<List<DropDownOptions>>();
+            this.logger.LogInformation("Static Controller -> GetProofTypes()");
+            var options = await staticService.GetProofTypes();
+            this.logger.LogInformation("Static Controller-> GetProofTypes()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = options }));
+            response.Data = options;
+            return Ok(response);
+        }
+
+        
+
+    
+
 
     }
 }

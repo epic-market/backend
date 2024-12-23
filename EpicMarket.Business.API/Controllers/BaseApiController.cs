@@ -21,28 +21,21 @@ namespace EpicMarket.Business.API.Controllers
 		private readonly IHttpContextAccessor httpContextAccessor;
 		protected readonly ApplicationDbContext dbContext;
 
-		public BaseApiController(ApplicationDbContext dbContext,IHttpContextAccessor httpContextAccessor
-			)
+		public BaseApiController(ApplicationDbContext dbContext,IHttpContextAccessor httpContextAccessor)
         {
 			this.httpContextAccessor = httpContextAccessor;
 			this.dbContext = dbContext;
         }
 
-		public int BusinessId
+		public int BusinessId //we get the business id from the user role which is the last business id that the user is associated with
         {
             get {
                 var usernameid = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
-                if (this.User.IsInRole(ROLES.BUSINESS_OWNER))
-                {
-                   return dbContext.Businesses.Where(c => c.PersonID == usernameid).Select(c => c.ID).FirstOrDefault(); ;
-                }
-                else if (this.User.IsInRole(ROLES.BUSINESS_EMPLOYEE))
-                {
-                    return dbContext.BusinessEmployeeMaps.Where(c => c.EmployeeID == usernameid).Select(c => c.BussinessID).FirstOrDefault();
-                }
-                else {
-                    throw new("No Business is found");
-                }
+                return this.User.IsInRole(ROLES.BUSINESS_OWNER) ? 
+                    dbContext.Businesses.Where(c => c.PersonID == usernameid).Select(c => c.ID).OrderByDescending(c => c).FirstOrDefault() : 
+                    this.User.IsInRole(ROLES.BUSINESS_EMPLOYEE) ? 
+                        dbContext.BusinessEmployeeMaps.Where(c => c.EmployeeID == usernameid).Select(c => c.BussinessID).OrderByDescending(c => c).FirstOrDefault() : 
+                        throw new("No Business is found");
 			}
 		}
 		public string LoggedInUserName
@@ -56,16 +49,12 @@ namespace EpicMarket.Business.API.Controllers
 		{
 			get
 			{
-
 				var request = this.httpContextAccessor.HttpContext.Request;
 				if (request == null) return null;
 				var uriBuilder = new UriBuilder(request.Scheme, request.Host.Host, request.Host.Port ?? -1);
 				uriBuilder.Path = request.Path.ToString();
 				uriBuilder.Query = request.QueryString.ToString();
-				if (uriBuilder.Uri.IsDefaultPort)
-				{
-					uriBuilder.Port = -1;
-				}
+				uriBuilder.Port = uriBuilder.Uri.IsDefaultPort ? -1 : uriBuilder.Port;
 
 				return uriBuilder.Uri.AbsoluteUri;
 			}

@@ -21,6 +21,7 @@ namespace EpicMarket.Contracts
         Task<List<HelpItemDTO>> GetHelpItemsforBypage(string pagename);
 
         Task<List<DropDownOptions>> GetOrderStatusOptions();
+        Task<List<DropDownOptions>> GetProofTypes();
         Task<int> SubscribeforOffers( string gmail);
 
     }
