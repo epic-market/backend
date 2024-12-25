@@ -23,7 +23,7 @@ namespace EpicMarket.Services
 			this.unitOfWork = unitOfWork;
 		}
 
-        public async Task<int> AddAddress(AddressDto addressDto)
+        public async Task<int> AddUpdateAddress(AddressDto addressDto)
         {
             var addressModel = mapper.Map<Address>(addressDto);
             if (addressDto.ID != null)

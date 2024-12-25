@@ -49,10 +49,20 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: OutletProducts/Create
-        public IActionResult Create()
+        public IActionResult Create([FromQuery]int? productID)
         {
-            ViewData["ProductID"] = new SelectList(_context.Outlets, "ID", "ID");
-            ViewData["ProductID"] = new SelectList(_context.Catalogs, "ID", "ID");
+            if (productID != null)
+            {
+                var businessid = _context.Catalogs.Where(c => c.ID == productID).FirstOrDefault().BusinessID;
+                ViewData["Outlets"] = new SelectList(_context.Outlets.Where(c => c.BussinessID == businessid), "ID", "Name");
+                ViewData["Products"] = new SelectList(_context.Catalogs.Where(c => c.ID == productID), "ID", "Name", productID);
+            }
+            else {
+                ViewData["Outlets"] = new SelectList(_context.Outlets, "ID", "Name");
+                ViewData["Products"] = new SelectList(_context.Catalogs, "ID", "Name", productID);
+            }
+		
+            ViewBag.productID = productID;
             return View();
         }
 
@@ -61,17 +71,33 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,OutletID,ProductID")] OutletProduct outletProduct)
+        public async Task<IActionResult> CreateOutletProduct([FromQuery] int? productID ,[Bind("ID,OutletID,ProductID,QuantityAvailable,MinimumStockLevel,MaximumStockLevel,ReorderPoint,BackOrders")] OutletProduct outletProduct)
         {
+
+            outletProduct.ProductID = (int)productID;
             if (ModelState.IsValid)
             {
                 _context.Add(outletProduct);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (productID != null)
+                {
+					return Redirect("/Catalogs/Details/"+productID);
+				}
+				return RedirectToAction(nameof(Index));
+
             }
-            ViewData["ProductID"] = new SelectList(_context.Outlets, "ID", "ID", outletProduct.ProductID);
-            ViewData["ProductID"] = new SelectList(_context.Catalogs, "ID", "ID", outletProduct.ProductID);
-            return View(outletProduct);
+            if (productID != null)
+            {
+                var businessid = _context.Catalogs.Where(c => c.ID == productID).FirstOrDefault().BusinessID;
+                ViewData["Outlets"] = new SelectList(_context.Outlets.Where(c => c.BussinessID == businessid), "ID", "Name",outletProduct.OutletID);
+                ViewData["Products"] = new SelectList(_context.Catalogs.Where(c => c.ID == productID), "ID", "Name", productID);
+            }
+            else
+            {
+                ViewData["Outlets"] = new SelectList(_context.Outlets, "ID", "Name", outletProduct.OutletID);
+                ViewData["Products"] = new SelectList(_context.Catalogs, "ID", "Name", productID);
+            }
+            return  RedirectToAction(nameof(Create),new { ProductId = productID }) ;
         }
 
         // GET: OutletProducts/Edit/5
@@ -82,7 +108,12 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var outletProduct = await _context.OutletProducts.FindAsync(id);
+            var outletProduct = await _context.OutletProducts
+            .Include(op => op.Outlet)
+            .Include(op => op.Product)
+            .FirstOrDefaultAsync(m => m.ID == id);
+
+
             if (outletProduct == null)
             {
                 return NotFound();
@@ -97,7 +128,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,OutletID,ProductID")] OutletProduct outletProduct)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,OutletID,ProductID,QuantityAvailable,MinimumStockLevel,MaximumStockLevel,ReorderPoint,BackOrders")] OutletProduct outletProduct)
         {
             if (id != outletProduct.ID)
             {
@@ -154,7 +185,10 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var outletProduct = await _context.OutletProducts.FindAsync(id);
+            var outletProduct = await _context.OutletProducts
+                               .Include(op => op.Outlet)
+                               .Include(op => op.Product)
+                               .FirstOrDefaultAsync(m => m.ID == id);
             if (outletProduct != null)
             {
                 _context.OutletProducts.Remove(outletProduct);

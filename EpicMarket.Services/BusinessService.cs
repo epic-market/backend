@@ -22,14 +22,15 @@ namespace EpicMarket.Services
         private readonly IAddressService addressService;
         private readonly IEventLogService eventLogService;
         private readonly ICommunicationQueueService communicationQueueService;
+        private readonly ITasksService tasksService;
         private readonly IUnitOfWork unitOfWork;
-        private static readonly object _lock = new object();
 		public BusinessService(
                                 ApplicationDbContext context,
                                 IMapper mapper ,
                                 IAddressService addressService,
                                 IEventLogService eventLogService,
                                 ICommunicationQueueService communicationQueueService,
+                                ITasksService tasksService,
                                 IUnitOfWork unitOfWork)
         {
             _context = context;
@@ -37,43 +38,85 @@ namespace EpicMarket.Services
             this.addressService = addressService;
             this.eventLogService = eventLogService;
             this.communicationQueueService = communicationQueueService;
+            this.tasksService = tasksService;
             this.unitOfWork = unitOfWork;
         }
-        public async Task<int> RegisterBusiness(BusinessRegisterDto businessRegisterDto, string UserName , int userid, string PageSource)
+        /// <summary>
+        /// Registers a new business in the system.
+        /// </summary>
+        /// <param name="businessRegisterDto">The business registration details.</param>
+        /// <param name="UserName">The username of the user registering the business.</param>
+        /// <param name="AdminPersonId">The ID of the admin person.</param>
+        /// <param name="userid">The ID of the user.</param>
+        /// <param name="PageSource">The source of the page.</param>
+        /// <returns>The ID of the newly registered business.</returns>
+        public async Task<BusinessDTO_Result> RegisterBusiness(BusinessRegisterDto businessRegisterDto, string UserName, int AdminPersonId, int userid, string PageSource)
         {
-			var statusid = await _context.StatusOptionSets.FirstOrDefaultAsync(c => c.Status == Business_Status.BUSINESS_UNVERIFIED);
-			var addressModel = new AddressDto();
+            // Check for null or missing required fields in businessRegisterDto
+            if (businessRegisterDto == null || string.IsNullOrEmpty(businessRegisterDto.BusinessName) || string.IsNullOrEmpty(businessRegisterDto.Address) || string.IsNullOrEmpty(businessRegisterDto.State) || string.IsNullOrEmpty(businessRegisterDto.City) || businessRegisterDto.PinCode == 0 || businessRegisterDto.Latitude == 0 || businessRegisterDto.Longitude == 0)
+            {
+                throw new ArgumentNullException(nameof(businessRegisterDto), "Business registration details are missing or invalid.");
+            }
+
+            var statusid = await _context.StatusOptionSets.FirstOrDefaultAsync(c => c.Status == StatusConstants.UNVERIFIED);
+            if (statusid == null)
+            {
+                throw new InvalidOperationException("Business status option set is missing.");
+            }
+
+            var addressModel = new AddressDto();
             addressModel.Address1 = businessRegisterDto.Address;
-            addressModel.City  = businessRegisterDto.City;
+            addressModel.City = businessRegisterDto.City;
             addressModel.State = businessRegisterDto.State;
             addressModel.Pincode = businessRegisterDto.PinCode;
             addressModel.Latitude = businessRegisterDto.Latitude;
             addressModel.Longitude = businessRegisterDto.Longitude;
             addressModel.CreateBy = UserName;
             addressModel.CreateDate = DateTime.Now;
-            int addressId = await addressService.AddAddress(addressModel);
+            int addressId = await addressService.AddUpdateAddress(addressModel);
 
             var businessModel = new Business();
             businessModel.AddressID = addressId;
-            businessModel.PersonID  = userid;
+            businessModel.PersonID = userid;
             businessModel.BusinessCategoryID = businessRegisterDto.BusinessCategoryID;
-            businessModel.Name = businessRegisterDto.BussinessName;
+            businessModel.Name = businessRegisterDto.BusinessName;
             businessModel.Description = businessRegisterDto.Description;
-           // businessModel.Logo = businessRegisterDto.LogoURL;
             businessModel.ContactNumber = businessRegisterDto.ContactNumber;
             businessModel.ContactEmail = businessRegisterDto.ContactEmail;
             businessModel.CreateBy = UserName;
             businessModel.CreateDate = DateTime.Now;
-			businessModel.StatusId = statusid.Id;
-                 
-			await _context.Businesses.AddAsync(businessModel);
-			await _context.SaveChangesAsync();
+            businessModel.StatusId = statusid.Id;
+
+            var proofEntity = new Proof
+            {
+                EntityType = EntityConstants.Business,
+                EntityId = businessModel.ID,
+                ProofTypeId = businessRegisterDto.ProofTypeId,
+                ProofNumber = businessRegisterDto.ProofNumber
+            };
+
+            await _context.Proofs.AddAsync(proofEntity);
+            await _context.Businesses.AddAsync(businessModel);
+            await _context.SaveChangesAsync();
+
+            var BusinssID = new List<int>() { businessModel.ID };
+
+            var taskID = await tasksService.SaveTask(new TasksParams()
+            {
+                TaskPriorityID = 5,
+                TaskEntity = EntityConstants.Business,
+                TaskData = string.Join(",", BusinssID),
+                Name = EntityConstants.Business,
+                Description = TaskDescriptions.Business,
+                TaskType = TaskTypeConstants.Verification
+            }, AdminPersonId, UserName);
 
             string savedJson = JsonConvert.SerializeObject(businessModel, new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             });
             await this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = businessModel.ID, Data = savedJson, Description = null, EventName = EventConstants.AddBusiness, EntityName = EntityConstants.Business, Source = PageSource });
+
             await this.communicationQueueService.InsertCommunicationQueue(
                     new Entities.CommunicationQueueDTO()
                     {
@@ -84,16 +127,16 @@ namespace EpicMarket.Services
                         CreateBy = UserName
                     });
 
-            return businessModel.ID;
+
+            return new BusinessDTO_Result(){BusinessId = businessModel.ID , ProofId = proofEntity.Id };
         }
+
 
         public async Task<BusinessDetailResult> GetBusinessByID(int businessId)
         {
 
             var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.LOGO);
             var attachmentTypeID_Product = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.PROOF);
-
-
 
             var attachments = from attachment in _context.Attachments
                               join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
@@ -133,7 +176,9 @@ namespace EpicMarket.Services
                 Thumbnail = thumbnail.Select(a => a.ImagePath).FirstOrDefault(),
             }).FirstOrDefaultAsync();
         }
-        public async Task<int> UpdateBusiness(int id, UpdateBusinessRegisterDto businessRegisterDto, string UserName, string PageSource)
+
+
+        public async Task<int> UpdateBusiness(int id, UpdateBusinessRegisterDto businessRegisterDto, string UserName, int AdminPersonId , string PageSource)
         {
             var addressModel = new AddressDto();
             var events = "";
@@ -146,16 +191,16 @@ namespace EpicMarket.Services
             addressModel.Longitude = businessRegisterDto.Longitude;
             addressModel.ID = _context.Businesses.Include(o => o.Address).AsNoTracking().FirstOrDefault(o => o.ID == id).AddressID;
 
-            int addressId = await addressService.AddAddress(addressModel);
+            int addressId = await addressService.AddUpdateAddress(addressModel);
 
             var businessModel = _context.Businesses.Find(id);
             businessModel.AddressID = addressId;
-            businessModel.Name = businessRegisterDto.BussinessName;
+            businessModel.Name = businessRegisterDto.BusinessName;
             businessModel.Description = businessRegisterDto.Description;
             businessModel.ContactEmail = businessRegisterDto.ContactEmail;
             businessModel.ContactNumber = businessRegisterDto.ContactNumber;
             businessModel.ID = (int)id;
-            businessModel.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == Business_Status.BUSINESS_UNVERIFIED).Id;
+            businessModel.StatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == StatusConstants.UNVERIFIED).Id;
             businessModel.ModifiedBy = UserName;
             businessModel.ModifiedDate = DateTime.Now;
             events = EventConstants.EditBusiness;
@@ -163,6 +208,20 @@ namespace EpicMarket.Services
             _context.Businesses.Update(businessModel);
 
             await unitOfWork.Complete();
+
+
+            var BusinssID = new List<int>() { businessModel.ID };
+            var taskID = await tasksService.SaveTask(new TasksParams()
+            {
+                TaskPriorityID = 5,
+                TaskEntity = EntityConstants.Business,
+                TaskData = string.Join(",", BusinssID),
+                Name = EntityConstants.Business,
+                Description = TaskDescriptions.Business,
+                TaskType = TaskTypeConstants.Verification
+            }, AdminPersonId, UserName);
+
+
             var savedOutletModel = _context.Businesses.FirstOrDefault(o => o.ID == businessModel.ID);
             string outletModelJson = JsonConvert.SerializeObject(savedOutletModel, new JsonSerializerSettings
             {

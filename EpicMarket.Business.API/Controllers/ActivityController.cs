@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EpicMarket.Business.API.Controllers
 {
+    [Route("api/activity")]
     public class ActivityController : BaseApiController
     {
         private readonly IMapper _mapper;

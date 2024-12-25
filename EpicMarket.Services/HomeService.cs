@@ -2,6 +2,7 @@
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -98,6 +99,16 @@ namespace EpicMarket.Services
             var ListFaqCategory = await context.FAQCategories.Where(c => c.TypeOfFAQ == typeOfFAQ).ToListAsync();
             var ListFaqCategoryDto = mapper.Map<List<FaqCategoryDto>>(ListFaqCategory);
             return ListFaqCategoryDto;
+        }
+
+        public async Task<List<FaqDto>> GetAllFaqsCustomerAsync()
+        {
+             return await context.FAQs.Include(c=>c.Category).Where(c=>c.Category.TypeOfFAQ == FAQRoleType.Customer).
+                    Select(c=> new FaqDto() { 
+                    Description = c.Description,
+                    Title = c.Title,    
+                          Id = c.Id
+                    }).ToListAsync();
         }
 
         public async Task<BlogDto> GetBlogDetails(int blogId)

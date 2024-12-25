@@ -1,0 +1,134 @@
+﻿using EpicMarket.Data.ApplicationModels;
+using EpicMarket.Data.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Metadata.Ecma335;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace EpicMarket.Data.Webapp.AlterScripts
+{
+    public class AlterScript8 : BaseAlterScript,IAlterScript
+    {
+        private readonly ApplicationDbContext dbContext;
+
+        public AlterScript8(ApplicationDbContext dbContext):base(dbContext)
+        {
+            this.dbContext = dbContext;
+        }
+
+
+
+        public void Execute()
+        {
+
+            Console.WriteLine("Started Executing " + this.GetType().Name);
+
+           
+            if (!dbContext.ApplicationConfigurations.Any(cm => cm.Name == "Profile"))
+            {
+                var applicationConfiguration = new ApplicationConfiguration
+                {
+                    Name = "Profile",
+                    Value = "Profile",
+                };
+
+                dbContext.ApplicationConfigurations.Add(applicationConfiguration);
+                dbContext.SaveChanges();
+            }
+
+            if (!dbContext.AttachmentTypes.Any(cm => cm.Name == "Profile"))
+            {
+                var attachmentType = new AttachmentType
+                {
+                    Name = "Profile",
+                    Description = "Profile",
+                };
+
+                dbContext.AttachmentTypes.Add(attachmentType);
+                dbContext.SaveChanges();
+            }
+
+
+            if (!dbContext.Entity.Any(cm => cm.Name == "AppUser"))
+            {
+                var entity = new Entity
+                {
+                    Name = "AppUser",
+                    Description = "AppUser",
+                };
+
+                dbContext.Entity.Add(entity);
+                dbContext.SaveChanges();
+            }
+
+
+            if (!dbContext.Entity.Any(cm => cm.Name == "Proof"))
+            {
+                var entity = new Entity
+                {
+                    Name = "Proof",
+                    Description = "Proof",
+                };
+
+                dbContext.Entity.Add(entity);
+                dbContext.SaveChanges();
+            }
+
+            var proofTypes = new List<ProofType>
+            {
+                new ProofType { Name = "GST Certificate" },
+                new ProofType { Name = "PAN Card" },
+                new ProofType { Name = "Aadhaar Card" }
+            };
+
+            foreach (var proofType in proofTypes)
+            {
+                if (!dbContext.ProofTypes.Any(cm => cm.Name == proofType.Name))
+                {
+                    dbContext.ProofTypes.Add(proofType);
+                }
+            }
+            //now we need to add the status option set for send to verification
+            if (!dbContext.StatusOptionSets.Any(cm => cm.Status == "SendToVerification"))
+            {
+                var statusOptionSet = new StatusOptionSet
+                {
+                    Status = "SendToVerification",
+                    StatusDescription = "Send To Verification",
+                };
+                dbContext.StatusOptionSets.Add(statusOptionSet);
+            }
+
+            //add the status option set for unsubscribed
+            if (!dbContext.SusbcriptionStatuses.Any(cm => cm.Name == "Subscribed"))
+            {
+                var statusOptionSet = new SusbcriptionStatus
+                {
+                    Name = "Subscribed",
+                };
+                dbContext.SusbcriptionStatuses.Add(statusOptionSet);
+            }
+
+            if (!dbContext.SusbcriptionStatuses.Any(cm => cm.Name == "Unsubscribed"))
+            {
+                var statusOptionSet = new SusbcriptionStatus
+                {
+                    Name = "Unsubscribed",
+                };
+                dbContext.SusbcriptionStatuses.Add(statusOptionSet);
+            }
+
+    dbContext.SaveChanges();    
+
+
+            this.updateDatabaseVersion(this.GetType().Name);
+
+            Console.WriteLine("Completed Executing " + this.GetType().Name);
+        }
+
+        //update the same row that it is complete the running 
+
+    }
+}

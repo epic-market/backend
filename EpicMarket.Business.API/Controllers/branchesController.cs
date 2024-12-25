@@ -5,6 +5,7 @@ using EpicMarket.Entities.CustomModels;
 using EpicMarket.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Security.Claims;
@@ -13,11 +14,13 @@ namespace EpicMarket.Business.API.Controllers
 {
 
     [Authorize]
+    [Route("api/branches")]
     public class branchesController : BaseApiController
     {
 
         private readonly ILogger<branchesController> logger;
         private readonly IBranchService branchService;
+        private readonly IRatingService ratingService;
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly IAttachmentService attachmentService;
         private readonly IFileService fileStoreService;
@@ -28,6 +31,7 @@ namespace EpicMarket.Business.API.Controllers
                                     ILogger<branchesController> logger,
                                     IBranchService branchService,
                                     ApplicationDbContext dbContext,
+                                    IRatingService ratingService,
                                     IHttpContextAccessor httpContextAccessor,
                                     IAttachmentService attachmentService,
                                     IFileService fileStoreService,
@@ -36,6 +40,7 @@ namespace EpicMarket.Business.API.Controllers
 		{
             this.logger = logger;
             this.branchService = branchService;
+            this.ratingService = ratingService;
             this.httpContextAccessor = httpContextAccessor;
             this.attachmentService = attachmentService;
             this.fileStoreService = fileStoreService;
@@ -61,7 +66,7 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
-        [HttpGet("DropDown")]
+        [HttpGet("dropdown-options")]
         [Authorize(Roles = ROLES.BUSINESS_OWNER)]
         public async Task<ActionResult<List<BranchsDropDownOptions>>> GetAllOutletsForDropDown()
         {
@@ -230,7 +235,7 @@ namespace EpicMarket.Business.API.Controllers
 
 
 
-        [HttpPost("MapEmployees")]
+        [HttpPost("map/employees")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<int>>> MapBranchToPeople(BranchPeopleMapParams branchPeopleMap)
         {
@@ -246,7 +251,7 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
-        [HttpPost("MapProducts")]
+        [HttpPost("map/products")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<int>>> MapBranchToProduct(BranchProductMapParams branchProductMap)
         {
@@ -313,6 +318,69 @@ namespace EpicMarket.Business.API.Controllers
 
             return Ok(response);
         }
+
+        [HttpGet("NearBy/Outlets")] 
+         public async Task<ActionResult<GetDataResult<List<OutletSeachDto>>>> GetNearbyOutlets(
+          [FromQuery] double? latitude,
+          [FromQuery] double? longitude,
+          [FromQuery] double radiusKm = 10,
+          [FromQuery] string category = null,
+          [FromQuery] double? minRating = null,
+          [FromQuery] string sortBy = "rating",
+          [FromQuery] SortDirection sortDirection = SortDirection.Desc,
+          [FromQuery] int page = 1,
+          [FromQuery] int pageSize = 10)
+        {
+            var request = new OutletSearchRequest
+            {
+                Latitude = latitude,
+                Longitude = longitude,
+                RadiusKm = radiusKm,
+                Category = category,
+                MinRating = minRating,
+                SortBy = sortBy,
+                SortDirection = sortDirection,
+                Page = page,
+                PageSize = pageSize
+            };
+
+            var result = await branchService.GetNearbyOutletsAsync(request);
+            return Ok(result);
+        }
+
+        [HttpGet("subscribed-outlets")]
+        public async Task<ActionResult<GetDataResult<SubscribedOutletDto>>> GetSubscribedOutlets([FromQuery] int page = 1,[FromQuery] int pageSize = 10)
+        {
+            var customerUserName = this.LoggedInUserName;
+            var result = await branchService.GetSubscribedOutletsAsync(customerUserName, page, pageSize);
+            return Ok(result);
+        }
+
+        [HttpPost("rating")]
+        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
+        public async Task<ActionResult<bool>> AddRatingToOutlet([FromBody] AddOutletRatingRequest request)
+        {
+            var response = new OperationResult<bool>();
+            this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = request }));
+            await ratingService.AddOutletRatingAsync(request, this.LoggedInUserName);
+            response.Data = true;
+            return Ok(response);
+        }
+
+        [HttpPost("subscribe/{outletId}")]
+        public async Task<ActionResult<bool>> SubscribeOutlet(int outletId)
+        {
+            var customerUserName = this.LoggedInUserName;
+            var result = await branchService.SubscribeOutletAsync(outletId, customerUserName);
+            
+            if (!result)
+            {
+                return BadRequest("Failed to subscribe to outlet");
+            }
+
+            return Ok(result);
+        }
+
 
     }
 }

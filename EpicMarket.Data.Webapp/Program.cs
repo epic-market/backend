@@ -2,7 +2,10 @@
 using EpicMarket.Data.Models;
 using EpicMarket.Data.Webapp;
 using EpicMarket.Data.Webapp.AlterScripts;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System.Diagnostics.CodeAnalysis;
 
 
@@ -13,13 +16,23 @@ builder.SetBasePath(Directory.GetCurrentDirectory())
 
 IConfiguration config = builder.Build();
 
-var dbcontext = new ApplicationDbContext(config);
+// Create HttpContextAccessor
+var httpContextAccessor = new HttpContextAccessor();
 
-var alterScriptVertions = new AlterScriptVersions(dbcontext);
+var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+optionsBuilder.UseSqlServer(config.GetConnectionString("DefaultConnection"));
+
+// Create DbContext with options
+var dbContext = new ApplicationDbContext(
+    configuration: config,
+    httpContextAccessor: httpContextAccessor
+);
+
+var alterScriptVertions = new AlterScriptVersions(dbContext);
 
 alterScriptVertions.Execute();
 
-var listOfScriptNotExcuted = dbcontext.DatabaseVersions.Where(c => c.Status == false).ToList();
+var listOfScriptNotExcuted = dbContext.DatabaseVersions.Where(c => c.Status == false).ToList();
 
 
 foreach (var item in listOfScriptNotExcuted)

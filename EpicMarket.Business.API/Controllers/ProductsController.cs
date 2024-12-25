@@ -14,24 +14,27 @@ using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext
 namespace EpicMarket.Business.API.Controllers
 {
 
-	public class ProductsController : BaseApiController
+    [Route("api/products")]
+    public class ProductsController : BaseApiController
 	{
 		private readonly ILogger<ProductsController> logger;
 		private readonly IProductService productService;
 		private readonly IApplicationConfigurationService applicationConfigurationService;
-		private readonly IAttachmentService attachmentService;
+        private readonly IRatingService ratingService;
+        private readonly IAttachmentService attachmentService;
 		private readonly IFileService fileStoreService;
 		private readonly ApplicationDbContext dbContext;
 		private readonly IHttpContextAccessor httpContextAccessor;
 		private readonly IBranchService branchService;
 
-		public ProductsController(ILogger<ProductsController> logger, IProductService productService, IApplicationConfigurationService applicationConfigurationService,
+		public ProductsController(ILogger<ProductsController> logger, IProductService productService, IApplicationConfigurationService applicationConfigurationService,IRatingService ratingService,
 			IAttachmentService attachmentService, IFileService fileStoreService, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
 		{
 			this.logger = logger;
 			this.productService = productService;
 			this.applicationConfigurationService = applicationConfigurationService;
-			this.attachmentService = attachmentService;
+            this.ratingService = ratingService;
+            this.attachmentService = attachmentService;
 			this.fileStoreService = fileStoreService;
 			this.dbContext = dbContext;
 			this.httpContextAccessor = httpContextAccessor;
@@ -113,7 +116,7 @@ namespace EpicMarket.Business.API.Controllers
 
 
 
-        [HttpPost("Advanced")]
+        [HttpPost("Inventory")]
         [Authorize(Roles = ROLES.BUSINESS_OWNER)]
         public async Task<ActionResult<OperationResult<int>>> UpdateAdvanceSettings([FromBody]ProductAdvanced productAdvanced)
         {
@@ -123,6 +126,19 @@ namespace EpicMarket.Business.API.Controllers
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
             await productService.UpdateAdvanceSetting(productAdvanced);
             this.logger.LogInformation("Products Controller -> UpdateAdvanceSettings()-> updated Successfully");
+            return Ok(response);
+        }
+
+
+        [HttpGet("Inventory/{id}")]
+        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
+        public async Task<ActionResult<OperationResult<ProductAdvanced>>> GetProductInventoryDetails(int id,int branchId)
+        {
+            var response = new OperationResult<ProductAdvanced>();
+            this.logger.LogInformation("Products Controller -> GetProductInventoryDetails()-> params {0}", JsonConvert.SerializeObject(new { Params = id }));
+            var results = await productService.GetProductInventoryDetails(id, branchId);
+            this.logger.LogInformation("Products Controller -> GetProductInventoryDetails()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
+            response.Data = results;
             return Ok(response);
         }
 
@@ -221,13 +237,13 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpPost("verify")]
-        [Authorize(Roles = ROLES.BUSINESS_OWNER)]
-        public async Task<ActionResult<OperationResult<int>>> VerifyCatalog(VerifyDto verifyBranchDto)
+        [Authorize(Roles = ROLES.BUSINESS_OWNER)]	
+        public async Task<ActionResult<OperationResult<int>>> VerifyCatalog(VerifyCatalogDto verifyCatalogDto)
         {
             var response = new OperationResult<int>();
-            this.logger.LogInformation("Products Controller -> VerifyCatalog()-> params {0}", JsonConvert.SerializeObject(new { Params = verifyBranchDto }));
+            this.logger.LogInformation("Products Controller -> VerifyCatalog()-> params {0}", JsonConvert.SerializeObject(new { Params = verifyCatalogDto }));
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-            var id = await productService.VerifyCatalog(verifyBranchDto, UserName, this.AdminPersonID, this.PageSource);
+            var id = await productService.VerifyCatalog(verifyCatalogDto, UserName, this.AdminPersonID, this.PageSource);
             this.logger.LogInformation("Products Controller -> VerifyCatalog()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
             response.Data = id;
             return Ok(response);
@@ -246,6 +262,8 @@ namespace EpicMarket.Business.API.Controllers
 			 await productService.deleteCatelog(id, UserName);
 			return Ok(response);
 		}
+
+
 
         [HttpGet("POS/{outletID}")]
         [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
@@ -272,5 +290,31 @@ namespace EpicMarket.Business.API.Controllers
             response.Data = id;
             return Ok(response);
         }
+
+
+
+		[HttpGet("customer-mobile")]
+		[Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
+		public async Task<ActionResult<OperationResult<GetDataResult<List<ProductResult>>>>> GetAllProductsForMobile([FromQuery] ProductMobileParams productResult)
+		{
+			var response = new OperationResult<GetDataResult<List<CustomerResultBaseOnCatefory>>> ();
+			this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = productResult }));
+			var results = await productService.GetAllProductsForMobile(productResult);
+			this.logger.LogInformation("Products Controller -> GetAllProducts()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
+			response.Data = results;
+			return Ok(response);
+		}
+
+        [HttpPost("Rating")]
+        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
+        public async Task<ActionResult<bool>> AddRatingToProduct([FromBody] AddProductRatingRequest request)
+        {
+            var response = new OperationResult<bool> ();
+            this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = request }));
+			await ratingService.AddProductRatingAsync(request,this.LoggedInUserName);
+            response.Data = true;
+            return Ok(response);
+        }
+
     }
 }

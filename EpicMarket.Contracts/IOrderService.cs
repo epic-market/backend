@@ -18,8 +18,10 @@ namespace EpicMarket.Contracts
 
         Task<GetDataResult<List<OrderResult>>> GetAllOrders(OrderParams orderParams,int businessID);
         Task<GetDataResult<List<OrderMobileResult>>> GetAllOrdersForMobile(OrderParams orderParams,int businessID);
-        Task<OrderMobileDeatilsResult> GetOrdersDetailsForMobile(int OrderId, int businessID);
+        Task<OrderMobileDeatilsResult> GetOrdersDetailsForMobile(int OrderId);
 
         Task<bool> AnyNewOrders(DateTime ordered_after, int businessid , int? outlet_id);
+        Task<GetDataResult<List<CustomerOrderDto>>> GetCustomerOrderHistoryAsync(int customerId, OrderHistoryRequest request);
+
     }
 }

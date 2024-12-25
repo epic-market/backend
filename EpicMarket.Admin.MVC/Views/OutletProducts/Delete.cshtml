@@ -21,22 +21,50 @@
 
 <div class="card">
     <div class="card-body">
-        <h3 class="card-title">Confirm Outlet Product Deletion</h3>
-        <p class="card-text">Are you sure you want to delete this outlet product?</p>
+        <div class="d-flex align-items-center mb-3">
+            <i class="bx bx-error-circle text-danger me-2 font-24"></i>
+            <h3 class="card-title mb-0">Confirm Outlet Product Deletion</h3>
+        </div>
+        <p class="card-text alert alert-danger">Are you sure you want to delete this outlet product? This action cannot be undone.</p>
 
         <div class="table-responsive">
             <table class="table table-bordered">
                 <tr>
-                    <th class="bg-light" style="width: 30%;">@Html.DisplayNameFor(model => model.OutletID)</th>
-                    <td>@Html.DisplayFor(model => model.OutletID)</td>
+                    <th class="bg-light" style="width: 30%;">@Html.DisplayNameFor(model => model.Outlet)</th>
+                    <td>@Html.DisplayFor(model => model.Outlet.Name)</td>
                 </tr>
                 <tr>
                     <th class="bg-light">@Html.DisplayNameFor(model => model.Product)</th>
-                    <td>@Html.DisplayFor(model => model.Product.ID)</td>
+                    <td>@Html.DisplayFor(model => model.Product.Name)</td>
                 </tr>
                 <tr>
-                    <th class="bg-light">@Html.DisplayNameFor(model => model.Outlet)</th>
-                    <td>@Html.DisplayFor(model => model.Outlet.ID)</td>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.QuantityAvailable)</th>
+                    <td>@Html.DisplayFor(model => model.QuantityAvailable)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.MinimumStockLevel)</th>
+                    <td>@Html.DisplayFor(model => model.MinimumStockLevel)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.MaximumStockLevel)</th>
+                    <td>@Html.DisplayFor(model => model.MaximumStockLevel)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.ReorderPoint)</th>
+                    <td>@Html.DisplayFor(model => model.ReorderPoint)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">@Html.DisplayNameFor(model => model.BackOrders)</th>
+                    <td>
+                        @if (Model.BackOrders)
+                        {
+                            <span class="badge bg-success">Yes</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">No</span>
+                        }
+                    </td>
                 </tr>
             </table>
         </div>
@@ -44,8 +72,8 @@
         <form asp-action="Delete" class="mt-4">
             <input type="hidden" asp-for="ID" />
             <div class="d-flex justify-content-between">
-                <a asp-action="Index" class="btn btn-secondary">
-                    <i class="bx bx-arrow-back me-1"></i> Back to List
+                <a href="javascript:history.go(-1)" class="btn btn-secondary">
+                    <i class="bx bx-arrow-back me-1"></i> Back
                 </a>
                 <button type="submit" class="btn btn-danger">
                     <i class="bx bx-trash me-1"></i> Delete

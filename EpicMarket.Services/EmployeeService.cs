@@ -174,7 +174,7 @@ namespace EpicMarket.Services
                     Pincode = employee.Pincode,
                 };
 
-                var addressId = await addressService.AddAddress(address);
+                var addressId = await addressService.AddUpdateAddress(address);
                 User.FirstName = employee.FirstName;
                 User.LastName = employee.LastName;
                 User.PhoneNumber = employee.ContactNumber;

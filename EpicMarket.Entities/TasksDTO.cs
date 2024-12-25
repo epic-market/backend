@@ -15,10 +15,21 @@ namespace EpicMarket.Entities
         public string Name { get; set; }
         public string Description { get; set; }
         public int? TaskTypeID { get; set; }
-        public string TaskData { get; set; }
+
         public IFormFile[] UploadFiles { get; set; }
     }
-       public class AttachmentTASKDTO
+
+    public class TasksParams
+    {
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string TaskType { get; set; }
+        public string TaskEntity { get; set; }
+        public string TaskData { get; set; }
+        public int? TaskPriorityID { get; set; }
+    }
+
+    public class AttachmentTASKDTO
     {
         public int TaskID { get; set; }
         public IFormFile[] UploadFiles { get; set; }

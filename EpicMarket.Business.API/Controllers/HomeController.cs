@@ -11,6 +11,7 @@ namespace EpicMarket.Business.API.Controllers
 {
 
     [AllowAnonymous]
+    [Route("api/home")]
     public class HomeController : BaseApiController
     {
         private readonly ILogger<HomeController> logger;
@@ -100,6 +101,22 @@ namespace EpicMarket.Business.API.Controllers
             var list = await homeService.GetBlogDetails(blogId);
 
             this.logger.LogInformation("Home Controller-> GetAllBlogs()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = list }));
+
+            reponse.Data = list;
+
+            return Ok(list);
+        }
+
+        [HttpGet("FAQ/Customer")]
+        public async Task<ActionResult<OperationResult<List<FaqDto>>>> GetAllFaqsCustomerAsync()
+        {
+            var reponse = new OperationResult<List<FaqDto>>();
+
+            this.logger.LogInformation("Home Controller -> GetAllFaqsCustomerAsync()");
+
+            var list = await homeService.GetAllFaqsCustomerAsync();
+
+            this.logger.LogInformation("Home Controller-> GetAllFaqsCustomerAsync()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = list }));
 
             reponse.Data = list;
 

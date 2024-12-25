@@ -14,16 +14,19 @@ using EpicMarket.Entities;
 using EpicMarket.Admin.MVC.Models;
 using System.Diagnostics.Eventing.Reader;
 using Newtonsoft.Json;
+using EpicMarket.Admin.MVC.Contracts;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
     public class TasksController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IAttachmentService _attachmentService;
 
-        public TasksController(ApplicationDbContext context)
+        public TasksController(IAttachmentService attachmentService,ApplicationDbContext context)
         {
             _context = context;
+            _attachmentService = attachmentService;
         }
 
         // GET: Tasks
@@ -42,23 +45,39 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
 
 
+
+
             var taskDetailsResult = new TaskDetailsModel();
 
             var taskDetails = await _context.Tasks
                 .Include(t => t.TaskStatusType)
                 .Include(t => t.TaskTypes)
                 .Include(t => t.AppUser)
+                .Include(t => t.Entity)
                 .FirstOrDefaultAsync(m => m.ID == id);
 
 
+         
 
-            var SubTasks = await _context.Tasks.Where(c=> c.ParentID == id).ToListAsync();
+
+           var SubTasks = await _context.Tasks.Include(t => t.AppUser)
+                                             .Include(t => t.TaskStatusType)
+                                             .Where(c=> c.ParentID == id).ToListAsync();
 
             var EntityForTasks = await _context.Entity.FirstOrDefaultAsync(m => m.Name == EntityConstants.Tasks);
 
             var eventLogs = await _context.EventLog.Where(c => c.RecordID == id && c.EntityID == EntityForTasks.ID).ToListAsync();
 
 			var comments = await _context.Comments.Where(c => c.RecordID == id && c.EntityID == EntityForTasks.ID).ToListAsync();
+
+
+            ViewBag.attachments = await this._attachmentService.GetAttachmentLinks(new GetAttachmentLink()
+            {
+                AttachmentType = AttachmentTypeConstants.TASK,
+                Entity = EntityConstants.Tasks,
+                RecordID = taskDetails.ID
+            });
+
 
 
             taskDetailsResult.Task = taskDetails;
@@ -120,7 +139,9 @@ namespace EpicMarket.Admin.MVC.Controllers
             var GetTaskType = _context.TaskTypes.Where(row => row.ID == tasks.TaskTypeID).FirstOrDefault();
             tasks.CreateBy = userName;
             tasks.CreateDate = DateTime.UtcNow;
-            tasks.DateDue = DateTime.Now.AddHours((double)GetTaskType.DefaultDueDateHours);
+            tasks.DateDue = GetTaskType.DefaultDueDateHours.HasValue
+                            ? DateTime.Now.AddHours((double)GetTaskType.DefaultDueDateHours)
+                            : DateTime.Now.AddDays(7);
             tasks.SubmittedByPersonID = UserID;
             tasks.ParentID = parentTaskId;
             tasks.DateAssigned = DateTime.UtcNow;

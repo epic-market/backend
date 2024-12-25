@@ -42,5 +42,9 @@ namespace EpicMarket.Data.Models
 
         public virtual ICollection<UserOnboardingProgress> UserOnboardingProgresses { get; set; }
 
+        public virtual ICollection<Rating> Ratings { get; set; }
+        public virtual ICollection<Subscription> Subscriptions { get; set; }
+
+
     }
 }

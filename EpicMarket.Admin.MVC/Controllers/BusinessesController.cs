@@ -31,13 +31,76 @@ namespace EpicMarket.Admin.MVC.Controllers
             this.attachmentService = attachmentService;
             this.fileService = fileService;
         }
-
-        // GET: Businesses
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var applicationDbContext = _context.Businesses.Include(b => b.Address).Include(b => b.BusinessCategory).Include(b => b.Person).Include(b=>b.Status);
-            return View(await applicationDbContext.ToListAsync());
+            return View();
         }
+        [HttpPost]
+        [Route("Business/GetFilteredData")]
+        public async Task<IActionResult> GetFilteredData([FromBody] BusinessFilterViewModel filter)
+        {
+            try
+            {
+                var query = _context.Businesses
+                    .Include(b => b.Address)
+                    .Include(b => b.BusinessCategory)
+                    .Include(b => b.Person)
+                    .Include(b => b.Status)
+                    .AsQueryable();
+
+                // Apply filters
+                if (!string.IsNullOrWhiteSpace(filter.BusinessId))
+                {
+                    query = query.Where(b => b.ID.ToString().Contains(filter.BusinessId));
+                }
+
+                if (!string.IsNullOrWhiteSpace(filter.OwnerUsername))
+                {
+                    query = query.Where(b => b.Person.UserName.Contains(filter.OwnerUsername));
+                }
+
+                if (!string.IsNullOrWhiteSpace(filter.ContactNumber))
+                {
+                    query = query.Where(b => b.ContactNumber.ToString().Contains(filter.ContactNumber));
+                }
+
+                var totalRecords = await query.CountAsync();
+
+                // Apply sorting
+                query = filter.SortColumn?.ToLower() switch
+                {
+                    "id" => filter.SortDirection == "asc" ? query.OrderBy(b => b.ID) : query.OrderByDescending(b => b.ID),
+                    "name" => filter.SortDirection == "asc" ? query.OrderBy(b => b.Name) : query.OrderByDescending(b => b.Name),
+                    "contactnumber" => filter.SortDirection == "asc" ? query.OrderBy(b => b.ContactNumber) : query.OrderByDescending(b => b.ContactNumber),
+                    _ => query.OrderBy(b => b.ID)
+                };
+
+                // Apply pagination and project to DTO
+                var businesses = await query
+                    .Skip((filter.PageNumber - 1) * filter.PageSize)
+                    .Take(filter.PageSize)
+                    .Select(b => new BusinessDto
+                    {
+                        ID = b.ID,
+                        Name = b.Name,
+                        ContactNumber = b.ContactNumber,
+                        ContactEmail = b.ContactEmail,
+                        StatusName = b.Status.Status,
+                        PersonUserName = b.Person.UserName,
+                        PersonId = b.Person.Id,
+                        BusinessCategoryName = b.BusinessCategory.Name,
+                        City = b.Address.City
+                    })
+                    .ToListAsync();
+
+                return Json(new { totalRecords, data = businesses });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message });
+            }
+        }
+
 
         // GET: Businesses/Details/5
         public async Task<IActionResult> Details(int? id)

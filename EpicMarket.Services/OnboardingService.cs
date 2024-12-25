@@ -35,14 +35,15 @@ namespace EpicMarket.Services
 
         public async Task  CompleteStepForUserID(int UserID, int StepID)
         {
-          var step =  _context.UserOnboardingProgresses.Where(c=>c.StepID == StepID && c.UserID == UserID).FirstOrDefault();
-            if (step != null)
-            { 
-                step.CompletedAt = DateTime.Now;
-                step.IsCompleted = true;
-                _context.UserOnboardingProgresses.Update(step);
+                var step = new UserOnboardingProgress()
+                {
+                    UserID = UserID,
+                    StepID = StepID,
+                    CompletedAt = DateTime.Now,
+                    IsCompleted = true
+                };
+                _context.UserOnboardingProgresses.Add(step);
                 await unitOfWork.Complete();
-            }
         }
 
         public async Task<List<OnboardingStepResult>> GetAllOnboardingSteps(int UserID)

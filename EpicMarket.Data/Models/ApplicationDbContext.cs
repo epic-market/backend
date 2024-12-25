@@ -1,10 +1,13 @@
 ﻿
 using EpicMarket.Data.ApplicationModels;
 using EpicMarket.Data.Common;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using System.Linq.Expressions;
+using System.Security.Claims;
 using System.Security.Principal;
 
 namespace EpicMarket.Data.Models
@@ -12,11 +15,150 @@ namespace EpicMarket.Data.Models
     public class ApplicationDbContext : IdentityDbContext<AppUser, AppRole, int, IdentityUserClaim<int>, AppUserRole, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>
     {
         private readonly IConfiguration _configuration;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private List<int> _allowedBusinessIds;
+        private List<int> _allowedBranchIds;
+        private bool _isInitialized = false;
 
-        public ApplicationDbContext(IConfiguration configuration)
+        public ApplicationDbContext(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             _configuration = configuration;
+            _httpContextAccessor = httpContextAccessor;
         }
+
+
+        private bool IsUserAdmin => _httpContextAccessor.HttpContext?.User?.IsInRole("admin") ?? false;
+
+        private List<int> AllowedBusinessIds
+        {
+            get
+            {
+                if (_allowedBusinessIds == null && !_isInitialized)
+                {
+                    _isInitialized = true; // Prevent recursive loop
+                    _allowedBusinessIds = GetUserBusinessIds();
+                }
+                return _allowedBusinessIds ?? new List<int>();
+            }
+        }
+
+        private List<int> AllowedBranchIds
+        {
+            get
+            {
+                if (_allowedBranchIds == null && !_isInitialized)
+                {
+                    _isInitialized = true; // Prevent recursive loop
+                    _allowedBranchIds = GetUserBranchIds();
+                }
+                return _allowedBranchIds ?? new List<int>();
+            }
+        }
+
+        public List<int> GetUserBusinessIds()
+        {
+            var currentUserId = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                return new List<int>();
+            }
+
+            try
+            {
+                var userId = int.Parse(currentUserId);
+
+                // Use raw SQL to avoid recursive calls
+                var connection = Database.GetDbConnection();
+                var command = connection.CreateCommand();
+                command.CommandText = @"
+                SELECT DISTINCT BussinessID 
+                FROM BusinessEmployeeMaps 
+                WHERE EmployeeID = @userId
+                UNION
+                SELECT DISTINCT ID
+                FROM Businesses
+                WHERE PersonID = @userId";
+
+                var parameter = command.CreateParameter();
+                parameter.ParameterName = "@userId";
+                parameter.Value = userId;
+                command.Parameters.Add(parameter);
+
+                if (connection.State != System.Data.ConnectionState.Open)
+                    connection.Open();
+
+                var results = new List<int>();
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        results.Add(reader.GetInt32(0));
+                    }
+                }
+
+                return results;
+            }
+            catch
+            {
+                return new List<int>();
+            }
+        }
+
+        public List<int> GetUserBranchIds()
+        {
+            var currentUserId = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                return new List<int>();
+            }
+
+            try
+            {
+                var userId = int.Parse(currentUserId);
+                var businessIds = AllowedBusinessIds;
+
+                // Use raw SQL to avoid recursive calls
+                var connection = Database.GetDbConnection();
+                var command = connection.CreateCommand();
+                command.CommandText = @"
+                SELECT DISTINCT o.ID
+                FROM Outlets o
+                LEFT JOIN OutletPeople op ON o.ID = op.OutletID
+                WHERE op.PersonId = @userId
+                OR o.BussinessID IN (SELECT value FROM STRING_SPLIT(@businessIds, ','))";
+
+                var userIdParam = command.CreateParameter();
+                userIdParam.ParameterName = "@userId";
+                userIdParam.Value = userId;
+                command.Parameters.Add(userIdParam);
+
+                var businessIdsParam = command.CreateParameter();
+                businessIdsParam.ParameterName = "@businessIds";
+                businessIdsParam.Value = string.Join(",", businessIds);
+                command.Parameters.Add(businessIdsParam);
+
+                if (connection.State != System.Data.ConnectionState.Open)
+                    connection.Open();
+
+                var results = new List<int>();
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        results.Add(reader.GetInt32(0));
+                    }
+                }
+
+                return results;
+            }
+            catch
+            {
+                return new List<int>();
+            }
+        }
+
+
+ 
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Business> Businesses { get; set; }
         public DbSet<BusinessCategoryInternal> BusinessCategories { get; set; }
@@ -77,6 +219,22 @@ namespace EpicMarket.Data.Models
 
         public DbSet<OnboardingStep> OnboardingSteps { get; set; }
         public DbSet<UserOnboardingProgress> UserOnboardingProgresses { get; set; }
+
+        public DbSet<Subscription> Subscriptions { get; set; }
+
+        public DbSet<SusbcriptionStatus> SusbcriptionStatuses{ get; set; }
+
+
+        public DbSet<Rating> Ratings { get; set; }
+
+        public DbSet<MerchantBankAccount> MerchantBankAccounts { get; set; }
+
+        public DbSet<MerchantUpiAccount> MerchantUpiAccounts { get; set; }
+
+        public DbSet<MerchantFinance> Finances { get; set; }
+        public DbSet<Proof> Proofs { get; set; }
+        public DbSet<ProofType> ProofTypes { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
@@ -85,11 +243,48 @@ namespace EpicMarket.Data.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-			base.OnModelCreating(modelBuilder);
+        
+ 
+            base.OnModelCreating(modelBuilder);
+
+            // Business-level filters
+            modelBuilder.Entity<Catalog>()
+                .HasQueryFilter(p => IsUserAdmin || !AllowedBusinessIds.Any() ||
+                    AllowedBusinessIds.Contains(p.BusinessID));
+
+            modelBuilder.Entity<BusinessEmployeeMap>()
+                .HasQueryFilter(p => IsUserAdmin || !AllowedBusinessIds.Any() ||
+                    AllowedBusinessIds.Contains(p.BussinessID));
+
+            modelBuilder.Entity<Business>()
+                .HasQueryFilter(b => IsUserAdmin || !AllowedBusinessIds.Any() ||
+                    AllowedBusinessIds.Contains(b.ID));
+
+            // Outlet (Branch) with combined business and branch filtering
+            modelBuilder.Entity<Outlet>()
+                .HasQueryFilter(p => IsUserAdmin ||
+                    ((!AllowedBusinessIds.Any() || AllowedBusinessIds.Contains(p.BussinessID)) &&
+                    (!AllowedBranchIds.Any() || AllowedBranchIds.Contains(p.ID))));
+
+            modelBuilder.Entity<MerchantFinance>()
+                .HasQueryFilter(o => IsUserAdmin || !AllowedBranchIds.Any() ||
+                    AllowedBranchIds.Contains(o.OutletID));
+
+            // Branch-level filters
+            modelBuilder.Entity<OutletProduct>()
+                .HasQueryFilter(p => IsUserAdmin || !AllowedBranchIds.Any() ||
+                    AllowedBranchIds.Contains(p.OutletID));
+
+            modelBuilder.Entity<OutletPerson>()
+                .HasQueryFilter(p => IsUserAdmin || !AllowedBranchIds.Any() ||
+                    AllowedBranchIds.Contains(p.OutletId));
+
+            modelBuilder.Entity<Order>()
+                .HasQueryFilter(o => IsUserAdmin || !AllowedBranchIds.Any() ||
+                    AllowedBranchIds.Contains(o.OutletID));
 
 
-
-			modelBuilder.Entity<AppUser>()
+            modelBuilder.Entity<AppUser>()
                          .HasIndex(op => op.UserName)
                          .IsUnique();
 

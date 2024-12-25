@@ -1,318 +1,498 @@
-﻿@model EpicMarket.Admin.MVC.Models.TaskDetailsModel
-
+﻿@using EpicMarket.Entities.CustomModels
+@model EpicMarket.Admin.MVC.Models.TaskDetailsModel
 @{
     ViewData["Title"] = "Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-    <div class="breadcrumb-title pe-3">Tasks</div>
-    <div class="ps-3">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0 p-0">
-                <li class="breadcrumb-item">
-                    <a asp-action="Index"><i class="bx bx-home-alt"></i></a>
-                </li>
-                <li class="breadcrumb-item active" aria-current="page">Details</li>
+<style>
+
+    .task-data-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+        .task-data-links .btn-link {
+            padding: 6px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.2s;
+            background-color: #f8f9fa;
+        }
+
+            .task-data-links .btn-link:hover {
+                background-color: #e9ecef;
+                border-color: #ced4da;
+                transform: translateY(-1px);
+            }
+
+        .task-data-links i {
+            font-size: 16px;
+        }
+    .task-header {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 24px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 500;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding: 16px;
+        border-left: 2px solid #e9ecef;
+        margin-bottom: 16px;
+    }
+
+    .timeline-dot {
+        position: absolute;
+        left: -6px;
+        top: 24px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #primary;
+    }
+
+    .comment-section {
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 16px;
+    }
+
+    .task-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 24px;
+        margin-bottom: 24px;
+    }
+
+    .card {
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+    .status-badge {
+        padding: 4px 10px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid transparent;
+    }
+
+    .bg-primary-subtle {
+        background-color: rgba(13, 110, 253, 0.1);
+        border-color: rgba(13, 110, 253, 0.1);
+    }
+
+    .bg-success-subtle {
+        background-color: rgba(25, 135, 84, 0.1);
+        border-color: rgba(25, 135, 84, 0.1);
+    }
+
+    .status-badge i {
+        font-size: 14px;
+    }
+
+    <style >
+    .comment-item {
+        border-left: 3px solid #0d6efd;
+        transition: transform 0.2s ease;
+    }
+
+    .comment-item:hover {
+        transform: translateX(4px);
+    }
+
+    .comment-content {
+        position: relative;
+        color: #444;
+        line-height: 1.5;
+    }
+
+    .empty-state {
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .font-40 {
+        font-size: 40px;
+    }
+</style>
+
+
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <div class="page-breadcrumb d-flex align-items-center mb-3">
+        <div class="breadcrumb-title pe-3">Tasks</div>
+        <nav aria-label="breadcrumb" class="ms-3">
+            <ol class="breadcrumb m-0">
+                <li class="breadcrumb-item"><a href="@Url.Action("Index")"><i class="bx bx-home-alt"></i></a></li>
+                <li class="breadcrumb-item active">Details</li>
             </ol>
         </nav>
     </div>
+
+    <!-- Task Header -->
+    <div class="task-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">#@Model.Task.ID - @Model.Task.Name</h3>
+            <a asp-action="Edit" class="btn btn-primary" asp-route-id="@Model?.Task.ID">
+                <i class="bx bx-edit me-1"></i>Edit
+            </a>
+        </div>
+        <div class="d-flex gap-2 mt-3">
+            <span class="status-badge bg-primary-subtle text-primary">
+                <i class="bx bx-task me-1"></i>@Model.Task.TaskTypes.Name
+            </span>
+            <span class="status-badge bg-success-subtle text-success">
+                <i class="bx bx-check-circle me-1"></i>@Model.Task.TaskStatusType.Status
+            </span>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="task-grid">
+        <!-- Left Column -->
+        <div class="card">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#details">Task Details</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#taskData">Task Data</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#activities">Activities</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="details">
+                        <div class="mb-4">
+                            <h5 class="card-title mb-3"><i class="bx bx-align-left me-2"></i>Task Description</h5>
+                            <p class="card-text">@(string.IsNullOrEmpty(Model.Task.Description) ? "-" : Model.Task.Description)</p>
+                        </div>
+                        <div class="row mt-4">
+                            <dl class="row col-12">
+                                <dt class="col-sm-4">Assigned To</dt>
+                                <dd class="col-sm-8">@(Model.Task.AppUser?.UserName ?? "-")</dd>
+
+                                <dt class="col-sm-4">Assigned Date</dt>
+                                <dd class="col-sm-8">@(Model.Task.DateAssigned?.ToString() ?? "-")</dd>
+
+                                <dt class="col-sm-4">Due Date</dt>
+                                <dd class="col-sm-8">@(Model.Task.DateDue?.ToString() ?? "-")</dd>
+
+                                <dt class="col-sm-4">Started Date</dt>
+                                <dd class="col-sm-8">@(Model.Task.DateStarted?.ToString() ?? "-")</dd>
+
+                                <dt class="col-sm-4">Completed Date</dt>
+                                <dd class="col-sm-8">@(Model.Task.DateCompleted?.ToString() ?? "-")</dd>
+
+                                <dt class="col-sm-4">Submitted By</dt>
+                                <dd class="col-sm-8">
+                                    @if (Model.Task.SubmittedByPersonID.HasValue)
+                                    {
+                                        <a asp-controller="AppUsers"
+                                           asp-action="Details"
+                                           asp-route-id="@Model.Task.SubmittedByPersonID"
+                                           class="text-primary text-decoration-none">
+                                            @Model.Task.SubmittedByPersonID.ToString()
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span>-</span>
+                                    }
+                                </dd>
+                                <dt class="col-sm-4">Task Priority</dt>
+                                <dd class="col-sm-8">@(Model.Task.TaskPriorityID?.ToString() ?? "-")</dd>
+
+                                <dt class="col-sm-4">Create Date</dt>
+                                <dd class="col-sm-8">@(Model.Task.CreateDate.ToString() ?? "-")</dd>
+
+                                <dt class="col-sm-4">Create By</dt>
+                                <dd class="col-sm-8">@(Model.Task.CreateBy ?? "-")</dd>
+
+                                <dt class="col-sm-4">Modified Date</dt>
+                                <dd class="col-sm-8">@(Model.Task.ModifiedDate?.ToString() ?? "-")</dd>
+
+                                <dt class="col-sm-4">Modified By</dt>
+                                <dd class="col-sm-8">@(Model.Task.ModifiedBy ?? "-")</dd>
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="taskData">
+                        <div class="mb-4">
+                            <h5 class="card-title mb-3"><i class="bx bx-data me-2"></i>Task Data</h5>
+                                        @if (Model.Task.TaskEntityID.HasValue && !string.IsNullOrEmpty(Model.Task.TaskData))
+                                          {
+                                            try
+                                    {
+                                        var taskData = Model.Task.TaskData;
+                                        var entityType = Model.Task.Entity.Name;
+
+                                    if (!string.IsNullOrEmpty(taskData))
+                                    {
+                                        // Parse the task data to get IDs
+                                        var ids = taskData.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                        .Select(id => id.Trim())
+                                        .ToList();
+
+                                        <div class="task-data-links">
+                                            @foreach (var id in ids)
+                                            {
+                                                switch (entityType)
+                                                {
+                                                    case EntityConstants.Catelog:
+                                                        <a href="@Url.Action("Details", "Catalogs", new { id = id })"
+                                                           class="btn btn-link">
+                                                            <i class="bx bx-package me-1"></i>Product #@id
+                                                        </a>
+                                                        break;
+
+                                                    case EntityConstants.Branch:
+                                                        <a href="@Url.Action("Details", "Outlets", new { id = id })"
+                                                           class="btn btn-link">
+                                                            <i class="bx bx-building me-1"></i>Branch #@id
+                                                        </a>
+                                                        break;
+
+                                                    case EntityConstants.Business:
+                                                        <a href="@Url.Action("Details", "Businesses", new { id = id })"
+                                                           class="btn btn-link">
+                                                            <i class="bx bx-store me-1"></i>Business #@id
+                                                        </a>
+                                                        break;
+
+                                                    default:
+                                                        <span>@id</span>
+                                                        break;
+                                                }
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="text-muted">No task data available</div>
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    <div class="text-danger">Error parsing task data</div>
+                                }
+                                  }
+                                else
+                                {
+                                <div class="task-data-content p-3 bg-light rounded">
+                                        @(string.IsNullOrEmpty(Model.Task.TaskData) ? "No task data available" : Model.Task.TaskData)
+                                </div>
+                                }
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="activities">
+                        <h5 class="card-title mb-3"><i class="bx bx-history me-2"></i>Activities</h5>
+                        @if (Model.EventLogs != null && Model.EventLogs.Any())
+                        {
+                            @foreach (var log in Model.EventLogs)
+                            {
+                                <div class="timeline-item">
+                                    <div class="timeline-dot"></div>
+                                    <h6>@log.CreateBy</h6>
+                                    <small class="text-muted">@log.CreateDate</small>
+                                    <p class="mt-2">@log.Description</p>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <i class="bx bx-history font-30 text-muted mb-2 d-block"></i>
+                                <p class="text-muted mb-0">No activities found</p>
+                            </div>
+                        }
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="d-flex flex-column gap-4">
+
+            <!-- Attachments Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bx bx-paperclip me-2"></i>Attachments</h5>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.attachments != null && ViewBag.attachments.Count > 0)
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var attachment in ViewBag.attachments)
+                            {
+                                <li class="list-group-item d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bx bx-file me-2 text-primary"></i>
+                                        <span>attachment </span>
+                                    </div>
+                                    <a href="@Url.Action("DisplayImage", "File", new { key = attachment })"
+                                       target="_blank"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bx bx-download me-1"></i>View
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bx bx-file font-30 text-muted mb-2 d-block"></i>
+                            <p class="text-muted mb-0">No attachments found</p>
+                        </div>
+                    }
+                </div>
+            </div>
+            <!-- Comments Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bx bx-comment me-2"></i>Comments</h5>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <div class="comment-section mb-3">
+                        @if (Model.Comments != null && Model.Comments.Any())
+                        {
+                            @foreach (var comment in Model.Comments)
+                            {
+                                <div class="comment-item p-3 mb-3 bg-light rounded-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="comment-avatar me-2">
+                                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                                                 style="width: 32px; height: 32px; font-size: 14px;">
+                                                @(comment.CreateBy.Substring(0, 1).ToUpper())
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex flex-column">
+                                                <strong class="text-primary">@comment.CreateBy</strong>
+                                                <small class="text-muted">
+                                                    <i class="bx bx-time-five me-1"></i>
+                                                    @comment.CreateDate.ToString("MMM dd, yyyy HH:mm")
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="comment-content ms-5">
+                                        <p class="mb-0">@comment.CommentText</p>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center py-4">
+                                <div class="empty-state">
+                                    <i class="bx bx-message-square-dots font-40 text-muted mb-3 d-block"></i>
+                                    <p class="text-muted mb-0">No comments yet</p>
+                                    <small class="text-muted">Be the first to comment on this task</small>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <form asp-action="AddComment" method="post" class="mt-auto">
+                        <div class="input-group">
+                            <input type="hidden" name="taskId" value="@Model.Task.ID" />
+                            <input type="text" name="commentText" class="form-control" placeholder="Add a comment..." required />
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bx bx-send me-1"></i>Send
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sub-Tasks Section -->
+    <div class="card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bx bx-list-ul me-2"></i>Sub-Tasks</h5>
+            <a asp-action="Create" class="btn btn-primary" asp-route-parentTaskId="@Model?.Task.ID">
+                <i class="bx bx-plus me-1"></i>Add Sub-Task
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                @if (Model.SubTasks != null && Model.SubTasks.Any())
+                {
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Assigned To</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.SubTasks)
+                            {
+                                <tr>
+                                    <td>@item.ID</td>
+                                    <td>@item.Name</td>
+                                    <td>@(item.AppUser?.UserName ?? "-")</td>
+                                    <td>
+                                        <span class="badge bg-info">@(item.TaskStatusType?.Status ?? "-")</span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="@Url.Action("Edit", new { id = item.ID })" class="btn btn-sm btn-outline-primary">
+                                                <i class="bx bx-edit"></i>
+                                            </a>
+                                            <a href="@Url.Action("Details", new { id = item.ID })" class="btn btn-sm btn-outline-info">
+                                                <i class="bx bx-info-circle"></i>
+                                            </a>
+                                            <a href="@Url.Action("Delete", new { id = item.ID })" class="btn btn-sm btn-outline-danger">
+                                                <i class="bx bx-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="bx bx-info-circle font-30 text-muted mb-2"></i>
+                        <p class="text-muted">No sub-tasks found</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
 </div>
-<hr />
-
-
-<div class="row mb-4" >
-	<div class="d-flex">
-	<div class="col-8 px-2">
-			<div class="card mb-4  h-100">
-			<div class="card-body">
-				<div class="d-flex justify-content-end mb-3">
-					<a asp-action="Edit" class="btn btn-primary px-5" asp-route-id="@Model?.Task.ID">Edit</a>
-				</div>
-				<h3 class="card-title"> #@Html.DisplayFor(model => model.Task.ID) -  @Html.DisplayFor(model => model.Task.Name)</h3>
-				<p class="card-text fs-6"> @Html.DisplayFor(model => model.Task.Description) </p>
-				<div class="d-flex gap-3 py-3">
-					<div> <b>@Html.DisplayFor(model => model.Task.TaskTypes.Name)</b> </div>
-					<div class="text-success"> @Html.DisplayFor(model => model.Task.TaskStatusType.Status)</div>
-				</div>
-				<div class="row">
-					<dl class="row col-6">
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Task.AppUser.FirstName)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Task.AppUser.FirstName)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Task.AppUser.UserName)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Task.AppUser.UserName)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Task.DateAssigned)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Task.DateAssigned)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Task.DateDue)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Task.DateDue)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Task.DateStarted)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Task.DateStarted)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Task.DateCompleted)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Task.DateCompleted)
-						</dd>
-
-					</dl>
-					<dl class="row col-6">
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Task.SubmittedByPersonID)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Task.SubmittedByPersonID)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Task.TaskPriorityID)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Task.TaskPriorityID)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Task.CreateDate)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Task.CreateDate)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Task.CreateBy)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Task.CreateBy)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Task.ModifiedDate)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Task.ModifiedDate)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Task.ModifiedBy)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Task.ModifiedBy)
-						</dd>
-					</dl>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="col-4">
-		<div class="card h-100">
-			<div class="card-header">
-					<h4><i class='bx bx-comment-detail font-18 me-1'></i>Activitys</h4>
-			</div>
-				<div class="card-body overflow-auto" style="max-height: 500px;">
-					<!-- Activities content goes here -->
-					@{
-						var eventLogs = Model.EventLogs.ToList();
-						var totalLogs = eventLogs.Count;
-					}
-
-					@for (int i = 0; i < totalLogs; i++)
-					{
-						var item = eventLogs[i];
-						<div class="row">
-							<div class="col-auto text-center flex-column d-none d-sm-flex">
-								@if (i == 0)
-								{
-									<!-- First record -->
-									<div class="row h-50">
-										<div class="col">&nbsp;</div>
-										<div class="col">&nbsp;</div>
-									</div>
-									<h5 class="m-2">
-										<span class="badge rounded-pill bg-light border">&nbsp;</span>
-									</h5>
-									<div class="row h-50">
-										<div class="col border-end">&nbsp;</div>
-										<div class="col">&nbsp;</div>
-									</div>
-								}
-								else if (i == totalLogs - 1)
-								{
-									<!-- Last record -->
-									<div class="row h-50">
-										<div class="col border-end">&nbsp;</div>
-										<div class="col">&nbsp;</div>
-									</div>
-									<h5 class="m-2">
-										<span class="badge rounded-pill bg-light border">&nbsp;</span>
-									</h5>
-									<div class="row h-50">
-										<div class="col">&nbsp;</div>
-										<div class="col">&nbsp;</div>
-									</div>
-								}
-								else
-								{
-									<!-- Middle records -->
-									<div class="row h-50">
-										<div class="col border-end">&nbsp;</div>
-										<div class="col">&nbsp;</div>
-									</div>
-									<h5 class="m-2">
-										<span class="badge rounded-pill bg-light border">&nbsp;</span>
-									</h5>
-									<div class="row h-50">
-										<div class="col border-end">&nbsp;</div>
-										<div class="col">&nbsp;</div>
-									</div>
-								}
-							</div>
-							<div class="col py-2">
-								<div class="card radius-15">
-									<div class="card-body">
-										<div class="float-end text-muted">@item.CreateDate</div>
-										<h5 class="card-title">@item.CreateBy</h5>
-										<p>@item.Description</p> <!-- Assuming you want to display the description -->
-									</div>
-								</div>
-							</div>
-						</div>
-					}
-					<!-- Add more activities as needed -->
-				</div>
-		</div>
-	</div>
-	</div>
-</div>
-
-<div class="row mb-4">
-	<div class="d-flex">
-		<div class="col-8 px-2">
-			<div class="card mb-4 h-100" style="min-height: 300px;">
-				<div class="card-header">
-					<h4>Task Data</h4>
-				</div>
-				<div class="card-body">
-					<p class="card-text fs-6">@Html.DisplayFor(model => model.Task.TaskData)</p>
-				</div>
-			</div>
-		</div>
-		<div class="col-4">
-			<div class="card h-100" style="min-height: 300px;">
-				<div class="card-header">
-					<h5><i class='bx bx-comment-detail font-18 me-1'></i> Comments</h5>
-				</div>
-				<div class="card-body d-flex flex-column">
-					<!-- Scrollable comments section -->
-					<div class="flex-grow-1 overflow-auto mb-3" style="max-height: 400px;">
-						<!-- Comments content goes here -->
-						@foreach (var item in Model.Comments)
-						{
-							<div class="mb-2">
-								<strong>@item.CreateBy</strong> <small class="text-muted">@item.CreateDate</small>
-								<p>@item.CommentText</p>
-							</div>
-						}
-						<!-- Add more comments as needed -->
-					</div>
-					<!-- Input area for adding new comments -->
-					<!-- Form for adding new comments -->
-					<form asp-action="AddComment" method="post" class="d-flex">
-						<input type="hidden" name="taskId" value="@Model.Task.ID" />
-						<input type="text" name="commentText" class="form-control me-2" placeholder="Add a comment..." required />
-						<button type="submit" class="btn btn-primary">Submit</button>
-					</form>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-
-
-
-
-<div class="card-body">
-	<ul class="nav nav-tabs nav-primary mb-0" role="tablist">
-		<li class="nav-item active" role="presentation">
-			<a class="nav-link active" data-bs-toggle="tab" href="#primaryorders" role="tab" aria-selected="true">
-				<div class="d-flex align-items-center">
-					<div class="tab-icon">
-						<i class='bx bx-star font-18 me-1'></i>
-					</div>
-					<div class="tab-title"> Child Tasks </div>
-				</div>
-			</a>
-		</li>
-	</ul>
-	<div class="tab-content pt-3">
-		<div class="tab-pane fade show active" id="primaryorders" role="tabpanel">
-			<div class="card">
-				<div class="card-body">
-					<div class="d-flex justify-content-end mb-3">
-						<a asp-action="Create" class="btn btn-primary px-5" asp-route-parentTaskId="@Model?.Task.ID">Add Sub-Task</a>
-					</div>
-					<div class="table-responsive">
-						<table id="example2" class="table table-striped table-bordered" style="width:100%">
-							<thead>
-								<tr>
-									<th>
-										@Html.DisplayNameFor(model => model.SubTask.ID)
-									</th>
-									<th>
-										@Html.DisplayNameFor(model => model.SubTask.Name)
-									</th>
-									<th>
-										@Html.DisplayNameFor(model => model.SubTask.PrimaryAssignedToPersonID)
-									</th>
-									<th>
-										@Html.DisplayNameFor(model => model.SubTask.TaskStatusType.Status)
-									</th>
-									<th></th>
-								</tr>
-							</thead>
-							<tbody>
-								@foreach (var item in Model.SubTasks)
-								{
-									<tr>
-										<td>
-											@Html.DisplayFor(modelItem => item.ID)
-										</td>
-										<td>
-											@Html.DisplayFor(modelItem => item.Name)
-										</td>
-										<td>
-											@Html.DisplayFor(modelItem => item.AppUser.UserName)
-										</td>
-										<td>
-											@Html.DisplayFor(modelItem => item.TaskStatusType.Status)
-										</td>
-
-										<td>
-											<a asp-controller="BusinessEmployeeMaps" asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-											<a asp-controller="BusinessEmployeeMaps" asp-action="Details" asp-route-id="@item.ID">Details</a> |
-											<a asp-controller="BusinessEmployeeMaps" asp-action="Delete" asp-route-id="@item.ID">Delete</a>
-										</td>
-									</tr>
-								}
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-  

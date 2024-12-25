@@ -23,7 +23,7 @@ namespace EpicMarket.Data.Models
         public string Description { get; set; }
         public long ContactNumber { get; set; }
         public string ContactEmail { get; set; }
-        public int? Rating { get; set; }
+        public double? Rating { get; set; }
         public int? ReviewCount { get; set; }
         public bool IsOpen { get; set; }
         public double? Weight { get; set; }
@@ -44,5 +44,12 @@ namespace EpicMarket.Data.Models
 
 
 		public virtual ICollection<OutletProduct> OutletProducts { get; set; }
+
+        public virtual ICollection<Rating>  Ratings { get; set; }
+
+        public virtual ICollection<Subscription> Subscriptions { get; set; }
+
+        public virtual MerchantFinance MerchantFinances { get; set; }
+
     }
 }
