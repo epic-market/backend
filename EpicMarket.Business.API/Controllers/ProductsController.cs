@@ -237,13 +237,13 @@ namespace EpicMarket.Business.API.Controllers
 
 
         [HttpPost("verify")]
-        [Authorize(Roles = ROLES.BUSINESS_OWNER)]
-        public async Task<ActionResult<OperationResult<int>>> VerifyCatalog(VerifyDto verifyBranchDto)
+        [Authorize(Roles = ROLES.BUSINESS_OWNER)]	
+        public async Task<ActionResult<OperationResult<int>>> VerifyCatalog(VerifyCatalogDto verifyCatalogDto)
         {
             var response = new OperationResult<int>();
-            this.logger.LogInformation("Products Controller -> VerifyCatalog()-> params {0}", JsonConvert.SerializeObject(new { Params = verifyBranchDto }));
+            this.logger.LogInformation("Products Controller -> VerifyCatalog()-> params {0}", JsonConvert.SerializeObject(new { Params = verifyCatalogDto }));
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-            var id = await productService.VerifyCatalog(verifyBranchDto, UserName, this.AdminPersonID, this.PageSource);
+            var id = await productService.VerifyCatalog(verifyCatalogDto, UserName, this.AdminPersonID, this.PageSource);
             this.logger.LogInformation("Products Controller -> VerifyCatalog()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
             response.Data = id;
             return Ok(response);
@@ -293,7 +293,7 @@ namespace EpicMarket.Business.API.Controllers
 
 
 
-		[HttpGet("Mobile/Products")]
+		[HttpGet("customer-mobile")]
 		[Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
 		public async Task<ActionResult<OperationResult<GetDataResult<List<ProductResult>>>>> GetAllProductsForMobile([FromQuery] ProductMobileParams productResult)
 		{
@@ -305,9 +305,9 @@ namespace EpicMarket.Business.API.Controllers
 			return Ok(response);
 		}
 
-        [HttpGet("Mobile/Products/Rating")]
+        [HttpPost("Rating")]
         [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
-        public async Task<ActionResult<bool>> AddRatingToProduct([FromQuery] AddProductRatingRequest request)
+        public async Task<ActionResult<bool>> AddRatingToProduct([FromBody] AddProductRatingRequest request)
         {
             var response = new OperationResult<bool> ();
             this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = request }));

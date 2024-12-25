@@ -25,13 +25,23 @@ namespace EpicMarket.Services
         public async Task AddProductRatingAsync(AddProductRatingRequest request,string CustomerUserName)
         {
             // Validate if customer has purchased the product
-            var hasPurchased = await _context.OrderDetails.Include(c=>c.Order.Person).AnyAsync(oi => oi.Order.Person.UserName == CustomerUserName && oi.CatalogID == request.ProductId);
+            // var hasPurchased = await _context.OrderDetails.Include(c=>c.Order.Person).AnyAsync(oi => oi.Order.Person.UserName == CustomerUserName && oi.CatalogID == request.ProductId);
 
-            if (!hasPurchased) {
-                throw new UnauthorizedAccessException("Can only rate purchased products");
-            }
+            // if (!hasPurchased) {
+            //     throw new UnauthorizedAccessException("Can only rate purchased products");
+            // }
                 
             var CustomerID = _context.Users.FirstOrDefault(c => c.UserName == CustomerUserName).Id;
+
+            var hasRated = await _context.Ratings.AnyAsync(r => r.CustomerId == CustomerID && r.ProductId == request.ProductId);
+            if (hasRated)
+                throw new UnauthorizedAccessException("Can only rate products once");
+
+            //we should not allow to rate if the outlet is not active
+            var catalog = await _context.Catalogs.IgnoreQueryFilters().Where(o => o.ID == request.ProductId && o.IsActive).FirstOrDefaultAsync();
+            if(catalog == null){
+                throw new UnauthorizedAccessException("products not found");
+            }
 
             var rating = new Rating
             {
@@ -46,15 +56,24 @@ namespace EpicMarket.Services
             _context.Ratings.Add(rating);
             await _context.SaveChangesAsync();
 
+            if (catalog != null) {
 
-            var CatelogProduct = _context.Catalogs.Find(request.ProductId);
-            if (CatelogProduct != null) {
-                var NewAverage = ((CatelogProduct.Rating * CatelogProduct.ReviewCount) + request.Rating) / CatelogProduct.ReviewCount + 1;
-                CatelogProduct.Rating = NewAverage;
-                CatelogProduct.ReviewCount = CatelogProduct.ReviewCount + 1;
-                _context.Update(CatelogProduct);
-                await _context.SaveChangesAsync(); 
-            
+                 if (catalog != null)
+                {
+                if (catalog.ReviewCount == null || catalog.ReviewCount == 0)
+                {
+                    catalog.Rating = request.Rating;
+                    catalog.ReviewCount = 1;
+                }
+                else
+                {
+                    var NewAverage = ((catalog.Rating * catalog.ReviewCount) + request.Rating) / (catalog.ReviewCount + 1);
+                    catalog.Rating = NewAverage;
+                    catalog.ReviewCount = catalog.ReviewCount + 1;
+                }
+                _context.Update(catalog);
+                await _context.SaveChangesAsync();
+            }
             }
         }
 

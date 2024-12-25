@@ -235,7 +235,7 @@ namespace EpicMarket.Business.API.Controllers
 
 
 
-        [HttpPost("MapEmployees")]
+        [HttpPost("map/employees")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<int>>> MapBranchToPeople(BranchPeopleMapParams branchPeopleMap)
         {
@@ -251,7 +251,7 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
-        [HttpPost("MapProducts")]
+        [HttpPost("map/products")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<int>>> MapBranchToProduct(BranchProductMapParams branchProductMap)
         {

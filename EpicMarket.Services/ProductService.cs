@@ -82,7 +82,7 @@ namespace EpicMarket.Services
 		public async Task<int> UpdateProducts(AddProductsDto productsDto,int id, string UserName, int businessID, string PageSource)
 		{
 
-			var product = await _context.Catalogs.FirstOrDefaultAsync(c => c.ID == id);
+			var product = await _context.Catalogs.FirstOrDefaultAsync(c => c.ID == id && c.IsActive);
 
 			if (product == null)
 			{
@@ -151,35 +151,56 @@ namespace EpicMarket.Services
 
             var getResult = new GetDataResult<List<ProductResult>>();
 
-
             //1 . filter with BusinessID
-            var Products = _context.OutletProducts.Where(c => c.OutletID == outletId).Include(c => c.Product)
-                                .Where(c => c.Product.IsActive == true);
-
+            var Products = _context.OutletProducts
+                                .Where(c => c.OutletID == outletId)
+                                .Include(c => c.Product)
+                                .Where(c => c.Product.IsActive == true)
+                                .IgnoreQueryFilters();
 
             //2 . Appling Searching
-            var sortedProducts = Products.Where(row => row.Product.Name.Contains(productParams.searchTerm.Trim()) || row.Product.Description.Contains(productParams.searchTerm.Trim()));
+            var sortedProducts = Products;
+            if (!string.IsNullOrEmpty(productParams.searchTerm))
+            {
+                var searchTerm = productParams.searchTerm.Trim();
+                sortedProducts = Products.Where(row => 
+                    row.Product.Name.Contains(searchTerm) || 
+                    row.Product.Description.Contains(searchTerm));
+            }
 
-            int totalCount = sortedProducts.Count();
+            int totalCount = await sortedProducts.CountAsync();
 
             // 4. Apply pagination (skip and take)
             var pagedProducts = sortedProducts
-                .Skip((productParams.PageIndex - 1) * productParams.pageSize) // Skip items for previous pages
-                .Take(productParams.pageSize); // Take items for the current page
+                .Skip((productParams.PageIndex - 1) * productParams.pageSize)
+                .Take(productParams.pageSize);
 
             // 5. Select data and add SRNO
-            var results = await pagedProducts.Select(c => new ProductResult()
-            {
-                ProductId = c.ID,
-                Name = c.Product.Name,
-                Rate = c.Product.Rate,
-                
-                Thumbnail = ((from attachment in _context.Attachments
-                              join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
-                              join entity in _context.Entity on link.EntityID equals entity.ID
-                              where entity.Name == EntityConstants.Catelog && link.RecordID == c.Product.ID && link.AttachmentTypeID == attachmentTypeID.ID
-                              select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}").FirstOrDefault()),
-            }).ToListAsync();
+            var results = await pagedProducts
+                .Select(c => new ProductResult()
+                {
+                    ProductId = c.ID,
+                    Name = c.Product.Name,
+                    Rate = c.Product.Rate,
+                    Status = c.Product.StatusOptionSets.Status,
+                    CostPrice = c.Product.CostPrice,
+                    Count = c.QuantityAvailable,
+                    Thumbnail = _context.Attachments
+                        .Join(_context.AttachmentLinks,
+                            a => a.ID,
+                            l => l.AttachmentID,
+                            (a, l) => new { a, l })
+                        .Join(_context.Entity,
+                            al => al.l.EntityID,
+                            e => e.ID,
+                            (al, e) => new { al.a, al.l, e })
+                        .Where(x => 
+                            x.e.Name == EntityConstants.Catelog && 
+                            x.l.RecordID == c.Product.ID && 
+                            x.l.AttachmentTypeID == attachmentTypeID.ID)
+                        .Select(x => $"{x.a.DocumentFolderPath}{x.a.DocumentFile}")
+                        .FirstOrDefault()
+                }).ToListAsync();
 
             getResult.items = results;
             getResult.Count = totalCount;
@@ -305,12 +326,46 @@ namespace EpicMarket.Services
 
 
      
-        public async Task<int> VerifyCatalog(VerifyDto verifyBranchDto, string UserName, int AdminPersonID, string PageSource)
+        public async Task<int> VerifyCatalog(VerifyCatalogDto verifyCatalogDto, string UserName, int AdminPersonID, string PageSource)
         {
+            // Check if all catalogs exist and are active
+            var allCatalogsExist = verifyCatalogDto.ListOfCatalogIDs.All(id => _context.Catalogs.Any(c => c.ID == id && c.IsActive));
+            if (!allCatalogsExist)
+            {
+                throw new Exception("One or more catalogs do not exist or are deleted.");
+            }
+
+            // Check if all catalogs are in not verified state
+            var allCatalogsNotVerifiedOrPending = verifyCatalogDto.ListOfCatalogIDs.All(id => !_context.Catalogs.Any(c => c.ID == id && (c.StatusId == _context.StatusOptionSets.Where(s => s.Status == StatusConstants.VERIFIED).FirstOrDefault().Id || c.StatusId == _context.StatusOptionSets.Where(s => s.Status == StatusConstants.PENDING).FirstOrDefault().Id)));
+            if (!allCatalogsNotVerifiedOrPending)
+            {
+                throw new Exception("One or more catalogs are already in the 'Verified' or 'Pending' state.");
+            }
+
+            //Check if any are already in send to verification state
+            var anyCatalogInSendToVerification = verifyCatalogDto.ListOfCatalogIDs.Any(id => _context.Catalogs.Any(c => c.ID == id && c.StatusId == _context.StatusOptionSets.Where(s => s.Status == StatusConstants.SENDTOVERIFICATION).FirstOrDefault().Id));
+            if (anyCatalogInSendToVerification)
+            {
+                throw new Exception("One or more catalogs are already in the 'Send To Verification' state.");
+            }
+
+            //Update all catalogs status to send for verification state
+            foreach(var id in verifyCatalogDto.ListOfCatalogIDs)
+            {
+                var catalog = await _context.Catalogs.FindAsync(id);
+                catalog.StatusId = _context.StatusOptionSets.FirstOrDefault(s => s.Status == StatusConstants.SENDTOVERIFICATION).Id;
+                catalog.ModifiedBy = UserName;
+                catalog.ModifiedDate = DateTime.Now;
+                _context.Catalogs.Update(catalog);
+            }
+
+            await unitOfWork.Complete();
+
             var newTaskStatus = await _context.TaskStatusTypes.Where(row => row.Status == "New").FirstOrDefaultAsync();
             var taskTypeID = await _context.TaskTypes.Where(row => row.Name == "Verification").FirstOrDefaultAsync();
             var userName = await _context.Users.Where(row => row.UserName == UserName).FirstOrDefaultAsync();
-            var taskEntity= await _context.Entity.Where(row => row.Name == EntityConstants.Catelog).FirstOrDefaultAsync();
+            var taskEntity = await _context.Entity.Where(row => row.Name == EntityConstants.Catelog).FirstOrDefaultAsync();
+
             var taskToSave = new Tasks
             {
                 Name = VerificationConstants.CatelogName,
@@ -323,13 +378,15 @@ namespace EpicMarket.Services
                 TaskEntityID = taskEntity.ID,
                 DateAssigned = DateTime.Now,
                 SubmittedByPersonID = userName.Id,
-                TaskData = string.Join(",", verifyBranchDto.ListOfBranchIDs),
+                TaskData = string.Join(",", verifyCatalogDto.ListOfCatalogIDs),
                 ReceivedDate = DateTime.Now,
                 CreateDate = DateTime.Now,
                 CreateBy = userName.Email
             };
+
             await _context.Tasks.AddAsync(taskToSave);
             await unitOfWork.Complete();
+
             return taskToSave.ID;
         }
 
@@ -353,7 +410,7 @@ namespace EpicMarket.Services
 
         public async Task<int> QuickActions(QuickActionsParams quickActionsParams, string UserName)
         {
-            var catalog = await _context.Catalogs.FindAsync(quickActionsParams.ProductId);
+            var catalog = await _context.Catalogs.Where(c=> c.ID == quickActionsParams.ProductId && c.IsActive).FirstOrDefaultAsync();
 			if (catalog != null)
 			{
 				//catalog.InStock= quickActionsParams.InStock == null ? catalog.InStock : quickActionsParams.InStock.Value;
@@ -400,7 +457,6 @@ namespace EpicMarket.Services
             return productAdvanced;
         }
 
-
         public async Task<GetDataResult<List<CustomerResultBaseOnCatefory>>> GetAllProductsForMobile(ProductMobileParams parameters)
         {  
 
@@ -408,6 +464,7 @@ namespace EpicMarket.Services
 
                 var VerifiedStatusID = _context.StatusOptionSets.FirstOrDefault(c => c.Status == StatusConstants.VERIFIED).Id;
                 var query = _context.OutletProducts
+                    .IgnoreQueryFilters()
                     .Include(p => p.Outlet)
                     .Include(p => p.Product)
                     .Where(p => p.Outlet.ID == parameters.OutletId && p.Product.StatusId == VerifiedStatusID)
@@ -428,11 +485,14 @@ namespace EpicMarket.Services
                         p.Product.Description.ToLower().Contains(searchTerm));
                 }
 
-                // Apply Sorting
-                query = ApplySorting(query, parameters.SortBy, parameters.SortOrder);
-
                 // Get total count for pagination
                 var totalItems = await query.CountAsync();
+
+                // Check if there are any products for the outlet
+                if (totalItems == 0)
+                {
+                    throw new Exception("No products found for the outlet");
+                }
 
             var recommendedProducts = await query
                                     .Where(p => p.Product.IsRecommended)
@@ -476,6 +536,8 @@ namespace EpicMarket.Services
                     })
                     .ToListAsync();
 
+            // Apply Sorting
+            var sortedCategoryProducts = categoryProducts.OrderBy(x => x.Category).ToList();
 
             var finalResults = new List<CustomerResultBaseOnCatefory>();
 
@@ -488,7 +550,7 @@ namespace EpicMarket.Services
                     CustomerProductResults = recommendedProducts
                 });
             }
-            finalResults.AddRange(categoryProducts);
+            finalResults.AddRange(sortedCategoryProducts);
 
 
             return new GetDataResult<List<CustomerResultBaseOnCatefory>>
@@ -497,7 +559,6 @@ namespace EpicMarket.Services
                    Count = totalItems
                 };
         }
-     
         private IQueryable<T> ApplySorting<T>(
             IQueryable<T> query,
             string sortBy,

@@ -149,6 +149,12 @@ namespace EpicMarket.Entities
         public List<int> ListOfBranchIDs { get; set; }
 
     }
+
+    public class VerifyCatalogDto
+    {
+        public List<int> ListOfCatalogIDs { get; set; }
+
+    }
     public class QuickActionsParams
     {
         public int? ProductId { get; set; }

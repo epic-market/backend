@@ -18,7 +18,7 @@ namespace EpicMarket.Contracts
 		Task<GetDataResult<List<ProductResult>>> GetAllProducts(ProductParams productResult, int businessID);
         Task<ProductsDto> GetProductDetails(int productId);
         Task<ProductAdvanced> GetProductInventoryDetails(int productId, int branchId);
-        Task<int> VerifyCatalog(VerifyDto verifyBranchDto, string UserName, int AdminPersonID, string PageSource);
+        Task<int> VerifyCatalog(VerifyCatalogDto verifyCatalogDto, string UserName, int AdminPersonID, string PageSource);
         Task<int> QuickActions(QuickActionsParams quickActionsParams ,string UserName);
 
         Task<GetDataResult<List<CustomerResultBaseOnCatefory>>> GetAllProductsForMobile(ProductMobileParams parameters);

@@ -185,24 +185,69 @@ namespace EpicMarket.Services
 
         public async Task<int> MapBranchToProducts(BranchProductMapParams branchProductMap)
         {
-            
-            foreach (var i in branchProductMap?.AddProductsId)
+            // Validate input parameters
+            if (branchProductMap == null)
             {
-                var branchProduct = new OutletProduct();
-                branchProduct.OutletID = branchProductMap.OutletId;
-                branchProduct.ProductID = i;
-                _context.OutletProducts.Add(branchProduct);
+                throw new ArgumentNullException(nameof(branchProductMap));
             }
 
-            foreach (var i in branchProductMap?.RemovedProductsId)
+            var addProducts = branchProductMap.AddProductsId ?? new List<int>();
+            var removeProducts = branchProductMap.RemovedProductsId ?? new List<int>();
+
+            if (!addProducts.Any() && !removeProducts.Any())
             {
-                var removedProducts = await _context.OutletProducts.Where(c => c.ProductID == i && c.OutletID == branchProductMap.OutletId).FirstOrDefaultAsync();
-                _context.OutletProducts.Remove(removedProducts);
+                throw new ArgumentException("At least one product must be specified for adding or removing");
             }
 
-            var j = await _context.SaveChangesAsync();
+            // Get existing outlet-product mappings in a single query
+            var existingMappings = await _context.OutletProducts
+                .Where(op => op.OutletID == branchProductMap.OutletId)
+                .ToListAsync();
 
-            return j;
+            // Check if any products to add are inactive/deleted
+            var inactiveProducts = await _context.Catalogs
+                .Where(c => addProducts.Contains(c.ID) && !c.IsActive)
+                .Select(c => c.ID)
+                .ToListAsync();
+
+            if (inactiveProducts.Any())
+            {
+                throw new InvalidOperationException($"Products with IDs {string.Join(",", inactiveProducts)} are inactive or deleted");
+            }
+
+            // Validate products to add
+            var duplicateProducts = existingMappings
+                .Where(em => addProducts.Contains(em.ProductID))
+                .Select(em => em.ProductID)
+                .ToList();
+
+            if (duplicateProducts.Any())
+            {
+                throw new InvalidOperationException($"Products with IDs {string.Join(",", duplicateProducts)} are already mapped to this outlet");
+            }
+
+            // Validate products to remove
+            var productsToRemove = existingMappings
+                .Where(em => removeProducts.Contains(em.ProductID))
+                .ToList();
+
+            if (productsToRemove.Count != removeProducts.Count)
+            {
+                var missingProducts = removeProducts.Except(productsToRemove.Select(p => p.ProductID));
+                throw new InvalidOperationException($"Products with IDs {string.Join(",", missingProducts)} are not mapped to this outlet");
+            }
+
+            // Add new mappings
+            var newMappings = addProducts.Select(productId => new OutletProduct
+            {
+                OutletID = branchProductMap.OutletId,
+                ProductID = productId
+            });
+
+            await _context.OutletProducts.AddRangeAsync(newMappings);
+            _context.OutletProducts.RemoveRange(productsToRemove);
+
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<GetDataResult<List<BranchResult>>> GetAllBranches(BranchParams branchParams, int BusinessID)
