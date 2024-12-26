@@ -3,6 +3,7 @@ using EpicMarket.Data.Models;
 using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
 using EpicMarket.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -26,6 +27,7 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetNotification()
         {
             var reponse = new OperationResult<List<NotificationResult>>();
@@ -45,6 +47,7 @@ namespace EpicMarket.Business.API.Controllers
         }
 
         [HttpPut("Read/{id}")]
+        [Authorize]
         public async Task<IActionResult> ReadNotification(int id)
         {
 
