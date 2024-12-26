@@ -22,4 +22,10 @@ namespace EpicMarket.Entities
         public string X { get; set; }
         public int Customer { get; set; }
     }
+
+    public class ActiveUserChartResponse
+    {
+        public List<ActiveUserChart> Monthly { get; set; }
+        public List<ActiveUserChart> Weekly { get; set; }
+    }
 }
