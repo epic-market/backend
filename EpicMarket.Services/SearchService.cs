@@ -25,31 +25,34 @@ namespace EpicMarket.Services
         }
         public async Task<SearchResult> SearchAsync(SearchRequest request)
         {
-
             var searchTerm = request.SearchTerm?.Trim().ToLower();
 
             if (string.IsNullOrEmpty(searchTerm))
                 return new SearchResult();
 
-            var branchQuery = _context.Outlets.Include(c=>c.Address).AsQueryable();
+            var branchQuery = _context.Outlets.Include(c=>c.Address).IgnoreQueryFilters().AsQueryable();
             var productQuery = _context.OutletProducts.Include(p => p.Outlet).Include(p=>p.Product).Include(p => p.Outlet.Address).AsQueryable();
 
             // Apply location filter if coordinates are provided
             if (request.Latitude.HasValue && request.Longitude.HasValue)
             {
                 branchQuery = branchQuery.Where(b =>
-                    CalculateDistance(
-                        request.Latitude.Value,
-                        request.Longitude.Value,
-                        b.Address.Latitude,
-                        b.Address.Latitude) <= request.RadiusKm);
+                    (6371 * Math.Acos(
+                        Math.Cos(request.Latitude.Value * Math.PI / 180) *
+                        Math.Cos(b.Address.Latitude * Math.PI / 180) *
+                        Math.Cos((request.Longitude.Value - b.Address.Longitude) * Math.PI / 180) +
+                        Math.Sin(request.Latitude.Value * Math.PI / 180) *
+                        Math.Sin(b.Address.Latitude * Math.PI / 180)
+                    )) <= request.RadiusKm);
 
                 productQuery = productQuery.Where(p =>
-                    CalculateDistance(
-                        request.Latitude.Value,
-                        request.Longitude.Value,
-                        p.Outlet.Address.Latitude,
-                        p.Outlet.Address.Longitude) <= request.RadiusKm);
+                    (6371 * Math.Acos(
+                        Math.Cos(request.Latitude.Value * Math.PI / 180) *
+                        Math.Cos(p.Outlet.Address.Latitude * Math.PI / 180) *
+                        Math.Cos((request.Longitude.Value - p.Outlet.Address.Longitude) * Math.PI / 180) +
+                        Math.Sin(request.Latitude.Value * Math.PI / 180) *
+                        Math.Sin(p.Outlet.Address.Latitude * Math.PI / 180)
+                    )) <= request.RadiusKm);
             }
 
             // Apply text search
@@ -63,13 +66,15 @@ namespace EpicMarket.Services
                     Latitude = b.Address.Latitude,
                     Longitude = b.Address.Longitude,
                     Distance = request.Latitude.HasValue ?
-                        CalculateDistance(
-                            request.Latitude.Value,
-                            request.Longitude.Value,
-                            b.Address.Latitude,
-                            b.Address.Longitude) : 0
+                        (6371 * Math.Acos(
+                            Math.Cos(request.Latitude.Value * Math.PI / 180) *
+                            Math.Cos(b.Address.Latitude * Math.PI / 180) *
+                            Math.Cos((request.Longitude.Value - b.Address.Longitude) * Math.PI / 180) +
+                            Math.Sin(request.Latitude.Value * Math.PI / 180) *
+                            Math.Sin(b.Address.Latitude * Math.PI / 180)
+                        )) : 0
                 })
-                 .OrderBy(b => b.Distance)
+                .OrderBy(b => b.Distance)
                 .Take(MaxBranches)
                 .ToListAsync();
 
@@ -83,13 +88,15 @@ namespace EpicMarket.Services
                     BranchName = p.Outlet.Name,
                     BranchId = p.Outlet.ID,
                     Distance = request.Latitude.HasValue ?
-                        CalculateDistance(
-                            request.Latitude.Value,
-                            request.Longitude.Value,
-                            p.Outlet.Address.Latitude,
-                            p.Outlet.Address.Longitude) : 0
+                        (6371 * Math.Acos(
+                            Math.Cos(request.Latitude.Value * Math.PI / 180) *
+                            Math.Cos(p.Outlet.Address.Latitude * Math.PI / 180) *
+                            Math.Cos((request.Longitude.Value - p.Outlet.Address.Longitude) * Math.PI / 180) +
+                            Math.Sin(request.Latitude.Value * Math.PI / 180) *
+                            Math.Sin(p.Outlet.Address.Latitude * Math.PI / 180)
+                        )) : 0
                 })
-               .OrderBy(p => p.Distance)
+                .OrderBy(p => p.Distance)
                 .Take(MaxProducts)
                 .ToListAsync();
 
@@ -109,20 +116,22 @@ namespace EpicMarket.Services
             var last24Hours = DateTime.UtcNow.AddHours(-24);
 
             // First get all orders and outlets in memory
-            var orders = await _context.Orders
+            var orders =  _context.Orders
                 .Include(o => o.OrderStatusOptions)
                 .Include(o => o.Outlet)
                 .Include(o => o.Outlet.Address)
                 .Where(o => o.OrderAt >= last24Hours &&
-                           o.OrderStatusOptions.OrderStatus != OrderStatusConstants.Canceled)
-                .ToListAsync();
+                           o.OrderStatusOptions.OrderStatus != OrderStatusConstants.Canceled);
 
             // Then do distance calculation and filtering in memory
-            var filteredOrders = orders.Where(o => CalculateDistance(
-                    latitude,
-                    longitude,
-                    o.Outlet.Address.Latitude,
-                    o.Outlet.Address.Longitude) <= radiusKm);
+            var filteredOrders = orders.Where(o => 
+                (6371 * Math.Acos(
+                    Math.Cos(latitude * Math.PI / 180) *
+                    Math.Cos(o.Outlet.Address.Latitude * Math.PI / 180) *
+                    Math.Cos((longitude - o.Outlet.Address.Longitude) * Math.PI / 180) +
+                    Math.Sin(latitude * Math.PI / 180) *
+                    Math.Sin(o.Outlet.Address.Latitude * Math.PI / 180)
+                )) <= radiusKm);
 
             var trendingStores = filteredOrders
                 .GroupBy(o => new
@@ -138,11 +147,13 @@ namespace EpicMarket.Services
                     OutletName = g.Key.Name,
                     OrderCount = g.Count(),
                     LastOrderTime = g.Max(o => o.OrderAt),
-                    Distance = CalculateDistance(
-                        latitude,
-                        longitude,
-                        g.Key.Latitude,
-                        g.Key.Longitude)
+                    Distance = 6371 * Math.Acos(
+                        Math.Cos(latitude * Math.PI / 180) *
+                        Math.Cos(g.Key.Latitude * Math.PI / 180) *
+                        Math.Cos((longitude - g.Key.Longitude) * Math.PI / 180) +
+                        Math.Sin(latitude * Math.PI / 180) *
+                        Math.Sin(g.Key.Latitude * Math.PI / 180)
+                    )
                 })
                 .OrderByDescending(s => s.OrderCount)
                 .Take(3)
