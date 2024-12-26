@@ -184,6 +184,35 @@ namespace EpicMarket.Business.API.Controllers
 
             return Ok(result);
         }
+
+        [HttpPost("customer")]
+        [Authorize] // This ensures only logged-in customers can create orders
+        public async Task<ActionResult<OperationResult<int>>> CreateCustomerOrder(CreateCustomerOrderDto ordersDto)
+        {
+            var response = new OperationResult<int>();
+            
+            try
+            {
+                this.logger.LogInformation("Orders Controller -> CreateCustomerOrder()-> params {0}", 
+                    JsonConvert.SerializeObject(new { Params = ordersDto }));
+
+                // Get the current user's ID
+                var userId = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                
+                var id = await orderService.CreateCustomerOrder(ordersDto, userId);
+                
+                this.logger.LogInformation("Orders Controller -> CreateCustomerOrder()-> return {0}", 
+                    JsonConvert.SerializeObject(new { Value = id }));
+                
+                response.Data = id;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+                return BadRequest(response);
+            }
+        }
     }
 
 }

@@ -17,6 +17,13 @@ namespace EpicMarket.Entities
         public  List<OrderDetailsDto> orderDetailsDtos { get; set; } // this List<OrderDetailsDto> convert to json to string
     }
 
+    public class CreateCustomerOrderDto
+    {
+        public int OutletId { get; set; }
+        public string PaymentMode { get; set; }
+        public List<OrderDetailsDto> OrderDetailsDtos { get; set; } // Required for order details
+    }
+
 
     public class OrdersDetailsResult
     {
@@ -136,7 +143,6 @@ namespace EpicMarket.Entities
     public class CustomerOrderDto
     {
         public int OrderId { get; set; }
-        public string OrderNumber { get; set; }
         public DateTime OrderDate { get; set; }
         public string Status { get; set; }
         public double TotalAmount { get; set; }
@@ -144,7 +150,6 @@ namespace EpicMarket.Entities
         public string OutletName { get; set; }
         public int OutletId { get; set; }
         public string PaymentMethod { get; set; }
-        public string DeliveryAddress { get; set; }
     }
 
 }

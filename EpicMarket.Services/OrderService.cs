@@ -43,79 +43,154 @@ namespace EpicMarket.Services
         }
 
 
-
         public async Task<int> CreateOrder(OrdersDto orderdto, string UserName, string PageSource)
         {
-            var User = new AppUser();
-            var totalItems = 0;
-            double totalPrice = 0.0;
-
-            var existingUser = await _context.Users
-                        .FirstOrDefaultAsync(u => u.UserName == orderdto.CustomerEmail || u.PhoneNumber == orderdto.CustomerPhone);
-
-            var OrderTypeID = await _context.OrderTypesOptions
-                      .FirstOrDefaultAsync(u => u.Ordertype == OrderType.OFFLINE);
-
-            if (existingUser == null)
+            try
             {
-                
-                User.FirstName = orderdto.CustomerName;
-                User.UserName = orderdto.CustomerEmail;
-                User.Email = orderdto.CustomerEmail;
-                User.PhoneNumber = orderdto.CustomerPhone;
-                await _context.Users.AddAsync(User);
+                var User = new AppUser();
+                var totalItems = 0;
+                double totalPrice = 0.0;
+
+                // Get or create unknown user if both phone and email are empty
+                if (string.IsNullOrEmpty(orderdto.CustomerPhone) && string.IsNullOrEmpty(orderdto.CustomerEmail))
+                {
+                    var unknownUser = await _context.Users
+                        .FirstOrDefaultAsync(u => u.UserName == "unknown_user");
+
+                    if (unknownUser == null)
+                    {
+                        User.FirstName = "Unknown";
+                        User.UserName = "unknown_user";
+                        User.Email = null;
+                        User.PhoneNumber = null;
+                        await _context.Users.AddAsync(User);
+                        await unitOfWork.Complete();
+                    }
+                    else
+                    {
+                        User.Id = unknownUser.Id;
+                    }
+                }
+                else
+                {
+                    // Find existing user by phone or email if either exists
+                    var existingUser = await _context.Users
+                        .FirstOrDefaultAsync(u => 
+                            (!string.IsNullOrEmpty(orderdto.CustomerEmail) && u.UserName == orderdto.CustomerEmail) || 
+                            (!string.IsNullOrEmpty(orderdto.CustomerPhone) && u.PhoneNumber == orderdto.CustomerPhone));
+
+                    if (existingUser == null)
+                    {
+                        User.FirstName = orderdto.CustomerName ?? "Unknown";
+                        
+                        // Set username based on available info
+                        if (!string.IsNullOrEmpty(orderdto.CustomerEmail))
+                        {
+                            User.UserName = orderdto.CustomerEmail;
+                            User.Email = orderdto.CustomerEmail;
+                        }
+                        else if (!string.IsNullOrEmpty(orderdto.CustomerPhone))
+                        {
+                            User.UserName = orderdto.CustomerPhone;
+                            User.Email = null;
+                        }
+                        
+                        User.PhoneNumber = orderdto.CustomerPhone;
+                        await _context.Users.AddAsync(User);
+                        await unitOfWork.Complete();
+                    }
+                    else
+                    {
+                        User.Id = existingUser.Id;
+                    }
+                }
+
+                var OrderTypeID = await _context.OrderTypesOptions
+                    .FirstOrDefaultAsync(u => u.Ordertype == OrderType.OFFLINE);
+
+                if (OrderTypeID == null)
+                {
+                    throw new Exception("Order type OFFLINE not found");
+                }
+
+                // Check if the outlet exists
+                var outletExists = await _context.Outlets.AnyAsync(o => o.ID == orderdto.OutletId && o.IsActive == true);
+                if (!outletExists)
+                {
+                    throw new Exception($"Outlet with ID {orderdto.OutletId} not found");
+                }
+
+                var listoforderDetails = new List<OrderDetail>();
+
+                foreach(var orderDetail in orderdto.orderDetailsDtos)
+                {
+                    var catelog = await _context.Catalogs
+                        .FirstOrDefaultAsync(c => c.ID == orderDetail.CatalogID && c.IsActive == true);
+
+                    if (catelog == null)
+                    {
+                        throw new Exception($"Product with ID {orderDetail.CatalogID} not found");
+                    }
+
+                    if (orderDetail.Quantity <= 0)
+                    {
+                        throw new ArgumentException($"Invalid quantity for product {catelog.Name}");
+                    }
+
+                    var singleOrderDetail = new OrderDetail
+                    {
+                        CatalogID = orderDetail.CatalogID,
+                        Quantity = orderDetail.Quantity,
+                        Rate = catelog.Rate,
+                        TotalPrice = catelog.Rate * orderDetail.Quantity
+                    };
+
+                    listoforderDetails.Add(singleOrderDetail);
+                    totalItems += orderDetail.Quantity;
+                    totalPrice += (catelog.Rate * orderDetail.Quantity);
+                }
+
+                var newOrder = new Order()
+                {
+                    PersonID = User.Id,
+                    OutletID = orderdto.OutletId,
+                    OrderTypeId = OrderTypeID.Id,
+                    OrderAt = DateTime.UtcNow,
+                    StatusId = orderdto.StatusId,
+                    PaymentMode = orderdto.PaymentMode,
+                    TotalItems = totalItems,
+                    TotalPrice = totalPrice,
+                };
+
+                await _context.Orders.AddAsync(newOrder);
                 await unitOfWork.Complete();
+
+                listoforderDetails.ForEach(od => od.OrderID = newOrder.ID);
+                await _context.OrderDetails.AddRangeAsync(listoforderDetails);
+                await unitOfWork.Complete();
+
+                var saved = await _context.Orders.FirstOrDefaultAsync(o => o.ID == newOrder.ID);
+                string saveJson = JsonConvert.SerializeObject(saved, new JsonSerializerSettings
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                });
+
+                await this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS 
+                { 
+                    RecordId = newOrder.ID,
+                    Data = saveJson,
+                    Description = null,
+                    EventName = EventConstants.AddOrder,
+                    EntityName = EntityConstants.Order,
+                    Source = PageSource 
+                });
+
+                return newOrder.ID;
             }
-            else{
-                User.Id = existingUser.Id;
+            catch (Exception ex)
+            {
+                throw new Exception($"Error creating order: {ex.Message}");
             }
-
-			var listoforderDetails = new List<OrderDetail>();
-
-
-            foreach(var orderDetail in orderdto.orderDetailsDtos)
-            {
-                var catelog = _context.Catalogs.FirstOrDefault(c => c.ID == orderDetail.CatalogID);
-                var singleOrderDetail = new OrderDetail();
-                singleOrderDetail.CatalogID = orderDetail.CatalogID;
-                singleOrderDetail.Quantity = orderDetail.Quantity;
-                singleOrderDetail.Rate = catelog.Rate;
-                singleOrderDetail.TotalPrice = catelog.Rate * orderDetail.Quantity;
-                listoforderDetails.Add(singleOrderDetail);
-                totalItems += orderDetail.Quantity;
-                totalPrice += (catelog.Rate * orderDetail.Quantity);
-            }
-
-
-            var newOrder = new Order()
-            {
-                PersonID = User.Id,
-				OutletID = orderdto.OutletId,
-                OrderTypeId = OrderTypeID.Id,
-                OrderAt = DateTime.Now,
-                StatusId = orderdto.StatusId,
-                PaymentMode = orderdto.PaymentMode,
-                TotalItems = totalItems,
-                TotalPrice = totalPrice,
-            };
-
-            await _context.Orders.AddAsync(newOrder);
-			await unitOfWork.Complete();
-
-
-			listoforderDetails.ForEach(od => od.OrderID = newOrder.ID);
-            await _context.OrderDetails.AddRangeAsync(listoforderDetails);
-			await unitOfWork.Complete();
-
-
-			var saved = _context.Orders.FirstOrDefault(o => o.ID == newOrder.ID);
-            string saveJson = JsonConvert.SerializeObject(saved, new JsonSerializerSettings
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            });
-            await this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = newOrder.ID, Data = saveJson, Description = null, EventName = EventConstants.AddOrder, EntityName = EntityConstants.Order,Source=PageSource });
-
-            return newOrder.ID;
         }
 
     
@@ -174,51 +249,56 @@ namespace EpicMarket.Services
 
         public async Task<GetDataResult<List<OrderResult>>> GetAllOrders(OrderParams orderParams, int businessID)
         {
-
             var getData = new GetDataResult<List<OrderResult>>();
 
-            //1 . filter with BusinessID
-            var orders = _context.Orders.Include(c=>c.Outlet).
-                Where(c => c.Outlet.BussinessID == businessID).Include(c=> c.Person);
-            
-            //2 . Appling Searching
-            var sortedOrders = orders.Where(row => row.Person.FirstName.Contains(orderParams.searchTerm.Trim()) || row.ID.ToString() == orderParams.searchTerm.Trim());
+            //1. Filter with BusinessID and include related data
+            var query = _context.Orders
+                .Include(c => c.Outlet)
+                .Include(c => c.Person)
+                .Include(c => c.OrderStatusOptions)
+                .Include(c => c.OrderTypesOptions)
+                .Where(c => c.Outlet.BussinessID == businessID);
 
-
-            // 3 .Appying Sorting
-            switch (orderParams.sortColumn)
+            //2. Apply searching if search term provided
+            if (!string.IsNullOrWhiteSpace(orderParams.searchTerm))
             {
-                case "OrderID":
-                    sortedOrders = orderParams.ascending ? sortedOrders.OrderBy(c => c.ID) : sortedOrders.OrderByDescending(c => c.ID);
-                    break;
-                case "Status":
-                    sortedOrders = orderParams.ascending ? sortedOrders.OrderBy(c => c.StatusId) : sortedOrders.OrderByDescending(c => c.StatusId);
-                    break;
-                default:
-                    break;
+                var searchTerm = orderParams.searchTerm.Trim();
+                query = query.Where(o => 
+                    o.Person.FirstName.Contains(searchTerm) || 
+                    o.ID.ToString().Contains(searchTerm)
+                );
             }
 
-            //getting the total count
-            int totalCount = sortedOrders.Count();
-
-
-            // 4. Apply pagination (skip and take)
-            var pagedOrders = sortedOrders
-                .Skip((orderParams.PageIndex - 1) * orderParams.pageSize) // Skip items for previous pages
-                .Take(orderParams.pageSize); // Take items for the current page
-
-            // 5. Select data and add SRNO
-            var results = await pagedOrders.Select(c => new OrderResult()
+            //3. Apply sorting
+            query = orderParams.sortColumn?.ToLower() switch
             {
-                ID = c.ID,
-                CustomerName = c.Person.FirstName + "" + c.Person.LastName,
-                Status = c.OrderStatusOptions.OrderStatus,
-                TotalPrice = c.TotalPrice,
-                TotalItems = c.TotalItems,
-                OrderType = c.OrderTypesOptions.Ordertype,
-                Count = totalCount
-            }).ToListAsync();
+                "orderid" => orderParams.ascending ? 
+                    query.OrderBy(c => c.ID) : 
+                    query.OrderByDescending(c => c.ID),
+                "status" => orderParams.ascending ?
+                    query.OrderBy(c => c.StatusId) :
+                    query.OrderByDescending(c => c.StatusId),
+                _ => query.OrderByDescending(c => c.OrderAt) // Default sort
+            };
 
+            //4. Get total count before pagination
+            var totalCount = await query.CountAsync();
+
+            //5. Apply pagination and select results
+            var results = await query
+                .Skip((orderParams.PageIndex - 1) * orderParams.pageSize)
+                .Take(orderParams.pageSize)
+                .Select(c => new OrderResult
+                {
+                    ID = c.ID,
+                    CustomerName = c.Person.FirstName + " " + c.Person.LastName,
+                    Status = c.OrderStatusOptions.OrderStatus,
+                    TotalPrice = c.TotalPrice,
+                    TotalItems = c.TotalItems,
+                    OrderType = c.OrderTypesOptions.Ordertype,
+                    Count = totalCount
+                })
+                .ToListAsync();
 
             getData.items = results;
             getData.Count = totalCount;
@@ -380,7 +460,7 @@ namespace EpicMarket.Services
             var query = _context.Orders
                 .Include(o => o.OrderDetails)
                 .Include(o=>o.OrderStatusOptions)
-                 .Include(o => o.Outlet)
+                .Include(o => o.Outlet)
                 .Where(o => o.PersonID == customerId)
                 .AsQueryable();
 
@@ -437,6 +517,112 @@ namespace EpicMarket.Services
                 items = orders,
                 Count = totalItems
             };
+        }
+
+        public async Task<int> CreateCustomerOrder(CreateCustomerOrderDto order, int userId)
+        {
+            try
+            {
+                double totalPrice = 0.0;
+                var totalItems = 0;
+
+                // Get ONLINE order type
+                var orderTypeId = await _context.OrderTypesOptions
+                    .FirstOrDefaultAsync(u => u.Ordertype == OrderType.ONLINE);
+
+                if (orderTypeId == null)
+                {
+                    throw new Exception("Order type ONLINE not found");
+                }
+
+                // Validate outlet
+                var outletExists = await _context.Outlets
+                    .AnyAsync(o => o.ID == order.OutletId && o.IsActive == true);
+                if (!outletExists)
+                {
+                    throw new Exception($"Outlet with ID {order.OutletId} not found");
+                }
+
+                var listoforderDetails = new List<OrderDetail>();
+
+                // Process order details
+                foreach(var orderDetail in order.OrderDetailsDtos)
+                {
+                    var catalog = await _context.Catalogs
+                        .FirstOrDefaultAsync(c => c.ID == orderDetail.CatalogID && c.IsActive == true);
+
+                    if (catalog == null)
+                    {
+                        throw new Exception($"Product with ID {orderDetail.CatalogID} not found");
+                    }
+
+                    if (orderDetail.Quantity <= 0)
+                    {
+                        throw new ArgumentException($"Invalid quantity for product {catalog.Name}");
+                    }
+
+                    var singleOrderDetail = new OrderDetail
+                    {
+                        CatalogID = orderDetail.CatalogID,
+                        Quantity = orderDetail.Quantity,
+                        Rate = catalog.Rate,
+                        TotalPrice = catalog.Rate * orderDetail.Quantity
+                    };
+
+                    listoforderDetails.Add(singleOrderDetail);
+                    totalItems += orderDetail.Quantity;
+                    totalPrice += (catalog.Rate * orderDetail.Quantity);
+                }
+
+
+                //get the order status id for the OrderStatusConstants.OrderPlaced 
+                var orderStatusId = await _context.OrderStatusOptions
+                    .FirstOrDefaultAsync(u => u.OrderStatus == OrderStatusConstants.OrderPlaced);
+
+                // Create new order
+                var newOrder = new Order()
+                {
+                    PersonID = userId,
+                    OutletID = order.OutletId,
+                    OrderTypeId = orderTypeId.Id,
+                    OrderAt = DateTime.UtcNow,
+                    StatusId = orderStatusId.Id, 
+                    PaymentMode = order.PaymentMode,
+                    TotalItems = totalItems,
+                    TotalPrice = totalPrice,
+                };
+
+                await _context.Orders.AddAsync(newOrder);
+                await unitOfWork.Complete();
+
+                // Add order details
+                listoforderDetails.ForEach(od => od.OrderID = newOrder.ID);
+                await _context.OrderDetails.AddRangeAsync(listoforderDetails);
+                await unitOfWork.Complete();
+
+                // Log the event
+                var saved = await _context.Orders.FirstOrDefaultAsync(o => o.ID == newOrder.ID);
+                string saveJson = JsonConvert.SerializeObject(saved, new JsonSerializerSettings
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                });
+
+                await this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS 
+                { 
+                    RecordId = newOrder.ID,
+                    Data = saveJson,
+                    Description = null,
+                    EventName = EventConstants.AddOrder,
+                    EntityName = EntityConstants.Order,
+                    Source = "Customer" 
+                });
+
+                return newOrder.ID;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error creating customer order: {ex.Message}");
+            }
         }
 
     }
