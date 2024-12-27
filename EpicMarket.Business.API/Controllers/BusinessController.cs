@@ -26,6 +26,7 @@ namespace EpicMarket.Business.API.Controllers
         private readonly IAttachmentService attachmentService;
         private readonly IFileService fileStoreService;
         private readonly IApplicationConfigurationService applicationConfigurationService;
+        private readonly IConfiguration _configuration;
 
         public BusinessController(
                                     ILogger<BusinessController> logger,
@@ -35,7 +36,8 @@ namespace EpicMarket.Business.API.Controllers
                                     IHttpContextAccessor httpContextAccessor,
                                     IAttachmentService attachmentService,
                                     IFileService fileStoreService,
-                                    IApplicationConfigurationService applicationConfigurationService
+                                    IApplicationConfigurationService applicationConfigurationService,
+                                    IConfiguration configuration
                                   ) : base(dbContext, httpContextAccessor)
         {
             this.logger = logger;
@@ -44,6 +46,7 @@ namespace EpicMarket.Business.API.Controllers
             this.attachmentService = attachmentService;
             this.fileStoreService = fileStoreService;
             this.applicationConfigurationService = applicationConfigurationService;
+            _configuration = configuration;
         }
 
 
@@ -151,6 +154,19 @@ namespace EpicMarket.Business.API.Controllers
                     });
                 }
             }
+            var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "..", "EmailTemplates");
+            var emailService = new EmailService(templatePath, _configuration); // Pass IConfiguration to EmailService
+           var emailModel = new 
+            {
+                 Business_Name = businessRegisterDto.BusinessName, // Assuming UserName is the business name
+               Processing_Days = "5", // Example processing days
+               Support_Email = "support@epicmarket.com", // Replace with actual support email
+               Support_Phone = "123-456-7890", // Replace with actual support phone
+               Current_Year = DateTime.Now.Year.ToString(),
+               Company_Address = "123 Epic Market St, Epic City, EC 12345", // Replace with actual address
+            };
+
+            await emailService.SendEmailAsync("UnderReviewForBusiness", emailModel,this.LoggedInUserName , "we are reviewing your business details");
 
             response.Data = new BusinessDTO_Result
             {
