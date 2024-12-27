@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Branch Verification Request Received - Epic Market</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background-color: #f5f5f5;
+    "
+  >
+    <table
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      style="background-color: #f5f5f5"
+    >
+      <tr>
+        <td align="center" style="padding: 40px 0">
+          <table
+            width="700"
+            cellpadding="0"
+            cellspacing="0"
+            style="
+              background-color: #ffffff;
+              border-radius: 16px;
+              overflow: hidden;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            "
+          >
+            <!-- Header -->
+            <tr>
+              <td
+                style="
+                  background: #000000;
+                  padding: 40px 20px;
+                  text-align: center;
+                "
+              >
+                <h1
+                  style="
+                    color: #ffffff;
+                    font-size: 32px;
+                    margin: 0 0 20px 0;
+                    font-weight: 700;
+                  "
+                >
+                  Epic Market
+                </h1>
+                <h2 style="font-size: 28px; color: #ffffff; margin: 0 0 8px 0">
+                  Branch Verification Request Received
+                </h2>
+                <p
+                  style="
+                    font-size: 18px;
+                    color: #ffffff;
+                    opacity: 0.9;
+                    margin: 0;
+                  "
+                >
+                  Your branches are now under review
+                </p>
+              </td>
+            </tr>
+
+            <!-- Content -->
+            <tr>
+              <td style="padding: 40px 30px">
+                <p>Dear <strong>${Business_Name}</strong>,</p>
+
+                <p style="margin-top: 16px">
+                  Thank you for submitting your branches for verification. Our
+                  team has received your request and will begin the verification
+                  process shortly.
+                </p>
+
+                <!-- Request Details -->
+                <div
+                  style="
+                    background: #f8fafc;
+                    border-radius: 12px;
+                    padding: 24px;
+                    margin: 24px 0;
+                    border-left: 4px solid #000000;
+                  "
+                >
+                  <h2 style="margin: 0 0 16px 0">Request Details</h2>
+                  <table
+                    width="100%"
+                    cellpadding="0"
+                    cellspacing="0"
+                    style="margin-bottom: 16px"
+                  >
+                    <tr>
+                      <td style="padding: 8px 0">
+                        <strong>Request ID:</strong>
+                      </td>
+                      <td style="padding: 8px 0">${Request_ID}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0">
+                        <strong>Submission Date:</strong>
+                      </td>
+                      <td style="padding: 8px 0">${Submission_Date}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 8px 0">
+                        <strong>Expected Review Time:</strong>
+                      </td>
+                      <td style="padding: 8px 0">3-5 business days</td>
+                    </tr>
+                  </table>
+
+                  <!-- Branches Table -->
+                  <table
+                    width="100%"
+                    cellpadding="0"
+                    cellspacing="0"
+                    style="
+                      border-collapse: separate;
+                      border-spacing: 0;
+                      border-radius: 8px;
+                      overflow: hidden;
+                    "
+                  >
+                    <tr>
+                      <th
+                        style="
+                          background: #000000;
+                          color: #ffffff;
+                          padding: 16px;
+                          text-align: left;
+                          font-size: 14px;
+                        "
+                      >
+                        Branch ID
+                      </th>
+                      <th
+                        style="
+                          background: #000000;
+                          color: #ffffff;
+                          padding: 16px;
+                          text-align: left;
+                          font-size: 14px;
+                        "
+                      >
+                        Branch Name
+                      </th>
+                      <th
+                        style="
+                          background: #000000;
+                          color: #ffffff;
+                          padding: 16px;
+                          text-align: left;
+                          font-size: 14px;
+                        "
+                      >
+                        Address
+                      </th>
+                      <th
+                        style="
+                          background: #000000;
+                          color: #ffffff;
+                          padding: 16px;
+                          text-align: left;
+                          font-size: 14px;
+                        "
+                      >
+                        Status
+                      </th>
+                    </tr>
+                    #foreach($branch in $Branches)
+                    <tr>
+                      <td
+                        style="
+                          padding: 16px;
+                          background: #ffffff;
+                          border-bottom: 1px solid #e5e7eb;
+                        "
+                      >
+                        $branch.BranchId
+                      </td>
+                      <td
+                        style="
+                          padding: 16px;
+                          background: #ffffff;
+                          border-bottom: 1px solid #e5e7eb;
+                        "
+                      >
+                        $branch.BranchName
+                      </td>
+                      <td
+                        style="
+                          padding: 16px;
+                          background: #ffffff;
+                          border-bottom: 1px solid #e5e7eb;
+                        "
+                      >
+                        $branch.Address
+                      </td>
+                      <td
+                        style="
+                          padding: 16px;
+                          background: #ffffff;
+                          border-bottom: 1px solid #e5e7eb;
+                        "
+                      >
+                        <span
+                          style="
+                            display: inline-block;
+                            padding: 6px 12px;
+                            background: #fef3c7;
+                            color: #92400e;
+                            border-radius: 20px;
+                            font-size: 12px;
+                            font-weight: 600;
+                            text-transform: uppercase;
+                          "
+                          >Under Review</span
+                        >
+                      </td>
+                    </tr>
+                    #end
+                  </table>
+                </div>
+
+                <!-- Verification Process -->
+                <div style="margin: 32px 0">
+                  <h2 style="margin: 0 0 24px 0">Our Verification Process</h2>
+
+                  <table
+                    width="100%"
+                    cellpadding="0"
+                    cellspacing="0"
+                    style="
+                      background: #ffffff;
+                      border-radius: 12px;
+                      border: 1px solid #e5e7eb;
+                    "
+                  >
+                    <tr>
+                      <td style="padding: 20px">
+                        <p style="margin: 0 0 16px 0">
+                          During the verification process, our team will:
+                        </p>
+                        <table width="100%" cellpadding="0" cellspacing="0">
+                          <tr>
+                            <td style="padding: 8px 0">
+                              ✓ Visit your business location for physical
+                              inspection
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 8px 0">
+                              ✓ Verify the accuracy of branch address and
+                              contact details
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 8px 0">
+                              ✓ Review branch photos and ensure they meet
+                              quality standards
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 8px 0">
+                              ✓ Validate business operations and compliance with
+                              marketplace guidelines
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+
+                <!-- Important Note -->
+                <div
+                  style="
+                    background: #fef3c7;
+                    border-radius: 12px;
+                    padding: 24px;
+                    margin: 32px 0;
+                    border-left: 4px solid #92400e;
+                  "
+                >
+                  <h3 style="margin: 0 0 16px 0; color: #92400e">
+                    Important Note
+                  </h3>
+                  <p style="margin: 0; color: #92400e">
+                    We recommend mapping your products to branches before
+                    verification. Only verified products will be displayed after
+                    successful branch verification. You can map products by
+                    clicking on the 'Edit Outlet' option in your dashboard.
+                  </p>
+                </div>
+
+                <!-- What's Next -->
+                <div
+                  style="
+                    background: #f8fafc;
+                    border-radius: 12px;
+                    padding: 24px;
+                    margin: 32px 0;
+                    border: 1px solid #e5e7eb;
+                  "
+                >
+                  <h2 style="margin: 0 0 16px 0">What Happens Next?</h2>
+                  <ul style="margin: 0; padding: 0 0 0 20px">
+                    <li style="margin-bottom: 8px">
+                      Our team will schedule an inspection visit to your branch
+                      location
+                    </li>
+                    <li style="margin-bottom: 8px">
+                      If any changes are required, we'll notify you through your
+                      support ticket
+                    </li>
+                    <li style="margin-bottom: 8px">
+                      Upon successful verification, your branch will
+                      automatically go live
+                    </li>
+                    <li style="margin-bottom: 8px">
+                      Verified products mapped to the branch will be visible to
+                      customers
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Track Status Button -->
+                <div style="text-align: center; margin: 32px 0">
+                  <a
+                    href="${Support_Portal_URL}"
+                    style="
+                      display: inline-block;
+                      padding: 16px 32px;
+                      background: #000000;
+                      color: #ffffff;
+                      text-decoration: none;
+                      border-radius: 8px;
+                      font-weight: 600;
+                      text-transform: uppercase;
+                      letter-spacing: 1px;
+                    "
+                    >Track Verification Status</a
+                  >
+                </div>
+
+                <!-- Help Section -->
+                <div
+                  style="
+                    background: #f8fafc;
+                    border-radius: 12px;
+                    padding: 24px;
+                    text-align: center;
+                    margin-top: 32px;
+                    border: 1px solid #e5e7eb;
+                  "
+                >
+                  <h3 style="margin: 0 0 16px 0">Need Assistance?</h3>
+                  <p style="margin: 0">
+                    You can check the status of your verification at any time in
+                    the support section
+                  </p>
+                  <p style="margin-top: 12px">
+                    Request ID: <strong>${Request_ID}</strong><br />
+                    Support Email:
+                    <a
+                      href="mailto:${Support_Email}"
+                      style="color: #000000; text-decoration: underline"
+                      >${Support_Email}</a
+                    ><br />
+                    Support Phone: ${Support_Phone}
+                  </p>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td
+                style="
+                  text-align: center;
+                  padding: 24px;
+                  background: #f8fafc;
+                  color: #6b7280;
+                  font-size: 14px;
+                  border-top: 1px solid #e5e7eb;
+                "
+              >
+                <p style="margin: 0">
+                  © ${Current_Year} Epic Market. All rights reserved.
+                </p>
+                <p style="margin-top: 8px">${Company_Address}</p>
+                <p style="margin-top: 16px">
+                  <small
+                    >This is an automated message. Please do not reply to this
+                    email.</small
+                  >
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

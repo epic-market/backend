@@ -25,6 +25,7 @@ namespace EpicMarket.Services
         private readonly ApplicationDbContext dbContext;
         private readonly IApplicationConfigurationService applicationConfiguration;
         private readonly ICommunicationQueueService communicationQueueService;
+        private readonly IConfiguration _configuration; // Added IConfiguration field
 
         public TokenService(IConfiguration config,
                             UserManager<AppUser> userManager,
@@ -37,6 +38,7 @@ namespace EpicMarket.Services
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
             this.applicationConfiguration = applicationConfiguration;
             this.communicationQueueService = communicationQueueService;
+            _configuration = config; // Initialize IConfiguration
         }
 
         public async Task<string> CreateToken(AppUser user)
@@ -95,15 +97,20 @@ namespace EpicMarket.Services
 
                 var intialURL = applicationConfiguration.GetApplicationConfigurationValue("BusinessOwnerBaseURL");
                 string queryToken = intialURL + resetPassword.Path + "/" + User.Id + "." + UniqueGuid;
-                await this.communicationQueueService.InsertCommunicationQueue(
-                    new Entities.CommunicationQueueDTO()
-                    {
-                        MessageData = queryToken,
-                        Subject = "Password Reset",
-                        NotificationRecipient = resetPassword.Email,
-                        ContactMethod = ContactMethodConstants.EMAIL,
-                        CreateBy = resetPassword.Email
-                    });
+                //await this.communicationQueueService.InsertCommunicationQueue(
+                //    new Entities.CommunicationQueueDTO()
+                //    {
+                //        MessageData = queryToken,
+                //        Subject = "Password Reset",
+                //        NotificationRecipient = resetPassword.Email,
+                //        ContactMethod = ContactMethodConstants.EMAIL,
+                //        CreateBy = resetPassword.Email
+                //    });
+
+                var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "..", "EmailTemplates");
+                var emailService = new EmailService(templatePath, _configuration); // Pass IConfiguration to EmailService
+                var model = new { Reset_Password_URL = queryToken };
+                await emailService.SendEmailAsync("ResetPasswordLink", model,resetPassword.Email, "Reset Password Link");
 
                 return "Reset Link sent to registered Email";
             }
