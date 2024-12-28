@@ -178,13 +178,13 @@ namespace EpicMarket.Business.API.Controllers
         //This related to non-login and query screen of advertise URL
         [HttpPost("AddSupportTask")]
         [AllowAnonymous]
-        public ActionResult<OperationResult<long>> AddSupportTask(SupportDTO supportDTO)
+        public async Task<ActionResult<OperationResult<long>>> AddSupportTask(SupportDTO supportDTO)
         {
             var response = new OperationResult<long>();
 
             this.logger.LogInformation("Support Controller -> AddSupportTask()-> params {0}", JsonConvert.SerializeObject(new { Params = supportDTO }));
 
-            var results = tasksService.AddSupportTask(supportDTO,this.AdminPersonID);
+            var results =await tasksService.AddSupportTask(supportDTO,this.AdminPersonID);
             this.logger.LogInformation("Support Controller -> AddSupportTask()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
             return Ok(response);
         }

@@ -282,6 +282,7 @@ namespace EpicMarket.Data.Models
             modelBuilder.Entity<Order>()
                 .HasQueryFilter(o => IsUserAdmin || !AllowedBranchIds.Any() ||
                     AllowedBranchIds.Contains(o.OutletID));
+            
 
 
             modelBuilder.Entity<AppUser>()
@@ -340,6 +341,18 @@ namespace EpicMarket.Data.Models
                   .WithMany(u => u.OutletProducts)
                   .HasForeignKey(op => op.OutletID)
                   .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Tasks>()
+                        .HasOne(op => op.TaskTypes)
+                        .WithMany(u => u.Tasks)
+                        .HasForeignKey(op => op.TaskTypeID)
+                        .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Tasks>()
+                        .HasOne(op => op.TaskStatusType)
+                        .WithMany(u => u.Tasks)
+                        .HasForeignKey(op => op.TaskStatusID)
+                        .OnDelete(DeleteBehavior.Restrict);
 
 
             modelBuilder.Entity<AppUser>()

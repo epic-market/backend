@@ -163,14 +163,33 @@ namespace EpicMarket.Services
         public async Task<long> AddSupportTask(SupportDTO supportDTO, int AdminPersonID)
         {
             var supportQuery = _context.SupportQuerys.Where(row => row.ID == supportDTO.QueryId).FirstOrDefault();
+
+            // Check for the static user
+            var staticUserEmail = "supportuser@epicmarket.in";
+            var user = await _userManager.Users.SingleOrDefaultAsync(x => x.Email == staticUserEmail);
+
+            // If user not found, create a new user without a password
+            if (user == null)
+            {
+                user = new AppUser
+                {
+                    UserName = staticUserEmail,
+                    Email = staticUserEmail,
+                    IsActive = true
+                };
+                _context.Users.Add(user); // Add user to the context without creating a password
+                await unitOfWork.Complete(); // Save changes to the database
+            }
+
             var taskParam = new TasksParams
             {
                 Name = "Support Query",
                 Description = supportQuery.Query,
                 TaskType = TaskTypeConstants.Support,
-                TaskData = supportDTO.Comment
+                TaskData = supportDTO.Comment,
+                TaskEntity = EntityConstants.Tasks
             };
-            var taskID = await this.SaveTask(taskParam, AdminPersonID, supportDTO.Email);
+            var taskID = await this.SaveTask(taskParam, AdminPersonID, staticUserEmail); // Use static user email
 
             SupportTicket supportTicket;
             supportTicket = new SupportTicket
