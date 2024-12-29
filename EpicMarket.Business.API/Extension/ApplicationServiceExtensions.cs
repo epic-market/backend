@@ -51,6 +51,7 @@ namespace EpicMarket.Business.API.Extension
             services.AddScoped<IOnboardingService, OnboardingService>();
             services.AddScoped<ISearchService, SearchService>();
             services.AddScoped<IRatingService, RatingService>();
+            services.AddScoped<IDashboardService, DashboardService>();
             services.AddScoped<LogUserActivity>();
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
             Serilog.Log.Logger = new LoggerConfiguration()

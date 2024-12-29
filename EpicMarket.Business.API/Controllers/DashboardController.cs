@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.Security.Claims;
 using EpicMarket.Contracts;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EpicMarket.Business.API.Controllers
 {
@@ -27,6 +28,7 @@ namespace EpicMarket.Business.API.Controllers
 
 
             [HttpGet("OnboardingSteps")]
+            [Authorize]
             public async Task<IActionResult> GetAllOnBoardSteps()
             {
 
@@ -72,7 +74,7 @@ namespace EpicMarket.Business.API.Controllers
             [HttpGet("active-users/{outletId}")]
             public async Task<IActionResult> GetActiveUsers(int outletId)
             {
-                var response = new OperationResult<(List<ActiveUserChart> Monthly, List<ActiveUserChart> Weekly)>();
+                var response = new OperationResult<ActiveUserChartResponse>();
                 
                 this.logger.LogInformation($"Dashboard Controller -> GetActiveUsers({outletId})");
 

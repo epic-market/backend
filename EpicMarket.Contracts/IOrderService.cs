@@ -22,6 +22,6 @@ namespace EpicMarket.Contracts
 
         Task<bool> AnyNewOrders(DateTime ordered_after, int businessid , int? outlet_id);
         Task<GetDataResult<List<CustomerOrderDto>>> GetCustomerOrderHistoryAsync(int customerId, OrderHistoryRequest request);
-
+        Task<int> CreateCustomerOrder(CreateCustomerOrderDto order, int userId);
     }
 }

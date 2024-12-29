@@ -20,8 +20,9 @@ namespace EpicMarket.Services
         _logger = logger;
     }
 
-    public async Task<(List<ActiveUserChart> Monthly, List<ActiveUserChart> Weekly)> GetActiveUsers(int outletId)
+    public async Task<ActiveUserChartResponse> GetActiveUsers(int outletId)
     {
+        var response = new ActiveUserChartResponse();
         try
         {
             var monthlyData = new List<ActiveUserChart>();
@@ -31,13 +32,17 @@ namespace EpicMarket.Services
             var earliestOrder = await _dbContext.Orders
                 .Where(o => o.OutletID == outletId)
                 .OrderBy(o => o.OrderAt)
+                .IgnoreQueryFilters()
                 .Select(o => o.OrderAt)
+            
                 .FirstOrDefaultAsync();
 
             if (earliestOrder == default)
             {
                 _logger.LogInformation($"No orders found for outlet {outletId}");
-                return (monthlyData, weeklyData);
+                response.Monthly = new List<ActiveUserChart>();
+                response.Weekly = new List<ActiveUserChart>();
+                return response;
             }
 
             var today = DateTime.UtcNow.Date;
@@ -57,6 +62,7 @@ namespace EpicMarket.Services
                     .Where(o => o.OutletID == outletId &&
                                o.OrderAt.Date >= startOfMonth && 
                                o.OrderAt.Date <= endOfMonth)
+                    .IgnoreQueryFilters()
                     .Select(o => o.PersonID)
                     .Distinct()
                     .CountAsync();
@@ -87,7 +93,9 @@ namespace EpicMarket.Services
             }
 
             _logger.LogInformation($"Retrieved active users data for outlet {outletId}. Monthly entries: {monthlyData.Count}, Weekly entries: {weeklyData.Count}");
-            return (monthlyData, weeklyData);
+            response.Monthly = monthlyData;
+            response.Weekly = weeklyData;
+            return response;
         }
         catch (Exception ex)
         {
@@ -96,7 +104,8 @@ namespace EpicMarket.Services
         }
     }
 
-    public async Task<List<GMVChart>> GetGrossMerchandiseValue(int outletId)
+        //GMV=Sales Price of Goods×Number of Goods Sold
+        public async Task<List<GMVChart>> GetGrossMerchandiseValue(int outletId)
     {
         try
         {
@@ -106,6 +115,7 @@ namespace EpicMarket.Services
             var startDate = await _dbContext.Orders
                 .Where(o => o.OutletID == outletId)
                 .OrderBy(o => o.OrderAt)
+                .IgnoreQueryFilters()
                 .Select(o => o.OrderAt)
                 .FirstOrDefaultAsync();
 
@@ -127,9 +137,8 @@ namespace EpicMarket.Services
                     .Where(o => o.OutletID == outletId &&
                                o.OrderAt >= startOfMonth && 
                                o.OrderAt <= endOfMonth)
-                    .Select(o => o.TotalPrice)
-                    .DefaultIfEmpty(0)
-                    .SumAsync();
+                    .IgnoreQueryFilters()
+                    .SumAsync(o => o.TotalPrice);
 
                 monthlyGMV.Add(new GMVChart
                 {
@@ -162,6 +171,7 @@ namespace EpicMarket.Services
             var previousMonthCustomers = await _dbContext.Orders
                 .Where(o => o.OutletID == outletId &&
                            o.OrderAt >= twoMonthsAgo && o.OrderAt < lastMonth)
+                .IgnoreQueryFilters()
                 .Select(o => o.PersonID)
                 .Distinct()
                 .ToListAsync();
@@ -177,6 +187,7 @@ namespace EpicMarket.Services
                 .Where(o => o.OutletID == outletId &&
                            o.OrderAt >= lastMonth && o.OrderAt < today)
                 .Where(o => previousMonthCustomers.Contains(o.PersonID))
+                .IgnoreQueryFilters()
                 .Select(o => o.PersonID)
                 .Distinct()
                 .CountAsync();
