@@ -2,13 +2,22 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
 WORKDIR /src
 
 # Copy csproj and restore as distinct layers
+COPY ./EpicMarket.Admin.MVC/EpicMarket.Admin.MVC.csproj ./EpicMarket.Admin.MVC/EpicMarket.Admin.MVC.csproj
 COPY ./EpicMarket.Business.API/EpicMarket.Business.API.csproj ./EpicMarket.Business.API/EpicMarket.Business.API.csproj
+COPY ./EpicMarket.Contracts/EpicMarket.Contracts.csproj ./EpicMarket.Contracts/EpicMarket.Contracts.csproj
+COPY ./EpicMarket.Data/EpicMarket.Data.csproj ./EpicMarket.Data/EpicMarket.Data.csproj
+COPY ./EpicMarket.Data.Webapp/EpicMarket.Data.Webapp.csproj ./EpicMarket.Data.Webapp/EpicMarket.Data.Webapp.csproj
+COPY ./EpicMarket.Entities/EpicMarket.Entities.csproj ./EpicMarket.Entities/EpicMarket.Entities.csproj
+COPY ./EpicMarket.Services/EpicMarket.Services.csproj ./EpicMarket.Services/EpicMarket.Services.csproj
+
 # Restore as distinct layers
+# ENV DOTNET_NUGET_SIGNATURE_VERIFICATION=false
 RUN dotnet restore ./EpicMarket.Business.API/EpicMarket.Business.API.csproj
 
 # Copy everything else and build
-COPY . .
+COPY . ./
 # Build and publish a release
+# ENV DOTNET_NUGET_SIGNATURE_VERIFICATION=false
 RUN dotnet publish "./EpicMarket.Business.API/EpicMarket.Business.API.csproj" -c Release -o out
 
 # Build runtime image
