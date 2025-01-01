@@ -120,8 +120,8 @@ namespace EpicMarket.Services
         {
             var attachmentTypeID = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
             var returnedProducts = await (from catalogItem in _context.Catalogs
-                    join outletProduct in (_context.OutletProducts.Where(a => a.OutletID == BranchId))
-                    on catalogItem.ID equals outletProduct.ProductID into joinedProducts
+                    join outletProduct in (_context.Inventory.Where(a => a.OutletID == BranchId))
+                    on catalogItem.ID equals outletProduct.ProductVariantID into joinedProducts
                     from matchedProduct in joinedProducts.DefaultIfEmpty()
                     where catalogItem.BusinessID == BusinessID && catalogItem.IsActive == true 
                     select new ProductsMapOptionResult
@@ -152,10 +152,10 @@ namespace EpicMarket.Services
             var getResult = new GetDataResult<List<ProductResult>>();
 
             //1 . filter with BusinessID
-            var Products = _context.OutletProducts
+            var Products = _context.Inventory
                                 .Where(c => c.OutletID == outletId)
-                                .Include(c => c.Product)
-                                .Where(c => c.Product.IsActive == true)
+                                .Include(c => c.ProductVariants)
+                                .Where(c => c.ProductVariants.Catalog.IsActive == true)
                                 .IgnoreQueryFilters();
 
             //2 . Appling Searching
@@ -164,8 +164,8 @@ namespace EpicMarket.Services
             {
                 var searchTerm = productParams.searchTerm.Trim();
                 sortedProducts = Products.Where(row => 
-                    row.Product.Name.Contains(searchTerm) || 
-                    row.Product.Description.Contains(searchTerm));
+                    row.ProductVariants.Catalog.Name.Contains(searchTerm) || 
+                    row.ProductVariants.Catalog.Description.Contains(searchTerm));
             }
 
             int totalCount = await sortedProducts.CountAsync();
@@ -179,11 +179,11 @@ namespace EpicMarket.Services
             var results = await pagedProducts
                 .Select(c => new ProductResult()
                 {
-                    ProductId = c.ID,
-                    Name = c.Product.Name,
-                    Rate = c.Product.Rate,
-                    Status = c.Product.StatusOptionSets.Status,
-                    CostPrice = c.Product.CostPrice,
+                    ProductId = c.ProductVariants.Catalog.ID,
+                    Name = c.ProductVariants.Catalog.Name,
+                    Rate = c.ProductVariants.Catalog.Rate,
+                    Status = c.ProductVariants.Catalog.StatusOptionSets.Status,
+                    CostPrice = c.ProductVariants.Catalog.CostPrice,
                     Count = c.QuantityAvailable,
                     Thumbnail = _context.Attachments
                         .Join(_context.AttachmentLinks,
@@ -196,7 +196,7 @@ namespace EpicMarket.Services
                             (al, e) => new { al.a, al.l, e })
                         .Where(x => 
                             x.e.Name == EntityConstants.Catelog && 
-                            x.l.RecordID == c.Product.ID && 
+                            x.l.RecordID == c.ProductVariants.Catalog.ID && 
                             x.l.AttachmentTypeID == attachmentTypeID.ID)
                         .Select(x => $"{x.a.DocumentFolderPath}{x.a.DocumentFile}")
                         .FirstOrDefault()
@@ -429,7 +429,7 @@ namespace EpicMarket.Services
 
         public async Task UpdateAdvanceSetting(ProductAdvanced productAdvanced)
         {
-           var outletCatelog =  _context.OutletProducts.FirstOrDefault(c=> c.ProductID == productAdvanced.CatelogId && c.OutletID == productAdvanced.BranchId);
+           var outletCatelog =  _context.Inventory.FirstOrDefault(c=> c.ProductVariantID == productAdvanced.CatelogId && c.OutletID == productAdvanced.BranchId);
 
             if (outletCatelog != null){
                 outletCatelog.BackOrders = productAdvanced.BackOrders;
@@ -444,13 +444,13 @@ namespace EpicMarket.Services
 
         public async Task<ProductAdvanced> GetProductInventoryDetails(int productId, int branchId)
         {
-           var productAdvanced = await _context.OutletProducts.Where(c => c.OutletID == branchId && c.ProductID == productId).Select(c=> new ProductAdvanced {
+           var productAdvanced = await _context.Inventory.Where(c => c.OutletID == branchId && c.ProductVariantID == productId).Select(c=> new ProductAdvanced {
               BackOrders = c.BackOrders,
               MaximumStockLevel = c.MaximumStockLevel,  
               MinimumStockLevel = c.MinimumStockLevel,
               QuantityAvailable = c.QuantityAvailable,
               ReorderPoint = c.ReorderPoint,    
-              CatelogId = c.ProductID,
+              CatelogId = c.ProductVariantID,
               BranchId = branchId
             }).FirstOrDefaultAsync();
 
@@ -463,17 +463,17 @@ namespace EpicMarket.Services
                 var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
 
                 var VerifiedStatusID = _context.StatusOptionSets.FirstOrDefault(c => c.Status == StatusConstants.VERIFIED).Id;
-                var query = _context.OutletProducts
+                var query = _context.Inventory
                     .IgnoreQueryFilters()
                     .Include(p => p.Outlet)
-                    .Include(p => p.Product)
-                    .Where(p => p.Outlet.ID == parameters.OutletId && p.Product.StatusId == VerifiedStatusID)
+                    .Include(p => p.ProductVariants)
+                    .Where(p => p.Outlet.ID == parameters.OutletId && p.ProductVariants.Catalog.StatusId == VerifiedStatusID)
                     .AsQueryable();
 
                 // Apply Category Filter
                 if (!string.IsNullOrEmpty(parameters.Category))
                 {
-                    query = query.Where(p => p.Product.Category == parameters.Category);
+                    query = query.Where(p => p.ProductVariants.Catalog.Category == parameters.Category);
                 }
 
                 // Apply Search
@@ -481,8 +481,8 @@ namespace EpicMarket.Services
                 {
                     var searchTerm = parameters.SearchTerm.Trim().ToLower();
                     query = query.Where(p =>
-                        p.Product.Name.ToLower().Contains(searchTerm) ||
-                        p.Product.Description.ToLower().Contains(searchTerm));
+                        p.ProductVariants.Catalog.Name.ToLower().Contains(searchTerm) ||
+                        p.ProductVariants.Catalog.Description.ToLower().Contains(searchTerm));
                 }
 
                 // Get total count for pagination
@@ -495,43 +495,43 @@ namespace EpicMarket.Services
                 }
 
             var recommendedProducts = await query
-                                    .Where(p => p.Product.IsRecommended)
+                                    .Where(p => p.ProductVariants.Catalog.IsRecommended)
                                     .Select(p => new CustomerProductResult
                                     {
-                                        ProductId = p.ProductID,
-                                        Name = p.Product.Name,
-                                        Description = p.Product.Description,
-                                        Rate = p.Product.CostPrice,
+                                        ProductId = p.ProductVariants.Catalog.ID,
+                                        Name = p.ProductVariants.Catalog.Name,
+                                        Description = p.ProductVariants.Catalog.Description,
+                                        Rate = p.ProductVariants.Catalog.CostPrice,
                                         Thumbnail = ((from attachment in _context.Attachments
                                                       join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
                                                       join entity in _context.Entity on link.EntityID equals entity.ID
-                                                      where entity.Name == EntityConstants.Catelog && link.RecordID == p.Product.ID && link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
+                                                      where entity.Name == EntityConstants.Catelog && link.RecordID == p.ProductVariants.Catalog.ID && link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
                                                       select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}").FirstOrDefault()),
-                                        Rating = p.Product.Rating,
-                                        RatingCount = p.Product.ReviewCount
+                                        Rating = p.ProductVariants.Catalog.Rating,
+                                        RatingCount = p.ProductVariants.Catalog.ReviewCount
                                     })
                                     .ToListAsync();
 
             var categoryProducts = await query
                     .Skip((parameters.Page - 1) * parameters.PageSize)
                     .Take(parameters.PageSize)
-                    .GroupBy(p => p.Product.Category)
+                    .GroupBy(p => p.ProductVariants.Catalog.Category)
                     .Select(g => new CustomerResultBaseOnCatefory
                     {
                         Category = g.Key,
                         CustomerProductResults = g.Select(p => new CustomerProductResult
                         {
-                            ProductId = p.ProductID,
-                            Name = p.Product.Name,
-                            Description = p.Product.Description,
-                            Rate = p.Product.CostPrice,
+                            ProductId = p.ProductVariants.Catalog.ID,
+                            Name = p.ProductVariants.Catalog.Name,
+                            Description = p.ProductVariants.Catalog.Description,
+                            Rate = p.ProductVariants.Catalog.CostPrice,
                             Thumbnail = ((from attachment in _context.Attachments
                                           join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
                                           join entity in _context.Entity on link.EntityID equals entity.ID
-                                          where entity.Name == EntityConstants.Catelog && link.RecordID == p.Product.ID && link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
+                                          where entity.Name == EntityConstants.Catelog && link.RecordID == p.ProductVariants.Catalog.ID && link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
                                           select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}").FirstOrDefault()),
-                            Rating = p.Product.Rating,
-                            RatingCount = p.Product.ReviewCount
+                            Rating = p.ProductVariants.Catalog.Rating,
+                            RatingCount = p.ProductVariants.Catalog.ReviewCount
                         }).ToList()
                     })
                     .ToListAsync();

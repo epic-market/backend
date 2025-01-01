@@ -200,7 +200,7 @@ namespace EpicMarket.Services
             }
 
             // Get existing outlet-product mappings in a single query
-            var existingMappings = await _context.OutletProducts
+            var existingMappings = await _context.Inventory
                 .Where(op => op.OutletID == branchProductMap.OutletId)
                 .ToListAsync();
 
@@ -217,8 +217,8 @@ namespace EpicMarket.Services
 
             // Validate products to add
             var duplicateProducts = existingMappings
-                .Where(em => addProducts.Contains(em.ProductID))
-                .Select(em => em.ProductID)
+                .Where(em => addProducts.Contains(em.ProductVariantID))
+                .Select(em => em.ProductVariantID)
                 .ToList();
 
             if (duplicateProducts.Any())
@@ -228,24 +228,24 @@ namespace EpicMarket.Services
 
             // Validate products to remove
             var productsToRemove = existingMappings
-                .Where(em => removeProducts.Contains(em.ProductID))
+                .Where(em => removeProducts.Contains(em.ProductVariantID))
                 .ToList();
 
             if (productsToRemove.Count != removeProducts.Count)
             {
-                var missingProducts = removeProducts.Except(productsToRemove.Select(p => p.ProductID));
+                var missingProducts = removeProducts.Except(productsToRemove.Select(p => p.ProductVariantID));
                 throw new InvalidOperationException($"Products with IDs {string.Join(",", missingProducts)} are not mapped to this outlet");
             }
 
             // Add new mappings
-            var newMappings = addProducts.Select(productId => new OutletProduct
+            var newMappings = addProducts.Select(productId => new Inventory
             {
                 OutletID = branchProductMap.OutletId,
-                ProductID = productId
+                ProductVariantID = productId
             });
 
-            await _context.OutletProducts.AddRangeAsync(newMappings);
-            _context.OutletProducts.RemoveRange(productsToRemove);
+            await _context.Inventory.AddRangeAsync(newMappings);
+            _context.Inventory.RemoveRange(productsToRemove);
 
             return await _context.SaveChangesAsync();
         }

@@ -172,7 +172,9 @@ namespace EpicMarket.Data.Models
         public DbSet<Outlet> Outlets { get; set; }
         public DbSet<OutletPerson> OutletPeople { get; set; }
 
-        public DbSet<OutletProduct> OutletProducts { get; set; }
+        public DbSet<Inventory> Inventory { get; set; }    
+
+        public DbSet<ProductVariants> ProductVariants { get; set; }
 
         public DbSet<ProductInternal> ProductInternals { get; set; }
 
@@ -271,7 +273,7 @@ namespace EpicMarket.Data.Models
                     AllowedBranchIds.Contains(o.OutletID));
 
             // Branch-level filters
-            modelBuilder.Entity<OutletProduct>()
+            modelBuilder.Entity<Inventory>()
                 .HasQueryFilter(p => IsUserAdmin || !AllowedBranchIds.Any() ||
                     AllowedBranchIds.Contains(p.OutletID));
 
@@ -329,15 +331,15 @@ namespace EpicMarket.Data.Models
                       .HasForeignKey(op => op.BussinessID)
                       .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<OutletProduct>()
-                 .HasOne(op => op.Product)
-                 .WithMany(u => u.OutletProducts)
-                 .HasForeignKey(op => op.ProductID)
+            modelBuilder.Entity<Inventory>()
+                 .HasOne(op => op.ProductVariants)
+                 .WithMany(u => u.Inventory)
+                 .HasForeignKey(op => op.ProductVariantID)
                  .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<OutletProduct>()
+            modelBuilder.Entity<Inventory>()
                   .HasOne(op => op.Outlet)
-                  .WithMany(u => u.OutletProducts)
+                  .WithMany(u => u.Inventory )
                   .HasForeignKey(op => op.OutletID)
                   .OnDelete(DeleteBehavior.Restrict);
 
