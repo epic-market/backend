@@ -20,5 +20,8 @@ namespace EpicMarket.Entities
 
         [Required]
         public string Password { get; set; }
+
+        public string OTP { get; set; }
+        public string ReferenceId { get; set; }
     }
 }

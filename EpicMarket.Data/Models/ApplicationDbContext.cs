@@ -1,5 +1,4 @@
-﻿
-using EpicMarket.Data.ApplicationModels;
+﻿using EpicMarket.Data.ApplicationModels;
 using EpicMarket.Data.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -236,6 +235,8 @@ namespace EpicMarket.Data.Models
         public DbSet<MerchantFinance> Finances { get; set; }
         public DbSet<Proof> Proofs { get; set; }
         public DbSet<ProofType> ProofTypes { get; set; }
+
+        public DbSet<OTPVerification> OTPVerifications { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

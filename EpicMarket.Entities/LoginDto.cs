@@ -10,10 +10,19 @@ namespace EpicMarket.Entities
     public class LoginDto
     {
         [Required]
-        [EmailAddress]
         public string Email { get; set; }
 
 		[Required]
 		public string Password { get; set; }
+    }
+
+    public class LoginPhoneDto
+    {
+        [Required]
+        public string Phone { get; set; }
+        [Required]
+        public string OTP { get; set; }
+        [Required]
+        public string ReferenceId { get; set; }
     }
 }
