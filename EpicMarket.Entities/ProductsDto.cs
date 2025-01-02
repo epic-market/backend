@@ -63,8 +63,7 @@ namespace EpicMarket.Entities
 
     public class ProductAdvanced
     {
-        public int CatelogId { get; set; }
-
+        public int ProductVariantId { get; set; }
         public int BranchId { get; set; }
         public int QuantityAvailable { get; set; }
 
@@ -84,13 +83,19 @@ namespace EpicMarket.Entities
 
     public class ProductsMapOptionResult 
     {
-        public int Id { get; set; }
+        public int VariantId { get; set; }
+
+        public int ProductId { get; set; }
 
         public string Name { get; set; }
 
         public string Description { get; set; }
 
         public double Rate { get; set; }
+
+        public string SKU { get; set; }
+
+        public Dictionary<string, string> Attributes { get; set; }
 
         public bool Selected { get; set; }
 
@@ -173,4 +178,20 @@ namespace EpicMarket.Entities
 		public List<string> ImageKeys { get; set; } 
 
 	}
+
+    public class ProductVariantDto
+    {
+        public string SKU { get; set; }
+        public decimal Price { get; set; }
+        public Dictionary<string, string> Attributes { get; set; }
+    }
+
+    public class ProductVariantResponse
+    {
+        public int VariantID { get; set; }
+        public int ProductID { get; set; }
+        public string SKU { get; set; }
+        public decimal Price { get; set; }
+        public Dictionary<string, string> Attributes { get; set; }
+    }
 }

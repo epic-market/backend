@@ -115,28 +115,31 @@ namespace EpicMarket.Services
 		}
 
 
-
 		public async Task<List<ProductsMapOptionResult>> GetAllProductForMap(int BusinessID,int BranchId)
         {
             var attachmentTypeID = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
             var returnedProducts = await (from catalogItem in _context.Catalogs
+                    join variant in _context.ProductVariants 
+                    on catalogItem.ID equals variant.ProductID
                     join outletProduct in (_context.Inventory.Where(a => a.OutletID == BranchId))
-                    on catalogItem.ID equals outletProduct.ProductVariantID into joinedProducts
+                    on variant.VariantID equals outletProduct.ProductVariantID into joinedProducts
                     from matchedProduct in joinedProducts.DefaultIfEmpty()
-                    where catalogItem.BusinessID == BusinessID && catalogItem.IsActive == true 
+                    where catalogItem.BusinessID == BusinessID && catalogItem.IsActive == true
                     select new ProductsMapOptionResult
                     {
-                        Id = catalogItem.ID,
+                        VariantId = variant.VariantID,
+                        ProductId = catalogItem.ID,
                         Name = catalogItem.Name,
                         Description = catalogItem.Description,
-                        Rate = catalogItem.Rate,
+                        Rate = (double)variant.Price,
+                        SKU = variant.SKU,
+                        Attributes = JsonConvert.DeserializeObject<Dictionary<string, string>>(variant.Attributes),
                         Thumbnail = ((from attachment in _context.Attachments
                                       join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
                                       join entity in _context.Entity on link.EntityID equals entity.ID
                                       where entity.Name == EntityConstants.Catelog && link.RecordID == catalogItem.ID && link.AttachmentTypeID == attachmentTypeID.ID
                                       select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}").FirstOrDefault()),
-                        Selected = matchedProduct == null ? false : true,
-
+                        Selected = matchedProduct != null
                     }).ToListAsync();
 
             return returnedProducts;
@@ -427,30 +430,42 @@ namespace EpicMarket.Services
 			}
         }
 
-        public async Task UpdateAdvanceSetting(ProductAdvanced productAdvanced)
+        public async Task AddOrUpdateProductInventoryDetails(ProductAdvanced productAdvanced)
         {
-           var outletCatelog =  _context.Inventory.FirstOrDefault(c=> c.ProductVariantID == productAdvanced.CatelogId && c.OutletID == productAdvanced.BranchId);
 
-            if (outletCatelog != null){
-                outletCatelog.BackOrders = productAdvanced.BackOrders;
-                outletCatelog.MaximumStockLevel = productAdvanced.MaximumStockLevel;
-                outletCatelog.MinimumStockLevel = productAdvanced.MinimumStockLevel;
-                outletCatelog.QuantityAvailable = productAdvanced.QuantityAvailable;
-                outletCatelog.ReorderPoint = productAdvanced.ReorderPoint;
+           var outletProductInventory =  _context.Inventory.FirstOrDefault(c=> c.ProductVariantID == productAdvanced.ProductVariantId && c.OutletID == productAdvanced.BranchId);
+
+            if (outletProductInventory == null){
+                outletProductInventory = new Inventory();
+                outletProductInventory.BackOrders = productAdvanced.BackOrders;
+                outletProductInventory.MaximumStockLevel = productAdvanced.MaximumStockLevel;
+                outletProductInventory.MinimumStockLevel = productAdvanced.MinimumStockLevel;
+                outletProductInventory.QuantityAvailable = productAdvanced.QuantityAvailable;
+                outletProductInventory.ReorderPoint = productAdvanced.ReorderPoint;
+                outletProductInventory.ProductVariantID = productAdvanced.ProductVariantId;
+                outletProductInventory.OutletID = productAdvanced.BranchId;
+                await _context.Inventory.AddAsync(outletProductInventory);
+                
+            }else{
+                outletProductInventory.BackOrders = productAdvanced.BackOrders;
+                outletProductInventory.MaximumStockLevel = productAdvanced.MaximumStockLevel;
+                outletProductInventory.MinimumStockLevel = productAdvanced.MinimumStockLevel;
+                outletProductInventory.QuantityAvailable = productAdvanced.QuantityAvailable;
+                outletProductInventory.ReorderPoint = productAdvanced.ReorderPoint;
+                _context.Inventory.Update(outletProductInventory);
             }
-            _context.Update(outletCatelog);
             await unitOfWork.Complete();
         }
 
-        public async Task<ProductAdvanced> GetProductInventoryDetails(int productId, int branchId)
+        public async Task<ProductAdvanced> GetProductInventoryDetails(int productVariantId, int branchId)
         {
-           var productAdvanced = await _context.Inventory.Where(c => c.OutletID == branchId && c.ProductVariantID == productId).Select(c=> new ProductAdvanced {
+           var productAdvanced = await _context.Inventory.Where(c => c.OutletID == branchId && c.ProductVariantID == productVariantId).Select(c=> new ProductAdvanced {
               BackOrders = c.BackOrders,
               MaximumStockLevel = c.MaximumStockLevel,  
               MinimumStockLevel = c.MinimumStockLevel,
               QuantityAvailable = c.QuantityAvailable,
               ReorderPoint = c.ReorderPoint,    
-              CatelogId = c.ProductVariantID,
+              ProductVariantId = c.ProductVariantID,
               BranchId = branchId
             }).FirstOrDefaultAsync();
 
@@ -601,8 +616,89 @@ namespace EpicMarket.Services
             };
         }
 
-        
+        public async Task<int> AddProductVariant(int productId, ProductVariantDto variantDto, string userName)
+        {
+            var product = await _context.Catalogs
+                .FirstOrDefaultAsync(c => c.ID == productId && c.IsActive);
+            
+            if (product == null)
+                throw new Exception("Product not found");
 
+            var existingVariant = await _context.ProductVariants.FirstOrDefaultAsync(v => v.ProductID == productId && v.SKU == variantDto.SKU);
+            if (existingVariant != null)
+                throw new Exception("Variant already exists");
+
+            var variant = new ProductVariants
+            {
+                ProductID = productId,
+                SKU = variantDto.SKU,
+                Price = variantDto.Price,
+                Attributes = JsonConvert.SerializeObject(variantDto.Attributes),
+                CreateBy = userName,
+                CreateDate = DateTime.Now,
+                IsActive = true
+            };
+
+            await _context.ProductVariants.AddAsync(variant);
+            await unitOfWork.Complete();
+            
+            return variant.VariantID;
+        }
+
+        public async Task<List<ProductVariantResponse>> GetProductVariants(int productId)
+        {
+            var variants = await _context.ProductVariants
+                .Where(v => v.ProductID == productId && v.IsActive)
+                .Select(v => new ProductVariantResponse
+                {
+                    VariantID = v.VariantID,
+                    ProductID = v.ProductID,
+                    SKU = v.SKU,
+                    Price = v.Price,
+                    Attributes = JsonConvert.DeserializeObject<Dictionary<string, string>>(v.Attributes)
+                })
+                .ToListAsync();
+
+            return variants;
+        }
+
+        public async Task<ProductVariantResponse> GetProductVariant(int productId, int variantId)
+        {
+            var variant = await _context.ProductVariants
+                .Where(v => v.ProductID == productId && v.VariantID == variantId && v.IsActive)
+                .Select(v => new ProductVariantResponse
+                {
+                    VariantID = v.VariantID,
+                    ProductID = v.ProductID,
+                    SKU = v.SKU,
+                    Price = v.Price,
+                    Attributes = JsonConvert.DeserializeObject<Dictionary<string, string>>(v.Attributes)
+                })
+                .FirstOrDefaultAsync();
+
+            if (variant == null)
+                throw new Exception("Product variant not found");
+
+            return variant;
+        }
+
+        public async Task UpdateProductVariant(int productId, int variantId, ProductVariantDto variantDto, string userName)
+        {
+            var variant = await _context.ProductVariants
+                .FirstOrDefaultAsync(v => v.ProductID == productId && v.VariantID == variantId && v.IsActive);
+
+            if (variant == null)
+                throw new Exception("Product variant not found");
+
+            variant.SKU = variantDto.SKU;
+            variant.Price = variantDto.Price;
+            variant.Attributes = JsonConvert.SerializeObject(variantDto.Attributes);
+            variant.ModifiedBy = userName;
+            variant.ModifiedDate = DateTime.Now;
+
+            _context.ProductVariants.Update(variant);
+            await unitOfWork.Complete();
+        }
 
     }
 

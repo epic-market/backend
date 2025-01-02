@@ -183,69 +183,68 @@ namespace EpicMarket.Services
 
         }
 
-        public async Task<int> MapBranchToProducts(BranchProductMapParams branchProductMap)
+        public async Task<int> MapBranchToProductVariants(BranchProductVariantMapParams branchProductVariantMap)
         {
             // Validate input parameters
-            if (branchProductMap == null)
+            if (branchProductVariantMap == null)
             {
-                throw new ArgumentNullException(nameof(branchProductMap));
+                throw new ArgumentNullException(nameof(branchProductVariantMap));
             }
 
-            var addProducts = branchProductMap.AddProductsId ?? new List<int>();
-            var removeProducts = branchProductMap.RemovedProductsId ?? new List<int>();
+            var addProductVariants = branchProductVariantMap.AddProductVariantId ?? new List<int>();
+            var removeProductVariants = branchProductVariantMap.RemovedProductVariantId ?? new List<int>();
 
-            if (!addProducts.Any() && !removeProducts.Any())
+            if (!addProductVariants.Any() && !removeProductVariants.Any())
             {
-                throw new ArgumentException("At least one product must be specified for adding or removing");
+                throw new ArgumentException("At least one product variant must be specified for adding or removing");
             }
 
             // Get existing outlet-product mappings in a single query
             var existingMappings = await _context.Inventory
-                .Where(op => op.OutletID == branchProductMap.OutletId)
+                .Where(op => op.OutletID == branchProductVariantMap.OutletId)
                 .ToListAsync();
 
-            // Check if any products to add are inactive/deleted
-            var inactiveProducts = await _context.Catalogs
-                .Where(c => addProducts.Contains(c.ID) && !c.IsActive)
-                .Select(c => c.ID)
+            var inactiveProductVariants = await _context.ProductVariants
+                .Where(c => addProductVariants.Contains(c.VariantID) && !c.IsActive)
+                .Select(c => c.VariantID)
                 .ToListAsync();
 
-            if (inactiveProducts.Any())
+            if (inactiveProductVariants.Any())
             {
-                throw new InvalidOperationException($"Products with IDs {string.Join(",", inactiveProducts)} are inactive or deleted");
+                throw new InvalidOperationException($"Product variants with IDs {string.Join(",", inactiveProductVariants)} are inactive or deleted");
             }
 
             // Validate products to add
-            var duplicateProducts = existingMappings
-                .Where(em => addProducts.Contains(em.ProductVariantID))
+            var duplicateProductVariants = existingMappings
+                .Where(em => addProductVariants.Contains(em.ProductVariantID))
                 .Select(em => em.ProductVariantID)
                 .ToList();
 
-            if (duplicateProducts.Any())
+            if (duplicateProductVariants.Any())
             {
-                throw new InvalidOperationException($"Products with IDs {string.Join(",", duplicateProducts)} are already mapped to this outlet");
+                throw new InvalidOperationException($"Product variants with IDs {string.Join(",", duplicateProductVariants)} are already mapped to this outlet");
             }
 
             // Validate products to remove
-            var productsToRemove = existingMappings
-                .Where(em => removeProducts.Contains(em.ProductVariantID))
+            var productVariantsToRemove = existingMappings
+                .Where(em => removeProductVariants.Contains(em.ProductVariantID))
                 .ToList();
 
-            if (productsToRemove.Count != removeProducts.Count)
+            if (productVariantsToRemove.Count != removeProductVariants.Count)
             {
-                var missingProducts = removeProducts.Except(productsToRemove.Select(p => p.ProductVariantID));
-                throw new InvalidOperationException($"Products with IDs {string.Join(",", missingProducts)} are not mapped to this outlet");
+                var missingProductVariants = removeProductVariants.Except(productVariantsToRemove.Select(p => p.ProductVariantID));
+                throw new InvalidOperationException($"Product variants with IDs {string.Join(",", missingProductVariants)} are not mapped to this outlet");
             }
 
             // Add new mappings
-            var newMappings = addProducts.Select(productId => new Inventory
+            var newMappings = addProductVariants.Select(productVariantId => new Inventory
             {
-                OutletID = branchProductMap.OutletId,
-                ProductVariantID = productId
+                OutletID = branchProductVariantMap.OutletId,
+                ProductVariantID = productVariantId
             });
 
             await _context.Inventory.AddRangeAsync(newMappings);
-            _context.Inventory.RemoveRange(productsToRemove);
+            _context.Inventory.RemoveRange(productVariantsToRemove);
 
             return await _context.SaveChangesAsync();
         }
