@@ -330,6 +330,8 @@ namespace EpicMarket.Business.API.Controllers
             
             return Ok(response);
         }
+	
+	[HttpGet("{productId}/variants")]
         [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
         public async Task<ActionResult<OperationResult<List<ProductVariantResponse>>>> GetProductVariants(
             [FromRoute] int productId)
