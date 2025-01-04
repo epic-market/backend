@@ -10,9 +10,9 @@ namespace EpicMarket.Admin.MVC.Models
 
 		public OutletPerson OutletEmployee { get; set; }
 
-		public List<OutletProduct> OutletProducts { get; set; }
+		public List<Inventory> Inventorys { get; set; }
 
-		public OutletProduct OutletProduct { get; set; }
+		public Inventory Inventory { get; set; }
 
 		public List<Order> Orders { get; set; }
 

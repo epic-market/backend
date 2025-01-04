@@ -1,4 +1,4 @@
-﻿@model EpicMarket.Data.Models.OutletProduct
+﻿@model EpicMarket.Data.Models.Inventory
 
 @{
     ViewData["Title"] = "Edit";
@@ -43,7 +43,7 @@
                         <div class="row">
                             <label class="col-sm-3 fw-bold">Product:</label>
                             <div class="col-sm-9">
-                                @Html.DisplayFor(model => model.Product.Name)
+                                @Html.DisplayFor(model => model.ProductVariants.Catalog.Name)
                             </div>
                         </div>
                     </div>
@@ -52,7 +52,7 @@
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <input type="hidden" asp-for="ID" />
                         <input type="hidden" asp-for="OutletID" />
-                        <input type="hidden" asp-for="ProductID" />
+                        <input type="hidden" asp-for="ProductVariants.Catalog.ID" />
 
                         <div class="row mb-3">
                             <label asp-for="QuantityAvailable" class="col-sm-3 col-form-label"></label>

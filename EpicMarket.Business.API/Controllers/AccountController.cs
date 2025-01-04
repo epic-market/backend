@@ -26,6 +26,7 @@ namespace EpicMarket.Business.API.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IProfileService profileService;
+        private readonly IOTPService _otpService;
         public UserController(
                                     UserManager<AppUser> userManager,
                                     SignInManager<AppUser> signInManager,
@@ -35,7 +36,8 @@ namespace EpicMarket.Business.API.Controllers
                                     ICommunicationService communication,
                                     ApplicationDbContext dbContext,
                                     IHttpContextAccessor httpContextAccessor,
-                                    IProfileService profileService
+                                    IProfileService profileService,
+                                    IOTPService otpService
                                     ) : base(dbContext, httpContextAccessor)
 		{
             _signInManager = signInManager;
@@ -45,6 +47,7 @@ namespace EpicMarket.Business.API.Controllers
             this.communication = communication;
             _tokenService = tokenService;
             this.profileService = profileService;
+            _otpService = otpService;
         }
         [HttpPost("register")]
         [AllowAnonymous]
@@ -73,6 +76,15 @@ namespace EpicMarket.Business.API.Controllers
                 user.UserName = registerDto.Email.ToLower();
                 user.Email = registerDto.Email.ToLower();
                 user.PhoneNumber = registerDto.Phone;
+
+                if(registerDto.OTP != null)
+                {
+                    var isVerified = await _otpService.VerifyOTPAsync(registerDto.ReferenceId, registerDto.OTP);
+                    if(!isVerified)
+                    {
+                        return BadRequest("Invalid OTP");
+                    }
+                }
 
                 var result = await _userManager.CreateAsync(user, registerDto.Password);
 
@@ -106,9 +118,59 @@ namespace EpicMarket.Business.API.Controllers
             }
         }
 
+        [HttpPost("login/phone")]
+        [AllowAnonymous]
+        public async Task<ActionResult<OperationResult<TokenDto>>> LoginPhone(LoginPhoneDto loginPhoneDto)
+        {
+
+            var result = await _otpService.VerifyOTPAsync(loginPhoneDto.ReferenceId, loginPhoneDto.OTP);
+
+            if(!result)
+            {
+                logger.LogError("OTP verification failed for user: {phone}", loginPhoneDto.Phone);
+                return Unauthorized("Invalid OTP");
+            }
+
+            var user = await GetUserByPhone(loginPhoneDto.Phone);
+            if(user == null)
+            {
+                //create user
+                user = new AppUser();
+                user.UserName = loginPhoneDto.Phone;
+                user.PhoneNumber = loginPhoneDto.Phone;
+                user.Email = loginPhoneDto.Phone;
+                user.FirstName = "Guest";
+                user.LastName = "Guest";
+                user.IsActive = true;
+                await _userManager.CreateAsync(user, "Guest");
+                await _userManager.AddToRoleAsync(user, ROLES.MEMBER);
+                await _userManager.UpdateAsync(user);
+                await dbContext.SaveChangesAsync();
+            }
+
+            var token = await _tokenService.CreateToken(user);
+
+            if(string.IsNullOrEmpty(token))
+            {
+                logger.LogError("Failed to generate token for user: {phone}", loginPhoneDto.Phone);
+                return StatusCode(500, "Failed to generate token");
+            }
+
+            var response = new OperationResult<TokenDto>
+            {
+                Data = new TokenDto
+                {
+                    Token = token
+                }
+            };
+
+            return Ok(response);
+        }   
+
         [HttpPost("login")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<TokenDto>>> Login(LoginDto loginDto)
+
         {
             if (loginDto == null)
             {
@@ -118,28 +180,28 @@ namespace EpicMarket.Business.API.Controllers
 
             var user = await GetUser(loginDto.Email);
 
-            if (user == null)
-            {
+                if (user == null)
+                {
                 logger.LogWarning("User not found for email: {email}", loginDto.Email);
-                return Unauthorized("Invalid username");
-            }
+                    return Unauthorized("Invalid username");
+                }   
 
-            var result = await _signInManager
+                var result = await _signInManager
                 .CheckPasswordSignInAsync(user, loginDto.Password, false);
 
-            if (!result.Succeeded)
-            {
+                if (!result.Succeeded)
+                {
                 logger.LogError("Password check failed for user: {email}", loginDto.Email);
-                return Unauthorized("Invalid password");
-            }
-
+                    return Unauthorized("Invalid password");
+                }
+                 
             var token = await _tokenService.CreateToken(user);
-            if (string.IsNullOrEmpty(token))
-            {
+                if (string.IsNullOrEmpty(token))
+                {
                 logger.LogError("Failed to generate token for user: {email}", loginDto.Email);
-                return StatusCode(500, "Failed to generate token");
-            }
-
+                    return StatusCode(500, "Failed to generate token");
+                }
+           
             var response = new OperationResult<TokenDto>
             {
                 Data = new TokenDto
@@ -375,8 +437,61 @@ namespace EpicMarket.Business.API.Controllers
             return response;
         }
         
+        [HttpPost("send-otp")]
+        [AllowAnonymous]
+        public async Task<ActionResult<OperationResult<OTPResponse>>> SendOTP(OTPRequest request)
+        {
+            try
+            {
+                var response = new OperationResult<OTPResponse>();
+                
+                if (string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.Type))
+                {
+                    return BadRequest("Username and Type are required");
+                }
+
+                var (referenceId, timestamp) = await _otpService.SendOTPAsync(request.Username, request.Type);
+                
+                response.Data = new OTPResponse
+                {
+                    ReferenceId = referenceId,
+                    Timestamp = timestamp
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error sending OTP to {username}", request.Username);
+                return StatusCode(500, "An error occurred while sending OTP");
+            }
+        }
+
+        //[HttpPost("verify-otp")]
+        //[AllowAnonymous]
+        //public async Task<ActionResult<OperationResult<bool>>> VerifyOTP(VerifyOTPRequest request)
+        //{
+        //    try
+        //    {
+        //        var response = new OperationResult<bool>();
+                
+        //        if (string.IsNullOrEmpty(request.ReferenceId) || string.IsNullOrEmpty(request.OTP))
+        //        {
+        //            return BadRequest("ReferenceId and OTP are required");
+        //        }
+
+        //        response.Data = await _otpService.VerifyOTPAsync(request.ReferenceId, request.OTP);
+                
+        //        return Ok(response);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        logger.LogError(ex, "Error verifying OTP");
+        //        return StatusCode(500, "An error occurred while verifying OTP");
+        //    }
+        //}
+        
      
-       
         private async Task<bool> UserExists(string username)
         {
             return await _userManager.Users.AnyAsync(x => x.UserName == username.ToLower() && x.IsActive == true);
@@ -386,6 +501,12 @@ namespace EpicMarket.Business.API.Controllers
         {
             return await _userManager.Users
              .SingleOrDefaultAsync(x => x.UserName == username.ToLower() && x.IsActive == true);
+        }
+
+        private async Task<AppUser> GetUserByPhone(string phone)
+        {
+            return await _userManager.Users
+             .SingleOrDefaultAsync(x => x.PhoneNumber == phone && x.IsActive == true);
         }
 
 

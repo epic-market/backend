@@ -40,9 +40,9 @@ namespace EpicMarket.Data.Models
 
         public virtual StatusOptionSet StatusOptionSets { get; set; }
 
-        public virtual ICollection<OutletProduct> OutletProducts { get; set; }
-
         public virtual ICollection<Rating> Ratings { get; set; }
+
+        public virtual ICollection<ProductVariants> ProductVariants { get; set; }
 
     }
 }

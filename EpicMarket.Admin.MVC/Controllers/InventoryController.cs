@@ -24,7 +24,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: OutletProducts
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.OutletProducts.Include(o => o.Outlet).Include(o => o.Outlet.Bussiness).Include(o => o.Product);
+            var applicationDbContext = _context.Inventory.Include(o => o.Outlet).Include(o => o.Outlet.Bussiness).Include(o => o.ProductVariants);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -36,9 +36,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var outletProduct = await _context.OutletProducts
+            var outletProduct = await _context.Inventory
                 .Include(o => o.Outlet)
-                .Include(o => o.Product)
+                .Include(o => o.ProductVariants)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (outletProduct == null)
             {
@@ -71,10 +71,10 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateOutletProduct([FromQuery] int? productID ,[Bind("ID,OutletID,ProductID,QuantityAvailable,MinimumStockLevel,MaximumStockLevel,ReorderPoint,BackOrders")] OutletProduct outletProduct)
+        public async Task<IActionResult> CreateOutletProduct([FromQuery] int? productID ,[Bind("ID,OutletID,ProductID,QuantityAvailable,MinimumStockLevel,MaximumStockLevel,ReorderPoint,BackOrders")] Inventory outletProduct)
         {
 
-            outletProduct.ProductID = (int)productID;
+            outletProduct.ID = (int)productID;
             if (ModelState.IsValid)
             {
                 _context.Add(outletProduct);
@@ -108,9 +108,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var outletProduct = await _context.OutletProducts
+            var outletProduct = await _context.Inventory
             .Include(op => op.Outlet)
-            .Include(op => op.Product)
+            .Include(op => op.ProductVariants)
             .FirstOrDefaultAsync(m => m.ID == id);
 
 
@@ -118,8 +118,8 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 return NotFound();
             }
-            ViewData["ProductID"] = new SelectList(_context.Outlets, "ID", "ID", outletProduct.ProductID);
-            ViewData["ProductID"] = new SelectList(_context.Catalogs, "ID", "ID", outletProduct.ProductID);
+            ViewData["ProductID"] = new SelectList(_context.Outlets, "ID", "ID", outletProduct.ProductVariants.Catalog.ID);
+            ViewData["ProductID"] = new SelectList(_context.Catalogs, "ID", "ID", outletProduct.ProductVariants.Catalog.ID);
             return View(outletProduct);
         }
 
@@ -128,7 +128,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,OutletID,ProductID,QuantityAvailable,MinimumStockLevel,MaximumStockLevel,ReorderPoint,BackOrders")] OutletProduct outletProduct)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,OutletID,ProductID,QuantityAvailable,MinimumStockLevel,MaximumStockLevel,ReorderPoint,BackOrders")] Inventory outletProduct)
         {
             if (id != outletProduct.ID)
             {
@@ -144,7 +144,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!OutletProductExists(outletProduct.ID))
+                    if (!InventoryExists(outletProduct.ID))
                     {
                         return NotFound();
                     }
@@ -155,8 +155,8 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ProductID"] = new SelectList(_context.Outlets, "ID", "ID", outletProduct.ProductID);
-            ViewData["ProductID"] = new SelectList(_context.Catalogs, "ID", "ID", outletProduct.ProductID);
+            ViewData["ProductID"] = new SelectList(_context.Outlets, "ID", "ID", outletProduct.ProductVariants.Catalog.ID);
+            ViewData["ProductID"] = new SelectList(_context.Catalogs, "ID", "ID", outletProduct.ProductVariants.Catalog.ID);
             return View(outletProduct);
         }
 
@@ -168,9 +168,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var outletProduct = await _context.OutletProducts
+            var outletProduct = await _context.Inventory
                 .Include(o => o.Outlet)
-                .Include(o => o.Product)
+                .Include(o => o.ProductVariants)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (outletProduct == null)
             {
@@ -185,22 +185,22 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var outletProduct = await _context.OutletProducts
+            var outletProduct = await _context.Inventory
                                .Include(op => op.Outlet)
-                               .Include(op => op.Product)
+                               .Include(op => op.ProductVariants)
                                .FirstOrDefaultAsync(m => m.ID == id);
             if (outletProduct != null)
             {
-                _context.OutletProducts.Remove(outletProduct);
+                _context.Inventory.Remove(outletProduct);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool OutletProductExists(int id)
+        private bool InventoryExists(int id)
         {
-            return _context.OutletProducts.Any(e => e.ID == id);
+            return _context.Inventory.Any(e => e.ID == id);
         }
     }
 }

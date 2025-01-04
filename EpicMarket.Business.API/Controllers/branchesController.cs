@@ -251,15 +251,15 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
-        [HttpPost("map/products")]
+        [HttpPost("map/product-variants")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
-		public async Task<ActionResult<OperationResult<int>>> MapBranchToProduct(BranchProductMapParams branchProductMap)
+		public async Task<ActionResult<OperationResult<int>>> MapBranchToProductVariant(BranchProductVariantMapParams branchProductVariantMap)
         {
 
 			var response = new OperationResult<int>();
-			this.logger.LogInformation("Branch Controller -> MapBranchToProduct()-> params {0}", JsonConvert.SerializeObject(new { Params = branchProductMap }));
+			this.logger.LogInformation("Branch Controller -> MapBranchToProduct()-> params {0}", JsonConvert.SerializeObject(new { Params = branchProductVariantMap }));
 
-            var id = await branchService.MapBranchToProducts(branchProductMap);
+            var id = await branchService.MapBranchToProductVariants(branchProductVariantMap);
 
             this.logger.LogInformation("Branch Controller -> MapBranchToProduct()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
 
