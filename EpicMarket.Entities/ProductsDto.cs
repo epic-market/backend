@@ -38,7 +38,11 @@ namespace EpicMarket.Entities
         public bool RequiresRefrigeration { get; set; } = false;
         public IFormFile[] Products { get; set; }
 		public IFormFile Thumbnail { get; set; }
+        public string Variants { get; set; }
 	}
+
+
+    
 
 	public class ProductsDto
     {
@@ -83,7 +87,6 @@ namespace EpicMarket.Entities
 
     public class ProductsMapOptionResult 
     {
-        public int VariantId { get; set; }
 
         public int ProductId { get; set; }
 
@@ -91,15 +94,28 @@ namespace EpicMarket.Entities
 
         public string Description { get; set; }
 
-        public double Rate { get; set; }
-
-        public string SKU { get; set; }
-
-        public Dictionary<string, string> Attributes { get; set; }
-
-        public bool Selected { get; set; }
-
         public string Thumbnail { get; set; }
+
+        public List<VariantResult> Variants { get; set; }
+    }
+
+
+    public class VariantResult
+    {
+        public int VariantId { get; set; }
+        public string SKU { get; set; }
+        public decimal Price { get; set; }
+        public bool Selected { get; set; }
+        public Dictionary<string, string> Attributes { get; set; }
+    }
+
+    public class VariantResultTemp
+    {
+        public int VariantId { get; set; }
+        public string SKU { get; set; }
+        public decimal Price { get; set; }
+        public bool Selected { get; set; }
+        public string Attributes { get; set; }
     }
 
     public class ProductParams

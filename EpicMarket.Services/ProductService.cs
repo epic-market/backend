@@ -50,7 +50,18 @@ namespace EpicMarket.Services
 		}
 
         public async Task<int> AddProduct(AddProductsDto productsDto, string UserName, int businessID, string PageSource)
-        {
+        {  //TODO: Add Product Variant
+
+          // First deserialize the string to get the JSON string
+            string jsonString = JsonConvert.DeserializeObject<string>(productsDto.Variants);
+            // Then deserialize the JSON string to get the array of variants
+            List<ProductVariantDto> variants = JsonConvert.DeserializeObject<List<ProductVariantDto>>(jsonString);
+
+            if(variants == null || variants.Count == 0)
+            {
+              throw new Exception("Variants are required");
+            }
+
             var product = mapper.Map<Catalog>(productsDto);
             product.BusinessID = businessID;
             product.CreateBy = UserName;
@@ -61,6 +72,21 @@ namespace EpicMarket.Services
             var mailevent = MessageDataConstants.AddCatelog;
             await _context.Catalogs.AddAsync(product);
             await unitOfWork.Complete();
+
+            var newVariants = variants.Select(v => new ProductVariants 
+                {   
+                ProductID = product.ID,
+                SKU = v.SKU,
+                Price = v.Price,
+                Attributes = JsonConvert.SerializeObject(v.Attributes),
+                CreateBy = UserName,
+                CreateDate = DateTime.Now
+            }).ToList();
+
+            await _context.ProductVariants.AddRangeAsync(newVariants);
+            await unitOfWork.Complete();
+          
+            
 			var saved = await _context.Catalogs.FirstOrDefaultAsync(o => o.ID == product.ID);
             string savedJson = JsonConvert.SerializeObject(saved, new JsonSerializerSettings
             {
@@ -117,32 +143,51 @@ namespace EpicMarket.Services
 
 		public async Task<List<ProductsMapOptionResult>> GetAllProductForMap(int BusinessID,int BranchId)
         {
-            var attachmentTypeID = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
+
+            var attachmentTypeID = await _context.AttachmentTypes
+                .FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
+
             var returnedProducts = await (from catalogItem in _context.Catalogs
-                    join variant in _context.ProductVariants 
-                    on catalogItem.ID equals variant.ProductID
-                    join outletProduct in (_context.Inventory.Where(a => a.OutletID == BranchId))
-                    on variant.VariantID equals outletProduct.ProductVariantID into joinedProducts
-                    from matchedProduct in joinedProducts.DefaultIfEmpty()
-                    where catalogItem.BusinessID == BusinessID && catalogItem.IsActive == true
-                    select new ProductsMapOptionResult
-                    {
-                        VariantId = variant.VariantID,
-                        ProductId = catalogItem.ID,
-                        Name = catalogItem.Name,
-                        Description = catalogItem.Description,
-                        Rate = (double)variant.Price,
-                        SKU = variant.SKU,
-                        Attributes = JsonConvert.DeserializeObject<Dictionary<string, string>>(variant.Attributes),
-                        Thumbnail = ((from attachment in _context.Attachments
-                                      join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
-                                      join entity in _context.Entity on link.EntityID equals entity.ID
-                                      where entity.Name == EntityConstants.Catelog && link.RecordID == catalogItem.ID && link.AttachmentTypeID == attachmentTypeID.ID
-                                      select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}").FirstOrDefault()),
-                        Selected = matchedProduct != null
-                    }).ToListAsync();
+                                    where catalogItem.BusinessID == BusinessID && catalogItem.IsActive == true
+                                    select new ProductsMapOptionResult
+                                    {
+                                        ProductId = catalogItem.ID,
+                                        Name = catalogItem.Name,
+                                        Description = catalogItem.Description,
+                                        Thumbnail = (from attachment in _context.Attachments
+                                                    join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                                                    join entity in _context.Entity on link.EntityID equals entity.ID
+                                                    where entity.Name == EntityConstants.Catelog && 
+                                                        link.RecordID == catalogItem.ID && 
+                                                        link.AttachmentTypeID == attachmentTypeID.ID
+                                                    select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
+                                                ).FirstOrDefault(),
+                                        Variants = (from v in _context.ProductVariants
+                                                where v.ProductID == catalogItem.ID
+                                                select new VariantResultTemp
+                                                {
+                                                    VariantId = v.VariantID,
+                                                    SKU = v.SKU,
+                                                    Price = v.Price,
+                                                    Attributes = v.Attributes,
+                                                    Selected = _context.Inventory
+                                                        .Where(i => i.OutletID == BranchId)
+                                                        .Any(i => i.ProductVariantID == v.VariantID)
+                                                })
+                                                .AsEnumerable()
+                                                .Select(v => new VariantResult
+                                                {
+                                                    VariantId = v.VariantId,
+                                                    SKU = v.SKU,
+                                                    Price = v.Price,
+                                                    Selected = v.Selected,
+                                                    Attributes = JsonConvert.DeserializeObject<Dictionary<string, string>>(v.Attributes ?? "{}")
+                                                })
+                                                .ToList()
+                                    }).ToListAsync();
 
             return returnedProducts;
+                        
         }
 
 
@@ -644,7 +689,6 @@ namespace EpicMarket.Services
             
             return variant.VariantID;
         }
-
         public async Task<List<ProductVariantResponse>> GetProductVariants(int productId)
         {
             var variants = await _context.ProductVariants
@@ -662,10 +706,10 @@ namespace EpicMarket.Services
             return variants;
         }
 
-        public async Task<ProductVariantResponse> GetProductVariant(int productId, int variantId)
+        public async Task<ProductVariantResponse> GetProductVariant(int variantId)
         {
             var variant = await _context.ProductVariants
-                .Where(v => v.ProductID == productId && v.VariantID == variantId && v.IsActive)
+                .Where(v => v.VariantID == variantId && v.IsActive)
                 .Select(v => new ProductVariantResponse
                 {
                     VariantID = v.VariantID,
@@ -682,10 +726,10 @@ namespace EpicMarket.Services
             return variant;
         }
 
-        public async Task UpdateProductVariant(int productId, int variantId, ProductVariantDto variantDto, string userName)
+        public async Task UpdateProductVariant(int variantId, ProductVariantDto variantDto, string userName)
         {
             var variant = await _context.ProductVariants
-                .FirstOrDefaultAsync(v => v.ProductID == productId && v.VariantID == variantId && v.IsActive);
+                .FirstOrDefaultAsync(v => v.VariantID == variantId && v.IsActive);
 
             if (variant == null)
                 throw new Exception("Product variant not found");

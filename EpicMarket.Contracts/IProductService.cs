@@ -27,7 +27,7 @@ namespace EpicMarket.Contracts
         Task deleteCatelog(int id,string UserName);
         Task<int> AddProductVariant(int productId, ProductVariantDto variantDto, string userName);
         Task<List<ProductVariantResponse>> GetProductVariants(int productId);
-        Task<ProductVariantResponse> GetProductVariant(int productId, int variantId);
-        Task UpdateProductVariant(int productId, int variantId, ProductVariantDto variantDto, string userName);
+        Task<ProductVariantResponse> GetProductVariant(int variantId);
+        Task UpdateProductVariant(int variantId, ProductVariantDto variantDto, string userName);
 	}
 }

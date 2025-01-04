@@ -444,7 +444,8 @@ namespace EpicMarket.Data.Models
 					typeof(Address),
 					typeof(BusinessEmployeeMap),
 					typeof(AppUser),
-                    typeof(Page)
+                    typeof(Page),
+                    typeof(ProductVariants)
                 );
 
 

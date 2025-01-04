@@ -25,3 +25,8 @@ namespace EpicMarket.Entities
         public string ReferenceId { get; set; }
     }
 }
+
+
+
+//Email Password 
+//send otp 

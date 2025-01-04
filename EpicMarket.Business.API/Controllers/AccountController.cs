@@ -467,29 +467,29 @@ namespace EpicMarket.Business.API.Controllers
             }
         }
 
-        [HttpPost("verify-otp")]
-        [AllowAnonymous]
-        public async Task<ActionResult<OperationResult<bool>>> VerifyOTP(VerifyOTPRequest request)
-        {
-            try
-            {
-                var response = new OperationResult<bool>();
+        //[HttpPost("verify-otp")]
+        //[AllowAnonymous]
+        //public async Task<ActionResult<OperationResult<bool>>> VerifyOTP(VerifyOTPRequest request)
+        //{
+        //    try
+        //    {
+        //        var response = new OperationResult<bool>();
                 
-                if (string.IsNullOrEmpty(request.ReferenceId) || string.IsNullOrEmpty(request.OTP))
-                {
-                    return BadRequest("ReferenceId and OTP are required");
-                }
+        //        if (string.IsNullOrEmpty(request.ReferenceId) || string.IsNullOrEmpty(request.OTP))
+        //        {
+        //            return BadRequest("ReferenceId and OTP are required");
+        //        }
 
-                response.Data = await _otpService.VerifyOTPAsync(request.ReferenceId, request.OTP);
+        //        response.Data = await _otpService.VerifyOTPAsync(request.ReferenceId, request.OTP);
                 
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Error verifying OTP");
-                return StatusCode(500, "An error occurred while verifying OTP");
-            }
-        }
+        //        return Ok(response);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        logger.LogError(ex, "Error verifying OTP");
+        //        return StatusCode(500, "An error occurred while verifying OTP");
+        //    }
+        //}
         
      
         private async Task<bool> UserExists(string username)
