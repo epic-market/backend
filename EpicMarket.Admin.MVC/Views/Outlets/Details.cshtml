@@ -305,7 +305,7 @@
 											@Html.DisplayNameFor(model => model.Inventory.ProductVariants.Catalog.Category)
 										</th>
 										<th>
-											@Html.DisplayNameFor(model => model.Inventory.ProductVariants.Catalog.Rate)
+											@Html.DisplayNameFor(model => model.Inventory.ProductVariants.Catalog)
 										</th>
 										<th></th>
 									</tr>
@@ -324,7 +324,7 @@
 												@Html.DisplayFor(modelItem => item.ProductVariants.Catalog.Category)
 											</td>
 											<td>
-												@Html.DisplayFor(modelItem => item.ProductVariants.Catalog.Rate)
+												@Html.DisplayFor(modelItem => item.ProductVariants.Catalog)
 											</td>
 											<td>
 												<a asp-controller="OutletProducts" asp-action="Edit" asp-route-id="@item.ID">Edit</a> |

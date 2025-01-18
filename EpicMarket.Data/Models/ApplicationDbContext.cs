@@ -26,6 +26,8 @@ namespace EpicMarket.Data.Models
         }
 
 
+
+
         private bool IsUserAdmin => _httpContextAccessor.HttpContext?.User?.IsInRole("admin") ?? false;
 
         private List<int> AllowedBusinessIds
@@ -238,6 +240,8 @@ namespace EpicMarket.Data.Models
 
         public DbSet<OTPVerification> OTPVerifications { get; set; }
 
+        public DbSet<Category> Categories { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
@@ -411,7 +415,14 @@ namespace EpicMarket.Data.Models
 					.HasForeignKey(fk => fk.AttachmentID)
 					.OnDelete(DeleteBehavior.Cascade);
 
-			modelBuilder.ApplyDefaultValuesToEntities(
+            modelBuilder.Entity<Catalog>()
+                        .HasOne(c => c.Category)
+                        .WithMany(c => c.Catalog)
+                        .HasForeignKey(c => c.CategoryID)
+                        .OnDelete(DeleteBehavior.Restrict);
+                        //
+
+            modelBuilder.ApplyDefaultValuesToEntities(
 					typeof(TaskType),
 					typeof(TaskStatusType),
 					typeof(Tasks),

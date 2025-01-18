@@ -55,7 +55,7 @@ namespace EpicMarket.Business.API.Controllers
 
 		[HttpPost]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
-		public async Task<ActionResult<OperationResult<int>>> AddProduct([FromForm] AddProductsDto productsDto)
+		public async Task<ActionResult<OperationResult<int>>> AddProduct([FromBody] AddProductsDto productsDto)
 		{
 
 			var response = new OperationResult<int>();
@@ -66,45 +66,27 @@ namespace EpicMarket.Business.API.Controllers
 			if (productsDto.Products?.Length > 0)
 			{
 				foreach (var product in productsDto.Products) {
-					var filinsertOutput = await this.SaveFileGlobalAsync(product, ApplicationConfigurationConstants.Products, this.fileStoreService, this.applicationConfigurationService, this.BusinessId);
-					var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
-					{
-						Name = EntityConstants.Catelog + AttachmentTypeConstants.PRODUCTIMAGES,
-						Comment = null,
-						DocumentType = DocumentTypeConstants.FILE,
-						DocumentFileType = product.ContentType,
-						DocumentFolderPath = filinsertOutput.FullPathLocation,
-						DocumentFile = filinsertOutput.FileName,
-					});
+					var attachmentId = await this.attachmentService.GetAttachmentId(product);
 					await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
 					{
 						AttachmentTypeName = AttachmentTypeConstants.PRODUCTIMAGES,
 						AttachmentID = attachmentId,
 						Entity = EntityConstants.Catelog,
 						RecordID = response.Data
-					});
+					}, this.BusinessId);
 
 				}
 
 				if (productsDto.Thumbnail != null)
 				{
-					var filinsertOutput = await this.SaveFileGlobalAsync(productsDto.Thumbnail, ApplicationConfigurationConstants.THUMBNAIL, this.fileStoreService, this.applicationConfigurationService, this.BusinessId);
-					var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
-					{
-						Name = EntityConstants.Catelog + AttachmentTypeConstants.THUMBNAIL,
-						Comment = null,
-						DocumentType = DocumentTypeConstants.FILE,
-						DocumentFileType = productsDto.Thumbnail.ContentType,
-						DocumentFolderPath = filinsertOutput.FullPathLocation,
-						DocumentFile = filinsertOutput.FileName,
-					});
+					var attachmentId = await this.attachmentService.GetAttachmentId(productsDto.Thumbnail);
 					await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
 					{
 						AttachmentTypeName = AttachmentTypeConstants.THUMBNAIL,
 						AttachmentID = attachmentId,
 						Entity = EntityConstants.Catelog,
 						RecordID = response.Data
-					});
+					}, this.BusinessId);
 
 				}
 
@@ -145,7 +127,7 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpPut("{id}")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
-		public async Task<ActionResult<OperationResult<int>>> UpdateProduct([FromRoute] int id, [FromForm] AddProductsDto productsDto)
+		public async Task<ActionResult<OperationResult<int>>> UpdateProduct([FromRoute] int id, [FromBody] AddProductsDto productsDto)
 		{
 
 			var response = new OperationResult<int>();
@@ -157,45 +139,27 @@ namespace EpicMarket.Business.API.Controllers
 			{
 				foreach (var product in productsDto.Products)
 				{
-					var filinsertOutput = await this.SaveFileGlobalAsync(product, ApplicationConfigurationConstants.Products, this.fileStoreService, this.applicationConfigurationService, this.BusinessId);
-					var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
-					{
-						Name = EntityConstants.Catelog + AttachmentTypeConstants.PRODUCTIMAGES,
-						Comment = null,
-						DocumentType = DocumentTypeConstants.FILE,
-						DocumentFileType = product.ContentType,
-						DocumentFolderPath = filinsertOutput.FullPathLocation,
-						DocumentFile = filinsertOutput.FileName,
-					});
+					var attachmentId = await this.attachmentService.GetAttachmentId(product);
 					await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
 					{
 						AttachmentTypeName = AttachmentTypeConstants.PRODUCTIMAGES,
 						AttachmentID = attachmentId,
 						Entity = EntityConstants.Catelog,
 						RecordID = response.Data
-					});
+					}, this.BusinessId);
 
 				}
 
 				if (productsDto.Thumbnail != null)
 				{
-					var filinsertOutput = await this.SaveFileGlobalAsync(productsDto.Thumbnail, ApplicationConfigurationConstants.THUMBNAIL, this.fileStoreService, this.applicationConfigurationService, this.BusinessId);
-					var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
-					{
-						Name = EntityConstants.Catelog + AttachmentTypeConstants.THUMBNAIL,
-						Comment = null,
-						DocumentType = DocumentTypeConstants.FILE,
-						DocumentFileType = productsDto.Thumbnail.ContentType,
-						DocumentFolderPath = filinsertOutput.FullPathLocation,
-						DocumentFile = filinsertOutput.FileName,
-					});
+					var attachmentId = await this.attachmentService.GetAttachmentId(productsDto.Thumbnail);
 					await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
 					{
 						AttachmentTypeName = AttachmentTypeConstants.THUMBNAIL,
 						AttachmentID = attachmentId,
 						Entity = EntityConstants.Catelog,
 						RecordID = response.Data
-					});
+					}, this.BusinessId);
 
 				}
 
@@ -330,17 +294,6 @@ namespace EpicMarket.Business.API.Controllers
             
             return Ok(response);
         }
-        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
-        public async Task<ActionResult<OperationResult<List<ProductVariantResponse>>>> GetProductVariants(
-            [FromRoute] int productId)
-        {
-            var response = new OperationResult<List<ProductVariantResponse>>();
-            this.logger.LogInformation("Products Controller -> GetProductVariants()-> productId: {0}", productId);
-            
-            response.Data = await productService.GetProductVariants(productId);
-            return Ok(response);
-        }
-
         [HttpGet("variants/{variantId}")]
         [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
         public async Task<ActionResult<OperationResult<ProductVariantResponse>>> GetProductVariant(

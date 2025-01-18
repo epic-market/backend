@@ -4,6 +4,7 @@ using EpicMarket.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EpicMarket.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250115090945_AddCategories")]
+    partial class AddCategories
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -446,9 +449,6 @@ namespace EpicMarket.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int?>("EntityId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -465,12 +465,7 @@ namespace EpicMarket.Data.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<int?>("RecordId")
-                        .HasColumnType("int");
-
                     b.HasKey("ID");
-
-                    b.HasIndex("EntityId");
 
                     b.ToTable("Attachments");
                 });
@@ -934,6 +929,7 @@ namespace EpicMarket.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("ParentID")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.HasKey("ID");
@@ -2826,15 +2822,6 @@ namespace EpicMarket.Data.Migrations
                     b.Navigation("Roles");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("EpicMarket.Data.Models.Attachment", b =>
-                {
-                    b.HasOne("EpicMarket.Data.Models.Entity", "Entity")
-                        .WithMany()
-                        .HasForeignKey("EntityId");
-
-                    b.Navigation("Entity");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.AttachmentLink", b =>

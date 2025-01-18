@@ -66,10 +66,10 @@ namespace EpicMarket.Entities
         public string ProofNumber { get; set; }
         [Required]
         [FileSize(5 * 1024 * 1024)] // 5MB limit
-        public IFormFile LogoFile { get; set; }
+        public string LogoFile { get; set; }
         [Required]
         [FileSize(5 * 1024 * 1024)] // 5MB limit
-        public IFormFile[] ProofFile { get; set; }
+        public string[] ProofFile { get; set; }
     }
     public class BusinessDTO_Result 
     {
@@ -130,7 +130,7 @@ namespace EpicMarket.Entities
         public string ProofType { get; set; }
 
         public string ProofNumber { get; set; }
-        public IFormFile LogoFile { get; set; }
-        public IFormFile[] ProofFile { get; set; }
+        public string LogoFile { get; set; }
+        public string[] ProofFile { get; set; }
     }
 }

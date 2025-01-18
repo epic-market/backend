@@ -13,12 +13,10 @@ namespace EpicMarket.Data.Models
     {
         public int ID { get; set; }
         public int BusinessID { get; set; }
-        public long? Barcode { get; set; }
         [StringLength(50)]
         public string Name { get; set; }
         public string Description { get; set; }
-        public string? Category { get; set; }
-        public double Rate { get; set; }
+        public int? CategoryID { get; set; }
         public bool IsRecommended { get; set; }
         public int? MaximumOrderPurchase { get; set; }
         public double? Rating { get; set; }
@@ -29,8 +27,6 @@ namespace EpicMarket.Data.Models
         public double PackedDepth { get; set; }
         public double Weight { get; set; }
         public bool RequiresRefrigeration { get; set; }
-        public double CostPrice { get; set; }
-
 
         [ForeignKey("StatusOptionSets")]
         public int StatusId { get; set; }
@@ -39,6 +35,8 @@ namespace EpicMarket.Data.Models
         public virtual Business Business { get; set; }
 
         public virtual StatusOptionSet StatusOptionSets { get; set; }
+
+        public virtual Category? Category { get; set; }
 
         public virtual ICollection<Rating> Ratings { get; set; }
 

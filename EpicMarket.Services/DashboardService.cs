@@ -104,7 +104,7 @@ namespace EpicMarket.Services
         }
     }
 
-        //GMV=Sales Price of Goods×Number of Goods Sold
+        //GMV=Sales Price of Goodsï¿½Number of Goods Sold
         public async Task<List<GMVChart>> GetGrossMerchandiseValue(int outletId)
     {
         try
@@ -215,7 +215,7 @@ namespace EpicMarket.Services
 
             var topProducts = await _dbContext.OrderDetails
                 .Where(od => od.Order.OutletID == outletId)
-                .GroupBy(od => od.CatalogID)
+                .GroupBy(od => od.ProductVariants.Catalog.ID)
                 .Select(g => new
                 {
                     ProductId = g.Key,

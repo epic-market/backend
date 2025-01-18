@@ -84,7 +84,7 @@ namespace EpicMarket.Services
                 {
                     Id = p.ProductVariants.Catalog.ID,
                     Name = p.ProductVariants.Catalog.Name,
-                    Price = p.ProductVariants.Catalog.Rate,
+                    Price = p.ProductVariants.SalePrice,
                     BranchName = p.Outlet.Name,
                     BranchId = p.Outlet.ID,
                     Distance = request.Latitude.HasValue ?
