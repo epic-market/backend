@@ -124,7 +124,7 @@ namespace EpicMarket.Services
 
                 foreach(var orderDetail in orderdto.orderDetailsDtos)
                 {
-                    var catelogVariant = await _context.ProductVariants.Include(c => c.Catalog)
+                    var catelogVariant = await _context.CatalogVariants.Include(c => c.Catalog)
                         .FirstOrDefaultAsync(c => c.VariantID == orderDetail.VariantID && c.IsActive == true);
 
                     if (catelogVariant == null)
@@ -199,18 +199,18 @@ namespace EpicMarket.Services
 
             var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
 
-            List<OrderDetails> OrderDetails = await _context.OrderDetails.Include(c => c.ProductVariants).Where(c => c.OrderID == OrderId)
+            List<OrderDetails> OrderDetails = await _context.OrderDetails.Include(c => c.CatalogVariants).Where(c => c.OrderID == OrderId)
                 .Select(c => new OrderDetails()
                 {
-                    CatalogID = c.ProductVariants.Catalog.ID,
-                    ProductName = c.ProductVariants.Catalog.Name,
+                    CatalogID = c.CatalogVariants.Catalog.ID,
+                    ProductName = c.CatalogVariants.Catalog.Name,
                     Quantity = c.Quantity,
                     Rate = c.Rate,
                     TotalPrice = c.TotalPrice,
                     Thumbnail = ((from attachment in _context.Attachments
                                   join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
                                   join entity in _context.Entity on link.EntityID equals entity.ID
-                                  where entity.Name == EntityConstants.Catelog && link.RecordID == c.ProductVariants.Catalog.ID && link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
+                                  where entity.Name == EntityConstants.Catelog && link.RecordID == c.CatalogVariants.Catalog.ID && link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
                                   select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}").FirstOrDefault())
                 }).ToListAsync();
 
@@ -387,8 +387,8 @@ namespace EpicMarket.Services
                 {
                     ID =c.OrderDetails.FirstOrDefault().ID,
                     Quantity= c.OrderDetails.FirstOrDefault().Quantity,
-                    Name= c.OrderDetails.FirstOrDefault().ProductVariants.Catalog.Name,
-                    Price=c.OrderDetails.FirstOrDefault().ProductVariants.SalePrice,
+                    Name= c.OrderDetails.FirstOrDefault().CatalogVariants.Catalog.Name,
+                    Price=c.OrderDetails.FirstOrDefault().CatalogVariants.SalePrice,
                     Total_price=c.OrderDetails.FirstOrDefault().TotalPrice
                 },
 
@@ -431,8 +431,8 @@ namespace EpicMarket.Services
                     {
                         ID = od.ID,
                         Quantity = od.Quantity,
-                        Name = od.ProductVariants.Catalog.Name,
-                        Price = od.ProductVariants.SalePrice,
+                        Name = od.CatalogVariants.Catalog.Name,
+                        Price = od.CatalogVariants.SalePrice,
                         Total_price = od.TotalPrice
                     }).ToList(),
 
@@ -548,7 +548,7 @@ namespace EpicMarket.Services
                 // Process order details
                 foreach(var orderDetail in order.OrderDetailsDtos)
                 {
-                    var catalogVariant = await _context.ProductVariants.Include(c => c.Catalog)
+                    var catalogVariant = await _context.CatalogVariants.Include(c => c.Catalog)
                         .FirstOrDefaultAsync(c => c.VariantID == orderDetail.VariantID && c.IsActive == true);
 
                     if (catalogVariant == null)

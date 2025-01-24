@@ -24,7 +24,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: OrderDetails
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.OrderDetails.Include(o => o.ProductVariants).Include(o => o.Order);
+            var applicationDbContext = _context.OrderDetails.Include(o => o.CatalogVariants).Include(o => o.Order);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -37,7 +37,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
 
             var orderDetail = await _context.OrderDetails
-                .Include(o => o.ProductVariants)
+                .Include(o => o.CatalogVariants)
                 .Include(o => o.Order)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (orderDetail == null)
@@ -69,7 +69,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CatalogID"] = new SelectList(_context.Catalogs, "ID", "ID", orderDetail.ProductVariants.ProductID);
+            ViewData["CatalogID"] = new SelectList(_context.Catalogs, "ID", "ID", orderDetail.CatalogVariants.CatalogID);
             ViewData["OrderID"] = new SelectList(_context.Orders, "ID", "ID", orderDetail.OrderID);
             return View(orderDetail);
         }
@@ -82,12 +82,12 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var orderDetail = await _context.OrderDetails.Include(c=>c.ProductVariants).FirstOrDefaultAsync(c=>c.ID == id);
+            var orderDetail = await _context.OrderDetails.Include(c=>c.CatalogVariants).FirstOrDefaultAsync(c=>c.ID == id);
             if (orderDetail == null)
             {
                 return NotFound();
             }
-            ViewData["CatalogID"] = new SelectList(_context.Catalogs, "ID", "ID", orderDetail.ProductVariants.ProductID);
+            ViewData["CatalogID"] = new SelectList(_context.Catalogs, "ID", "ID", orderDetail.CatalogVariants.CatalogID);
             ViewData["OrderID"] = new SelectList(_context.Orders, "ID", "ID", orderDetail.OrderID);
             return View(orderDetail);
         }
@@ -139,7 +139,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CatalogID"] = new SelectList(_context.Catalogs, "ID", "ID", orderDetail.ProductVariants.ProductID);
+            ViewData["CatalogID"] = new SelectList(_context.Catalogs, "ID", "ID", orderDetail.CatalogVariants.CatalogID);
             ViewData["OrderID"] = new SelectList(_context.Orders, "ID", "ID", orderDetail.OrderID);
             return View(orderDetail);
         }
@@ -153,7 +153,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
 
             var orderDetail = await _context.OrderDetails
-                .Include(o => o.ProductVariants)
+                .Include(o => o.CatalogVariants)
                 .Include(o => o.Order)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (orderDetail == null)

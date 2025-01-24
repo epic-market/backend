@@ -31,7 +31,7 @@
                             @Html.DisplayNameFor(model => model.Order)
                         </th>
                         <th>
-                            @Html.DisplayNameFor(model => model.ProductVariants)
+                            @Html.DisplayNameFor(model => model.CatalogVariants)
                         </th>
                         <th>
                             @Html.DisplayNameFor(model => model.Quantity)
@@ -55,7 +55,7 @@
                                 <a asp-controller="Orders" asp-action="Details" asp-route-id="@item.Order.ID">   @Html.DisplayFor(modelItem => item.Order.ID) </a>
                             </td>
                             <td>
-                                <a asp-controller="Catalogs" asp-action="Details" asp-route-id="@item.ProductVariants.ProductID"> @Html.DisplayFor(modelItem => item.ProductVariants.ProductID)</a>
+                                <a asp-controller="Catalogs" asp-action="Details" asp-route-id="@item.CatalogVariants.CatalogID"> @Html.DisplayFor(modelItem => item.CatalogVariants.CatalogID)</a>
                                
                             </td>
                             <td>

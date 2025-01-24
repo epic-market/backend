@@ -175,7 +175,7 @@ namespace EpicMarket.Data.Models
 
         public DbSet<Inventory> Inventory { get; set; }    
 
-        public DbSet<ProductVariants> ProductVariants { get; set; }
+        public DbSet<CatalogVariants> CatalogVariants { get; set; }
 
         public DbSet<ProductInternal> ProductInternals { get; set; }
 
@@ -337,7 +337,7 @@ namespace EpicMarket.Data.Models
                       .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Inventory>()
-                 .HasOne(op => op.ProductVariants)
+                 .HasOne(op => op.CatalogVariants)
                  .WithMany(u => u.Inventory)
                  .HasForeignKey(op => op.ProductVariantID)
                  .OnDelete(DeleteBehavior.Restrict);
@@ -456,7 +456,7 @@ namespace EpicMarket.Data.Models
 					typeof(BusinessEmployeeMap),
 					typeof(AppUser),
                     typeof(Page),
-                    typeof(ProductVariants)
+                    typeof(CatalogVariants)
                 );
 
 

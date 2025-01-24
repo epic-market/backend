@@ -18,15 +18,11 @@ namespace EpicMarket.Data.Models
         public string Description { get; set; }
         public int? CategoryID { get; set; }
         public bool IsRecommended { get; set; }
-        public int? MaximumOrderPurchase { get; set; }
         public double? Rating { get; set; }
         public int? ReviewCount { get; set; }
         public int? OrderCount { get; set; }
-        public double PackedHeight { get; set; }
-        public double PackedWidhth { get; set; }
-        public double PackedDepth { get; set; }
-        public double Weight { get; set; }
         public bool RequiresRefrigeration { get; set; }
+        public string BaseHightlights { get; set; }
 
         [ForeignKey("StatusOptionSets")]
         public int StatusId { get; set; }
@@ -40,7 +36,7 @@ namespace EpicMarket.Data.Models
 
         public virtual ICollection<Rating> Ratings { get; set; }
 
-        public virtual ICollection<ProductVariants> ProductVariants { get; set; }
+        public virtual ICollection<CatalogVariants> CatalogVariants { get; set; }
 
     }
 }

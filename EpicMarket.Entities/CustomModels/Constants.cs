@@ -91,6 +91,7 @@ namespace EpicMarket.Entities.CustomModels
     public static class EntityConstants
     {
         public const string Catelog = "Catelog";
+        public const string CatelogVariant = "CatelogVariant";
 		public const string Branch = "Branch";
         public const string Employees = "Employees";
         public const string Order = "Order";

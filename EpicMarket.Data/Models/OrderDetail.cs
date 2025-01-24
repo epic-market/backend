@@ -18,6 +18,6 @@ namespace EpicMarket.Data.Models
 
         // Navigation properties
         public virtual Order? Order { get; set; }
-        public virtual ProductVariants? ProductVariants { get; set; }
+        public virtual CatalogVariants? CatalogVariants { get; set; }
     }
 }

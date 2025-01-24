@@ -64,12 +64,14 @@ namespace EpicMarket.Entities
         [Required]
         [StringLength(50, MinimumLength = 2)]
         public string ProofNumber { get; set; }
+
         [Required]
         [FileSize(5 * 1024 * 1024)] // 5MB limit
-        public string LogoFile { get; set; }
+        public IFormFile LogoFile { get; set; }
+
         [Required]
         [FileSize(5 * 1024 * 1024)] // 5MB limit
-        public string[] ProofFile { get; set; }
+        public IFormFile[] ProofFile { get; set; }
     }
     public class BusinessDTO_Result 
     {

@@ -10,21 +10,26 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EpicMarket.Data.Models
 {
-    public class ProductVariants : BaseModel
+    public class CatalogVariants : BaseModel
     {
         [Key]
         public int VariantID { get; set; }
-
+    
         [Required]
         [ForeignKey("Catalog")]
-        public int ProductID { get; set; }
+        public int CatalogID { get; set; }
 
         [Required]
         [StringLength(50)]
         public string SKU { get; set; }
+        
+        public string Barcode { get; set; }
 
         [Required]
-        public string VariantName { get; set; }
+        public string OptionName { get; set; }
+
+        [Required]
+        public string OptionValue { get; set; }
 
         [Required]
         public double CostPrice { get; set; } //cost of product for percharse
@@ -32,9 +37,13 @@ namespace EpicMarket.Data.Models
         [Required]
          public double SalePrice { get; set; } //what price he what to show to users
 
-        [Required]
-        public string VariantAttributes { get; set; }
-
+        public double CompareAtPrice { get; set; }
+        public string AdditionalHightlights { get; set; }
+        public double PackedHeight { get; set; }
+        public double PackedWidhth { get; set; }
+        public double PackedDepth { get; set; }
+        public string WeightUnit { get; set; }//kg,g,lbs,oz
+        public double Weight { get; set; } //value of weight
         public virtual Catalog Catalog { get; set; }
 
         public virtual ICollection<Inventory> Inventory { get; set; }

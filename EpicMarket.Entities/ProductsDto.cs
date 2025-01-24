@@ -30,8 +30,6 @@ namespace EpicMarket.Entities
         public double? PackedDepth { get; set; }
         public double? Weight { get; set; }
         public bool RequiresRefrigeration { get; set; } = false;
-        public string[] Products { get; set; }
-		public string Thumbnail { get; set; }
         public string Variants { get; set; }
 	}
 
@@ -50,11 +48,7 @@ namespace EpicMarket.Entities
 		public int? MaximumOrderPurchase { get; set; }
         public string? Status { get; set; }
 		public string Thumbnail { get; set; }
-        public double CostPrice { get; set; }
-        public double? PackedHeight { get; set; }
-        public double? PackedWidhth { get; set; }
-        public double? PackedDepth { get; set; }
-        public double? Weight { get; set; }
+        public string BaseHightlights { get; set; }
         public bool RequiresRefrigeration { get; set; }
         public List<VariantResult> Variants { get; set; }
     }
@@ -101,7 +95,7 @@ namespace EpicMarket.Entities
         public double SalePrice { get; set; }
         public double CostPrice { get; set; }
         public bool Selected { get; set; }
-        public Dictionary<string, string> Attributes { get; set; }
+        public string AdditionalHightlights { get; set; }
     }
 
     public class VariantResultTemp
@@ -111,7 +105,7 @@ namespace EpicMarket.Entities
         public double SalePrice { get; set; }
         public double CostPrice { get; set; }
         public bool Selected { get; set; }
-        public string Attributes { get; set; }
+        public string AdditionalHightlights { get; set; }
     }
 
     public class ProductParams
@@ -191,10 +185,15 @@ namespace EpicMarket.Entities
 
     public class ProductVariantDto
     {
+        public string OptionName { get; set; }
+        public string OptionValue { get; set; }
         public string SKU { get; set; }
         public double SalePrice { get; set; }
+        public double CompareAtPrice { get; set; }
+        public string AdditionalHightlights { get; set; } 
         public double CostPrice { get; set; }
-        public Dictionary<string, string> Attributes { get; set; }
+        public string[] ProductImages { get; set; }
+		public string Thumbnail { get; set; }
     }
 
     public class ProductVariantResponse
@@ -204,6 +203,6 @@ namespace EpicMarket.Entities
         public string SKU { get; set; }
         public double SalePrice { get; set; }
         public double CostPrice { get; set; }
-        public Dictionary<string, string> Attributes { get; set; }
+        public string AdditionalHightlights { get; set; }
     }
 }

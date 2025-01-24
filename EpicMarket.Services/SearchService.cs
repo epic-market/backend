@@ -31,7 +31,7 @@ namespace EpicMarket.Services
                 return new SearchResult();
 
             var branchQuery = _context.Outlets.Include(c=>c.Address).IgnoreQueryFilters().AsQueryable();
-            var productQuery = _context.Inventory.Include(p => p.Outlet).Include(p=>p.ProductVariants).Include(p => p.Outlet.Address).AsQueryable();
+            var productQuery = _context.Inventory.Include(p => p.Outlet).Include(p=>p.CatalogVariants).Include(p => p.Outlet.Address).AsQueryable();
 
             // Apply location filter if coordinates are provided
             if (request.Latitude.HasValue && request.Longitude.HasValue)
@@ -79,12 +79,12 @@ namespace EpicMarket.Services
                 .ToListAsync();
 
             var products = await productQuery
-                .Where(p => p.ProductVariants.Catalog.Name.ToLower().Contains(searchTerm))
+                .Where(p => p.CatalogVariants.Catalog.Name.ToLower().Contains(searchTerm))
                 .Select(p => new ProductSearchDto 
                 {
-                    Id = p.ProductVariants.Catalog.ID,
-                    Name = p.ProductVariants.Catalog.Name,
-                    Price = p.ProductVariants.SalePrice,
+                    Id = p.CatalogVariants.Catalog.ID,
+                    Name = p.CatalogVariants.Catalog.Name,
+                    Price = p.CatalogVariants.SalePrice,
                     BranchName = p.Outlet.Name,
                     BranchId = p.Outlet.ID,
                     Distance = request.Latitude.HasValue ?

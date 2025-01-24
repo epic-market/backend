@@ -62,35 +62,6 @@ namespace EpicMarket.Business.API.Controllers
 			this.logger.LogInformation("Products Controller -> AddProduct()-> params {0}", JsonConvert.SerializeObject(new { Params = productsDto }));
 			var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
 			response.Data = await productService.AddProduct(productsDto, UserName, this.BusinessId, this.PageSource);
-
-			if (productsDto.Products?.Length > 0)
-			{
-				foreach (var product in productsDto.Products) {
-					var attachmentId = await this.attachmentService.GetAttachmentId(product);
-					await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
-					{
-						AttachmentTypeName = AttachmentTypeConstants.PRODUCTIMAGES,
-						AttachmentID = attachmentId,
-						Entity = EntityConstants.Catelog,
-						RecordID = response.Data
-					}, this.BusinessId);
-
-				}
-
-				if (productsDto.Thumbnail != null)
-				{
-					var attachmentId = await this.attachmentService.GetAttachmentId(productsDto.Thumbnail);
-					await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
-					{
-						AttachmentTypeName = AttachmentTypeConstants.THUMBNAIL,
-						AttachmentID = attachmentId,
-						Entity = EntityConstants.Catelog,
-						RecordID = response.Data
-					}, this.BusinessId);
-
-				}
-
-			}
 			this.logger.LogInformation("Products Controller -> AddProduct()-> return {0}", JsonConvert.SerializeObject(new { Results = response }));
 
 			return Ok(response);
@@ -134,36 +105,6 @@ namespace EpicMarket.Business.API.Controllers
 			this.logger.LogInformation("Products Controller -> AddProduct()-> params {0}", JsonConvert.SerializeObject(new { Params = productsDto }));
 			var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
 			response.Data = await productService.UpdateProducts(productsDto,id, UserName, this.BusinessId, this.PageSource);
-
-			if (productsDto.Products?.Length > 0)
-			{
-				foreach (var product in productsDto.Products)
-				{
-					var attachmentId = await this.attachmentService.GetAttachmentId(product);
-					await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
-					{
-						AttachmentTypeName = AttachmentTypeConstants.PRODUCTIMAGES,
-						AttachmentID = attachmentId,
-						Entity = EntityConstants.Catelog,
-						RecordID = response.Data
-					}, this.BusinessId);
-
-				}
-
-				if (productsDto.Thumbnail != null)
-				{
-					var attachmentId = await this.attachmentService.GetAttachmentId(productsDto.Thumbnail);
-					await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
-					{
-						AttachmentTypeName = AttachmentTypeConstants.THUMBNAIL,
-						AttachmentID = attachmentId,
-						Entity = EntityConstants.Catelog,
-						RecordID = response.Data
-					}, this.BusinessId);
-
-				}
-
-			}
 			this.logger.LogInformation("Products Controller -> AddProduct()-> return {0}", JsonConvert.SerializeObject(new { Results = response }));
 
 			return Ok(response);
@@ -291,6 +232,36 @@ namespace EpicMarket.Business.API.Controllers
 
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
             response.Data = await productService.AddProductVariant(id, variantDto, UserName);
+			if (variantDto.ProductImages?.Length > 0)
+			{
+				foreach (var product in variantDto.ProductImages)
+				{
+					var attachmentId = await this.attachmentService.GetAttachmentId(product);
+					await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
+					{
+						AttachmentTypeName = AttachmentTypeConstants.PRODUCTIMAGES,
+						AttachmentID = attachmentId,
+						Entity = EntityConstants.CatelogVariant,
+						RecordID = response.Data
+					}, this.BusinessId);
+
+				}
+
+				if (variantDto.Thumbnail != null)
+				{
+					var attachmentId = await this.attachmentService.GetAttachmentId(variantDto.Thumbnail);
+					await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
+					{
+						AttachmentTypeName = AttachmentTypeConstants.THUMBNAIL,
+						AttachmentID = attachmentId,
+						Entity = EntityConstants.CatelogVariant,
+						RecordID = response.Data
+					}, this.BusinessId);
+
+				}
+
+			}
+			
             
             return Ok(response);
         }

@@ -55,7 +55,7 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             var orders = await _context.Orders.Where(c => c.OutletID == id).Include(o => o.Address).ToListAsync();
             var outletPersons = await _context.OutletPeople.Where(c => c.OutletId == id).Include(o => o.Person).ToListAsync();
-            var outletProducts = await _context.Inventory.Where(c => c.OutletID == id).Include(o => o.ProductVariants).ToListAsync();
+            var outletProducts = await _context.Inventory.Where(c => c.OutletID == id).Include(o => o.CatalogVariants).ToListAsync();
             
             outletDetails.Outlet = outlet;
             outletDetails.Orders = orders;

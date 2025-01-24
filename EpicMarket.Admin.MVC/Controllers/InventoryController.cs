@@ -24,7 +24,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: OutletProducts
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Inventory.Include(o => o.Outlet).Include(o => o.Outlet.Bussiness).Include(o => o.ProductVariants);
+            var applicationDbContext = _context.Inventory.Include(o => o.Outlet).Include(o => o.Outlet.Bussiness).Include(o => o.CatalogVariants);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -38,7 +38,7 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             var outletProduct = await _context.Inventory
                 .Include(o => o.Outlet)
-                .Include(o => o.ProductVariants)
+                .Include(o => o.CatalogVariants)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (outletProduct == null)
             {
@@ -110,7 +110,7 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             var outletProduct = await _context.Inventory
             .Include(op => op.Outlet)
-            .Include(op => op.ProductVariants)
+            .Include(op => op.CatalogVariants)
             .FirstOrDefaultAsync(m => m.ID == id);
 
 
@@ -118,8 +118,8 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 return NotFound();
             }
-            ViewData["ProductID"] = new SelectList(_context.Outlets, "ID", "ID", outletProduct.ProductVariants.Catalog.ID);
-            ViewData["ProductID"] = new SelectList(_context.Catalogs, "ID", "ID", outletProduct.ProductVariants.Catalog.ID);
+            ViewData["ProductID"] = new SelectList(_context.Outlets, "ID", "ID", outletProduct.CatalogVariants.Catalog.ID);
+            ViewData["ProductID"] = new SelectList(_context.Catalogs, "ID", "ID", outletProduct.CatalogVariants.Catalog.ID);
             return View(outletProduct);
         }
 
@@ -155,8 +155,8 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ProductID"] = new SelectList(_context.Outlets, "ID", "ID", outletProduct.ProductVariants.Catalog.ID);
-            ViewData["ProductID"] = new SelectList(_context.Catalogs, "ID", "ID", outletProduct.ProductVariants.Catalog.ID);
+            ViewData["ProductID"] = new SelectList(_context.Outlets, "ID", "ID", outletProduct.CatalogVariants.Catalog.ID);
+            ViewData["ProductID"] = new SelectList(_context.Catalogs, "ID", "ID", outletProduct.CatalogVariants.Catalog.ID);
             return View(outletProduct);
         }
 
@@ -170,7 +170,7 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             var outletProduct = await _context.Inventory
                 .Include(o => o.Outlet)
-                .Include(o => o.ProductVariants)
+                .Include(o => o.CatalogVariants)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (outletProduct == null)
             {
@@ -187,7 +187,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         {
             var outletProduct = await _context.Inventory
                                .Include(op => op.Outlet)
-                               .Include(op => op.ProductVariants)
+                               .Include(op => op.CatalogVariants)
                                .FirstOrDefaultAsync(m => m.ID == id);
             if (outletProduct != null)
             {

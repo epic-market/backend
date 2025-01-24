@@ -294,7 +294,7 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             business.Address.ModifiedBy = userName;
             business.Address.ModifiedDate = DateTime.UtcNow;
-            business.Address.Id = business.AddressID;
+            business.Address.Id = (int)business.AddressID;
             business.ModifiedBy = userName;
             business.ModifiedDate = DateTime.UtcNow;
 

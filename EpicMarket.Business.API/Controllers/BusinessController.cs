@@ -46,10 +46,9 @@ namespace EpicMarket.Business.API.Controllers
             this.applicationConfigurationService = applicationConfigurationService;
         }
 
-
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<OperationResult<BusinessDTO_Result>>> RegisterBusiness([FromBody] BusinessRegisterDto businessRegisterDto)
+        public async Task<ActionResult<OperationResult<BusinessDTO_Result>>> RegisterBusiness([FromForm] BusinessRegisterDto businessRegisterDto)
         {
             // Check for null reference cases
             if (businessRegisterDto == null)
@@ -88,15 +87,20 @@ namespace EpicMarket.Business.API.Controllers
             // Handle logo file upload
             if (businessRegisterDto.LogoFile?.Length > 0)
             {
-                var attachmentId = await this.attachmentService.GetAttachmentId(businessRegisterDto.LogoFile);
-
+                var filinsertOutput = await this.SaveFileBusinessAsync(businessRegisterDto.LogoFile, this.fileStoreService, this.applicationConfigurationService, result.BusinessId);
+                if (filinsertOutput == null)
+                {
+                    this.logger.LogError("Failed to save logo file");
+                    return BadRequest("Failed to save logo file");
+                }
+                 var attachmentId = await this.attachmentService.GetAttachmentId(filinsertOutput.Key);
                 await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
                 {
                     AttachmentTypeName = AttachmentTypeConstants.LOGO,
                     AttachmentID = attachmentId,
                     Entity = EntityConstants.Business,
                     RecordID = result.BusinessId
-                }, this.BusinessId);
+                }, result.BusinessId);
             }
 
             // Handle proof files upload
@@ -104,14 +108,20 @@ namespace EpicMarket.Business.API.Controllers
             {
                 foreach (var proof in businessRegisterDto.ProofFile)
                 {
-                    var attachmentId = await this.attachmentService.GetAttachmentId(proof);
+                    var filinsertOutput = await this.SaveFileBusinessAsync( proof , this.fileStoreService  , this.applicationConfigurationService, result.BusinessId);
+                    if (filinsertOutput == null)
+                    {
+                        this.logger.LogError("Failed to save proof file");
+                        return BadRequest("Failed to save proof file");
+                    }
+                    var attachmentId = await this.attachmentService.GetAttachmentId(filinsertOutput.Key);
                     await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
                     {
                         AttachmentTypeName = AttachmentTypeConstants.PROOF,
                         AttachmentID = attachmentId,
                         Entity = EntityConstants.Proof,
                         RecordID = result.ProofId
-                    }, this.BusinessId);
+                    }, result.BusinessId);
                 }
             }
 
