@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Epic - Order Confirmation</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background-color: #f5f5f5;
+    "
+  >
+    <table
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      style="background-color: #f5f5f5"
+    >
+      <tr>
+        <td align="center" style="padding: 40px 0">
+          <table
+            width="600"
+            cellpadding="0"
+            cellspacing="0"
+            style="
+              background-color: #ffffff;
+              border-radius: 16px;
+              overflow: hidden;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            "
+          >
+            <!-- Header -->
+            <tr>
+              <td
+                style="
+                  background: #000000;
+                  padding: 40px 20px;
+                  text-align: center;
+                "
+              >
+                <h1
+                  style="
+                    color: #ffffff;
+                    font-size: 32px;
+                    margin: 0 0 20px 0;
+                    font-weight: 700;
+                  "
+                >
+                  Epic Market
+                </h1>
+                <h2
+                  style="
+                    font-size: 24px;
+                    font-weight: 600;
+                    color: #ffffff;
+                    margin: 0;
+                  "
+                >
+                  Order Confirmation
+                </h2>
+              </td>
+            </tr>
+
+            <!-- Content -->
+            <tr>
+              <td style="padding: 40px 30px">
+                <p>Dear <strong>${Customer_Name}</strong>,</p>
+
+                <p style="margin-top: 16px">
+                  Thank you for your order! We're excited to get your items
+                  ready and will notify you once they're on their way.
+                </p>
+
+                <!-- Order Details Card -->
+                <div
+                  style="
+                    background: #f8fafc;
+                    border-radius: 12px;
+                    padding: 24px;
+                    margin: 24px 0;
+                    border-left: 4px solid #000000;
+                  "
+                >
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td>
+                        <p style="margin: 0">
+                          <strong>Order Number:</strong>
+                          <span
+                            style="
+                              font-family: monospace;
+                              background: #ffffff;
+                              padding: 8px 12px;
+                              border-radius: 6px;
+                              font-size: 14px;
+                              border: 1px solid #e5e7eb;
+                            "
+                            >${Order_Number}</span
+                          >
+                        </p>
+                        <p style="margin: 12px 0 0 0">
+                          <strong>Order Date:</strong> ${Order_Date}
+                        </p>
+                        <p style="margin: 12px 0 0 0">
+                          <strong>Status:</strong>
+                          <span
+                            style="
+                              display: inline-block;
+                              padding: 6px 16px;
+                              background: #000000;
+                              color: #ffffff;
+                              border-radius: 20px;
+                              font-size: 14px;
+                              font-weight: 600;
+                              letter-spacing: 0.5px;
+                              text-transform: uppercase;
+                            "
+                            >Processing</span
+                          >
+                        </p>
+                        <p style="margin: 12px 0 0 0">
+                          <strong>Shipping Address:</strong><br />
+                          ${Shipping_Address}
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+
+                <!-- Order Summary -->
+                <h2 style="margin: 32px 0 24px 0">Order Summary</h2>
+                <table
+                  width="100%"
+                  cellpadding="0"
+                  cellspacing="0"
+                  style="border-collapse: separate; border-spacing: 0"
+                >
+                  <!-- Header -->
+                  <tr>
+                    <th
+                      style="
+                        background: #f8fafc;
+                        padding: 16px;
+                        text-align: left;
+                        font-weight: 600;
+                        border-bottom: 2px solid #000000;
+                        color: #4b5563;
+                      "
+                    >
+                      Product
+                    </th>
+                    <th
+                      style="
+                        background: #f8fafc;
+                        padding: 16px;
+                        text-align: left;
+                        font-weight: 600;
+                        border-bottom: 2px solid #000000;
+                        color: #4b5563;
+                      "
+                    >
+                      Quantity
+                    </th>
+                    <th
+                      style="
+                        background: #f8fafc;
+                        padding: 16px;
+                        text-align: left;
+                        font-weight: 600;
+                        border-bottom: 2px solid #000000;
+                        color: #4b5563;
+                      "
+                    >
+                      Price
+                    </th>
+                  </tr>
+                  <!-- Product Rows -->
+                  #foreach ($item in $Order_Items)
+                  <tr>
+                    <td style="padding: 16px; border-bottom: 1px solid #e5e7eb">
+                      ${item.Product_Name}
+                    </td>
+                    <td style="padding: 16px; border-bottom: 1px solid #e5e7eb">
+                      ${item.Quantity}
+                    </td>
+                    <td style="padding: 16px; border-bottom: 1px solid #e5e7eb">
+                      $${item.Price}
+                    </td>
+                  </tr>
+                  #end
+                  <!-- Subtotal Row -->
+                  <tr>
+                    <td
+                      colspan="2"
+                      style="
+                        padding: 16px;
+                        text-align: right;
+                        border-bottom: 1px solid #e5e7eb;
+                      "
+                    >
+                      <strong>Subtotal:</strong>
+                    </td>
+                    <td style="padding: 16px; border-bottom: 1px solid #e5e7eb">
+                      $${Subtotal}
+                    </td>
+                  </tr>
+                  <!-- Total Row -->
+                  <tr>
+                    <td
+                      colspan="2"
+                      style="
+                        padding: 16px;
+                        text-align: right;
+                        background: #f8fafc;
+                        font-weight: 700;
+                        font-size: 18px;
+                      "
+                    >
+                      <strong>Total:</strong>
+                    </td>
+                    <td
+                      style="
+                        padding: 16px;
+                        background: #f8fafc;
+                        font-weight: 700;
+                        font-size: 18px;
+                      "
+                    >
+                      $${Total}
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Track Order Button -->
+                <div style="text-align: center; margin: 32px 0">
+                  <a
+                    href="${Order_Tracking_URL}"
+                    style="
+                      display: inline-block;
+                      padding: 16px 32px;
+                      background: #000000;
+                      color: #ffffff;
+                      text-decoration: none;
+                      border-radius: 8px;
+                      font-weight: 600;
+                      text-transform: uppercase;
+                      letter-spacing: 1px;
+                    "
+                    >Track Your Order</a
+                  >
+                </div>
+
+                <!-- Help Section -->
+                <div
+                  style="
+                    background: #f8fafc;
+                    border-radius: 12px;
+                    padding: 24px;
+                    text-align: center;
+                    margin-top: 32px;
+                  "
+                >
+                  <h3 style="color: #000000; margin: 0 0 16px 0">
+                    Need Assistance?
+                  </h3>
+                  <p style="margin: 0">
+                    Email:
+                    <a
+                      href="mailto:${Customer_Service_Email}"
+                      style="color: #000000; text-decoration: underline"
+                      >${Customer_Service_Email}</a
+                    ><br />
+                    Phone: ${Customer_Service_Phone}
+                  </p>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td
+                style="
+                  text-align: center;
+                  padding: 24px;
+                  background: #f8fafc;
+                  color: #6b7280;
+                  font-size: 14px;
+                  border-top: 1px solid #e5e7eb;
+                "
+              >
+                <p style="margin: 0">
+                  © ${Current_Year} Epic Market. All rights reserved.
+                </p>
+                <p style="margin-top: 8px">${Company_Address}</p>
+                <p style="margin-top: 16px">
+                  <small
+                    >This is an automated message. Please do not reply to this
+                    email.</small
+                  >
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

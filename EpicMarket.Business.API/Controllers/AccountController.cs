@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Security.Claims;
 using System.Collections.Generic;
+using EpicMarket.Services;
 
 //verified in postman
 namespace EpicMarket.Business.API.Controllers
@@ -26,6 +27,7 @@ namespace EpicMarket.Business.API.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IProfileService profileService;
+        private readonly IConfiguration _configuration;
         private readonly IOTPService _otpService;
         public UserController(
                                     UserManager<AppUser> userManager,
@@ -37,6 +39,7 @@ namespace EpicMarket.Business.API.Controllers
                                     ApplicationDbContext dbContext,
                                     IHttpContextAccessor httpContextAccessor,
                                     IProfileService profileService,
+                                    IConfiguration configuration
                                     IOTPService otpService
                                     ) : base(dbContext, httpContextAccessor)
 		{
@@ -47,6 +50,7 @@ namespace EpicMarket.Business.API.Controllers
             this.communication = communication;
             _tokenService = tokenService;
             this.profileService = profileService;
+            _configuration = configuration;
             _otpService = otpService;
         }
         [HttpPost("register")]
@@ -101,6 +105,18 @@ namespace EpicMarket.Business.API.Controllers
                     logger.LogError("Adding user to role failed with errors: {@errors}", roleResult.Errors);
                     return BadRequest(result.Errors);
                 }
+
+                var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "..", "EmailTemplates");
+                var emailService = new EmailService(templatePath, _configuration); // Pass IConfiguration to EmailService
+                var model = new 
+                {
+                    Document_Upload_URL = "owner.epicmarket.in", // Replace with actual URL
+                    Support_Email = "support@epicmarket.in", // Replace with actual support email
+                    Support_Phone = "123-456-7890", // Replace with actual support phone number
+                    Current_Year = DateTime.Now.Year.ToString(),
+                    Company_Address = "123 Epic Market St, Business City, BC 12345" // Replace with actual address
+                };
+                await emailService.SendEmailAsync("BusinessRegisterSuccussfullyAskingToCompleteDetetials", model, registerDto.Email, "Business Registration Successful - Complete Your Details");
 
                 response.Data = new TokenDto
                 {

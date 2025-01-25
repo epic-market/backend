@@ -104,7 +104,7 @@ namespace EpicMarket.Services
         }
     }
 
-        //GMV=Sales Price of Goods×Number of Goods Sold
+        //GMV=Sales Price of Goodsï¿½Number of Goods Sold
         public async Task<List<GMVChart>> GetGrossMerchandiseValue(int outletId)
     {
         try
