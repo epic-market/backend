@@ -43,7 +43,7 @@ namespace EpicMarket.Data.Models
 
 
 
-		public virtual ICollection<OutletProduct> OutletProducts { get; set; }
+		public virtual ICollection<Inventory> Inventory { get; set; }
 
         public virtual ICollection<Rating>  Ratings { get; set; }
 

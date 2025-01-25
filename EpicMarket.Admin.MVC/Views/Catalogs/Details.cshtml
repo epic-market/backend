@@ -231,28 +231,28 @@
 							<thead>
 								<tr>
 									<th>
-										@Html.DisplayNameFor(model => model.OutletProduct.Outlet)
+										@Html.DisplayNameFor(model => model.Inventory.Outlet)
 									</th>
 									<th>
-										@Html.DisplayNameFor(model => model.OutletProduct.QuantityAvailable)
+										@Html.DisplayNameFor(model => model.Inventory.QuantityAvailable)
 									</th>
 									<th>
-										@Html.DisplayNameFor(model => model.OutletProduct.MaximumStockLevel)
+										@Html.DisplayNameFor(model => model.Inventory.MaximumStockLevel)
 									</th>
 									<th>
-										@Html.DisplayNameFor(model => model.OutletProduct.MinimumStockLevel)
+										@Html.DisplayNameFor(model => model.Inventory.MinimumStockLevel)
 									</th>
 									<th>
-										@Html.DisplayNameFor(model => model.OutletProduct.ReorderPoint)
+										@Html.DisplayNameFor(model => model.Inventory.ReorderPoint)
 									</th>
 									<th>
-										@Html.DisplayNameFor(model => model.OutletProduct.BackOrders)
+										@Html.DisplayNameFor(model => model.Inventory.BackOrders)
 									</th>
 									<th></th>
 								</tr>
 							</thead>
 							<tbody>
-								@foreach (var item in Model.OutletProducts)
+								@foreach (var item in Model.Inventorys)
 								{
 									<tr>
 										<td>

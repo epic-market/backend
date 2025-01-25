@@ -7,8 +7,8 @@ namespace EpicMarket.Admin.MVC.Models
 	{
         public Catalog Catalog { get; set; }
 
-		public OutletProduct OutletProduct { get; set; }
+		public Inventory Inventory { get; set; }
 
-		public List<OutletProduct> OutletProducts { get; set; }
+		public List<Inventory> Inventorys { get; set; }
     }
 }

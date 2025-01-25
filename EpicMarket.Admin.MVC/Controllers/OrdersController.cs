@@ -89,10 +89,10 @@ namespace EpicMarket.Admin.MVC.Controllers
         [HttpGet]
         public IActionResult GetProducts(int branchId)
         {
-            var products = _context.OutletProducts
+            var products = _context.Inventory
                 .Where(p => p.OutletID == branchId)
-                .Include(p=>p.Product)
-                .Select(p => new Product { Id = p.Product.ID,Name =  p.Product.Name,Price = (decimal)p.Product.Rate })
+                .Include(p=>p.ProductVariants)
+                .Select(p => new Product { Id = p.ProductVariants.Catalog.ID,Name =  p.ProductVariants.Catalog.Name,Price = (decimal)p.ProductVariants.Catalog.Rate })
                 .ToList();
             return Json(products);
         }

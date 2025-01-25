@@ -38,7 +38,11 @@ namespace EpicMarket.Entities
         public bool RequiresRefrigeration { get; set; } = false;
         public IFormFile[] Products { get; set; }
 		public IFormFile Thumbnail { get; set; }
+        public string Variants { get; set; }
 	}
+
+
+    
 
 	public class ProductsDto
     {
@@ -63,8 +67,7 @@ namespace EpicMarket.Entities
 
     public class ProductAdvanced
     {
-        public int CatelogId { get; set; }
-
+        public int ProductVariantId { get; set; }
         public int BranchId { get; set; }
         public int QuantityAvailable { get; set; }
 
@@ -84,17 +87,35 @@ namespace EpicMarket.Entities
 
     public class ProductsMapOptionResult 
     {
-        public int Id { get; set; }
+
+        public int ProductId { get; set; }
 
         public string Name { get; set; }
 
         public string Description { get; set; }
 
-        public double Rate { get; set; }
-
-        public bool Selected { get; set; }
-
         public string Thumbnail { get; set; }
+
+        public List<VariantResult> Variants { get; set; }
+    }
+
+
+    public class VariantResult
+    {
+        public int VariantId { get; set; }
+        public string SKU { get; set; }
+        public decimal Price { get; set; }
+        public bool Selected { get; set; }
+        public Dictionary<string, string> Attributes { get; set; }
+    }
+
+    public class VariantResultTemp
+    {
+        public int VariantId { get; set; }
+        public string SKU { get; set; }
+        public decimal Price { get; set; }
+        public bool Selected { get; set; }
+        public string Attributes { get; set; }
     }
 
     public class ProductParams
@@ -173,4 +194,20 @@ namespace EpicMarket.Entities
 		public List<string> ImageKeys { get; set; } 
 
 	}
+
+    public class ProductVariantDto
+    {
+        public string SKU { get; set; }
+        public decimal Price { get; set; }
+        public Dictionary<string, string> Attributes { get; set; }
+    }
+
+    public class ProductVariantResponse
+    {
+        public int VariantID { get; set; }
+        public int ProductID { get; set; }
+        public string SKU { get; set; }
+        public decimal Price { get; set; }
+        public Dictionary<string, string> Attributes { get; set; }
+    }
 }

@@ -10,7 +10,7 @@ using System.Runtime;
 
 namespace EpicMarket.Data.Models
 {
-    public class OutletProduct
+    public class Inventory
     {
         public int ID { get; set; }
 
@@ -18,8 +18,8 @@ namespace EpicMarket.Data.Models
         [ForeignKey("Outlet")]
         public int OutletID { get; set; }
 
-        [ForeignKey("Product")]
-        public int ProductID { get; set; }
+        [ForeignKey("ProductVariants")]
+        public int ProductVariantID { get; set; }
 
         [Required]
         [DefaultValue(0)]
@@ -37,7 +37,7 @@ namespace EpicMarket.Data.Models
         [Required]
         public bool BackOrders { get; set; } //if true this will allow user to order if it is outofstock also
 
-        public virtual Catalog Product { get; set; }
+        public virtual ProductVariants ProductVariants { get; set; }
 
         public virtual Outlet Outlet { get; set; } 
     }

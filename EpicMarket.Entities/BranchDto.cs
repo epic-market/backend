@@ -131,11 +131,11 @@ namespace EpicMarket.Entities
     }
 
 
-    public class BranchProductMapParams
+    public class BranchProductVariantMapParams
     {
         public int OutletId { get; set; }
-        public List<int> AddProductsId { get; set; }
-        public List<int> RemovedProductsId { get; set; }
+        public List<int> AddProductVariantId { get; set; }
+        public List<int> RemovedProductVariantId { get; set; }
     }
 
     public class BranchProductMapResult

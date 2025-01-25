@@ -296,35 +296,35 @@
 								<thead>
 									<tr>
 										<th>
-											@Html.DisplayNameFor(model => model.OutletProduct.ID)
+											@Html.DisplayNameFor(model => model.Inventory.ID)
 										</th>
 										<th>
-											@Html.DisplayNameFor(model => model.OutletProduct.Product.Name)
+											@Html.DisplayNameFor(model => model.Inventory.ProductVariants.Catalog.Name)
 										</th>
 										<th>
-											@Html.DisplayNameFor(model => model.OutletProduct.Product.Category)
+											@Html.DisplayNameFor(model => model.Inventory.ProductVariants.Catalog.Category)
 										</th>
 										<th>
-											@Html.DisplayNameFor(model => model.OutletProduct.Product.Rate)
+											@Html.DisplayNameFor(model => model.Inventory.ProductVariants.Catalog.Rate)
 										</th>
 										<th></th>
 									</tr>
 								</thead>
 								<tbody>
-									@foreach (var item in Model.OutletProducts)
+									@foreach (var item in Model.Inventorys)
 									{
 										<tr>
 											<td>
 												@Html.DisplayFor(modelItem => item.ID)
 											</td>
 											<td>
-												@Html.DisplayFor(modelItem => item.Product.Name)
+												@Html.DisplayFor(modelItem => item.ProductVariants.Catalog.Name)
 											</td>
 											<td>
-												@Html.DisplayFor(modelItem => item.Product.Category)
+												@Html.DisplayFor(modelItem => item.ProductVariants.Catalog.Category)
 											</td>
 											<td>
-												@Html.DisplayFor(modelItem => item.Product.Rate)
+												@Html.DisplayFor(modelItem => item.ProductVariants.Catalog.Rate)
 											</td>
 											<td>
 												<a asp-controller="OutletProducts" asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
