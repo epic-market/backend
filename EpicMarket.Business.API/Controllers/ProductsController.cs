@@ -40,7 +40,96 @@ namespace EpicMarket.Business.API.Controllers
 			this.httpContextAccessor = httpContextAccessor;
 		}
 
-		[HttpGet("Map/{outletID}")]
+
+        [HttpPost]
+        [Authorize(Roles = ROLES.BUSINESS_OWNER)]
+        public async Task<ActionResult<OperationResult<int>>> AddProduct([FromBody] AddProductsDto productsDto)
+        {
+
+            var response = new OperationResult<int>();
+            this.logger.LogInformation("Products Controller -> AddProduct()-> params {0}", JsonConvert.SerializeObject(new { Params = productsDto }));
+            var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
+            response.Data = await productService.AddProduct(productsDto, UserName, this.BusinessId, this.PageSource);
+            this.logger.LogInformation("Products Controller -> AddProduct()-> return {0}", JsonConvert.SerializeObject(new { Results = response }));
+
+            return Ok(response);
+        }
+
+
+        [HttpPost("Inventory")]
+        [Authorize(Roles = ROLES.BUSINESS_OWNER)]
+        public async Task<ActionResult<OperationResult<int>>> AddOrUpdateProductInventoryDetails([FromBody] InventoryResult productAdvanced)
+        {
+
+            var response = new OperationResult<int>();
+            this.logger.LogInformation("Products Controller -> UpdateAdvanceSettings()-> params {0}", JsonConvert.SerializeObject(new { Params = productAdvanced }));
+            var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
+            await productService.AddOrUpdateProductInventoryDetails(productAdvanced);
+            this.logger.LogInformation("Products Controller -> UpdateAdvanceSettings()-> updated Successfully");
+            return Ok(response);
+        }
+
+
+        [HttpPut("{id}")]
+        [Authorize(Roles = ROLES.BUSINESS_OWNER)]
+        public async Task<ActionResult<OperationResult<int>>> UpdateProduct([FromRoute] int id, [FromBody] AddProductsDto productsDto)
+        {
+
+            var response = new OperationResult<int>();
+            this.logger.LogInformation("Products Controller -> AddProduct()-> params {0}", JsonConvert.SerializeObject(new { Params = productsDto }));
+            var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
+            response.Data = await productService.UpdateProducts(productsDto, id, UserName, this.BusinessId, this.PageSource);
+            this.logger.LogInformation("Products Controller -> AddProduct()-> return {0}", JsonConvert.SerializeObject(new { Results = response }));
+
+            return Ok(response);
+        }
+
+
+        [HttpPost("QuickActions")]
+        [Authorize(Roles = ROLES.BUSINESS_OWNER)]
+        public async Task<ActionResult<OperationResult<int>>> QuickActions(QuickActionsParams quickActionsParams)
+        {
+            var response = new OperationResult<int>();
+            this.logger.LogInformation("Products Controller -> QuickActions()-> params {0}", JsonConvert.SerializeObject(new { Params = quickActionsParams }));
+            var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
+            var id = await productService.QuickActions(quickActionsParams, UserName);
+            this.logger.LogInformation("Products Controller -> QuickActions()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
+            response.Data = id;
+            return Ok(response);
+        }
+
+
+        [HttpPost("Rating")]
+        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
+        public async Task<ActionResult<bool>> AddRatingToProduct([FromBody] AddProductRatingRequest request)
+        {
+            var response = new OperationResult<bool>();
+            this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = request }));
+            await ratingService.AddProductRatingAsync(request, this.LoggedInUserName);
+            response.Data = true;
+            return Ok(response);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        [HttpGet("Map/{outletID}")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<List<ProductsMapOptionResult>>>> GetAllProductForMap(int outletID)
 		{
@@ -53,40 +142,14 @@ namespace EpicMarket.Business.API.Controllers
 		}
 
 
-		[HttpPost]
-		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
-		public async Task<ActionResult<OperationResult<int>>> AddProduct([FromBody] AddProductsDto productsDto)
-		{
-
-			var response = new OperationResult<int>();
-			this.logger.LogInformation("Products Controller -> AddProduct()-> params {0}", JsonConvert.SerializeObject(new { Params = productsDto }));
-			var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-			response.Data = await productService.AddProduct(productsDto, UserName, this.BusinessId, this.PageSource);
-			this.logger.LogInformation("Products Controller -> AddProduct()-> return {0}", JsonConvert.SerializeObject(new { Results = response }));
-
-			return Ok(response);
-		}
 
 
-
-        [HttpPost("Inventory")]
-        [Authorize(Roles = ROLES.BUSINESS_OWNER)]
-        public async Task<ActionResult<OperationResult<int>>> AddOrUpdateProductInventoryDetails([FromBody]ProductAdvanced productAdvanced)
-        {
-
-            var response = new OperationResult<int>();
-            this.logger.LogInformation("Products Controller -> UpdateAdvanceSettings()-> params {0}", JsonConvert.SerializeObject(new { Params = productAdvanced }));
-            var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-            await productService.AddOrUpdateProductInventoryDetails(productAdvanced);
-            this.logger.LogInformation("Products Controller -> UpdateAdvanceSettings()-> updated Successfully");
-            return Ok(response);
-        }
 
         [HttpGet("Inventory")]
         [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
-        public async Task<ActionResult<OperationResult<ProductAdvanced>>> GetProductInventoryDetails(int productVariantId,int branchId)
+        public async Task<ActionResult<OperationResult<InventoryResult>>> GetProductInventoryDetails(int productVariantId,int branchId)
         {
-            var response = new OperationResult<ProductAdvanced>();
+            var response = new OperationResult<InventoryResult>();
             this.logger.LogInformation("Products Controller -> GetProductInventoryDetails()-> params {0}", JsonConvert.SerializeObject(new { Params = productVariantId, branchId }));
             var results = await productService.GetProductInventoryDetails(productVariantId, branchId);
             this.logger.LogInformation("Products Controller -> GetProductInventoryDetails()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
@@ -96,19 +159,6 @@ namespace EpicMarket.Business.API.Controllers
 
 
 
-        [HttpPut("{id}")]
-		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
-		public async Task<ActionResult<OperationResult<int>>> UpdateProduct([FromRoute] int id, [FromBody] AddProductsDto productsDto)
-		{
-
-			var response = new OperationResult<int>();
-			this.logger.LogInformation("Products Controller -> AddProduct()-> params {0}", JsonConvert.SerializeObject(new { Params = productsDto }));
-			var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-			response.Data = await productService.UpdateProducts(productsDto,id, UserName, this.BusinessId, this.PageSource);
-			this.logger.LogInformation("Products Controller -> AddProduct()-> return {0}", JsonConvert.SerializeObject(new { Results = response }));
-
-			return Ok(response);
-		}
 
 
         [HttpGet]
@@ -171,9 +221,9 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpGet("POS/{outletID}")]
         [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
-        public async Task<ActionResult<OperationResult<GetDataResult<List<ProductResult>>>>> GetAllProductsForPOS([FromQuery] ProductPOSParams productResult , int outletID)
+        public async Task<ActionResult<OperationResult<GetDataResult<List<ProductForPOSResult>>>>> GetAllProductsForPOS([FromQuery] ProductPOSParams productResult , int outletID)
         {
-            var response = new OperationResult<GetDataResult<List<ProductResult>>>();
+            var response = new OperationResult<GetDataResult<List<ProductForPOSResult>>>();
             this.logger.LogInformation("Products Controller -> GetAllProductsForPOS()-> params {0}", JsonConvert.SerializeObject(new { Params = productResult }));
             var results = await productService.GetAllProductsForPOS(productResult, outletID);
             this.logger.LogInformation("Products Controller -> GetAllProductsForPOS()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
@@ -182,26 +232,14 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
-        [HttpPost("QuickActions")]
-        [Authorize(Roles = ROLES.BUSINESS_OWNER)]
-        public async Task<ActionResult<OperationResult<int>>> QuickActions(QuickActionsParams quickActionsParams)
-        {
-            var response = new OperationResult<int>();
-            this.logger.LogInformation("Products Controller -> QuickActions()-> params {0}", JsonConvert.SerializeObject(new { Params = quickActionsParams }));
-            var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-            var id = await productService.QuickActions(quickActionsParams, UserName);
-            this.logger.LogInformation("Products Controller -> QuickActions()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
-            response.Data = id;
-            return Ok(response);
-        }
-
+ 
 
 
 		[HttpGet("customer-mobile")]
 		[Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
-		public async Task<ActionResult<OperationResult<GetDataResult<List<ProductResult>>>>> GetAllProductsForMobile([FromQuery] ProductMobileParams productResult)
+		public async Task<ActionResult<OperationResult<GetDataResult<List<CustomerResultBaseOnCategory>>>>> GetAllProductsForMobile([FromQuery] ProductMobileParams productResult)
 		{
-			var response = new OperationResult<GetDataResult<List<CustomerResultBaseOnCatefory>>> ();
+			var response = new OperationResult<GetDataResult<List<CustomerResultBaseOnCategory>>> ();
 			this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = productResult }));
 			var results = await productService.GetAllProductsForMobile(productResult);
 			this.logger.LogInformation("Products Controller -> GetAllProducts()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
@@ -209,90 +247,83 @@ namespace EpicMarket.Business.API.Controllers
 			return Ok(response);
 		}
 
-        [HttpPost("Rating")]
-        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
-        public async Task<ActionResult<bool>> AddRatingToProduct([FromBody] AddProductRatingRequest request)
-        {
-            var response = new OperationResult<bool> ();
-            this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = request }));
-			await ratingService.AddProductRatingAsync(request,this.LoggedInUserName);
-            response.Data = true;
-            return Ok(response);
-        }
 
-        [HttpPost("{id}/variants")]
-        [Authorize(Roles = ROLES.BUSINESS_OWNER)]
-        public async Task<ActionResult<OperationResult<int>>> AddProductVariant(
-            [FromRoute] int id,
-            [FromBody] ProductVariantDto variantDto)
-        {
-            var response = new OperationResult<int>();
-            this.logger.LogInformation("Products Controller -> AddProductVariant()-> params {0}", 
-                JsonConvert.SerializeObject(new { ProductId = id, Variant = variantDto }));
+        // [HttpPost("{id}/variants")]
+        // [Authorize(Roles = ROLES.BUSINESS_OWNER)]
+        // public async Task<ActionResult<OperationResult<int>>> AddProductVariant(
+        //     [FromRoute] int id,
+        //     [FromBody] ProductVariantDto variantDto)
+        // {
+        //     var response = new OperationResult<int>();
+        //     this.logger.LogInformation("Products Controller -> AddProductVariant()-> params {0}", 
+        //         JsonConvert.SerializeObject(new { ProductId = id, Variant = variantDto }));
 
-            var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-            response.Data = await productService.AddProductVariant(id, variantDto, UserName);
-			if (variantDto.ProductImages?.Length > 0)
-			{
-				foreach (var product in variantDto.ProductImages)
-				{
-					var attachmentId = await this.attachmentService.GetAttachmentId(product);
-					await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
-					{
-						AttachmentTypeName = AttachmentTypeConstants.PRODUCTIMAGES,
-						AttachmentID = attachmentId,
-						Entity = EntityConstants.CatelogVariant,
-						RecordID = response.Data
-					}, this.BusinessId);
+        //     var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
+        //     response.Data = await productService.AddProductVariant(id, variantDto, UserName);
+		// 	if (variantDto.ProductImages?.Length > 0)
+		// 	{
+		// 		foreach (var product in variantDto.ProductImages)
+		// 		{
+		// 			var attachmentId = await this.attachmentService.GetAttachmentId(product);
+		// 			await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
+		// 			{
+		// 				AttachmentTypeName = AttachmentTypeConstants.PRODUCTIMAGES,
+		// 				AttachmentID = attachmentId,
+		// 				Entity = EntityConstants.CatelogVariant,
+		// 				RecordID = response.Data
+		// 			}, this.BusinessId);
 
-				}
+		// 		}
 
-				if (variantDto.Thumbnail != null)
-				{
-					var attachmentId = await this.attachmentService.GetAttachmentId(variantDto.Thumbnail);
-					await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
-					{
-						AttachmentTypeName = AttachmentTypeConstants.THUMBNAIL,
-						AttachmentID = attachmentId,
-						Entity = EntityConstants.CatelogVariant,
-						RecordID = response.Data
-					}, this.BusinessId);
+		// 		if (variantDto.Thumbnail != null)
+		// 		{
+		// 			var attachmentId = await this.attachmentService.GetAttachmentId(variantDto.Thumbnail);
+		// 			await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
+		// 			{
+		// 				AttachmentTypeName = AttachmentTypeConstants.THUMBNAIL,
+		// 				AttachmentID = attachmentId,
+		// 				Entity = EntityConstants.CatelogVariant,
+		// 				RecordID = response.Data
+		// 			}, this.BusinessId);
 
-				}
+		// 		}
 
-			}
+		// 	}
 			
             
-            return Ok(response);
-        }
-        [HttpGet("variants/{variantId}")]
+        //     return Ok(response);
+        // }
+        
+        [HttpGet("{productId}/variants")]
         [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
-        public async Task<ActionResult<OperationResult<ProductVariantResponse>>> GetProductVariant(
-            [FromRoute] int variantId)
+        public async Task<ActionResult<OperationResult<List<ProductVariantResponse>>>> GetProductVariants(
+            [FromRoute] int productId)
         {
-            var response = new OperationResult<ProductVariantResponse>();
-            this.logger.LogInformation("Products Controller -> GetProductVariant()-> variantId: {0}", variantId);
+            var response = new OperationResult<List<ProductVariantResponse>>();
+            this.logger.LogInformation("Products Controller -> GetProductVariants()-> productId: {0}", productId);
             
-            response.Data = await productService.GetProductVariant(variantId);
+            response.Data = await productService.GetProductVariants(productId);
             return Ok(response);
         }
 
-        [HttpPut("variants/{variantId}")]
-        [Authorize(Roles = ROLES.BUSINESS_OWNER)]
-        public async Task<ActionResult<OperationResult<bool>>> UpdateProductVariant(
-            [FromRoute] int variantId,
-            [FromBody] ProductVariantDto variantDto)
-        {
-            var response = new OperationResult<bool>();
-            this.logger.LogInformation("Products Controller -> UpdateProductVariant()-> params {0}", 
-                JsonConvert.SerializeObject(new { VariantId = variantId, Variant = variantDto }));
+
+
+        // [HttpPut("variants/{variantId}")]
+        // [Authorize(Roles = ROLES.BUSINESS_OWNER)]
+        // public async Task<ActionResult<OperationResult<bool>>> UpdateProductVariant(
+        //     [FromRoute] int variantId,
+        //     [FromBody] ProductVariantDto variantDto)
+        // {
+        //     var response = new OperationResult<bool>();
+        //     this.logger.LogInformation("Products Controller -> UpdateProductVariant()-> params {0}", 
+        //         JsonConvert.SerializeObject(new { VariantId = variantId, Variant = variantDto }));
             
-            var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-            await productService.UpdateProductVariant(variantId, variantDto, UserName);
-            response.Data = true;
+        //     var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
+        //     await productService.UpdateProductVariant(variantId, variantDto, UserName);
+        //     response.Data = true;
             
-            return Ok(response);
-        }
+        //     return Ok(response);
+        // }
 
     }
 }

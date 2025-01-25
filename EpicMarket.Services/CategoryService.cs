@@ -42,9 +42,9 @@ namespace EpicMarket.Services
             this.unitOfWork = unitOfWork;
         }
 
-        public async Task<List<CategoriesDto>> GetCategories()
+        public async Task<List<CategoriesDto>> GetCategories(int businessId)
         {
-            var categories = await _context.Categories.ToListAsync();
+            var categories = await _context.Categories.Where(c => c.BusinessID == businessId).ToListAsync();
             return mapper.Map<List<CategoriesDto>>(categories);
         }     
 

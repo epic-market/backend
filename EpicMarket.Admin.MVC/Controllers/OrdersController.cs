@@ -131,7 +131,7 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             foreach (var orderDetail in order.Items)
             {
-                var productVariant = _context.CatalogVariants.FirstOrDefault(p => p.VariantID == orderDetail.ProductId);
+                var productVariant = _context.CatalogVariants.FirstOrDefault(p => p.ID == orderDetail.ProductId);
                 var singleOrderDetail = new OrderDetail();
                 singleOrderDetail.VariantID = orderDetail.ProductId;
                 singleOrderDetail.Quantity = orderDetail.Quantity;

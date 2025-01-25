@@ -7,10 +7,10 @@ namespace EpicMarket.Entities
 {
     public class CategoriesDto
     {
-        public int ID { get; set; }
+        public int? ID { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public int BusinessID { get; set; }
+        public int? BusinessID { get; set; }
     }
 
 

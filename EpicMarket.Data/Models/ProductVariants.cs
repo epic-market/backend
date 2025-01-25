@@ -13,37 +13,28 @@ namespace EpicMarket.Data.Models
     public class CatalogVariants : BaseModel
     {
         [Key]
-        public int VariantID { get; set; }
-    
+        public int ID { get; set; }
         [Required]
         [ForeignKey("Catalog")]
         public int CatalogID { get; set; }
-
         [Required]
         [StringLength(50)]
         public string SKU { get; set; }
-        
         public string Barcode { get; set; }
-
-        [Required]
-        public string OptionName { get; set; }
-
-        [Required]
-        public string OptionValue { get; set; }
-
+        public string Attributes { get; set; }//{"Size" : XL , "Color" : Red}
         [Required]
         public double CostPrice { get; set; } //cost of product for percharse
-
         [Required]
          public double SalePrice { get; set; } //what price he what to show to users
-
-        public double CompareAtPrice { get; set; }
+        public double? CompareAtPrice { get; set; }
         public string AdditionalHightlights { get; set; }
-        public double PackedHeight { get; set; }
-        public double PackedWidhth { get; set; }
-        public double PackedDepth { get; set; }
+        public int? MaximumOrderQuantity { get; set; }
+        public int? MinimumOrderQuantity { get; set; }
+        public double? PackedHeight { get; set; }
+        public double? PackedWidhth { get; set; }
+        public double? PackedDepth { get; set; }
         public string WeightUnit { get; set; }//kg,g,lbs,oz
-        public double Weight { get; set; } //value of weight
+        public double? Weight { get; set; } //value of weight
         public virtual Catalog Catalog { get; set; }
 
         public virtual ICollection<Inventory> Inventory { get; set; }

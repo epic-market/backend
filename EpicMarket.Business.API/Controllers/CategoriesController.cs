@@ -30,7 +30,8 @@ namespace EpicMarket.Business.API.Controllers
 		[HttpGet]
 		public async Task<IActionResult> GetCategories()
 		{
-			var categories = await categoryService.GetCategories();
+
+			var categories = await categoryService.GetCategories(this.BusinessId);
 			return Ok(categories);
 		}	
 
@@ -45,9 +46,8 @@ namespace EpicMarket.Business.API.Controllers
 		public async Task<IActionResult> CreateCategory([FromBody]CategoriesDto categoryDto)
 		{
 
-		  categoryDto.BusinessID = this.BusinessId;
+		 	 categoryDto.BusinessID = this.BusinessId;
 			var category = await categoryService.CreateCategory(categoryDto);
-
 			return Ok(category);
 		}	
 

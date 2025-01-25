@@ -10,7 +10,7 @@ namespace EpicMarket.Contracts
 {
     public interface ICategoryService
     {
-        Task<List<CategoriesDto>> GetCategories();
+        Task<List<CategoriesDto>> GetCategories(int businessId);
 
         Task<CategoriesDto> GetCategory(int id);
         Task<CategoriesDto> CreateCategory(CategoriesDto category);

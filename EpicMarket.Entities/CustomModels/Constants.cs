@@ -111,7 +111,6 @@ namespace EpicMarket.Entities.CustomModels
         public const string BRANCH_THUMBNAIL = "BranchThumbnail";
         public const string TASK = "Task";
         public const string ProductInternal = "ProductInternal";//
-
         public const string Profile = "Profile";//
     }
     public static class DocumentTypeConstants

@@ -125,7 +125,7 @@ namespace EpicMarket.Services
                 foreach(var orderDetail in orderdto.orderDetailsDtos)
                 {
                     var catelogVariant = await _context.CatalogVariants.Include(c => c.Catalog)
-                        .FirstOrDefaultAsync(c => c.VariantID == orderDetail.VariantID && c.IsActive == true);
+                        .FirstOrDefaultAsync(c => c.ID == orderDetail.VariantID && c.IsActive == true);
 
                     if (catelogVariant == null)
                     {
@@ -549,7 +549,7 @@ namespace EpicMarket.Services
                 foreach(var orderDetail in order.OrderDetailsDtos)
                 {
                     var catalogVariant = await _context.CatalogVariants.Include(c => c.Catalog)
-                        .FirstOrDefaultAsync(c => c.VariantID == orderDetail.VariantID && c.IsActive == true);
+                        .FirstOrDefaultAsync(c => c.ID == orderDetail.VariantID && c.IsActive == true);
 
                     if (catalogVariant == null)
                     {
