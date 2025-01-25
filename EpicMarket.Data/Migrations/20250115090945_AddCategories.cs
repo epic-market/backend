@@ -12,7 +12,7 @@ namespace EpicMarket.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "F K_OrderDetails_Catalogs_CatalogID",
+                name: "FK_OrderDetails_Catalogs_CatalogID",
                 table: "OrderDetails");
 
             migrationBuilder.DropIndex(
