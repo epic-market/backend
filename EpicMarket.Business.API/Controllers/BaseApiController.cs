@@ -70,26 +70,18 @@ namespace EpicMarket.Business.API.Controllers
 
 
 
-        protected async Task<SaveFileDTO> SaveFileGlobalAsync(IFormFile file, string entityName, IFileService fileStoreService, IApplicationConfigurationService applicationConfigurationService,int RecordID = 0)
+        protected async Task<SaveFileDTO> SaveFileBusinessAsync(IFormFile file, IFileService fileStoreService, IApplicationConfigurationService applicationConfigurationService,int BusinessId)
 		{
-			string filePath = " ";
 			if (file != null && file.Length > 0)
 			{
-				string fullPathLocation = null;
-				string subPathLocation = null;
-
-                if (!string.IsNullOrWhiteSpace(entityName))
-				{
-					fullPathLocation = applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.BasePath);
-                    subPathLocation = this.GetFolderPathFromConfiguration(entityName, applicationConfigurationService);
-                    if (RecordID != 0) {
-                        fullPathLocation = fullPathLocation + "/" + RecordID +"/"+ subPathLocation;
-                    }
-					if (!fullPathLocation.EndsWith("/"))
-					{
-						fullPathLocation = fullPathLocation + "/";
-					}
+				string fullPathLocation = applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.BasePath);
+				if (BusinessId != 0) {
+					fullPathLocation = fullPathLocation + "/" + BusinessId +"/Images/";
 				}
+				else {
+					throw new Exception("BusinessId is required");
+				}
+		
 				// Made fitting based on AWS
 				var uploadedFile = file;
 
@@ -99,12 +91,11 @@ namespace EpicMarket.Business.API.Controllers
 
 				fileName = fileName.Replace('&', '_').Replace('<', '_').Replace('>', '_');
 				fileName = fileName.SanitizeFile();
-				filePath =  await fileStoreService.UploadFileAsync(uploadedFile, fullPathLocation, fileName);
+				var key =  await fileStoreService.UploadFileAsync(uploadedFile, fullPathLocation, fileName, EntityConstants.Business, BusinessId);
 
 				return new SaveFileDTO()
 				{
-					FileName = fileName,
-					FullPathLocation = fullPathLocation.ToString()
+					Key = key
 				};
 			}
 
@@ -126,7 +117,6 @@ namespace EpicMarket.Business.API.Controllers
 						fullPathLocation = fullPathLocation + "\\";
 					}
 				}
-
 
 				var fullFilePath = Path.Combine(fullPathLocation, filePath);
 

@@ -16,7 +16,7 @@ namespace EpicMarket.Entities
         public string Description { get; set; }
         public int? TaskTypeID { get; set; }
 
-        public IFormFile[] UploadFiles { get; set; }
+        public string[] UploadFiles { get; set; }
     }
 
     public class TasksParams
@@ -76,7 +76,7 @@ namespace EpicMarket.Entities
         public string CommentText { get; set; }
         public string Status { get; set; }
         public int? TaskId { get; set; }
-        public IFormFile[] UploadFiles { get; set; }
+        public string[] UploadFiles { get; set; }
     }
     public class CommentListDTO
     {

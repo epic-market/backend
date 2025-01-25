@@ -87,15 +87,15 @@ namespace EpicMarket.Services
             businessModel.CreateDate = DateTime.Now;
             businessModel.StatusId = statusid.Id;
 
-            var proofEntity = new Proof
-            {
-                EntityType = EntityConstants.Business,
-                EntityId = businessModel.ID,
-                ProofTypeId = businessRegisterDto.ProofTypeId,
-                ProofNumber = businessRegisterDto.ProofNumber
-            };
+            //var proofEntity = new Proof
+            //{
+            //    EntityType = EntityConstants.Business,
+            //    EntityId = businessModel.ID,
+            //    ProofTypeId = businessRegisterDto.ProofTypeId,
+            //    ProofNumber = businessRegisterDto.ProofNumber
+            //};
 
-            await _context.Proofs.AddAsync(proofEntity);
+            //await _context.Proofs.AddAsync(proofEntity);
             await _context.Businesses.AddAsync(businessModel);
             await _context.SaveChangesAsync();
 
@@ -128,7 +128,7 @@ namespace EpicMarket.Services
                     });
 
 
-            return new BusinessDTO_Result(){BusinessId = businessModel.ID , ProofId = proofEntity.Id };
+            return new BusinessDTO_Result(){BusinessId = businessModel.ID /*, ProofId = proofEntity.Id*/ };
         }
 
 
@@ -168,7 +168,7 @@ namespace EpicMarket.Services
                 City = o.Address.City,
                 Pincode = o.Address.Pincode,
                 State = o.Address.State,
-                AddressID = o.AddressID,
+                AddressID = (int)o.AddressID,
                 Latitude = o.Address.Latitude,
                 Longitude = o.Address.Longitude,
                 Status = _context.StatusOptionSets.FirstOrDefault(s => s.Id == o.StatusId).Status,

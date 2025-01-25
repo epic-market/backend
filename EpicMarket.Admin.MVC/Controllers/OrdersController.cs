@@ -54,7 +54,7 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             var orderDetails = await _context.OrderDetails.
                 Where(o=> o.OrderID == id)
-               .Include(o => o.Catalog)
+               .Include(o => o.CatalogVariants)
                 .ToListAsync();
 
             orderModel.Order = order;
@@ -91,8 +91,8 @@ namespace EpicMarket.Admin.MVC.Controllers
         {
             var products = _context.Inventory
                 .Where(p => p.OutletID == branchId)
-                .Include(p=>p.ProductVariants)
-                .Select(p => new Product { Id = p.ProductVariants.Catalog.ID,Name =  p.ProductVariants.Catalog.Name,Price = (decimal)p.ProductVariants.Catalog.Rate })
+                .Include(p=>p.CatalogVariants)
+                .Select(p => new Product { Id = p.CatalogVariants.Catalog.ID,Name =  p.CatalogVariants.Catalog.Name,Price = (decimal)p.CatalogVariants.SalePrice })
                 .ToList();
             return Json(products);
         }
@@ -131,15 +131,15 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             foreach (var orderDetail in order.Items)
             {
-                var catelog = _context.Catalogs.FirstOrDefault(c => c.ID == orderDetail.ProductId);
+                var productVariant = _context.CatalogVariants.FirstOrDefault(p => p.ID == orderDetail.ProductId);
                 var singleOrderDetail = new OrderDetail();
-                singleOrderDetail.CatalogID = orderDetail.ProductId;
+                singleOrderDetail.VariantID = orderDetail.ProductId;
                 singleOrderDetail.Quantity = orderDetail.Quantity;
-                singleOrderDetail.Rate = catelog.Rate;
-                singleOrderDetail.TotalPrice = catelog.Rate * orderDetail.Quantity;
+                singleOrderDetail.Rate = productVariant.SalePrice;
+                singleOrderDetail.TotalPrice = productVariant.SalePrice * orderDetail.Quantity;
                 listoforderDetails.Add(singleOrderDetail);
                 totalItems += orderDetail.Quantity;
-                totalPrice += (catelog.Rate * orderDetail.Quantity);
+                totalPrice += (productVariant.SalePrice * orderDetail.Quantity);
             }
 
 

@@ -76,7 +76,7 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<OperationResult<int>>> AddTask([FromForm] TasksDTO tasksDTO)
+        public async Task<ActionResult<OperationResult<int>>> AddTask([FromBody] TasksDTO tasksDTO)
         {
             var response = new OperationResult<int>();
 
@@ -96,24 +96,14 @@ namespace EpicMarket.Business.API.Controllers
             {
                 foreach (var proof in tasksDTO.UploadFiles)
                 {
-                    var filinsertOutput = await this.SaveFileGlobalAsync(proof, FilePathConstants.TASKPATH, this.fileStoreService, this.applicationConfigurationService, ((int)results));
-                    var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
-                    {
-
-                        Name = AttachmentTypeConstants.TASK,
-                        Comment = null,
-                        DocumentType = DocumentTypeConstants.FILE,
-                        DocumentFileType = proof.ContentType,
-                        DocumentFolderPath = filinsertOutput.FullPathLocation,
-                        DocumentFile = filinsertOutput.FileName,
-                    });
+                    var attachmentId = await this.attachmentService.GetAttachmentId(proof);
                     await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
                     {
                         AttachmentTypeName = AttachmentTypeConstants.TASK,
                         AttachmentID = attachmentId,
                         Entity = EntityConstants.Tasks,
                         RecordID = ((int)results)
-                    });
+                    }, this.BusinessId);
                 }
             }
             this.logger.LogInformation("Support Controller -> AddTask()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
@@ -139,7 +129,7 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpPost("CommentsAttachments")]
         [Authorize]
-        public async Task<ActionResult<OperationResult<int>>> AddTaskCommentAndAttachment([FromForm] CommentDTO commentDTO)
+        public async Task<ActionResult<OperationResult<int>>> AddTaskCommentAndAttachment([FromBody] CommentDTO commentDTO)
         {
             var response = new OperationResult<int>();
             this.logger.LogInformation("Support Controller -> AddTaskComment()-> params {0}", JsonConvert.SerializeObject(new { Params = commentDTO }));
@@ -150,24 +140,14 @@ namespace EpicMarket.Business.API.Controllers
             {
                 foreach (var proof in commentDTO.UploadFiles)
                 {
-                    var filinsertOutput = await this.SaveFileGlobalAsync(proof, FilePathConstants.TASKPATH, this.fileStoreService, this.applicationConfigurationService, commentDTO.TaskId.Value);
-                    var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
-                    {
-
-                        Name = AttachmentTypeConstants.TASK,
-                        Comment = null,
-                        DocumentType = DocumentTypeConstants.FILE,
-                        DocumentFileType = proof.ContentType,
-                        DocumentFolderPath = filinsertOutput.FullPathLocation,
-                        DocumentFile = filinsertOutput.FileName,
-                    });
+                    var attachmentId = await this.attachmentService.GetAttachmentId(proof);
                     await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
                     {
                         AttachmentTypeName = AttachmentTypeConstants.TASK,
                         AttachmentID = attachmentId,
                         Entity = EntityConstants.Tasks,
                         RecordID = commentDTO.TaskId.Value
-                    });
+                    }, this.BusinessId);
                 }
             }
             this.logger.LogInformation("Support Controller -> AddTaskComment()-> return {0}", JsonConvert.SerializeObject(new { Results = response.Data }));

@@ -32,6 +32,12 @@ namespace EpicMarket.Data.Models
 
         public string DocumentFile { get; set; }
 
+        public int?EntityId { get; set; } //to know which entity this attachment is related to maximum it will be for business
+
+        public int? RecordId { get; set; }
+
 		public virtual ICollection<AttachmentLink> AttachmentLinks { get; set; }
+
+        public Entity Entity { get; set; }
 	}
 }

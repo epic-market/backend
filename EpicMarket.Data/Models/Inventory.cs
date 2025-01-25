@@ -22,22 +22,17 @@ namespace EpicMarket.Data.Models
         public int ProductVariantID { get; set; }
 
         [Required]
-        [DefaultValue(0)]
-        public int QuantityAvailable { get; set; }
+        public bool TrackInventory { get; set; }  // If false, system won't auto-track inventory
+        public bool IsInStock { get; set; }  // Manual override for stock status
+        public int? QuantityAvailable { get; set; } // Current stock
+        public int? MinimumStockLevel { get; set; }  // Don't let stock go below this
+        public int? MaximumStockLevel { get; set; } // Don't order more than this
+        public int? ReorderPoint { get; set; } // Place new order when stock hits this level
 
         [Required]
-        public int MinimumStockLevel { get; set; }
+        public bool BackOrders { get; set; } // if true this will allow user to order if it is outofstock also
 
-        [Required]
-        public int MaximumStockLevel { get; set; }
-
-        [Required]
-        public int ReorderPoint { get; set; }
-
-        [Required]
-        public bool BackOrders { get; set; } //if true this will allow user to order if it is outofstock also
-
-        public virtual ProductVariants ProductVariants { get; set; }
+        public virtual CatalogVariants CatalogVariants { get; set; }
 
         public virtual Outlet Outlet { get; set; } 
     }

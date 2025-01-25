@@ -34,9 +34,9 @@ namespace EpicMarket.Entities
         public double Longitude { get; set; }
         [Required]
         public int Pincode { get; set; }
+        public string Thumbnail { get; set; }
+        public string[] Photos { get; set; }
 
-        public IFormFile[] Photos { get; set; }
-        public IFormFile Thumbnail { get; set; }
     }
 
 

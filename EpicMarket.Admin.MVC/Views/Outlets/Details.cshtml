@@ -299,13 +299,13 @@
 											@Html.DisplayNameFor(model => model.Inventory.ID)
 										</th>
 										<th>
-											@Html.DisplayNameFor(model => model.Inventory.ProductVariants.Catalog.Name)
+											@Html.DisplayNameFor(model => model.Inventory.CatalogVariants.Catalog.Name)
 										</th>
 										<th>
-											@Html.DisplayNameFor(model => model.Inventory.ProductVariants.Catalog.Category)
+											@Html.DisplayNameFor(model => model.Inventory.CatalogVariants.Catalog.Category)
 										</th>
 										<th>
-											@Html.DisplayNameFor(model => model.Inventory.ProductVariants.Catalog.Rate)
+											@Html.DisplayNameFor(model => model.Inventory.CatalogVariants.Catalog)
 										</th>
 										<th></th>
 									</tr>
@@ -318,13 +318,13 @@
 												@Html.DisplayFor(modelItem => item.ID)
 											</td>
 											<td>
-												@Html.DisplayFor(modelItem => item.ProductVariants.Catalog.Name)
+												@Html.DisplayFor(modelItem => item.CatalogVariants.Catalog.Name)
 											</td>
 											<td>
-												@Html.DisplayFor(modelItem => item.ProductVariants.Catalog.Category)
+												@Html.DisplayFor(modelItem => item.CatalogVariants.Catalog.Category)
 											</td>
 											<td>
-												@Html.DisplayFor(modelItem => item.ProductVariants.Catalog.Rate)
+												@Html.DisplayFor(modelItem => item.CatalogVariants.Catalog)
 											</td>
 											<td>
 												<a asp-controller="OutletProducts" asp-action="Edit" asp-route-id="@item.ID">Edit</a> |

@@ -446,6 +446,9 @@ namespace EpicMarket.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int?>("EntityId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -462,7 +465,12 @@ namespace EpicMarket.Data.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<int?>("RecordId")
+                        .HasColumnType("int");
+
                     b.HasKey("ID");
+
+                    b.HasIndex("EntityId");
 
                     b.ToTable("Attachments");
                 });
@@ -642,7 +650,7 @@ namespace EpicMarket.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
-                    b.Property<int>("AddressID")
+                    b.Property<int?>("AddressID")
                         .HasColumnType("int");
 
                     b.Property<string>("Banner")
@@ -813,17 +821,14 @@ namespace EpicMarket.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
-                    b.Property<long?>("Barcode")
-                        .HasColumnType("bigint");
+                    b.Property<string>("BaseHightlights")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("BusinessID")
                         .HasColumnType("int");
 
-                    b.Property<string>("Category")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("CostPrice")
-                        .HasColumnType("float");
+                    b.Property<int?>("CategoryID")
+                        .HasColumnType("int");
 
                     b.Property<string>("CreateBy")
                         .ValueGeneratedOnAdd()
@@ -846,9 +851,6 @@ namespace EpicMarket.Data.Migrations
                     b.Property<bool>("IsRecommended")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("MaximumOrderPurchase")
-                        .HasColumnType("int");
-
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
@@ -862,18 +864,6 @@ namespace EpicMarket.Data.Migrations
                     b.Property<int?>("OrderCount")
                         .HasColumnType("int");
 
-                    b.Property<double>("PackedDepth")
-                        .HasColumnType("float");
-
-                    b.Property<double>("PackedHeight")
-                        .HasColumnType("float");
-
-                    b.Property<double>("PackedWidhth")
-                        .HasColumnType("float");
-
-                    b.Property<double>("Rate")
-                        .HasColumnType("float");
-
                     b.Property<double?>("Rating")
                         .HasColumnType("float");
 
@@ -886,16 +876,145 @@ namespace EpicMarket.Data.Migrations
                     b.Property<int>("StatusId")
                         .HasColumnType("int");
 
-                    b.Property<double>("Weight")
-                        .HasColumnType("float");
+                    b.Property<string>("VarientOptions")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
 
                     b.HasIndex("BusinessID");
 
+                    b.HasIndex("CategoryID");
+
                     b.HasIndex("StatusId");
 
                     b.ToTable("Catalogs");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.CatalogVariants", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("AdditionalHightlights")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Attributes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Barcode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CatalogID")
+                        .HasColumnType("int");
+
+                    b.Property<double?>("CompareAtPrice")
+                        .HasColumnType("float");
+
+                    b.Property<double>("CostPrice")
+                        .HasColumnType("float");
+
+                    b.Property<string>("CreateBy")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValueSql("'System'");
+
+                    b.Property<DateTime>("CreateDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValueSql("1");
+
+                    b.Property<int?>("MaximumOrderQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MinimumOrderQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double?>("PackedDepth")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("PackedHeight")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("PackedWidhth")
+                        .HasColumnType("float");
+
+                    b.Property<string>("SKU")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<double>("SalePrice")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("Weight")
+                        .HasColumnType("float");
+
+                    b.Property<string>("WeightUnit")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("CatalogID");
+
+                    b.ToTable("CatalogVariants");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.Category", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("BusinessID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreateBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ParentID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("BusinessID");
+
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Comment", b =>
@@ -1386,10 +1505,13 @@ namespace EpicMarket.Data.Migrations
                     b.Property<bool>("BackOrders")
                         .HasColumnType("bit");
 
-                    b.Property<int>("MaximumStockLevel")
+                    b.Property<bool>("IsInStock")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("MaximumStockLevel")
                         .HasColumnType("int");
 
-                    b.Property<int>("MinimumStockLevel")
+                    b.Property<int?>("MinimumStockLevel")
                         .HasColumnType("int");
 
                     b.Property<int>("OutletID")
@@ -1398,11 +1520,14 @@ namespace EpicMarket.Data.Migrations
                     b.Property<int>("ProductVariantID")
                         .HasColumnType("int");
 
-                    b.Property<int>("QuantityAvailable")
+                    b.Property<int?>("QuantityAvailable")
                         .HasColumnType("int");
 
-                    b.Property<int>("ReorderPoint")
+                    b.Property<int?>("ReorderPoint")
                         .HasColumnType("int");
+
+                    b.Property<bool>("TrackInventory")
+                        .HasColumnType("bit");
 
                     b.HasKey("ID");
 
@@ -1690,7 +1815,7 @@ namespace EpicMarket.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
-                    b.Property<int>("CatalogID")
+                    b.Property<int?>("CatalogVariantsID")
                         .HasColumnType("int");
 
                     b.Property<string>("CreateBy")
@@ -1726,9 +1851,12 @@ namespace EpicMarket.Data.Migrations
                     b.Property<double>("TotalPrice")
                         .HasColumnType("float");
 
+                    b.Property<int>("VariantID")
+                        .HasColumnType("int");
+
                     b.HasKey("ID");
 
-                    b.HasIndex("CatalogID");
+                    b.HasIndex("CatalogVariantsID");
 
                     b.HasIndex("OrderID");
 
@@ -1993,57 +2121,6 @@ namespace EpicMarket.Data.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("ProductInternals");
-                });
-
-            modelBuilder.Entity("EpicMarket.Data.Models.ProductVariants", b =>
-                {
-                    b.Property<int>("VariantID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VariantID"));
-
-                    b.Property<string>("Attributes")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CreateBy")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(max)")
-                        .HasDefaultValueSql("'System'");
-
-                    b.Property<DateTime>("CreateDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValueSql("1");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("ProductID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SKU")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("VariantID");
-
-                    b.HasIndex("ProductID");
-
-                    b.ToTable("ProductVariants");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.PromotionalLeads", b =>
@@ -2773,6 +2850,15 @@ namespace EpicMarket.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("EpicMarket.Data.Models.Attachment", b =>
+                {
+                    b.HasOne("EpicMarket.Data.Models.Entity", "Entity")
+                        .WithMany()
+                        .HasForeignKey("EntityId");
+
+                    b.Navigation("Entity");
+                });
+
             modelBuilder.Entity("EpicMarket.Data.Models.AttachmentLink", b =>
                 {
                     b.HasOne("EpicMarket.Data.Models.Attachment", "Attachments")
@@ -2816,8 +2902,7 @@ namespace EpicMarket.Data.Migrations
                     b.HasOne("EpicMarket.Data.Models.Address", "Address")
                         .WithMany("Businesses")
                         .HasForeignKey("AddressID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("EpicMarket.Data.Models.BusinessCategoryInternal", "BusinessCategory")
                         .WithMany("Businesses")
@@ -2871,6 +2956,11 @@ namespace EpicMarket.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("EpicMarket.Data.Models.Category", "Category")
+                        .WithMany("Catalog")
+                        .HasForeignKey("CategoryID")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("EpicMarket.Data.Models.StatusOptionSet", "StatusOptionSets")
                         .WithMany("Catalogs")
                         .HasForeignKey("StatusId")
@@ -2879,7 +2969,31 @@ namespace EpicMarket.Data.Migrations
 
                     b.Navigation("Business");
 
+                    b.Navigation("Category");
+
                     b.Navigation("StatusOptionSets");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.CatalogVariants", b =>
+                {
+                    b.HasOne("EpicMarket.Data.Models.Catalog", "Catalog")
+                        .WithMany("CatalogVariants")
+                        .HasForeignKey("CatalogID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Catalog");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.Category", b =>
+                {
+                    b.HasOne("EpicMarket.Data.Models.Business", "Business")
+                        .WithMany("Categories")
+                        .HasForeignKey("BusinessID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Business");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Comment", b =>
@@ -2960,15 +3074,15 @@ namespace EpicMarket.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("EpicMarket.Data.Models.ProductVariants", "ProductVariants")
+                    b.HasOne("EpicMarket.Data.Models.CatalogVariants", "CatalogVariants")
                         .WithMany("Inventory")
                         .HasForeignKey("ProductVariantID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Outlet");
+                    b.Navigation("CatalogVariants");
 
-                    b.Navigation("ProductVariants");
+                    b.Navigation("Outlet");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.MerchantBankAccount", b =>
@@ -3085,11 +3199,9 @@ namespace EpicMarket.Data.Migrations
 
             modelBuilder.Entity("EpicMarket.Data.Models.OrderDetail", b =>
                 {
-                    b.HasOne("EpicMarket.Data.Models.Catalog", "Catalog")
-                        .WithMany()
-                        .HasForeignKey("CatalogID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("EpicMarket.Data.Models.CatalogVariants", "CatalogVariants")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("CatalogVariantsID");
 
                     b.HasOne("EpicMarket.Data.Models.Order", "Order")
                         .WithMany("OrderDetails")
@@ -3097,7 +3209,7 @@ namespace EpicMarket.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Catalog");
+                    b.Navigation("CatalogVariants");
 
                     b.Navigation("Order");
                 });
@@ -3157,17 +3269,6 @@ namespace EpicMarket.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("ApplicationsTable");
-                });
-
-            modelBuilder.Entity("EpicMarket.Data.Models.ProductVariants", b =>
-                {
-                    b.HasOne("EpicMarket.Data.Models.Catalog", "Catalog")
-                        .WithMany("ProductVariants")
-                        .HasForeignKey("ProductID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Catalog");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Proof", b =>
@@ -3461,6 +3562,8 @@ namespace EpicMarket.Data.Migrations
             modelBuilder.Entity("EpicMarket.Data.Models.Business", b =>
                 {
                     b.Navigation("BusinessEmployees");
+
+                    b.Navigation("Categories");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.BusinessCategoryInternal", b =>
@@ -3470,9 +3573,21 @@ namespace EpicMarket.Data.Migrations
 
             modelBuilder.Entity("EpicMarket.Data.Models.Catalog", b =>
                 {
-                    b.Navigation("ProductVariants");
+                    b.Navigation("CatalogVariants");
 
                     b.Navigation("Ratings");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.CatalogVariants", b =>
+                {
+                    b.Navigation("Inventory");
+
+                    b.Navigation("OrderDetails");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.Category", b =>
+                {
+                    b.Navigation("Catalog");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.ContactMethod", b =>
@@ -3553,11 +3668,6 @@ namespace EpicMarket.Data.Migrations
                     b.Navigation("SupportQuerys");
 
                     b.Navigation("SupportTickets");
-                });
-
-            modelBuilder.Entity("EpicMarket.Data.Models.ProductVariants", b =>
-                {
-                    b.Navigation("Inventory");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.StatusOptionSet", b =>

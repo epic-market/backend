@@ -9,12 +9,9 @@ namespace EpicMarket.Entities
 {
     public class OrderDetailsDto
     {
-        public int CatalogID { get; set; }
+        public int VariantID { get; set; }
         public int Quantity { get; set; }
     }
-
-
-
 
     public class OrderDetails
     {
