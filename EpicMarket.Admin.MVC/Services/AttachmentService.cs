@@ -21,12 +21,6 @@ namespace EpicMarket.Admin.MVC.Services
 			this.applicationConfigurationService = applicationConfigurationService;
 		}
 
-		public async Task DeleteAttachment(AttachmentDTO attachmentDTO)
-		{
-
-		
-
-		}
 
 		public async Task InsertAttachment(AttachmentModel attachmentModel)
 		{
@@ -41,8 +35,8 @@ namespace EpicMarket.Admin.MVC.Services
 						Comment = attachmentModel.Comment,
 						DocumentType = DocumentTypeConstants.FILE,
 						DocumentFileType = product.ContentType,
-						DocumentFolderPath = filinsertOutput.FullPathLocation,
-						DocumentFile = filinsertOutput.FileName,
+					////	DocumentFolderPath = filinsertOutput.FullPathLocation,
+					////	DocumentFile = filinsertOutput.FileName,
 					});
 					await InsertAttachmentLink(new AttachmentLinkDTO()
 					{
@@ -90,8 +84,8 @@ namespace EpicMarket.Admin.MVC.Services
 
 				return new SaveFileDTO()
 				{
-					FileName = fileName,
-					FullPathLocation = fullPathLocation.ToString()
+					//FileName = fileName,
+					//FullPathLocation = fullPathLocation.ToString()
 				};
 			}
 
@@ -168,6 +162,11 @@ namespace EpicMarket.Admin.MVC.Services
                             };
 
 			return attachments.Select(a => a.ImagePath).ToList();
+        }
+
+        public Task DeleteAttachment(AttachmentDTO attachmentDTO)
+        {
+            throw new NotImplementedException();
         }
     }
 }

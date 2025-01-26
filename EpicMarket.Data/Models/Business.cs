@@ -17,7 +17,6 @@ namespace EpicMarket.Data.Models
         [DisplayName("Business ID")]
         public int ID { get; set; }
         public int PersonID { get; set; }
-
 		public int? StatusId { get; set; }
 		public int BusinessCategoryID { get; set; }
 
@@ -40,7 +39,7 @@ namespace EpicMarket.Data.Models
         public string ContactEmail { get; set; }
 
 
-        public int AddressID { get; set; }
+        public int? AddressID { get; set; }
         public int? Rating { get; set; }
         public int? ReviewCount { get; set; }
         public bool IsOpen { get; set; }
@@ -56,5 +55,7 @@ namespace EpicMarket.Data.Models
 		public virtual StatusOptionSet? Status { get; set; }
 
         public virtual ICollection<BusinessEmployeeMap> BusinessEmployees { get; set; }
+
+        public virtual ICollection<Category> Categories { get; set; }
     }
 }

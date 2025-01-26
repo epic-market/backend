@@ -26,6 +26,8 @@ namespace EpicMarket.Data.Models
         }
 
 
+
+
         private bool IsUserAdmin => _httpContextAccessor.HttpContext?.User?.IsInRole("admin") ?? false;
 
         private List<int> AllowedBusinessIds
@@ -173,7 +175,7 @@ namespace EpicMarket.Data.Models
 
         public DbSet<Inventory> Inventory { get; set; }    
 
-        public DbSet<ProductVariants> ProductVariants { get; set; }
+        public DbSet<CatalogVariants> CatalogVariants { get; set; }
 
         public DbSet<ProductInternal> ProductInternals { get; set; }
 
@@ -237,6 +239,8 @@ namespace EpicMarket.Data.Models
         public DbSet<ProofType> ProofTypes { get; set; }
 
         public DbSet<OTPVerification> OTPVerifications { get; set; }
+
+        public DbSet<Category> Categories { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -334,7 +338,7 @@ namespace EpicMarket.Data.Models
                       .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Inventory>()
-                 .HasOne(op => op.ProductVariants)
+                 .HasOne(op => op.CatalogVariants)
                  .WithMany(u => u.Inventory)
                  .HasForeignKey(op => op.ProductVariantID)
                  .OnDelete(DeleteBehavior.Restrict);
@@ -424,7 +428,14 @@ namespace EpicMarket.Data.Models
 					.HasForeignKey(fk => fk.AttachmentID)
 					.OnDelete(DeleteBehavior.Cascade);
 
-			modelBuilder.ApplyDefaultValuesToEntities(
+            modelBuilder.Entity<Catalog>()
+                        .HasOne(c => c.Category)
+                        .WithMany(c => c.Catalog)
+                        .HasForeignKey(c => c.CategoryID)
+                        .OnDelete(DeleteBehavior.Restrict);
+                        //
+
+            modelBuilder.ApplyDefaultValuesToEntities(
 					typeof(TaskType),
 					typeof(TaskStatusType),
 					typeof(Tasks),
@@ -458,7 +469,7 @@ namespace EpicMarket.Data.Models
 					typeof(BusinessEmployeeMap),
 					typeof(AppUser),
                     typeof(Page),
-                    typeof(ProductVariants)
+                    typeof(CatalogVariants)
                 );
 
 

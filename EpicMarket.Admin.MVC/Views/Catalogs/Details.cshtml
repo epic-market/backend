@@ -94,17 +94,12 @@
 					</div>
 				</div>
 				<div class="mb-3">
-					<span class="price h4">₹ @Html.DisplayFor(model => model.Catalog.Rate)</span>
+					<span class="price h4">₹ @Html.DisplayFor(model => model.Catalog)</span>
 				</div>
 				<p class="card-text fs-6"> @Html.DisplayFor(model => model.Catalog.Description)</p>
 				<div class="row">
 					<dl class="row col-6">
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Catalog.Barcode)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Catalog.Barcode)
-						</dd>
+
 						<dt class="col-sm-4">
 							@Html.DisplayNameFor(model => model.Catalog.Category)
 						</dt>
@@ -112,12 +107,12 @@
 							@Html.DisplayFor(model => model.Catalog.Category)
 						</dd>
 
-						<dt class="col-sm-4">
+@* 						<dt class="col-sm-4">
 							@Html.DisplayNameFor(model => model.Catalog.MaximumOrderPurchase)
 						</dt>
 						<dd class="col-sm-8">
 							@Html.DisplayFor(model => model.Catalog.MaximumOrderPurchase)
-						</dd>
+						</dd> *@
 						<dt class="col-sm-4">
 							@Html.DisplayNameFor(model => model.Catalog.ReviewCount)
 						</dt>

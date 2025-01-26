@@ -32,12 +32,16 @@ namespace EpicMarket.Business.API.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> UploadFileAsync(IFormFile file , string? prefix)
+		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
+		public async Task<OperationResult<SaveFileDTO>> UploadFileAsync([FromForm]IFormFile file)
 		{
-			var key =  await this.SaveFileGlobalAsync(file, ApplicationConfigurationConstants.Products, fileService, applicationConfigurationService);
-			return Ok($"File {prefix}/{key} uploaded to S3 successfully!");
+			var key =  await this.SaveFileBusinessAsync(file, fileService, applicationConfigurationService, BusinessId);
+			return new OperationResult<SaveFileDTO>()
+			{
+				Data = key
+			};
 		}
-
+ 
 		[HttpGet]
 		public async Task<IActionResult> GetAllFilesAsync(string? prefix)
 		{
@@ -49,7 +53,6 @@ namespace EpicMarket.Business.API.Controllers
         [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Client, NoStore = false)]
         public async Task<IActionResult> GetFileByKeyAsync(string key)
 		{
-
 			var fileObject = await this.fileService.GetFileByKeyAsync(key);
 			return File(fileObject.fileStream, fileObject.contentType);
 		}

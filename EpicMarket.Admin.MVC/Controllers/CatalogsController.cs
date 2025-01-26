@@ -50,7 +50,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                .AsNoTracking()
                .FirstOrDefaultAsync(m => m.ID == id);
 
-			var OutletProductsList = await _context.Inventory.Include(c => c.Outlet).Where(c => c.ProductVariants.Catalog.ID == id).ToListAsync();
+			var OutletProductsList = await _context.Inventory.Include(c => c.Outlet).Where(c => c.CatalogVariants.Catalog.ID == id).ToListAsync();
 
             var CatalogModel = new CatelogModel()
             {

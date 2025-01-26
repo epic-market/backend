@@ -10,24 +10,21 @@ namespace EpicMarket.Contracts
 {
     public interface IProductService
     {
-        Task<List<ProductsMapOptionResult>> GetAllProductForMap(int businessID, int outletID);
         Task<int> AddProduct(AddProductsDto productsDto,string UserName, int businessID,string PageSource);
-        Task AddOrUpdateProductInventoryDetails(ProductAdvanced productAdvanced);
-
+        Task AddOrUpdateProductInventoryDetails(InventoryResult productAdvanced);
         Task<int> UpdateProducts(AddProductsDto productsDto,int id, string UserName, int businessID, string PageSource);
-		Task<GetDataResult<List<ProductResult>>> GetAllProducts(ProductParams productResult, int businessID);
+	    Task<GetDataResult<List<ProductResult>>> GetAllProducts(ProductParams productResult, int businessID);
+        Task<List<ProductsMapOptionResult>> GetAllProductForMap(int businessID, int outletID);
+         Task<GetDataResult<List<CustomerResultBaseOnCategory>>> GetAllProductsForMobile(ProductMobileParams parameters);
+        Task<GetDataResult<List<ProductForPOSResult>>> GetAllProductsForPOS(ProductPOSParams productParams, int outletId);
         Task<ProductsDto> GetProductDetails(int productId);
-        Task<ProductAdvanced> GetProductInventoryDetails(int productId, int branchId);
-
+        Task<InventoryResult> GetProductInventoryDetails(int productId, int branchId);
         Task<int> VerifyCatalog(VerifyCatalogDto verifyCatalogDto, string UserName, int AdminPersonID, string PageSource);
         Task<int> QuickActions(QuickActionsParams quickActionsParams ,string UserName);
-
-        Task<GetDataResult<List<CustomerResultBaseOnCatefory>>> GetAllProductsForMobile(ProductMobileParams parameters);
-        Task<GetDataResult<List<ProductResult>>> GetAllProductsForPOS(ProductPOSParams productParams, int outletId);
         Task deleteCatelog(int id,string UserName);
-        Task<int> AddProductVariant(int productId, ProductVariantDto variantDto, string userName);
+        // Task<int> AddProductVariant(int productId, ProductVariantDto variantDto, string userName);
         Task<List<ProductVariantResponse>> GetProductVariants(int productId);
-        Task<ProductVariantResponse> GetProductVariant(int variantId);
-        Task UpdateProductVariant(int variantId, ProductVariantDto variantDto, string userName);
+        // Task<ProductVariantResponse> GetProductVariant(int variantId);
+        // Task UpdateProductVariant(int variantId, ProductVariantDto variantDto, string userName);
 	}
 }

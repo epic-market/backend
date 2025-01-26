@@ -72,7 +72,7 @@ namespace EpicMarket.Business.API.Controllers
                 if (await UserExists(registerDto.Email))
                 {
                     logger.LogWarning("Username is already taken for email: {email}", registerDto.Email);
-                    return BadRequest("Username is taken");
+                return BadRequest("Username is taken");
                 }
 
                 var user = _mapper.Map<AppUser>(registerDto);
@@ -81,14 +81,14 @@ namespace EpicMarket.Business.API.Controllers
                 user.Email = registerDto.Email.ToLower();
                 user.PhoneNumber = registerDto.Phone;
 
-                if(registerDto.OTP != null)
-                {
-                    var isVerified = await _otpService.VerifyOTPAsync(registerDto.ReferenceId, registerDto.OTP);
-                    if(!isVerified)
-                    {
-                        return BadRequest("Invalid OTP");
-                    }
-                }
+                // if(registerDto.OTP != null)
+                // {
+                //     var isVerified = await _otpService.VerifyOTPAsync(registerDto.ReferenceId, registerDto.OTP);
+                //     if(!isVerified)
+                //     {
+                //         return BadRequest("Invalid OTP");
+                //     }
+                // }
 
                 var result = await _userManager.CreateAsync(user, registerDto.Password);
 
@@ -117,6 +117,80 @@ namespace EpicMarket.Business.API.Controllers
                     Company_Address = "123 Epic Market St, Business City, BC 12345" // Replace with actual address
                 };
                 await emailService.SendEmailAsync("BusinessRegisterSuccussfullyAskingToCompleteDetetials", model, registerDto.Email, "Business Registration Successful - Complete Your Details");
+
+                response.Data = new TokenDto
+                {
+                    Token = await _tokenService.CreateToken(user)
+                };
+
+                logger.LogInformation("Account Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = response }));
+                logger.LogInformation("User registered successfully with email: {email}", registerDto.Email);
+                return CreatedAtAction(nameof(Register), response);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred while registering user with email: {email}", registerDto.Email);
+                return StatusCode(500, "An error occurred while registering user");
+            }
+        }
+
+
+
+        [HttpPost("business/register")]
+        [AllowAnonymous]
+        public async Task<ActionResult<OperationResult<TokenDto>>> RegisterBusiness(RegisterDto registerDto)
+        {
+            try
+            {
+                logger.LogInformation("Account Controller -> Register()-> params {0}", JsonConvert.SerializeObject(new { Params = registerDto }));
+
+                var response = new OperationResult<TokenDto>();
+
+                if (registerDto == null)
+                {
+                    logger.LogError("RegisterDto is null");
+                    return BadRequest("Invalid request");
+                }
+
+                if (await UserExists(registerDto.Email))
+                {
+                    logger.LogWarning("Username is already taken for email: {email}", registerDto.Email);
+                return BadRequest("Username is taken");
+                }
+
+                var user = _mapper.Map<AppUser>(registerDto);
+
+                user.UserName = registerDto.Email.ToLower();
+                user.Email = registerDto.Email.ToLower();
+                user.PhoneNumber = registerDto.Phone;
+
+                // if(registerDto.OTP != null)
+                // {
+                //     var isVerified = await _otpService.VerifyOTPAsync(registerDto.ReferenceId, registerDto.OTP);
+                //     if(!isVerified)
+                //     {
+                //         return BadRequest("Invalid OTP");
+                //     }
+                // }
+
+                //create new business and save it with this user
+               
+
+                var result = await _userManager.CreateAsync(user, registerDto.Password);
+
+                if (!result.Succeeded)
+                {
+                    logger.LogError("User creation failed with errors: {@errors}", result.Errors);
+                    return BadRequest(result.Errors);
+                }
+
+                var roleResult = await _userManager.AddToRoleAsync(user, ROLES.BUSINESS_OWNER);
+
+                if (!roleResult.Succeeded)
+                {
+                    logger.LogError("Adding user to role failed with errors: {@errors}", roleResult.Errors);
+                    return BadRequest(result.Errors);
+                }
 
                 response.Data = new TokenDto
                 {

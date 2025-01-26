@@ -108,7 +108,7 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpPost]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
-		public async Task<ActionResult<OperationResult<int>>> AddBranch([FromForm]BranchDto branchDto)
+		public async Task<ActionResult<OperationResult<int>>> AddBranch([FromBody]BranchDto branchDto)
         {
             var response = new OperationResult<int>();
 			this.logger.LogInformation("Branch Controller -> AddBranch()-> params {0}", JsonConvert.SerializeObject(new { Params = branchDto }));
@@ -116,52 +116,30 @@ namespace EpicMarket.Business.API.Controllers
             var id =  await branchService.AddBranch(branchDto, UserName, this.BusinessId,this.PageSource);
             if (branchDto.Photos?.Length > 0)
             {
-                foreach (var photo in branchDto.Photos)
+                foreach (var photoKey in branchDto.Photos)
                 {
-                    var filinsertOutput = await this.SaveFileGlobalAsync(photo, ApplicationConfigurationConstants.BranchesPhotos, this.fileStoreService, this.applicationConfigurationService, this.BusinessId);
-                    var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
-                    {
-                        Name = EntityConstants.Branch + AttachmentTypeConstants.BRANCH_PHOTOS,
-                        Comment = null,
-                        DocumentType = DocumentTypeConstants.FILE,
-                        DocumentFileType = photo.ContentType,
-                        DocumentFolderPath = filinsertOutput.FullPathLocation,
-                        DocumentFile = filinsertOutput.FileName,
-                    });
+                    var attachmentId = await this.attachmentService.GetAttachmentId(photoKey);
                     await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
                     {
                         AttachmentTypeName = AttachmentTypeConstants.BRANCH_PHOTOS,
                         AttachmentID = attachmentId,
                         Entity = EntityConstants.Branch,
                         RecordID = id
-                    });
+                    }, this.BusinessId);
                 }
-
- 
             }
 
             if (branchDto.Thumbnail != null)
             {
-                var filinsertOutput = await this.SaveFileGlobalAsync(branchDto.Thumbnail, ApplicationConfigurationConstants.BranchThumbnail, this.fileStoreService, this.applicationConfigurationService, this.BusinessId);
-                var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
-                {
-                    Name = EntityConstants.Branch + AttachmentTypeConstants.BRANCH_THUMBNAIL,
-                    Comment = null,
-                    DocumentType = DocumentTypeConstants.FILE,
-                    DocumentFileType = branchDto.Thumbnail.ContentType,
-                    DocumentFolderPath = filinsertOutput.FullPathLocation,
-                    DocumentFile = filinsertOutput.FileName,
-                });
+                var attachmentId = await this.attachmentService.GetAttachmentId(branchDto.Thumbnail);
                 await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
                 {
                     AttachmentTypeName = AttachmentTypeConstants.BRANCH_THUMBNAIL,
                     AttachmentID = attachmentId,
                     Entity = EntityConstants.Branch,
                     RecordID = id
-                });
-
+                }, this.BusinessId);
             }
-
 
             this.logger.LogInformation("Branch Controller -> AddBranch()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
             response.Data = id;
@@ -171,7 +149,7 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = ROLES.BUSINESS_OWNER)]
-        public async Task<ActionResult<OperationResult<int>>> UpdateBranch(int id, [FromForm]BranchDto branchDto)
+        public async Task<ActionResult<OperationResult<int>>> UpdateBranch(int id, [FromBody]BranchDto branchDto)
         {
             var response = new OperationResult<int>();
             this.logger.LogInformation("Branch Controller -> AddBranch()-> params {0}", JsonConvert.SerializeObject(new { Params = branchDto }));
@@ -181,23 +159,14 @@ namespace EpicMarket.Business.API.Controllers
             {
                 foreach (var photo in branchDto.Photos)
                 {
-                    var filinsertOutput = await this.SaveFileGlobalAsync(photo, ApplicationConfigurationConstants.BranchesPhotos, this.fileStoreService, this.applicationConfigurationService, this.BusinessId);
-                    var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
-                    {
-                        Name = EntityConstants.Branch + AttachmentTypeConstants.BRANCH_PHOTOS,
-                        Comment = null,
-                        DocumentType = DocumentTypeConstants.FILE,
-                        DocumentFileType = photo.ContentType,
-                        DocumentFolderPath = filinsertOutput.FullPathLocation,
-                        DocumentFile = filinsertOutput.FileName,
-                    });
+                    var attachmentId = await this.attachmentService.GetAttachmentId(photo);
                     await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
                     {
                         AttachmentTypeName = AttachmentTypeConstants.BRANCH_PHOTOS,
                         AttachmentID = attachmentId,
                         Entity = EntityConstants.Branch,
                         RecordID = branchID
-                    });
+                    }, this.BusinessId);
                 }
 
 
@@ -205,23 +174,14 @@ namespace EpicMarket.Business.API.Controllers
 
             if (branchDto.Thumbnail != null)
             {
-                var filinsertOutput = await this.SaveFileGlobalAsync(branchDto.Thumbnail, ApplicationConfigurationConstants.BranchThumbnail, this.fileStoreService, this.applicationConfigurationService, this.BusinessId);
-                var attachmentId = await this.attachmentService.InsertOrUpdateAttachment(new AttachmentDTO
-                {
-                    Name = EntityConstants.Branch + AttachmentTypeConstants.BRANCH_THUMBNAIL,
-                    Comment = null,
-                    DocumentType = DocumentTypeConstants.FILE,
-                    DocumentFileType = branchDto.Thumbnail.ContentType,
-                    DocumentFolderPath = filinsertOutput.FullPathLocation,
-                    DocumentFile = filinsertOutput.FileName,
-                });
+                var attachmentId = await this.attachmentService.GetAttachmentId(branchDto.Thumbnail);
                 await this.attachmentService.InsertAttachmentLink(new AttachmentLinkDTO()
                 {
                     AttachmentTypeName = AttachmentTypeConstants.BRANCH_THUMBNAIL,
                     AttachmentID = attachmentId,
                     Entity = EntityConstants.Branch,
                     RecordID = branchID
-                });
+                }, this.BusinessId);
 
             }
 
