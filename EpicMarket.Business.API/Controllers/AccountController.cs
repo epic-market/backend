@@ -39,7 +39,7 @@ namespace EpicMarket.Business.API.Controllers
                                     ApplicationDbContext dbContext,
                                     IHttpContextAccessor httpContextAccessor,
                                     IProfileService profileService,
-                                    IConfiguration configuration
+                                    IConfiguration configuration,
                                     IOTPService otpService
                                     ) : base(dbContext, httpContextAccessor)
 		{

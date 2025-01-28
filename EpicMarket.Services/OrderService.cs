@@ -193,49 +193,75 @@ namespace EpicMarket.Services
             }
         }
 
-    
         public async Task<OrdersDetailsResult> GetSingleOrder(int OrderId)
         {
+            // Check if order exists first
+            var order = await _context.Orders
+                .Include(c => c.Person)
+                .Include(c => c.OrderTypesOptions)
+                .Include(c => c.Outlet)
+                .Include(c => c.OrderStatusOptions)
+                .Include(c => c.Address)
+                .FirstOrDefaultAsync(c => c.ID == OrderId);
 
-            var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
+            if (order == null)
+            {
+                throw new Exception($"Order with ID {OrderId} not found");
+            }
 
-            List<OrderDetails> OrderDetails = await _context.OrderDetails.Include(c => c.CatalogVariants).Where(c => c.OrderID == OrderId)
+            var attachmentTypeID_Thumbnail = await _context.AttachmentTypes
+                .FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
+
+            if (attachmentTypeID_Thumbnail == null)
+            {
+                throw new Exception("Thumbnail attachment type not found");
+            }
+
+            List<OrderDetails> orderDetails = await _context.OrderDetails
+                .Include(c => c.CatalogVariants)
+                .ThenInclude(cv => cv.Catalog)
+                .Where(c => c.OrderID == OrderId)
                 .Select(c => new OrderDetails()
                 {
-                    CatalogID = c.CatalogVariants.Catalog.ID,
+                    VariantID = c.CatalogVariants.ID,
                     ProductName = c.CatalogVariants.Catalog.Name,
                     Quantity = c.Quantity,
                     Rate = c.Rate,
                     TotalPrice = c.TotalPrice,
-                    Thumbnail = ((from attachment in _context.Attachments
-                                  join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
-                                  join entity in _context.Entity on link.EntityID equals entity.ID
-                                  where entity.Name == EntityConstants.Catelog && link.RecordID == c.CatalogVariants.Catalog.ID && link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
-                                  select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}").FirstOrDefault())
+                    Thumbnail = _context.Attachments
+                        .Join(_context.AttachmentLinks,
+                            a => a.ID,
+                            al => al.AttachmentID,
+                            (a, al) => new { Attachment = a, Link = al })
+                        .Join(_context.Entity,
+                            j => j.Link.EntityID,
+                            e => e.ID,
+                            (j, e) => new { j.Attachment, j.Link, Entity = e })
+                        .Where(x => x.Entity.Name == EntityConstants.CatelogVariant &&
+                                  x.Link.RecordID == c.CatalogVariants.ID &&
+                                  x.Link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID)
+                        .Select(x => $"{x.Attachment.DocumentFolderPath}{x.Attachment.DocumentFile}")
+                        .FirstOrDefault() ?? string.Empty
                 }).ToListAsync();
 
-            string OrderDetailsString = JsonConvert.SerializeObject(OrderDetails);
-            var Order = await _context.Orders.Where(c => c.ID == OrderId).Include(c => c.Person).Include(c=>c.OrderTypesOptions).Include(c=>c.Outlet).Include(c=>c.OrderStatusOptions).Include(c => c.Address).Select(
-                c => new OrdersDetailsResult()
-                {
-                    CustomerName = c.Person.FirstName + " " + c.Person.LastName,
-                    CustomerEmail = c.Person.Email,
-                    CustomerPhone = c.Person.PhoneNumber,
-                    OrderDate = c.OrderAt,
-                    PaymentMode = c.PaymentMode,
-                    OrderMode = c.OrderTypesOptions.Ordertype,
-                    Status = c.OrderStatusOptions.OrderStatus,
-                    TotalItems = c.TotalItems,
-                    TotalPrice = c.TotalPrice,
-                    OrderDetails = OrderDetails,
-                    OutletName = c.Outlet.Name,
-                    OutletId = c.OutletID,
-                }).FirstOrDefaultAsync();
+            var result = new OrdersDetailsResult()
+            {
+                CustomerName = $"{order.Person.FirstName} {order.Person.LastName}",
+                CustomerEmail = order.Person.Email ?? string.Empty,
+                CustomerPhone = order.Person.PhoneNumber ?? string.Empty,
+                OrderDate = order.OrderAt,
+                PaymentMode = order.PaymentMode ?? string.Empty,
+                OrderMode = order.OrderTypesOptions?.Ordertype ?? string.Empty,
+                Status = order.OrderStatusOptions?.OrderStatus ?? string.Empty,
+                TotalItems = order.TotalItems,
+                TotalPrice = order.TotalPrice,
+                OrderDetails = orderDetails,
+                OutletName = order.Outlet?.Name ?? string.Empty,
+                OutletId = order.OutletID
+            };
 
-            return Order;
-
+            return result;
         }
-
         public async Task<int> UpdateStatus(int OrderId, int StatusId)
         {
             var Order = _context.Orders.Find(OrderId);
