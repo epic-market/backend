@@ -15,7 +15,7 @@ namespace EpicMarket.Entities
 
     public class OrderDetails
     {
-        public int CatalogID { get; set; }
+        public int VariantID { get; set; }
         public string ProductName { get; set; }
         public int Quantity { get; set; }
         public double Rate { get; set; }

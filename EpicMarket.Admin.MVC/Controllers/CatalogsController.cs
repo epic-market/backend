@@ -45,12 +45,15 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
 
             var catalog = await _context.Catalogs
-               .Include(c => c.Business)
-               .Include(c=>c.StatusOptionSets)
-               .AsNoTracking()
-               .FirstOrDefaultAsync(m => m.ID == id);
+                .Include(c => c.Business)
+                .Include(c => c.StatusOptionSets)
+                .Include(c => c.CatalogVariants)
+                    .ThenInclude(v => v.Inventory)
+                        .ThenInclude(i => i.Outlet)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.ID == id);
 
-			var OutletProductsList = await _context.Inventory.Include(c => c.Outlet).Where(c => c.CatalogVariants.Catalog.ID == id).ToListAsync();
+            var OutletProductsList = await _context.Inventory.Include(c => c.Outlet).Where(c => c.CatalogVariants.Catalog.ID == id).ToListAsync();
 
             var CatalogModel = new CatelogModel()
             {
@@ -58,38 +61,32 @@ namespace EpicMarket.Admin.MVC.Controllers
                 Inventorys = OutletProductsList
             };
 
+            var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
+            var attachmentTypeID_Product = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.PRODUCTIMAGES);
 
-			var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
-			var attachmentTypeID_Product = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.PRODUCTIMAGES);
+            var attachments = from attachment in _context.Attachments
+                              join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                              join entity in _context.Entity on link.EntityID equals entity.ID
+                              where entity.Name == EntityConstants.Catelog && link.RecordID == id && link.AttachmentTypeID == attachmentTypeID_Product.ID
+                              select new
+                              {
+                                  ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
+                              };
 
+            var thumbnail = from attachment in _context.Attachments
+                            join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                            join entity in _context.Entity on link.EntityID equals entity.ID
+                            where entity.Name == EntityConstants.Catelog && link.RecordID == id && link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
+                            orderby attachment.CreateDate descending
+                            select new
+                            {
+                                ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
+                            };
 
+            ViewBag.thumbnail = thumbnail.Select(a => a.ImagePath).FirstOrDefault();
+            ViewBag.attachments = attachments.Select(a => a.ImagePath).ToList();
 
-			var attachments = from attachment in _context.Attachments
-							  join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
-							  join entity in _context.Entity on link.EntityID equals entity.ID
-							  where entity.Name == EntityConstants.Catelog && link.RecordID == id && link.AttachmentTypeID == attachmentTypeID_Product.ID
-							  select new
-							  {
-								  ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
-							  };
-
-			var thumbnail = from attachment in _context.Attachments
-							join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
-							join entity in _context.Entity on link.EntityID equals entity.ID
-							where entity.Name == EntityConstants.Catelog && link.RecordID == id && link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
-							orderby attachment.CreateDate descending
-							select new
-							{
-								ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
-							};
-
-
-
-			ViewBag.thumbnail = thumbnail.Select(a => a.ImagePath).FirstOrDefault();
-			ViewBag.attachments = attachments.Select(a => a.ImagePath).ToList();
-
-
-			if (catalog == null)
+            if (catalog == null)
             {
                 return NotFound();
             }
