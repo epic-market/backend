@@ -96,10 +96,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                     RecordID = productInternal.ID,
                     Entity = EntityConstants.ProductInternal,
                     AttachmentType = AttachmentTypeConstants.ProductInternal,
-                    FolderPathConstant = FilePathConstants.ProductInternal,
                     Files = images
                 };
-                await attachmentService.InsertAttachment(attachment);
+                await attachmentService.UploadAttachment(attachment);
                 return RedirectToAction(nameof(Index));
 
         }
@@ -168,10 +167,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                                 RecordID = productInternal.ID,
                                 Entity = EntityConstants.ProductInternal,
                                 AttachmentType = AttachmentTypeConstants.ProductInternal,
-                                FolderPathConstant = FilePathConstants.ProductInternal,
                                 Files = newImages
                             };
-                            await attachmentService.InsertAttachment(attachment);
+                            await attachmentService.UploadAttachment(attachment);
       
                     }
                 }

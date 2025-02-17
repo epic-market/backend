@@ -133,10 +133,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                         RecordID = catalog.ID,
                         Entity = EntityConstants.Catelog,
                         AttachmentType = AttachmentTypeConstants.THUMBNAIL,
-                        FolderPathConstant = FilePathConstants.THUMBNAILPATH,
                         Files = thumbnail
                     };
-                    await attachmentService.InsertAttachment(attachmentLogo);
+                    await attachmentService.UploadAttachment(attachmentLogo);
                 }
 
                 if (ProductImages?.Length > 0)
@@ -148,10 +147,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                         RecordID = catalog.ID,
                         Entity = EntityConstants.Catelog,
                         AttachmentType = AttachmentTypeConstants.PRODUCTIMAGES,
-                        FolderPathConstant = FilePathConstants.PRODUCTPATH,
                         Files = ProductImages
                     };
-                    await attachmentService.InsertAttachment(attachmentProofs);
+                    await attachmentService.UploadAttachment(attachmentProofs);
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -236,10 +234,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                             RecordID = catalog.ID,
                             Entity = EntityConstants.Catelog,
                             AttachmentType = AttachmentTypeConstants.THUMBNAIL,
-                            FolderPathConstant = FilePathConstants.THUMBNAILPATH,
                             Files = newThumbnail
                         };
-                        await attachmentService.InsertAttachment(attachmentThumbnail);
+                        await attachmentService.UploadAttachment(attachmentThumbnail);
 
                     }
 
@@ -261,10 +258,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                             RecordID = catalog.ID,
                             Entity = EntityConstants.Catelog,
                             AttachmentType = AttachmentTypeConstants.PRODUCTIMAGES,
-                            FolderPathConstant = FilePathConstants.PRODUCTPATH,
                             Files = newProductImages
                         };
-                        await attachmentService.InsertAttachment(attachmentProductImages);
+                        await attachmentService.UploadAttachment(attachmentProductImages);
 
                     }
 

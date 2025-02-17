@@ -138,10 +138,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                         RecordID = outlet.ID,
                         Entity = EntityConstants.Branch,
                         AttachmentType = AttachmentTypeConstants.BRANCH_THUMBNAIL,
-                        FolderPathConstant = FilePathConstants.BranchThumbnail,
                         Files = thumbnail
                     };
-                    await attachmentService.InsertAttachment(attachmentThumbnail);
+                    await attachmentService.UploadAttachment(attachmentThumbnail);
                 }
 
                 if (OutletImages?.Length > 0)
@@ -153,10 +152,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                         RecordID = outlet.ID,
                         Entity = EntityConstants.Branch,
                         AttachmentType = AttachmentTypeConstants.BRANCH_PHOTOS,
-                        FolderPathConstant = FilePathConstants.BranchesPhotos,
                         Files = OutletImages
                     };
-                    await attachmentService.InsertAttachment(attachmentOutletImages);
+                    await attachmentService.UploadAttachment(attachmentOutletImages);
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -247,10 +245,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                             RecordID = outlet.ID,
                             Entity = EntityConstants.Branch,
                             AttachmentType = AttachmentTypeConstants.BRANCH_THUMBNAIL,
-                            FolderPathConstant = FilePathConstants.BranchThumbnail,
                             Files = newThumbnail
                         };
-                        await attachmentService.InsertAttachment(attachmentThumbnail);
+                        await attachmentService.UploadAttachment(attachmentThumbnail);
 
                     }
 
@@ -272,10 +269,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                             RecordID = outlet.ID,
                             Entity = EntityConstants.Branch,
                             AttachmentType = AttachmentTypeConstants.BRANCH_PHOTOS,
-                            FolderPathConstant = FilePathConstants.BranchesPhotos,
                             Files = newOutletImages
                         };
-                        await attachmentService.InsertAttachment(attachmentOutletImages);
+                        await attachmentService.UploadAttachment(attachmentOutletImages);
 
                     }
                 }

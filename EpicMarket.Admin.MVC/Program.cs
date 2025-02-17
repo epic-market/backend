@@ -29,7 +29,7 @@ builder.Services.AddDbContext<ApplicationDbContext>();
 builder.Services.AddScoped<IAttachmentService,AttachmentService>();
 builder.Services.AddScoped<IApplicationConfigurationService, ApplicationConfigurationService>();
 builder.Services.AddScoped<IFileService, FileService>();
-
+builder.Services.AddScoped<IEntityService, EntityService>();
 
 
 builder.Services.AddDbContext<AuthDbContext>(options =>

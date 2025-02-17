@@ -22,22 +22,14 @@ namespace EpicMarket.Admin.MVC.Services
 		}
 
 
-		public async Task InsertAttachment(AttachmentModel attachmentModel)
+		public async Task UploadAttachment(AttachmentModel attachmentModel)
 		{
 			if (attachmentModel.Files?.Length > 0)
 			{
 				foreach (var product in attachmentModel.Files)
 				{
-					var filinsertOutput = await this.SaveFileGlobalAsync(product, attachmentModel.FolderPathConstant, attachmentModel.BusinessID);
-					var attachmentId = await InsertOrUpdateAttachment(new AttachmentDTO
-					{
-						Name = attachmentModel.Name,
-						Comment = attachmentModel.Comment,
-						DocumentType = DocumentTypeConstants.FILE,
-						DocumentFileType = product.ContentType,
-					////	DocumentFolderPath = filinsertOutput.FullPathLocation,
-					////	DocumentFile = filinsertOutput.FileName,
-					});
+					var insertedKey = await this.SaveFileBusinessAsync(product, attachmentModel.BusinessID);
+					var attachmentId = await this.GetAttachmentId(insertedKey.Key);
 					await InsertAttachmentLink(new AttachmentLinkDTO()
 					{
 						AttachmentTypeName = attachmentModel.AttachmentType,
@@ -50,28 +42,69 @@ namespace EpicMarket.Admin.MVC.Services
 			}
 		}
 
+	public async Task<int> GetAttachmentId(string key)
+	{
+		var attachment = await _context.Attachments.FirstOrDefaultAsync(a => a.DocumentFile == key);
+		return attachment.ID;
+	}
+	
 
-		private async Task<SaveFileDTO> SaveFileGlobalAsync(IFormFile file, string FolderPathConstant, int RecordID = 0)
+
+
+		// private async Task<SaveFileDTO> SaveFileGlobalAsync(IFormFile file, int RecordID = 0)
+		// {
+		// 	string filePath = " ";
+		// 	if (file != null && file.Length > 0)
+		// 	{
+		// 		string fullPathLocation = null;
+		// 		string subPathLocation = null;
+
+		// 		if (!string.IsNullOrWhiteSpace(FolderPathConstant))
+		// 		{
+		// 			fullPathLocation = applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.BasePath);
+		// 			subPathLocation = _context.ApplicationConfigurations.Where(c => c.Name == FolderPathConstant).FirstOrDefault().Value;
+		// 			if (RecordID != 0)
+		// 			{
+		// 				fullPathLocation = fullPathLocation + "/" + RecordID + "/" + subPathLocation;
+		// 			}
+		// 			if (!fullPathLocation.EndsWith("/"))
+		// 			{
+		// 				fullPathLocation = fullPathLocation + "/";
+		// 			}
+		// 		}
+		// 		// Made fitting based on AWS
+		// 		var uploadedFile = file;
+
+		// 		var fileName = Path.GetFileNameWithoutExtension(uploadedFile.FileName);
+		// 		string type = Path.GetExtension(uploadedFile.FileName);
+		// 		fileName += "_" + DateTime.Now.Ticks.ToString() + type;
+
+		// 		fileName = fileName.Replace('&', '_').Replace('<', '_').Replace('>', '_');
+		// 		filePath = await fileService.UploadFileAsync(uploadedFile, fullPathLocation, fileName);
+
+		// 		return new SaveFileDTO()
+		// 		{
+		// 			//FileName = fileName,
+		// 			//FullPathLocation = fullPathLocation.ToString()
+		// 		};
+		// 	}
+
+		// 	return null;
+		// }
+
+
+ 		private async Task<SaveFileDTO> SaveFileBusinessAsync(IFormFile file,int BusinessId)
 		{
-			string filePath = " ";
 			if (file != null && file.Length > 0)
 			{
-				string fullPathLocation = null;
-				string subPathLocation = null;
-
-				if (!string.IsNullOrWhiteSpace(FolderPathConstant))
-				{
-					fullPathLocation = applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.BasePath);
-					subPathLocation = _context.ApplicationConfigurations.Where(c => c.Name == FolderPathConstant).FirstOrDefault().Value;
-					if (RecordID != 0)
-					{
-						fullPathLocation = fullPathLocation + "/" + RecordID + "/" + subPathLocation;
-					}
-					if (!fullPathLocation.EndsWith("/"))
-					{
-						fullPathLocation = fullPathLocation + "/";
-					}
+				string fullPathLocation = applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.BasePath);
+				if (BusinessId != 0) {
+					fullPathLocation = fullPathLocation + "/" + BusinessId +"/Images/";
 				}
+				else {
+					throw new Exception("BusinessId is required");
+				}
+		
 				// Made fitting based on AWS
 				var uploadedFile = file;
 
@@ -80,17 +113,18 @@ namespace EpicMarket.Admin.MVC.Services
 				fileName += "_" + DateTime.Now.Ticks.ToString() + type;
 
 				fileName = fileName.Replace('&', '_').Replace('<', '_').Replace('>', '_');
-				filePath = await fileService.UploadFileAsync(uploadedFile, fullPathLocation, fileName);
+				var key =  await fileService.UploadFileAsync(uploadedFile, fullPathLocation, fileName, EntityConstants.Business, BusinessId);
 
 				return new SaveFileDTO()
 				{
-					//FileName = fileName,
-					//FullPathLocation = fullPathLocation.ToString()
+					Key = key
 				};
 			}
 
 			return null;
 		}
+
+
 
 
 	

@@ -218,10 +218,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                         RecordID = business.ID,
                         Entity = EntityConstants.Business,
                         AttachmentType = AttachmentTypeConstants.LOGO,
-                        FolderPathConstant = FilePathConstants.LOGOPATH,
                         Files = Images
                     };
-                    await attachmentService.InsertAttachment(attachmentLogo);
+                    await attachmentService.UploadAttachment(attachmentLogo);
                 }
 
                 if (Proofs?.Length > 0)
@@ -233,10 +232,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                         RecordID = business.ID,
                         Entity = EntityConstants.Business,
                         AttachmentType = AttachmentTypeConstants.PROOF,
-                        FolderPathConstant = FilePathConstants.ProofPATH,
                         Files = Proofs
                     };
-                    await attachmentService.InsertAttachment(attachmentProofs);
+                    await attachmentService.UploadAttachment(attachmentProofs);
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -332,10 +330,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                             RecordID = business.ID,
                             Entity = EntityConstants.Business,
                             AttachmentType = AttachmentTypeConstants.LOGO,
-                            FolderPathConstant = FilePathConstants.LOGOPATH,
                             Files = newLogo
                         };
-                        await attachmentService.InsertAttachment(attachment);
+                        await attachmentService.UploadAttachment(attachment);
 
                     }
 
@@ -358,10 +355,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                             RecordID = business.ID,
                             Entity = EntityConstants.Business,
                             AttachmentType = AttachmentTypeConstants.PROOF,
-                            FolderPathConstant = FilePathConstants.ProofPATH,
                             Files = newProofs
                         };
-                        await attachmentService.InsertAttachment(attachmentProofs);
+                        await attachmentService.UploadAttachment(attachmentProofs);
 
                     }
                 }

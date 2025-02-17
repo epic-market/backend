@@ -8,7 +8,6 @@
         public string Entity { get; set; }
 		public string AttachmentType { get; set; }
 		public int BusinessID { get; set; }
-		public string FolderPathConstant { get; set; }
         public IFormFile[] Files { get; set; }
 
 	}
