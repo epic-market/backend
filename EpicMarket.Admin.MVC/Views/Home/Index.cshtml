@@ -1,7 +1,345 @@
-﻿
-<div class="container mt-5">
-    <div class="jumbotron text-center">
-        <h1 class="display-4">Welcome to Epicmarket Admin Panel</h1>
-        <p class="lead">@ViewBag.TypeofMessage @ViewBag.Firstname</p>
+﻿@model EpicMarket.Admin.MVC.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="dashboard">
+    <!-- Header Section -->
+    <div class="dashboard-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="display-5 fw-bold">Dashboard</h1>
+                <p class="lead">@Model.GreetingMessage, @Model.UserFirstName! Welcome to Epicmarket Admin Panel</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <div class="date-time">
+                    <span id="current-date">@DateTime.Now.ToString("dddd, MMMM d, yyyy")</span>
+                    <span id="current-time" class="ms-2 badge bg-primary"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Section -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card bg-primary text-white">
+                <div class="stat-card-body">
+                    <h5 class="stat-card-title">Businesses</h5>
+                    <h2 class="stat-card-value">@Model.BusinessCount</h2>
+                    <p class="stat-card-desc">Total registered businesses</p>
+                </div>
+                <div class="stat-card-icon">
+                    <i class="bi bi-building"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card bg-success text-white">
+                <div class="stat-card-body">
+                    <h5 class="stat-card-title">Outlets</h5>
+                    <h2 class="stat-card-value">@Model.OutletCount</h2>
+                    <p class="stat-card-desc">Total registered outlets</p>
+                </div>
+                <div class="stat-card-icon">
+                    <i class="bi bi-shop"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card bg-warning text-white">
+                <div class="stat-card-body">
+                    <h5 class="stat-card-title">Orders</h5>
+                    <h2 class="stat-card-value">@Model.OrderCount</h2>
+                    <p class="stat-card-desc">Total processed orders</p>
+                </div>
+                <div class="stat-card-icon">
+                    <i class="bi bi-cart3"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card bg-danger text-white">
+                <div class="stat-card-body">
+                    <h5 class="stat-card-title">Revenue</h5>
+                    <h2 class="stat-card-value">₹@Model.TotalRevenue.ToString("N2")</h2>
+                    <p class="stat-card-desc">Total revenue</p>
+                </div>
+                <div class="stat-card-icon">
+                    <i class="bi bi-currency-dollar"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Access Section -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Access</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row justify-content-around">
+                        <div class="col-auto">
+                            <a asp-controller="Businesses" asp-action="Index" class="quick-link">
+                                <div class="quick-link-icon">
+                                    <i class="bi bi-building"></i>
+                                </div>
+                                <div class="quick-link-text">Business</div>
+                            </a>
+                        </div>
+                        <div class="col-auto">
+                            <a asp-controller="Tasks" asp-action="Index" class="quick-link">
+                                <div class="quick-link-icon">
+                                    <i class="bi bi-check2-square"></i>
+                                </div>
+                                <div class="quick-link-text">Tasks</div>
+                            </a>
+                        </div>
+                        <div class="col-auto">
+                            <a asp-controller="Orders" asp-action="Index" class="quick-link">
+                                <div class="quick-link-icon">
+                                    <i class="bi bi-bag"></i>
+                                </div>
+                                <div class="quick-link-text">Orders</div>
+                            </a>
+                        </div>
+                        <div class="col-auto">
+                            <a asp-controller="Catalogs" asp-action="Index" class="quick-link">
+                                <div class="quick-link-icon">
+                                    <i class="bi bi-collection"></i>
+                                </div>
+                                <div class="quick-link-text">Catalog</div>
+                            </a>
+                        </div>
+                        <div class="col-auto">
+                            <a asp-controller="SupportQuerys" asp-action="Index" class="quick-link">
+                                <div class="quick-link-icon">
+                                    <i class="bi bi-headset"></i>
+                                </div>
+                                <div class="quick-link-text">Support Queries</div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Tasks Table -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Your Recent Tasks</h5>
+                    <a asp-controller="Tasks" asp-action="Index" class="btn btn-primary btn-sm">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Task Name</th>
+                                    <th>Description</th>
+                                    <th>Type</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.RecentTasks.Any())
+                                {
+                                    foreach (var task in Model.RecentTasks)
+                                    {
+                                        <tr>
+                                            <td>@task.Name</td>
+                                            <td>
+                                                <span class="text-truncate d-inline-block" style="max-width: 200px;">
+                                                    @(task.Description?.Length > 50 ? task.Description.Substring(0, 50) + "..." : task.Description ?? "Verification For the Business")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="text-nowrap">@(task.TaskTypes?.Name ?? "Verification")</span>
+                                            </td>
+                                            <td>
+                                                <span class="text-danger">
+                                                    <i class="bi bi-clock me-1"></i>
+                                                    Dec @(task.DateDue?.Day.ToString() ?? "30")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">@(task.TaskStatusType?.Status ?? "New")</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <a asp-controller="Tasks" asp-action="Details" asp-route-id="@task.ID" class="btn btn-primary btn-sm">
+                                                    <i class="bi bi-eye"></i> View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center py-3">No tasks assigned to you</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<style>
+    .stat-card {
+        border-radius: 0.5rem;
+        overflow: hidden;
+        position: relative;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+    
+    .stat-card-body {
+        padding: 1.5rem;
+        z-index: 1;
+        position: relative;
+    }
+    
+    .stat-card-icon {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 2rem;
+        opacity: 0.3;
+    }
+    
+    .stat-card-title {
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-card-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-card-desc {
+        font-size: 0.8rem;
+        margin-bottom: 0;
+        opacity: 0.8;
+    }
+    
+    .quick-link {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #495057;
+        text-decoration: none;
+        padding: 10px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .quick-link:hover {
+        transform: translateY(-5px);
+    }
+    
+    .quick-link-icon {
+        width: 60px;
+        height: 60px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+        font-size: 1.5rem;
+        color: #0d6efd;
+        transition: all 0.3s ease;
+    }
+    
+    .quick-link:hover .quick-link-icon {
+        background-color: #0d6efd;
+        color: white;
+    }
+    
+    .quick-link-text {
+        font-size: 1rem;
+        font-weight: 500;
+    }
+    
+    .activity-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+    
+    .activity-title {
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+    
+    .activity-subtitle {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .activity-time {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .table {
+        font-size: 0.9rem;
+    }
+    
+    .table td, .table th {
+        vertical-align: middle;
+    }
+</style>
+
+<!-- Add Bootstrap Icons if not already included in your layout -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css" rel="stylesheet">
+
+@section Scripts {
+    <script>
+        // Initialize Bootstrap tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+            
+            // Update date and time
+            function updateDateTime() {
+                const now = new Date();
+                
+                // Format date: Monday, January 1, 2023
+                const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                document.getElementById('current-date').textContent = now.toLocaleDateString(undefined, dateOptions);
+                
+                // Format time: 12:34:56 PM
+                const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+                document.getElementById('current-time').textContent = now.toLocaleTimeString(undefined, timeOptions);
+            }
+            
+            // Initial update
+            updateDateTime();
+            
+            // Update every second
+            setInterval(updateDateTime, 1000);
+        });
+    </script>
+}
