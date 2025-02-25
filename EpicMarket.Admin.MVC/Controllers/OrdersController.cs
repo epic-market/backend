@@ -13,6 +13,9 @@ using System.Security.Claims;
 using EpicMarket.Entities;
 using Newtonsoft.Json;
 using System.Drawing.Printing;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Admin.MVC.Services;
+using System.Text.Json;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -20,10 +23,17 @@ namespace EpicMarket.Admin.MVC.Controllers
     public class OrdersController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public OrdersController(ApplicationDbContext context)
+        public OrdersController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: Orders
@@ -101,7 +111,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         public async Task<IActionResult> PlaceOrder([FromBody] SingleOrder order)
         {
 
-            var User = new AppUser();
+            var orderplacedUser = new AppUser();
             var totalItems = 0;
             double totalPrice = 0.0;
             var existingUser = await _context.Users
@@ -115,16 +125,16 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (existingUser == null)
             {
 
-                User.FirstName = order.CustomerDetails.Phone;
-                User.UserName = order.CustomerDetails.Email;
-                User.Email = order.CustomerDetails.Phone;
-                User.PhoneNumber = order.CustomerDetails.Phone;
-                await _context.Users.AddAsync(User);
+                orderplacedUser.FirstName = order.CustomerDetails.Phone;
+                orderplacedUser.UserName = order.CustomerDetails.Email;
+                orderplacedUser.Email = order.CustomerDetails.Phone;
+                orderplacedUser.PhoneNumber = order.CustomerDetails.Phone;
+                await _context.Users.AddAsync(orderplacedUser);
                 await _context.SaveChangesAsync();
             }
             else
             {
-                User.Id = existingUser.Id;
+                orderplacedUser.Id = existingUser.Id;
             }
             var listoforderDetails = new List<OrderDetail>();
 
@@ -145,7 +155,7 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             var newOrder = new Order()
             {
-                PersonID = User.Id,
+                PersonID = orderplacedUser.Id,
                 OutletID = order.OutletID,
                 OrderTypeId = OrderTypeID.Id,
                 OrderAt = DateTime.Now,
@@ -166,6 +176,18 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             var saved = _context.Orders.FirstOrDefault(o => o.ID == newOrder.ID);
 
+            // After saving the order
+            await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+            {
+                EventName = EventConstants.CREATE,
+                EntityName = EntityConstants.Order,
+                Source = _urlContextService.CurrentPageUrl,
+                Description = $"Placed new order for customer: {order.CustomerDetails.Email}",
+                Data = System.Text.Json.JsonSerializer.Serialize(saved),
+                RecordId = saved.ID,
+                BusinessID = 0,
+                LoggedInUserName = User.Identity.Name
+            });
 
              return RedirectToAction(nameof(Index)); ;
         }
@@ -199,6 +221,19 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (order != null)
             {
                 _context.Orders.Remove(order);
+                
+                // Log event before saving changes
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DELETE,
+                    EntityName = EntityConstants.Order,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted order with ID: {order.ID}",
+                    Data = System.Text.Json.JsonSerializer.Serialize(order),
+                    RecordId = order.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
             }
 
             await _context.SaveChangesAsync();
@@ -232,9 +267,12 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ID,PersonID,BusinessID,OrderType,TotalPrice,TotalItems,OrderAt,OrderTypeId,OutletID,StatusId,PaymentMode,AddressID,CreateDate,CreateBy,ModifiedDate,ModifiedBy,Address")] Order order)
         {
-
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
-
+            
+            // Get original entity for event logging
+            var originalEntity = await _context.Orders
+                .AsNoTracking()
+                .FirstOrDefaultAsync(o => o.ID == id);
 
             if (order.AddressID != null)
             {
@@ -259,6 +297,23 @@ namespace EpicMarket.Admin.MVC.Controllers
                 {
                     _context.Update(order);
                     await _context.SaveChangesAsync();
+                    
+                    // Log event
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.UPDATE,
+                        EntityName = EntityConstants.Order,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated order with ID: {order.ID}",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = order
+                        }),
+                        RecordId = order.ID,
+                        BusinessID = 0,
+                        LoggedInUserName = userName
+                    });
                 }
                 catch (DbUpdateConcurrencyException)
                 {

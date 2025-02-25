@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using EpicMarket.Entities.CustomModels;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -15,10 +17,17 @@ namespace EpicMarket.Admin.MVC.Controllers
     public class OrderDetailsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public OrderDetailsController(ApplicationDbContext context)
+        public OrderDetailsController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: OrderDetails
@@ -67,6 +76,19 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 _context.Add(orderDetail);
                 await _context.SaveChangesAsync();
+                
+                // Log event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.CreateOrderDetail,
+                    EntityName = EntityConstants.OrderDetail,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Created order detail for order ID: {orderDetail.OrderID}",
+                    Data = System.Text.Json.JsonSerializer.Serialize(orderDetail),
+                    RecordId = orderDetail.ID,
+                    LoggedInUserName = User.Identity.Name
+                });
+                
                 return RedirectToAction(nameof(Index));
             }
             ViewData["CatalogID"] = new SelectList(_context.Catalogs, "ID", "ID", orderDetail.CatalogVariants.CatalogID);
@@ -103,6 +125,11 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 return NotFound();
             }
+            
+            // Get original entity for event logging
+            var originalEntity = await _context.OrderDetails
+                .AsNoTracking()
+                .FirstOrDefaultAsync(od => od.ID == id);
 
             if (ModelState.IsValid)
             {
@@ -110,21 +137,18 @@ namespace EpicMarket.Admin.MVC.Controllers
                 {
                     _context.Update(orderDetail);
                     await _context.SaveChangesAsync();
-
-                    var Order = _context.Orders.Include(c=>c.OrderDetails).FirstOrDefault(c => c.ID == orderDetail.OrderID);
-                    double TotalPrice = 0;
-                    var TotalItems = 0;
-                    foreach (var Item in Order.OrderDetails) {
-                        TotalPrice = TotalPrice + Item.TotalPrice;
-                        TotalItems = TotalItems + Item.Quantity;
-                    }
-                    Order.TotalPrice = TotalPrice;
-                    Order.TotalItems = TotalItems;
-
-                    _context.Update(Order);
-                    await _context.SaveChangesAsync();
-
-
+                    
+                    // Log event
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditOrderDetail,
+                        EntityName = EntityConstants.OrderDetail,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated order detail ID: {orderDetail.ID}",
+                        Data = System.Text.Json.JsonSerializer.Serialize(orderDetail),
+                        RecordId = orderDetail.ID,
+                        LoggedInUserName = User.Identity.Name
+                    });
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -173,6 +197,18 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (orderDetail != null)
             {
                 _context.OrderDetails.Remove(orderDetail);
+                
+                // Log event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteOrderDetail,
+                    EntityName = EntityConstants.OrderDetail,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted order detail ID: {orderDetail.ID}",
+                    Data = System.Text.Json.JsonSerializer.Serialize(orderDetail),
+                    RecordId = orderDetail.ID,
+                    LoggedInUserName = User.Identity.Name
+                });
             }
 
             await _context.SaveChangesAsync();

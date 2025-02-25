@@ -10,6 +10,8 @@ using EpicMarket.Data.Models;
 using System.Reflection.Metadata;
 using System.Security.Claims;
 using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities.CustomModels;
+using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -18,12 +20,21 @@ namespace EpicMarket.Admin.MVC.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IAttachmentService _attachmentService;
         private readonly IFileService _fileService;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public AttachmentsController(IAttachmentService attachmentService ,IFileService fileService ,ApplicationDbContext context)
+        public AttachmentsController(
+            IAttachmentService attachmentService,
+            IFileService fileService,
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
             _attachmentService = attachmentService;
             _fileService = fileService;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: Attachments
@@ -93,6 +104,19 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 _context.Add(attachment);
                 await _context.SaveChangesAsync();
+
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddAttachment,
+                    EntityName = EntityConstants.Attachment,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Added attachment '{attachment.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(attachment),
+                    RecordId = attachment.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
                 return RedirectToAction(nameof(Index));
             }
             return View(attachment);
@@ -133,8 +157,29 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 try
                 {
+                    var originalEntity = await _context.Attachments.AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.ID == id);
+
                     _context.Update(attachment);
                     await _context.SaveChangesAsync();
+
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditAttachment,
+                        EntityName = EntityConstants.Attachment,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated attachment '{attachment.Name}'",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = attachment
+                        }),
+                        RecordId = attachment.ID,
+                        BusinessID = 0,
+                        LoggedInUserName = User.Identity.Name
+                    });
+
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -147,7 +192,6 @@ namespace EpicMarket.Admin.MVC.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
             return View(attachment);
         }
@@ -182,9 +226,21 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (attachment != null)
             {
                 _context.Attachments.Remove(attachment);
-            }
 
-            await _context.SaveChangesAsync();
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteAttachment,
+                    EntityName = EntityConstants.Attachment,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted attachment '{attachment.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(attachment),
+                    RecordId = attachment.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 

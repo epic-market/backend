@@ -9,16 +9,26 @@ using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
 using EpicMarket.Data.ApplicationModels;
 using System.Security.Claims;
+using EpicMarket.Entities.CustomModels;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
     public class CommunicationQueuesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public CommunicationQueuesController(ApplicationDbContext context)
+        public CommunicationQueuesController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: CommunicationQueues
@@ -77,9 +87,22 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (communicationQueue != null)
             {
                 _context.CommunicationQueue.Remove(communicationQueue);
+
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteCommunicationQueue,
+                    EntityName = EntityConstants.CommunicationQueue,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted communication queue ID: {communicationQueue.ID}",
+                    Data = System.Text.Json.JsonSerializer.Serialize(communicationQueue),
+                    RecordId = communicationQueue.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

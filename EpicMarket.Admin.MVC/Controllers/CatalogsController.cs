@@ -12,6 +12,7 @@ using EpicMarket.Entities.CustomModels;
 using Microsoft.CodeAnalysis;
 using EpicMarket.Admin.MVC.Models;
 using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -21,12 +22,21 @@ namespace EpicMarket.Admin.MVC.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IAttachmentService attachmentService;
         private readonly IFileService fileService;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public CatalogsController(ApplicationDbContext context, IAttachmentService attachmentService, IFileService fileService)
+        public CatalogsController(
+            ApplicationDbContext context, 
+            IAttachmentService attachmentService, 
+            IFileService fileService,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
             this.attachmentService = attachmentService;
             this.fileService = fileService;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: Catalogs
@@ -109,7 +119,6 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,BusinessID,Barcode,Name,Description,Images,Category,Rate,InStock,IsRecommended,MaximumOrderPurchase,Rating,ReviewCount,OrderCount,StatusId,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Catalog catalog, IFormFile[] thumbnail, IFormFile[] ProductImages)
         {
-
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
 
             catalog.CreateBy = userName;
@@ -123,6 +132,18 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 _context.Add(catalog);
                 await _context.SaveChangesAsync();
+
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddCatalog,
+                    EntityName = EntityConstants.Catalog,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Added catalog '{catalog.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(catalog),
+                    RecordId = catalog.ID,
+                    BusinessID = catalog.BusinessID,
+                    LoggedInUserName = User.Identity.Name
+                });
 
                 if (thumbnail?.Length > 0)
                 {
@@ -210,8 +231,27 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 try
                 {
+                    var originalEntity = await _context.Catalogs.AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.ID == id);
+
                     _context.Update(catalog);
                     await _context.SaveChangesAsync();
+
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditCatalog,
+                        EntityName = EntityConstants.Catalog,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated catalog '{catalog.Name}'",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = catalog
+                        }),
+                        RecordId = catalog.ID,
+                        BusinessID = catalog.BusinessID,
+                        LoggedInUserName = User.Identity.Name
+                    });
 
                     // Handle added images
                     if (addedThumbnail != null && addedThumbnail?.Length > 0)
@@ -311,9 +351,21 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (catalog != null)
             {
                 _context.Catalogs.Remove(catalog);
-            }
 
-            await _context.SaveChangesAsync();
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteCatalog,
+                    EntityName = EntityConstants.Catalog,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted catalog '{catalog.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(catalog),
+                    RecordId = catalog.ID,
+                    BusinessID = catalog.BusinessID,
+                    LoggedInUserName = User.Identity.Name
+                });
+
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 

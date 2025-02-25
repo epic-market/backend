@@ -9,16 +9,26 @@ using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
 using System.Reflection.Metadata;
 using System.Security.Claims;
+using EpicMarket.Entities.CustomModels;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
     public class EventsController : Controller
     {
         private readonly AuthDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public EventsController(AuthDbContext context)
+        public EventsController(
+            AuthDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: Events
@@ -61,14 +71,26 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,EventCategoryID,Name,Description,PriorityID,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Event @event)
         {
-
-			var userName = this.User.FindFirst(ClaimTypes.Name).Value;
-			@event.CreateBy = userName;
-			@event.CreateDate = DateTime.UtcNow;
-			if (ModelState.IsValid)
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            @event.CreateBy = userName;
+            @event.CreateDate = DateTime.UtcNow;
+            if (ModelState.IsValid)
             {
                 _context.Add(@event);
                 await _context.SaveChangesAsync();
+
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddEvent,
+                    EntityName = EntityConstants.Event,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Added event '{@event.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(@event),
+                    RecordId = @event.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
                 return RedirectToAction(nameof(Index));
             }
             ViewData["EventCategoryID"] = new SelectList(_context.ApplicationsTable, "ID", "Name", @event.EventCategoryID);
@@ -99,10 +121,10 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ID,EventCategoryID,Name,Description,PriorityID,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] Event @event)
         {
-			var userName = this.User.FindFirst(ClaimTypes.Name).Value;
-			@event.ModifiedBy = userName;
-			@event.ModifiedDate = DateTime.UtcNow;
-			if (id != @event.ID)
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            @event.ModifiedBy = userName;
+            @event.ModifiedDate = DateTime.UtcNow;
+            if (id != @event.ID)
             {
                 return NotFound();
             }
@@ -111,8 +133,29 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 try
                 {
+                    var originalEntity = await _context.Event.AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.ID == id);
+
                     _context.Update(@event);
                     await _context.SaveChangesAsync();
+
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditEvent,
+                        EntityName = EntityConstants.Event,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated event '{@event.Name}'",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = @event
+                        }),
+                        RecordId = @event.ID,
+                        BusinessID = 0,
+                        LoggedInUserName = User.Identity.Name
+                    });
+
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -125,7 +168,6 @@ namespace EpicMarket.Admin.MVC.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
             ViewData["EventCategoryID"] = new SelectList(_context.ApplicationsTable, "ID", "Name", @event.EventCategoryID);
             return View(@event);
@@ -159,6 +201,18 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (@event != null)
             {
                 _context.Event.Remove(@event);
+
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteEvent,
+                    EntityName = EntityConstants.Event,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted event '{@event.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(@event),
+                    RecordId = @event.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
             }
 
             await _context.SaveChangesAsync();

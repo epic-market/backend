@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Authorization;
 using EpicMarket.Entities.CustomModels;
 using EpicMarket.Data.ApplicationModels;
 using System.Security.Claims;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -17,10 +19,17 @@ namespace EpicMarket.Admin.MVC.Controllers
     public class BusinessCategoryInternalsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public BusinessCategoryInternalsController(ApplicationDbContext context)
+        public BusinessCategoryInternalsController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: BusinessCategoryInternals
@@ -67,6 +76,19 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 _context.Add(businessCategoryInternal);
                 await _context.SaveChangesAsync();
+
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddBusinessCategory,
+                    EntityName = EntityConstants.BusinessCategory,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Added business category '{businessCategoryInternal.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(businessCategoryInternal),
+                    RecordId = businessCategoryInternal.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
                 return RedirectToAction(nameof(Index));
             }
             return View(businessCategoryInternal);
@@ -107,8 +129,28 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 try
                 {
+                    var originalEntity = await _context.BusinessCategories.AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.ID == id);
+
                     _context.Update(businessCategoryInternal);
                     await _context.SaveChangesAsync();
+
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditBusinessCategory,
+                        EntityName = EntityConstants.BusinessCategory,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated business category '{businessCategoryInternal.Name}'",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = businessCategoryInternal
+                        }),
+                        RecordId = businessCategoryInternal.ID,
+                        BusinessID = 0,
+                        LoggedInUserName = User.Identity.Name
+                    });
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -153,9 +195,21 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (businessCategoryInternal != null)
             {
                 _context.BusinessCategories.Remove(businessCategoryInternal);
-            }
 
-            await _context.SaveChangesAsync();
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteBusinessCategory,
+                    EntityName = EntityConstants.BusinessCategory,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted business category '{businessCategoryInternal.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(businessCategoryInternal),
+                    RecordId = businessCategoryInternal.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 

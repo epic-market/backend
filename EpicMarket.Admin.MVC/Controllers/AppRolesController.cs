@@ -7,16 +7,26 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
+using EpicMarket.Entities.CustomModels;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
     public class AppRolesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public AppRolesController(ApplicationDbContext context)
+        public AppRolesController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: AppRoles
@@ -56,12 +66,24 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,NormalizedName,ConcurrencyStamp")] AppRole appRole)
         {
-
             appRole.NormalizedName = appRole.Name.ToUpper();
             if (ModelState.IsValid)
             {
                 _context.Add(appRole);
                 await _context.SaveChangesAsync();
+
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddAppRole,
+                    EntityName = EntityConstants.AppRole,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Added app role '{appRole.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(appRole),
+                    RecordId = appRole.Id,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
                 return RedirectToAction(nameof(Index));
             }
             return View(appRole);
@@ -100,8 +122,29 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 try
                 {
+                    var originalEntity = await _context.Roles.AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.Id == id);
+
                     _context.Update(appRole);
                     await _context.SaveChangesAsync();
+
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditAppRole,
+                        EntityName = EntityConstants.AppRole,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated app role '{appRole.Name}'",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = appRole
+                        }),
+                        RecordId = appRole.Id,
+                        BusinessID = 0,
+                        LoggedInUserName = User.Identity.Name
+                    });
+
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -114,7 +157,6 @@ namespace EpicMarket.Admin.MVC.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
             return View(appRole);
         }
@@ -146,9 +188,21 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (appRole != null)
             {
                 _context.Roles.Remove(appRole);
-            }
 
-            await _context.SaveChangesAsync();
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteAppRole,
+                    EntityName = EntityConstants.AppRole,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted app role '{appRole.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(appRole),
+                    RecordId = appRole.Id,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 

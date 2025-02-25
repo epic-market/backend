@@ -8,16 +8,26 @@ using Microsoft.EntityFrameworkCore;
 using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
 using System.Security.Claims;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
     public class TaskStatusTypesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public TaskStatusTypesController(ApplicationDbContext context)
+        public TaskStatusTypesController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: TaskStatusTypes
@@ -60,10 +70,24 @@ namespace EpicMarket.Admin.MVC.Controllers
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             taskStatusType.CreateBy = userName;
             taskStatusType.CreateDate = DateTime.UtcNow;
+            
             if (ModelState.IsValid)
             {
                 _context.Add(taskStatusType);
                 await _context.SaveChangesAsync();
+                
+                // Log the event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddTaskStatusType,
+                    EntityName = EntityConstants.TaskStatusType,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Added task status type '{taskStatusType.Status}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(taskStatusType),
+                    RecordId = taskStatusType.Id,
+                    LoggedInUserName = User.Identity.Name
+                });
+                
                 return RedirectToAction(nameof(Index));
             }
             return View(taskStatusType);
@@ -95,16 +119,38 @@ namespace EpicMarket.Admin.MVC.Controllers
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             taskStatusType.ModifiedBy = userName;
             taskStatusType.ModifiedDate = DateTime.UtcNow;
+            
             if (id != taskStatusType.Id)
             {
                 return NotFound();
             }
+
+            // Get the original entity for comparison
+            var originalTaskStatusType = await _context.TaskStatusTypes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.Id == id);
 
             if (ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(taskStatusType);
+                    
+                    // Log the event
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditTaskStatusType,
+                        EntityName = EntityConstants.TaskStatusType,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated task status type '{taskStatusType.Status}'",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new { 
+                            Original = originalTaskStatusType, 
+                            Updated = taskStatusType 
+                        }),
+                        RecordId = taskStatusType.Id,
+                        LoggedInUserName = User.Identity.Name
+                    });
+                    
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -150,6 +196,18 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (taskStatusType != null)
             {
                 _context.TaskStatusTypes.Remove(taskStatusType);
+                
+                // Log the event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteTaskStatusType,
+                    EntityName = EntityConstants.TaskStatusType,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted task status type '{taskStatusType.Status}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(taskStatusType),
+                    RecordId = taskStatusType.Id,
+                    LoggedInUserName = User.Identity.Name
+                });
             }
 
             await _context.SaveChangesAsync();

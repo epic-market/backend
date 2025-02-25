@@ -12,6 +12,9 @@ using System.Security.Claims;
 using EpicMarket.Entities.CustomModels;
 using Microsoft.CodeAnalysis.Operations;
 using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Admin.MVC.Services;
+using System.Text.Json;
+using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -21,12 +24,21 @@ namespace EpicMarket.Admin.MVC.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IAttachmentService attachmentService;
         private readonly IFileService fileService;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public OutletsController(ApplicationDbContext context, IAttachmentService attachmentService, IFileService fileService)
+        public OutletsController(
+            ApplicationDbContext context, 
+            IAttachmentService attachmentService, 
+            IFileService fileService,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
             this.attachmentService = attachmentService;
             this.fileService = fileService;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: Outlets
@@ -117,18 +129,31 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,BussinessID,AddressID,Name,Description,ContactNumber,ContactEmail,Rating,ReviewCount,IsOpen,Weight,StatusId,CreateDate,CreateBy,ModifiedDate,ModifiedBy,Address")] Outlet outlet, IFormFile[] thumbnail, IFormFile[] OutletImages)
         {
-
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
-
 
             outlet.Address.CreateBy = userName;
             outlet.Address.CreateDate = DateTime.UtcNow;
             outlet.CreateBy = userName;
             outlet.CreateDate = DateTime.UtcNow;
+
             if (ModelState.IsValid)
             {
                 _context.Add(outlet);
                 await _context.SaveChangesAsync();
+                
+                // Log event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.CREATE,
+                    EntityName = EntityConstants.Outlet,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Created outlet: {outlet.Name}",
+                    Data = JsonSerializer.Serialize(outlet),
+                    RecordId = outlet.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = userName
+                });
+                
                 if (thumbnail?.Length > 0)
                 {
                     var attachmentThumbnail = new AttachmentModel()
@@ -204,9 +229,12 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ID,BussinessID,AddressID,Name,Description,ContactNumber,ContactEmail,Rating,ReviewCount,IsOpen,Weight,StatusId,CreateDate,CreateBy,ModifiedDate,ModifiedBy,Address,IsActive")] Outlet outlet, IFormFile[] newThumbnail, string? addedThumbnail, IFormFile[] newOutletImages, string? removedOutletImages, string? addedOutletImages)
         {
-
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
-
+            
+            // Get original entity for event logging
+            var originalEntity = await _context.Outlets
+                .AsNoTracking()
+                .FirstOrDefaultAsync(o => o.ID == id);
 
             outlet.Address.ModifiedBy = userName;
             outlet.Address.ModifiedDate = DateTime.UtcNow;
@@ -225,6 +253,24 @@ namespace EpicMarket.Admin.MVC.Controllers
                 {
                     _context.Update(outlet);
                     await _context.SaveChangesAsync();
+                    
+                    // Log event
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.UPDATE,
+                        EntityName = EntityConstants.Outlet,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated outlet: {outlet.Name}",
+                        Data = JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = outlet
+                        }),
+                        RecordId = outlet.ID,
+                        BusinessID = 0,
+                        LoggedInUserName = userName
+                    });
+                    
                     if (addedThumbnail != null && addedThumbnail?.Length > 0)
                     {
                         List<string> ExisitingThumbnail = await this.attachmentService.GetAttachmentLinks(new GetAttachmentLink()
@@ -323,6 +369,19 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (outlet != null)
             {
                 _context.Outlets.Remove(outlet);
+                
+                // Log event before saving changes
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DELETE,
+                    EntityName = EntityConstants.Outlet,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted outlet: {outlet.Name}",
+                    Data = JsonSerializer.Serialize(outlet),
+                    RecordId = outlet.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
             }
 
             await _context.SaveChangesAsync();

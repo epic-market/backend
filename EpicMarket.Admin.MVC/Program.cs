@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Amazon.S3;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Admin.MVC.Services;
+using EpicMarket.Admin.MVC.Middleware;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,7 +31,7 @@ builder.Services.AddScoped<IAttachmentService,AttachmentService>();
 builder.Services.AddScoped<IApplicationConfigurationService, ApplicationConfigurationService>();
 builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IEntityService, EntityService>();
-
+builder.Services.AddScoped<IEventService, EventService>();
 
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -44,6 +45,9 @@ builder.Services.AddDefaultIdentity<AppUser>().AddDefaultTokenProviders().
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
 
+// Add before builder.Services.AddControllersWithViews()
+builder.Services.AddSingleton<UrlContextService>();
+builder.Services.AddScoped<IUrlContextService>(sp => sp.GetRequiredService<UrlContextService>());
 
 var app = builder.Build();
 
@@ -56,6 +60,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+// Add after app.UseRouting() and before app.UseAuthentication()
+app.UseUrlContext();
 
 app.UseAuthentication();
 app.UseAuthorization();

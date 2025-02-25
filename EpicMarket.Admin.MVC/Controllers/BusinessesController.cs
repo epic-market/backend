@@ -15,6 +15,7 @@ using EpicMarket.Entities.CustomModels;
 using System.Net.Mail;
 using EpicMarket.Admin.MVC.Contracts;
 using Microsoft.IdentityModel.Tokens;
+using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -24,12 +25,21 @@ namespace EpicMarket.Admin.MVC.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IAttachmentService attachmentService;
         private readonly IFileService fileService;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public BusinessesController(ApplicationDbContext context,IAttachmentService attachmentService, IFileService fileService)
+        public BusinessesController(
+            ApplicationDbContext context, 
+            IAttachmentService attachmentService, 
+            IFileService fileService,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
             this.attachmentService = attachmentService;
             this.fileService = fileService;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
         public IActionResult Index()
         {
@@ -194,11 +204,9 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,PersonID,BusinessCategoryID,Name,Description,Banner,Logo,ContactNumber,ContactEmail,AddressID,Rating,ReviewCount,IsOpen,Weight,StatusId,CreateDate,CreateBy,ModifiedDate,ModifiedBy,Address")] Business business,IFormFile[] Images , IFormFile[] Proofs)
+        public async Task<IActionResult> Create([Bind("ID,PersonID,BusinessCategoryID,Name,Description,Banner,Logo,ContactNumber,ContactEmail,AddressID,Rating,ReviewCount,IsOpen,Weight,StatusId,CreateDate,CreateBy,ModifiedDate,ModifiedBy,Address")] Business business, IFormFile[] Images, IFormFile[] Proofs)
         {
-
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
-
 
             business.Address.CreateBy = userName;
             business.Address.CreateDate = DateTime.UtcNow;
@@ -209,6 +217,18 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 _context.Add(business);
                 await _context.SaveChangesAsync();
+
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddBusiness,
+                    EntityName = EntityConstants.Business,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Added business '{business.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(business),
+                    RecordId = business.ID,
+                    BusinessID = business.ID,
+                    LoggedInUserName = User.Identity.Name
+                });
 
                 if (Images?.Length > 0) {
                     var attachmentLogo = new AttachmentModel()
@@ -283,12 +303,9 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,PersonID,BusinessCategoryID,Name,Description,Banner,Logo,ContactNumber,ContactEmail,AddressID,Rating,ReviewCount,IsOpen,Weight,CreateDate,CreateBy,ModifiedDate,ModifiedBy,StatusId,Address,IsActive")] Business business, IFormFile[] newLogo, string? addedLogos , IFormFile[] newProofs, string? removedProofs, string? addedProofs)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,PersonID,BusinessCategoryID,Name,Description,Banner,Logo,ContactNumber,ContactEmail,AddressID,Rating,ReviewCount,IsOpen,Weight,CreateDate,CreateBy,ModifiedDate,ModifiedBy,StatusId,Address,IsActive")] Business business, IFormFile[] newLogo, string? addedLogos, IFormFile[] newProofs, string? removedProofs, string? addedProofs)
         {
-
-
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
-
 
             business.Address.ModifiedBy = userName;
             business.Address.ModifiedDate = DateTime.UtcNow;
@@ -305,9 +322,29 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 try
                 {
+                    var originalBusiness = await _context.Businesses
+                        .AsNoTracking()
+                        .Include(b => b.Address)
+                        .FirstOrDefaultAsync(b => b.ID == id);
 
                     _context.Update(business);
                     await _context.SaveChangesAsync();
+
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditBusiness,
+                        EntityName = EntityConstants.Business,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated business '{business.Name}'",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            Original = originalBusiness,
+                            Updated = business
+                        }),
+                        RecordId = business.ID,
+                        BusinessID = business.ID,
+                        LoggedInUserName = User.Identity.Name
+                    });
 
                     // Handle added images
                     if (addedLogos != null && newLogo?.Length > 0)
@@ -333,9 +370,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                             Files = newLogo
                         };
                         await attachmentService.UploadAttachment(attachment);
-
                     }
-
 
                     // Handle removed images
                     if (!string.IsNullOrEmpty(removedProofs))
@@ -347,7 +382,6 @@ namespace EpicMarket.Admin.MVC.Controllers
                     // Handle added images
                     if (addedProofs != null && newProofs?.Length > 0)
                     {
-
                         var attachmentProofs = new AttachmentModel()
                         {
                             Name = EntityConstants.Business,
@@ -358,7 +392,6 @@ namespace EpicMarket.Admin.MVC.Controllers
                             Files = newProofs
                         };
                         await attachmentService.UploadAttachment(attachmentProofs);
-
                     }
                 }
                 catch (DbUpdateConcurrencyException)
@@ -410,9 +443,21 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (business != null)
             {
                 _context.Businesses.Remove(business);
-            }
 
-            await _context.SaveChangesAsync();
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteBusiness,
+                    EntityName = EntityConstants.Business,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted business '{business.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(business),
+                    RecordId = business.ID,
+                    BusinessID = business.ID,
+                    LoggedInUserName = User.Identity.Name
+                });
+
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 

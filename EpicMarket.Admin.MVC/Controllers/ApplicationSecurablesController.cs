@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Authorization;
 using EpicMarket.Entities.CustomModels;
 using System.Reflection.Metadata;
 using System.Security.Claims;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -18,10 +20,17 @@ namespace EpicMarket.Admin.MVC.Controllers
     public class ApplicationSecurablesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public ApplicationSecurablesController(ApplicationDbContext context)
+        public ApplicationSecurablesController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: ApplicationSecurables
@@ -64,10 +73,24 @@ namespace EpicMarket.Admin.MVC.Controllers
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             applicationSecurables.CreateBy = userName;
             applicationSecurables.CreateDate = DateTime.UtcNow;
+            
             if (ModelState.IsValid)
             {
                 _context.Add(applicationSecurables);
                 await _context.SaveChangesAsync();
+
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddApplicationSecurable,
+                    EntityName = EntityConstants.ApplicationSecurable,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Added application securable '{applicationSecurables.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(applicationSecurables),
+                    RecordId = applicationSecurables.Id,
+                    BusinessID = 0,
+                    LoggedInUserName = userName
+                });
+
                 return RedirectToAction(nameof(Index));
             }
             return View(applicationSecurables);
@@ -96,10 +119,10 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] ApplicationSecurables applicationSecurables)
         {
-
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             applicationSecurables.ModifiedBy = userName;
             applicationSecurables.ModifiedDate = DateTime.UtcNow;
+
             if (id != applicationSecurables.Id)
             {
                 return NotFound();
@@ -109,8 +132,29 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 try
                 {
+                    var originalEntity = await _context.ApplicationSecurables.AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.Id == id);
+
                     _context.Update(applicationSecurables);
                     await _context.SaveChangesAsync();
+
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditApplicationSecurable,
+                        EntityName = EntityConstants.ApplicationSecurable,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated application securable '{applicationSecurables.Name}'",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = applicationSecurables
+                        }),
+                        RecordId = applicationSecurables.Id,
+                        BusinessID = 0,
+                        LoggedInUserName = userName
+                    });
+
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -123,7 +167,6 @@ namespace EpicMarket.Admin.MVC.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
             return View(applicationSecurables);
         }
@@ -155,9 +198,21 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (applicationSecurables != null)
             {
                 _context.ApplicationSecurables.Remove(applicationSecurables);
-            }
 
-            await _context.SaveChangesAsync();
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteApplicationSecurable,
+                    EntityName = EntityConstants.ApplicationSecurable,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted application securable '{applicationSecurables.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(applicationSecurables),
+                    RecordId = applicationSecurables.Id,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 
