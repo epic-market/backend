@@ -9,16 +9,26 @@ using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
 using EpicMarket.Data.ApplicationModels;
 using System.Security.Claims;
+using EpicMarket.Entities.CustomModels;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
     public class EntitiesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public EntitiesController(ApplicationDbContext context)
+        public EntitiesController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: Entities
@@ -58,7 +68,6 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Entity entity)
         {
-
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             entity.CreateBy = userName;
             entity.CreateDate = DateTime.UtcNow;
@@ -66,6 +75,19 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 _context.Add(entity);
                 await _context.SaveChangesAsync();
+
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddEntity,
+                    EntityName = EntityConstants.Entity,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Added entity '{entity.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(entity),
+                    RecordId = entity.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
                 return RedirectToAction(nameof(Index));
             }
             return View(entity);
@@ -106,8 +128,29 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 try
                 {
+                    var originalEntity = await _context.Entity.AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.ID == id);
+
                     _context.Update(entity);
                     await _context.SaveChangesAsync();
+
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditEntity,
+                        EntityName = EntityConstants.Entity,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated entity '{entity.Name}'",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = entity
+                        }),
+                        RecordId = entity.ID,
+                        BusinessID = 0,
+                        LoggedInUserName = User.Identity.Name
+                    });
+
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -120,7 +163,6 @@ namespace EpicMarket.Admin.MVC.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
             return View(entity);
         }
@@ -152,9 +194,21 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (entity != null)
             {
                 _context.Entity.Remove(entity);
-            }
 
-            await _context.SaveChangesAsync();
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteEntity,
+                    EntityName = EntityConstants.Entity,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted entity '{entity.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(entity),
+                    RecordId = entity.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 

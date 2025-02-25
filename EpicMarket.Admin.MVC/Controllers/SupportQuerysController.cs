@@ -9,16 +9,26 @@ using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
 using System.Reflection.Metadata;
 using System.Security.Claims;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
     public class SupportQuerysController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public SupportQuerysController(ApplicationDbContext context)
+        public SupportQuerysController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: SupportQuerys
@@ -63,14 +73,27 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,Query,TaskTypeID,TypeofPersonid,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] SupportQuerys supportQuerys)
         {
-
-			var userName = this.User.FindFirst(ClaimTypes.Name).Value;
-			supportQuerys.CreateBy = userName;
-			supportQuerys.CreateDate = DateTime.UtcNow;
-			if (ModelState.IsValid)
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            supportQuerys.CreateBy = userName;
+            supportQuerys.CreateDate = DateTime.UtcNow;
+            
+            if (ModelState.IsValid)
             {
                 _context.Add(supportQuerys);
                 await _context.SaveChangesAsync();
+                
+                // Log the event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddSupportQuery,
+                    EntityName = EntityConstants.SupportQuery,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Added support query '{supportQuerys.Query}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(supportQuerys),
+                    RecordId = supportQuerys.ID,
+                    LoggedInUserName = User.Identity.Name
+                });
+                
                 return RedirectToAction(nameof(Index));
             }
             ViewData["TypeofPersonid"] = new SelectList(_context.PersonTypes, "ID", "Type", supportQuerys.TypeofPersonid);
@@ -101,22 +124,43 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Query,TaskTypeID,TypeofPersonid,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] SupportQuerys supportQuerys)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Query,TaskTypeID,TypeofPersonid,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] SupportQuerys supportQuerys)
         {
-
-			var userName = this.User.FindFirst(ClaimTypes.Name).Value;
-			supportQuerys.ModifiedBy = userName;
-			supportQuerys.ModifiedDate = DateTime.UtcNow;
-			if (id != supportQuerys.ID)
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            supportQuerys.ModifiedBy = userName;
+            supportQuerys.ModifiedDate = DateTime.UtcNow;
+            
+            if (id != supportQuerys.ID)
             {
                 return NotFound();
             }
+
+            // Get the original entity for comparison
+            var originalSupportQuery = await _context.SupportQuerys
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.ID == id);
 
             if (ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(supportQuerys);
+                    
+                    // Log the event
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditSupportQuery,
+                        EntityName = EntityConstants.SupportQuery,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated support query '{supportQuerys.Query}'",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new { 
+                            Original = originalSupportQuery, 
+                            Updated = supportQuerys 
+                        }),
+                        RecordId = supportQuerys.ID,
+                        LoggedInUserName = User.Identity.Name
+                    });
+                    
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -166,6 +210,18 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (supportQuerys != null)
             {
                 _context.SupportQuerys.Remove(supportQuerys);
+                
+                // Log the event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteSupportQuery,
+                    EntityName = EntityConstants.SupportQuery,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted support query '{supportQuerys.Query}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(supportQuerys),
+                    RecordId = supportQuerys.ID,
+                    LoggedInUserName = User.Identity.Name
+                });
             }
 
             await _context.SaveChangesAsync();

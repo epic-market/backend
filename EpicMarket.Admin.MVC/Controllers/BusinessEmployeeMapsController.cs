@@ -7,16 +7,25 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities.CustomModels;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
     public class BusinessEmployeeMapsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public BusinessEmployeeMapsController(ApplicationDbContext context)
+        public BusinessEmployeeMapsController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: BusinessEmployeeMaps
@@ -65,6 +74,19 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 _context.Add(businessEmployeeMap);
                 await _context.SaveChangesAsync();
+
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddBusinessEmployeeMap,
+                    EntityName = EntityConstants.BusinessEmployeeMap,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Added business employee map for Business ID: {businessEmployeeMap.BussinessID}, Employee ID: {businessEmployeeMap.EmployeeID}",
+                    Data = System.Text.Json.JsonSerializer.Serialize(businessEmployeeMap),
+                    RecordId = businessEmployeeMap.ID,
+                    BusinessID = businessEmployeeMap.BussinessID,
+                    LoggedInUserName = User.Identity.Name
+                });
+
                 return RedirectToAction(nameof(Index));
             }
             ViewData["BussinessID"] = new SelectList(_context.Businesses, "ID", "ID", businessEmployeeMap.BussinessID);
@@ -106,8 +128,29 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 try
                 {
+                    var originalEntity = await _context.BusinessEmployeeMaps.AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.ID == id);
+
                     _context.Update(businessEmployeeMap);
                     await _context.SaveChangesAsync();
+
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditBusinessEmployeeMap,
+                        EntityName = EntityConstants.BusinessEmployeeMap,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated business employee map for Business ID: {businessEmployeeMap.BussinessID}, Employee ID: {businessEmployeeMap.EmployeeID}",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = businessEmployeeMap
+                        }),
+                        RecordId = businessEmployeeMap.ID,
+                        BusinessID = businessEmployeeMap.BussinessID,
+                        LoggedInUserName = User.Identity.Name
+                    });
+
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -120,7 +163,6 @@ namespace EpicMarket.Admin.MVC.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
             ViewData["BussinessID"] = new SelectList(_context.Businesses, "ID", "ID", businessEmployeeMap.BussinessID);
             ViewData["EmployeeID"] = new SelectList(_context.Users, "Id", "Id", businessEmployeeMap.EmployeeID);
@@ -156,9 +198,21 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (businessEmployeeMap != null)
             {
                 _context.BusinessEmployeeMaps.Remove(businessEmployeeMap);
-            }
 
-            await _context.SaveChangesAsync();
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteBusinessEmployeeMap,
+                    EntityName = EntityConstants.BusinessEmployeeMap,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted business employee map for Business ID: {businessEmployeeMap.BussinessID}, Employee ID: {businessEmployeeMap.EmployeeID}",
+                    Data = System.Text.Json.JsonSerializer.Serialize(businessEmployeeMap),
+                    RecordId = businessEmployeeMap.ID,
+                    BusinessID = businessEmployeeMap.BussinessID,
+                    LoggedInUserName = User.Identity.Name
+                });
+
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 

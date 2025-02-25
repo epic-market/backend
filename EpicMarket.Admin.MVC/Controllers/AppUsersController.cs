@@ -9,6 +9,8 @@ using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using EpicMarket.Entities.CustomModels;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -18,12 +20,21 @@ namespace EpicMarket.Admin.MVC.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<AppUser> userManager;
         private readonly RoleManager<AppRole> roleManager;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public AppUsersController(ApplicationDbContext context, UserManager<AppUser> userManager,RoleManager<AppRole> roleManager)
+        public AppUsersController(
+            ApplicationDbContext context, 
+            UserManager<AppUser> userManager,
+            RoleManager<AppRole> roleManager,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
             this.userManager = userManager;
             this.roleManager = roleManager;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: AppUsers
@@ -118,6 +129,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                     return NotFound();
                 }
 
+                var originalUser = await _context.Users.AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Id == id);
+
                 // Update user properties
                 existingUser.FirstName = user.FirstName;
                 existingUser.LastName = user.LastName;
@@ -137,6 +151,23 @@ namespace EpicMarket.Admin.MVC.Controllers
                 var result = await userManager.UpdateAsync(existingUser);
                 if (result.Succeeded)
                 {
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditAppUser,
+                        EntityName = EntityConstants.AppUser,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated user '{existingUser.UserName}'",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            Original = originalUser,
+                            Updated = existingUser,
+                            Roles = SelectedRoles
+                        }),
+                        RecordId = existingUser.Id,
+                        BusinessID = 0,
+                        LoggedInUserName = User.Identity.Name
+                    });
+
                     return RedirectToAction(nameof(Index));
                 }
                 else
@@ -183,9 +214,21 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (appUser != null)
             {
                 _context.Users.Remove(appUser);
-            }
 
-            await _context.SaveChangesAsync();
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteAppUser,
+                    EntityName = EntityConstants.AppUser,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted user '{appUser.UserName}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(appUser),
+                    RecordId = appUser.Id,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 

@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using EpicMarket.Entities.CustomModels;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -15,10 +17,17 @@ namespace EpicMarket.Admin.MVC.Controllers
     public class OutletProductsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public OutletProductsController(ApplicationDbContext context)
+        public OutletProductsController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: OutletProducts
@@ -141,6 +150,18 @@ namespace EpicMarket.Admin.MVC.Controllers
                 {
                     _context.Update(outletProduct);
                     await _context.SaveChangesAsync();
+                    
+                    // Log event
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditInventory,
+                        EntityName = EntityConstants.Inventory,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated inventory item ID: {outletProduct.ID}",
+                        Data = System.Text.Json.JsonSerializer.Serialize(outletProduct),
+                        RecordId = outletProduct.ID,
+                        LoggedInUserName = User.Identity.Name
+                    });
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -192,6 +213,18 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (outletProduct != null)
             {
                 _context.Inventory.Remove(outletProduct);
+                
+                // Log event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteInventory,
+                    EntityName = EntityConstants.Inventory,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted inventory item ID: {outletProduct.ID}",
+                    Data = System.Text.Json.JsonSerializer.Serialize(outletProduct),
+                    RecordId = outletProduct.ID,
+                    LoggedInUserName = User.Identity.Name
+                });
             }
 
             await _context.SaveChangesAsync();

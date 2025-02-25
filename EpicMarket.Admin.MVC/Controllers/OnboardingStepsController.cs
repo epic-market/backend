@@ -7,16 +7,26 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
     public class OnboardingStepsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public OnboardingStepsController(ApplicationDbContext context)
+        public OnboardingStepsController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: OnboardingSteps
@@ -56,16 +66,28 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,StepName,StepDescription,PageId,StepOrder,CreatedAt")] OnboardingStep onboardingStep)
+        public async Task<IActionResult> Create([Bind("Id,StepName,StepDescription,StepOrder,PageId")] OnboardingStep onboardingStep)
         {
-            onboardingStep.CreatedAt = DateTime.Now;
             if (ModelState.IsValid)
             {
                 _context.Add(onboardingStep);
                 await _context.SaveChangesAsync();
+                
+                // Log event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.CreateOnboardingStep,
+                    EntityName = EntityConstants.OnboardingStep,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Created onboarding step: {onboardingStep.StepName}",
+                    Data = System.Text.Json.JsonSerializer.Serialize(onboardingStep),
+                    RecordId = onboardingStep.Id,
+                    LoggedInUserName = User.Identity.Name
+                });
+                
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PageId"] = new SelectList(_context.Pages, "ID", "Url", onboardingStep.Page);
+            ViewData["PageId"] = new SelectList(_context.Pages, "ID", "Url", onboardingStep.PageId);
             return View(onboardingStep);
         }
 
@@ -91,12 +113,17 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,StepName,StepDescription,PageId,StepOrder,CreatedAt")] OnboardingStep onboardingStep)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,StepName,StepDescription,StepOrder,PageId")] OnboardingStep onboardingStep)
         {
             if (id != onboardingStep.Id)
             {
                 return NotFound();
             }
+            
+            // Get original entity for event logging
+            var originalEntity = await _context.OnboardingSteps
+                .AsNoTracking()
+                .FirstOrDefaultAsync(os => os.Id == id);
 
             if (ModelState.IsValid)
             {
@@ -104,6 +131,18 @@ namespace EpicMarket.Admin.MVC.Controllers
                 {
                     _context.Update(onboardingStep);
                     await _context.SaveChangesAsync();
+                    
+                    // Log event
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditOnboardingStep,
+                        EntityName = EntityConstants.OnboardingStep,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated onboarding step: {onboardingStep.StepName}",
+                        Data = System.Text.Json.JsonSerializer.Serialize(onboardingStep),
+                        RecordId = onboardingStep.Id,
+                        LoggedInUserName = User.Identity.Name
+                    });
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -150,6 +189,18 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (onboardingStep != null)
             {
                 _context.OnboardingSteps.Remove(onboardingStep);
+                
+                // Log event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteOnboardingStep,
+                    EntityName = EntityConstants.OnboardingStep,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted onboarding step: {onboardingStep.StepName}",
+                    Data = System.Text.Json.JsonSerializer.Serialize(onboardingStep),
+                    RecordId = onboardingStep.Id,
+                    LoggedInUserName = User.Identity.Name
+                });
             }
 
             await _context.SaveChangesAsync();

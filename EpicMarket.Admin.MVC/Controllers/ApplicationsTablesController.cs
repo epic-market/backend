@@ -9,16 +9,26 @@ using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
 using System.Reflection.Metadata;
 using System.Security.Claims;
+using EpicMarket.Entities.CustomModels;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
     public class ApplicationsTablesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public ApplicationsTablesController(ApplicationDbContext context)
+        public ApplicationsTablesController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: ApplicationsTables
@@ -58,13 +68,27 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,Name,Description,Sequence,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] ApplicationsTable applicationsTable)
         {
-			var userName = this.User.FindFirst(ClaimTypes.Name).Value;
-			applicationsTable.CreateBy = userName;
-			applicationsTable.CreateDate = DateTime.UtcNow;
-			if (ModelState.IsValid)
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            applicationsTable.CreateBy = userName;
+            applicationsTable.CreateDate = DateTime.UtcNow;
+
+            if (ModelState.IsValid)
             {
                 _context.Add(applicationsTable);
                 await _context.SaveChangesAsync();
+
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddApplicationTable,
+                    EntityName = EntityConstants.ApplicationTable,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Added application table '{applicationsTable.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(applicationsTable),
+                    RecordId = applicationsTable.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = userName
+                });
+
                 return RedirectToAction(nameof(Index));
             }
             return View(applicationsTable);
@@ -93,10 +117,11 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,Sequence,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] ApplicationsTable applicationsTable)
         {
-			var userName = this.User.FindFirst(ClaimTypes.Name).Value;
-			applicationsTable.ModifiedBy = userName;
-			applicationsTable.ModifiedDate = DateTime.UtcNow;
-			if (id != applicationsTable.ID)
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            applicationsTable.ModifiedBy = userName;
+            applicationsTable.ModifiedDate = DateTime.UtcNow;
+
+            if (id != applicationsTable.ID)
             {
                 return NotFound();
             }
@@ -105,8 +130,29 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 try
                 {
+                    var originalEntity = await _context.ApplicationsTable.AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.ID == id);
+
                     _context.Update(applicationsTable);
                     await _context.SaveChangesAsync();
+
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditApplicationTable,
+                        EntityName = EntityConstants.ApplicationTable,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated application table '{applicationsTable.Name}'",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = applicationsTable
+                        }),
+                        RecordId = applicationsTable.ID,
+                        BusinessID = 0,
+                        LoggedInUserName = userName
+                    });
+
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -119,7 +165,6 @@ namespace EpicMarket.Admin.MVC.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
             return View(applicationsTable);
         }
@@ -151,9 +196,22 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (applicationsTable != null)
             {
                 _context.ApplicationsTable.Remove(applicationsTable);
+
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteApplicationTable,
+                    EntityName = EntityConstants.ApplicationTable,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted application table '{applicationsTable.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(applicationsTable),
+                    RecordId = applicationsTable.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

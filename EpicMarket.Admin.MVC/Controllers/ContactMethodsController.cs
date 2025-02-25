@@ -9,16 +9,26 @@ using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
 using System.Reflection.Metadata;
 using System.Security.Claims;
+using EpicMarket.Entities.CustomModels;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
     public class ContactMethodsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public ContactMethodsController(ApplicationDbContext context)
+        public ContactMethodsController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: ContactMethods
@@ -65,6 +75,19 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 _context.Add(contactMethod);
                 await _context.SaveChangesAsync();
+
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddContactMethod,
+                    EntityName = EntityConstants.ContactMethod,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Added contact method '{contactMethod.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(contactMethod),
+                    RecordId = contactMethod.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
                 return RedirectToAction(nameof(Index));
             }
             return View(contactMethod);
@@ -105,8 +128,29 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 try
                 {
+                    var originalEntity = await _context.ContactMethod.AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.ID == id);
+
                     _context.Update(contactMethod);
                     await _context.SaveChangesAsync();
+
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditContactMethod,
+                        EntityName = EntityConstants.ContactMethod,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated contact method '{contactMethod.Name}'",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = contactMethod
+                        }),
+                        RecordId = contactMethod.ID,
+                        BusinessID = 0,
+                        LoggedInUserName = User.Identity.Name
+                    });
+
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -119,7 +163,6 @@ namespace EpicMarket.Admin.MVC.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
             return View(contactMethod);
         }
@@ -151,9 +194,21 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (contactMethod != null)
             {
                 _context.ContactMethod.Remove(contactMethod);
-            }
 
-            await _context.SaveChangesAsync();
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteContactMethod,
+                    EntityName = EntityConstants.ContactMethod,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted contact method '{contactMethod.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(contactMethod),
+                    RecordId = contactMethod.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 

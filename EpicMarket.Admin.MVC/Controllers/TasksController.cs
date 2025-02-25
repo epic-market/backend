@@ -22,11 +22,19 @@ namespace EpicMarket.Admin.MVC.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IAttachmentService _attachmentService;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public TasksController(IAttachmentService attachmentService,ApplicationDbContext context)
+        public TasksController(
+            IAttachmentService attachmentService,
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
             _attachmentService = attachmentService;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: Tasks
@@ -150,6 +158,19 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 _context.Add(tasks);
                 await _context.SaveChangesAsync();
+                
+                // Log the event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddTask,
+                    EntityName = EntityConstants.Tasks,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Added task '{tasks.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(tasks),
+                    RecordId = tasks.ID,
+                    LoggedInUserName = User.Identity.Name
+                });
+                
                 return RedirectToAction(nameof(Index));
             }
 
@@ -223,114 +244,41 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,TaskTypeID,ParentID,TaskStatusID,TaskPriorityID,PrimaryAssignedToPersonID,DateAssigned,DateDue,DateStarted,DateCompleted,SubmittedByPersonID,TaskData,ReceivedDate,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] Tasks tasks)
         {
-            var existingTask = await _context.Tasks.FindAsync(id);
-
-            if (existingTask == null)
-            {
-                return NotFound();
-            }
-
-			var changes = new List<string>();
-
-			// Detach the existing entity
-			_context.Entry(existingTask).State = EntityState.Detached;
-
-            // Update properties as needed
-            if (existingTask.PrimaryAssignedToPersonID != tasks.PrimaryAssignedToPersonID)
-            {
-                tasks.DateAssigned = DateTime.UtcNow;
-                changes.Add("assignment");
-            }
-
-            if (existingTask.TaskTypeID != tasks.TaskTypeID)
-            {
-                var GetTaskType = _context.TaskTypes.FirstOrDefault(row => row.ID == tasks.TaskTypeID);
-                changes.Add("task type");
-
-				if (GetTaskType != null)
-                {
-                    tasks.DateDue = DateTime.Now.AddHours((double)GetTaskType.DefaultDueDateHours);
-                }
-            }
-
-			if (existingTask.TaskStatusID != tasks.TaskStatusID)
-			{
-                changes.Add("status");
-			}
-
-			if (existingTask.Name != tasks.Name)
-			{
-				changes.Add("Name");
-			}
-
-			if (existingTask.Description != tasks.Description)
-			{
-				changes.Add("Decription");
-			}
-
-			if (existingTask.TaskPriorityID != tasks.TaskPriorityID)
-			{
-				changes.Add("Priority");
-			}
-
-			if (existingTask.TaskData != tasks.TaskData)
-			{
-				changes.Add("Task Details");
-			}
-
-
-
-			var NewstatusID = _context.TaskStatusTypes.FirstOrDefault(row => row.Status == "New")?.Id;
-
-            if (existingTask.TaskStatusID == NewstatusID && existingTask.TaskStatusID != tasks.TaskStatusID)
-            {
-                tasks.DateStarted = DateTime.UtcNow;
-            }
-
-            var ClosedstatusID = _context.TaskStatusTypes.FirstOrDefault(row => row.Status == "Closed")?.Id;
-
-            if (tasks.TaskStatusID == ClosedstatusID)
-            {
-                tasks.DateCompleted = DateTime.UtcNow;
-            }
-			string description = changes.Count > 0 ? $"{string.Join(" and ", changes)} changed" : "No significant changes";
-
-			string outletModelJson = JsonConvert.SerializeObject(tasks, new JsonSerializerSettings
-			{
-				ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-			});
-			var userName = this.User.FindFirst(ClaimTypes.Name)?.Value;
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             tasks.ModifiedBy = userName;
             tasks.ModifiedDate = DateTime.UtcNow;
-
-			var EntityForTasks = _context.Entity.FirstOrDefault(m => m.Name == EntityConstants.Tasks).ID;
-			var eventModel = await _context.Event.Where(row => row.Name == EventConstants.EditEmployees).FirstOrDefaultAsync();
-			var eventLogRecord = new EventLog
-			{
-                EventID = eventModel.ID,
-				EntityID = EntityForTasks,
-				RecordID = tasks.ID,
-				Source = "Admin",
-				Description = description,
-				Data = outletModelJson,
-				CreateDate = DateTime.Now,
-				CreateBy = userName
-			};
-
-			if (id != tasks.ID)
+            
+            if (id != tasks.ID)
             {
                 return NotFound();
             }
+
+            // Get the original entity for comparison
+            var originalTask = await _context.Tasks
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.ID == id);
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // Attach the updated entity and mark it as modified
-                    _context.Tasks.Attach(tasks);
-                    _context.Entry(tasks).State = EntityState.Modified;
-                    _context.EventLog.Add(eventLogRecord);
-
+                    _context.Update(tasks);
+                    
+                    // Log the event
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditTask,
+                        EntityName = EntityConstants.Tasks,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated task '{tasks.Name}'",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new { 
+                            Original = originalTask, 
+                            Updated = tasks 
+                        }),
+                        RecordId = tasks.ID,
+                        LoggedInUserName = User.Identity.Name
+                    });
+                    
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -412,6 +360,18 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (tasks != null)
             {
                 _context.Tasks.Remove(tasks);
+                
+                // Log the event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteTask,
+                    EntityName = EntityConstants.Tasks,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted task '{tasks.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(tasks),
+                    RecordId = tasks.ID,
+                    LoggedInUserName = User.Identity.Name
+                });
             }
 
             await _context.SaveChangesAsync();

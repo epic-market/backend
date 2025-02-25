@@ -11,7 +11,9 @@ using EpicMarket.Entities.CustomModels;
 using System.Security.Claims;
 using EpicMarket.Admin.MVC.Models;
 using EpicMarket.Admin.MVC.Contracts;
-
+using EpicMarket.Admin.MVC.Services;
+using System.Text.Json;
+using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -21,15 +23,22 @@ namespace EpicMarket.Admin.MVC.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IAttachmentService attachmentService;
         private readonly IFileService fileService;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public ProductInternalsController(ApplicationDbContext context,IAttachmentService attachmentService,IFileService fileService)
+        public ProductInternalsController(
+            ApplicationDbContext context,
+            IAttachmentService attachmentService,
+            IFileService fileService,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
             this.attachmentService = attachmentService;
             this.fileService = fileService;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
-
-
 
         // GET: ProductInternals
         public async Task<IActionResult> Index()
@@ -77,7 +86,6 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,BarCode,Name,Description")] ProductInternalModel productInternalModel, IFormFile[] images)
         {
-
             var productInternal = new ProductInternal();
 
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -87,20 +95,33 @@ namespace EpicMarket.Admin.MVC.Controllers
             productInternal.Name = productInternalModel.Name;
             productInternal.Description = productInternalModel.Description;
       
-                _context.Add(productInternal);
-                await _context.SaveChangesAsync();
-                var attachment = new AttachmentModel()
-                {
-                    Name = EntityConstants.ProductInternal,
-                    Comment = EntityConstants.ProductInternal,
-                    RecordID = productInternal.ID,
-                    Entity = EntityConstants.ProductInternal,
-                    AttachmentType = AttachmentTypeConstants.ProductInternal,
-                    Files = images
-                };
-                await attachmentService.UploadAttachment(attachment);
-                return RedirectToAction(nameof(Index));
-
+            _context.Add(productInternal);
+            await _context.SaveChangesAsync();
+            
+            // Log event
+            await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+            {
+                EventName = EventConstants.CREATE,
+                EntityName = EntityConstants.ProductInternal,
+                Source = _urlContextService.CurrentPageUrl,
+                Description = $"Created product internal: {productInternal.Name}",
+                Data = JsonSerializer.Serialize(productInternal),
+                RecordId = productInternal.ID,
+                BusinessID = 0,
+                LoggedInUserName = userName
+            });
+            
+            var attachment = new AttachmentModel()
+            {
+                Name = EntityConstants.ProductInternal,
+                Comment = EntityConstants.ProductInternal,
+                RecordID = productInternal.ID,
+                Entity = EntityConstants.ProductInternal,
+                AttachmentType = AttachmentTypeConstants.ProductInternal,
+                Files = images
+            };
+            await attachmentService.UploadAttachment(attachment);
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: ProductInternals/Edit/5
@@ -137,7 +158,12 @@ namespace EpicMarket.Admin.MVC.Controllers
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             productInternal.ModifiedBy = userName;
             productInternal.ModifiedDate = DateTime.UtcNow;
-
+            
+            // Get original entity for event logging
+            var originalEntity = await _context.ProductInternals
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.ID == id);
+                
             if (id != productInternal.ID)
             {
                 return NotFound();
@@ -149,6 +175,24 @@ namespace EpicMarket.Admin.MVC.Controllers
                 {
                     _context.Update(productInternal);
                     await _context.SaveChangesAsync();
+                    
+                    // Log event
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.UPDATE,
+                        EntityName = EntityConstants.ProductInternal,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated product internal: {productInternal.Name}",
+                        Data = JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = productInternal
+                        }),
+                        RecordId = productInternal.ID,
+                        BusinessID = 0,
+                        LoggedInUserName = userName
+                    });
+                    
                     // Handle removed images
                     if (!string.IsNullOrEmpty(removedImages))
                     {
@@ -216,9 +260,23 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (productInternal != null)
             {
                 _context.ProductInternals.Remove(productInternal);
+                
+                // Log event before saving changes
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DELETE,
+                    EntityName = EntityConstants.ProductInternal,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted product internal: {productInternal.Name}",
+                    Data = JsonSerializer.Serialize(productInternal),
+                    RecordId = productInternal.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+                
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

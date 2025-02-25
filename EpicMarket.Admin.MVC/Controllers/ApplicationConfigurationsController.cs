@@ -10,6 +10,8 @@ using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using EpicMarket.Entities.CustomModels;
 using System.Security.Claims;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -17,10 +19,17 @@ namespace EpicMarket.Admin.MVC.Controllers
     public class ApplicationConfigurationsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public ApplicationConfigurationsController(ApplicationDbContext context)
+        public ApplicationConfigurationsController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: ApplicationConfigurations
@@ -124,6 +133,19 @@ public async Task<IActionResult> Details(int? id)
             {
                 _context.Add(applicationConfiguration);
                 await _context.SaveChangesAsync();
+
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddApplicationConfiguration,
+                    EntityName = EntityConstants.ApplicationConfiguration,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Added application configuration '{applicationConfiguration.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(applicationConfiguration),
+                    RecordId = applicationConfiguration.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
                 return RedirectToAction(nameof(Index));
             }
             return View(applicationConfiguration);
@@ -152,11 +174,9 @@ public async Task<IActionResult> Details(int? id)
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Value,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] ApplicationConfiguration applicationConfiguration)
         {
-
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             applicationConfiguration.ModifiedBy = userName;
             applicationConfiguration.ModifiedDate = DateTime.UtcNow;
-
 
             if (id != applicationConfiguration.ID)
             {
@@ -167,8 +187,29 @@ public async Task<IActionResult> Details(int? id)
             {
                 try
                 {
+                    var originalEntity = await _context.ApplicationConfigurations.AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.ID == id);
+
                     _context.Update(applicationConfiguration);
                     await _context.SaveChangesAsync();
+
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditApplicationConfiguration,
+                        EntityName = EntityConstants.ApplicationConfiguration,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated application configuration '{applicationConfiguration.Name}'",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = applicationConfiguration
+                        }),
+                        RecordId = applicationConfiguration.ID,
+                        BusinessID = 0,
+                        LoggedInUserName = User.Identity.Name
+                    });
+
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -181,7 +222,6 @@ public async Task<IActionResult> Details(int? id)
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
             return View(applicationConfiguration);
         }
@@ -213,9 +253,21 @@ public async Task<IActionResult> Details(int? id)
             if (applicationConfiguration != null)
             {
                 _context.ApplicationConfigurations.Remove(applicationConfiguration);
-            }
 
-            await _context.SaveChangesAsync();
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteApplicationConfiguration,
+                    EntityName = EntityConstants.ApplicationConfiguration,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted application configuration '{applicationConfiguration.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(applicationConfiguration),
+                    RecordId = applicationConfiguration.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 

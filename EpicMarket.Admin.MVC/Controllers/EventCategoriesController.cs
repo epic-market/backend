@@ -8,16 +8,26 @@ using Microsoft.EntityFrameworkCore;
 using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
 using System.Security.Claims;
+using EpicMarket.Entities.CustomModels;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
     public class EventCategoriesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public EventCategoriesController(ApplicationDbContext context)
+        public EventCategoriesController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: EventCategories
@@ -64,6 +74,19 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 _context.Add(eventCategory);
                 await _context.SaveChangesAsync();
+
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddEventCategory,
+                    EntityName = EntityConstants.EventCategory,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Added event category '{eventCategory.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(eventCategory),
+                    RecordId = eventCategory.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
                 return RedirectToAction(nameof(Index));
             }
             return View(eventCategory);
@@ -104,8 +127,29 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 try
                 {
+                    var originalEntity = await _context.ApplicationsTable.AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.ID == id);
+
                     _context.Update(eventCategory);
                     await _context.SaveChangesAsync();
+
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditEventCategory,
+                        EntityName = EntityConstants.EventCategory,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated event category '{eventCategory.Name}'",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = eventCategory
+                        }),
+                        RecordId = eventCategory.ID,
+                        BusinessID = 0,
+                        LoggedInUserName = User.Identity.Name
+                    });
+
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -118,7 +162,6 @@ namespace EpicMarket.Admin.MVC.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
             return View(eventCategory);
         }
@@ -150,6 +193,18 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (eventCategory != null)
             {
                 _context.ApplicationsTable.Remove(eventCategory);
+
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteEventCategory,
+                    EntityName = EntityConstants.EventCategory,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted event category '{eventCategory.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(eventCategory),
+                    RecordId = eventCategory.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
             }
 
             await _context.SaveChangesAsync();

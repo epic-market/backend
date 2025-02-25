@@ -8,6 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using EpicMarket.Entities.CustomModels;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Admin.MVC.Services;
+using System.Text.Json;
+using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -15,10 +19,17 @@ namespace EpicMarket.Admin.MVC.Controllers
     public class OutletPersonsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public OutletPersonsController(ApplicationDbContext context)
+        public OutletPersonsController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: OutletPersons
@@ -67,6 +78,20 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 _context.Add(outletPerson);
                 await _context.SaveChangesAsync();
+                
+                // Log event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.CREATE,
+                    EntityName = EntityConstants.OutletPerson,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Created outlet person association with ID: {outletPerson.ID}",
+                    Data = JsonSerializer.Serialize(outletPerson),
+                    RecordId = outletPerson.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+                
                 return RedirectToAction(nameof(Index));
             }
             ViewData["PersonId"] = new SelectList(_context.Outlets, "ID", "ID", outletPerson.PersonId);
@@ -103,6 +128,11 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 return NotFound();
             }
+            
+            // Get original entity for event logging
+            var originalEntity = await _context.OutletPeople
+                .AsNoTracking()
+                .FirstOrDefaultAsync(op => op.ID == id);
 
             if (ModelState.IsValid)
             {
@@ -110,6 +140,23 @@ namespace EpicMarket.Admin.MVC.Controllers
                 {
                     _context.Update(outletPerson);
                     await _context.SaveChangesAsync();
+                    
+                    // Log event
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.UPDATE,
+                        EntityName = EntityConstants.OutletPerson,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated outlet person association with ID: {outletPerson.ID}",
+                        Data = JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = outletPerson
+                        }),
+                        RecordId = outletPerson.ID,
+                        BusinessID = 0,
+                        LoggedInUserName = User.Identity.Name
+                    });
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -158,6 +205,19 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (outletPerson != null)
             {
                 _context.OutletPeople.Remove(outletPerson);
+                
+                // Log event before saving changes
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DELETE,
+                    EntityName = EntityConstants.OutletPerson,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted outlet person association with ID: {outletPerson.ID}",
+                    Data = JsonSerializer.Serialize(outletPerson),
+                    RecordId = outletPerson.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
             }
 
             await _context.SaveChangesAsync();

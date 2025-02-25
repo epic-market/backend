@@ -9,16 +9,26 @@ using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
 using System.Reflection.Metadata;
 using System.Security.Claims;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
     public class BlogCategoriesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public BlogCategoriesController(ApplicationDbContext context)
+        public BlogCategoriesController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: BlogCategories
@@ -66,14 +76,24 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 _context.Add(blogCategory);
                 await _context.SaveChangesAsync();
+
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddBlogCategory,
+                    EntityName = EntityConstants.BlogCategory,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Added blog category '{blogCategory.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(blogCategory),
+                    RecordId = blogCategory.Id,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
                 if (!string.IsNullOrEmpty(returnUrl))
                 {
                     return Redirect(returnUrl);
                 }
-                else
-                {
-                    return RedirectToAction(nameof(Index));
-                }
+                return RedirectToAction(nameof(Index));
             }
             ViewBag.ReturnUrl = returnUrl;
             return View(blogCategory);
@@ -114,8 +134,29 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 try
                 {
+                    var originalEntity = await _context.BlogCategory.AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.Id == id);
+
                     _context.Update(blogCategory);
                     await _context.SaveChangesAsync();
+
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditBlogCategory,
+                        EntityName = EntityConstants.BlogCategory,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated blog category '{blogCategory.Name}'",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = blogCategory
+                        }),
+                        RecordId = blogCategory.Id,
+                        BusinessID = 0,
+                        LoggedInUserName = User.Identity.Name
+                    });
+
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -128,7 +169,6 @@ namespace EpicMarket.Admin.MVC.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
             return View(blogCategory);
         }
@@ -160,9 +200,21 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (blogCategory != null)
             {
                 _context.BlogCategory.Remove(blogCategory);
-            }
 
-            await _context.SaveChangesAsync();
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteBlogCategory,
+                    EntityName = EntityConstants.BlogCategory,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted blog category '{blogCategory.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(blogCategory),
+                    RecordId = blogCategory.Id,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 
