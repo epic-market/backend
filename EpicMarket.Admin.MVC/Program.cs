@@ -6,6 +6,7 @@ using Amazon.S3;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Admin.MVC.Services;
 using EpicMarket.Admin.MVC.Middleware;
+using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +27,14 @@ builder.Services.AddControllersWithViews()
     {
         options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
     });
+
+// Add browser refresh and hot reload services in development
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddRazorPages();
+    builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+}
+
 builder.Services.AddDbContext<ApplicationDbContext>();
 builder.Services.AddScoped<IAttachmentService,AttachmentService>();
 builder.Services.AddScoped<IApplicationConfigurationService, ApplicationConfigurationService>();
