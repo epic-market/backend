@@ -40,6 +40,8 @@ namespace EpicMarket.Entities.CustomModels
         public const string MEMBER = "member";
         public const string ADMIN = "admin";
         public const string MODERATOR = "moderator";
+        public const string ROOT = "root";
+        public const string SUPPORT = "support";
 
     }
 

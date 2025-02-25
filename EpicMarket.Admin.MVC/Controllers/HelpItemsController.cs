@@ -12,9 +12,10 @@ using System.Security.Claims;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
-
+using Microsoft.AspNetCore.Authorization;
 namespace EpicMarket.Admin.MVC.Controllers
 {
+    [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
     public class HelpItemsController : Controller
     {
         private readonly ApplicationDbContext _context;

@@ -17,7 +17,7 @@ using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [Authorize(Roles = $"{ROLES.ADMIN}")]
+    [Authorize(Roles = $"{ROLES.ROOT}")]
     public class ProductInternalsController : Controller
     {
         private readonly ApplicationDbContext _context;

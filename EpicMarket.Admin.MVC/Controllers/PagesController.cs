@@ -14,9 +14,12 @@ using EpicMarket.Admin.MVC.Services;
 using System.Text.Json;
 using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
+
+    [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
     public class PagesController : Controller
     {
         private readonly ApplicationDbContext _context;

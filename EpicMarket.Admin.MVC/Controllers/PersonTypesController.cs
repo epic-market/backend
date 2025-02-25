@@ -12,9 +12,11 @@ using EpicMarket.Admin.MVC.Services;
 using System.Text.Json;
 using EpicMarket.Entities.CustomModels;
 using EpicMarket.Entities;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
+     [Authorize(Roles = $"{ROLES.ROOT}")]
     public class PersonTypesController : Controller
     {
         private readonly ApplicationDbContext _context;

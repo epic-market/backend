@@ -19,7 +19,7 @@ using System.Text.Json;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [Authorize(Roles = $"{ROLES.ADMIN}")]
+    [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]   
     public class OrdersController : Controller
     {
         private readonly ApplicationDbContext _context;

@@ -15,9 +15,11 @@ using EpicMarket.Admin.MVC.Models;
 using System.Diagnostics.Eventing.Reader;
 using Newtonsoft.Json;
 using EpicMarket.Admin.MVC.Contracts;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
+    [Authorize(Roles = $"{ROLES.SUPPORT},{ROLES.ROOT},{ROLES.ADMIN}")]
     public class TasksController : Controller
     {
         private readonly ApplicationDbContext _context;

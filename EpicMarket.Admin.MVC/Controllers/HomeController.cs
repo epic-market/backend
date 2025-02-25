@@ -8,7 +8,7 @@ using System.Security.Claims;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [Authorize(Roles = $"{ROLES.ADMIN}")]
+    [Authorize(Roles = $"{ROLES.ROOT},{ROLES.ADMIN},{ROLES.SUPPORT}")]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;

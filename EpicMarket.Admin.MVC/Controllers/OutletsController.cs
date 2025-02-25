@@ -18,7 +18,7 @@ using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [Authorize(Roles = $"{ROLES.ADMIN}")]
+    [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
     public class OutletsController : Controller
     {
         private readonly ApplicationDbContext _context;

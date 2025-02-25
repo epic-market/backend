@@ -8,9 +8,11 @@ using Microsoft.EntityFrameworkCore;
 using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
 using EpicMarket.Admin.MVC.Contracts;
-
+using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Entities.CustomModels;
 namespace EpicMarket.Admin.MVC.Controllers
 {
+    [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
     public class EventLogsController : Controller
     {
         private readonly ApplicationDbContext _context;

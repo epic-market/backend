@@ -12,9 +12,10 @@ using EpicMarket.Admin.MVC.Models;
 using EpicMarket.Entities.CustomModels;
 using EpicMarket.Entities;
 using EpicMarket.Admin.MVC.Contracts;
-
+using Microsoft.AspNetCore.Authorization;
 namespace EpicMarket.Admin.MVC.Controllers
 {
+    [Authorize(Roles = $"{ROLES.ROOT}")]
     public class AccessControlListsController : Controller
     {
         private readonly ApplicationDbContext _context;
