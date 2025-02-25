@@ -11,9 +11,10 @@ using EpicMarket.Data.Models;
 using EpicMarket.Entities.CustomModels;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
-
+using Microsoft.AspNetCore.Authorization;
 namespace EpicMarket.Admin.MVC.Controllers
 {
+    [Authorize(Roles = $"{ROLES.ROOT}")]
     public class AccessTypesController : Controller
     {
         private readonly ApplicationDbContext _context;

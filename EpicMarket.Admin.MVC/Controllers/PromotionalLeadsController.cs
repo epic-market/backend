@@ -11,9 +11,12 @@ using System.Reflection.Metadata;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
+
+   [Authorize(Roles = $"{ROLES.SUPPORT},{ROLES.ROOT},{ROLES.ADMIN}")]
     public class PromotionalLeadsController : Controller
     {
         private readonly ApplicationDbContext _context;

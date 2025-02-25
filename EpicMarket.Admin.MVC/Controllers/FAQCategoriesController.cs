@@ -17,7 +17,7 @@ using EpicMarket.Admin.MVC.Contracts;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [Authorize(Roles = $"{ROLES.ADMIN}")]
+    [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
     public class FAQCategoriesController : Controller
     {
         private readonly ApplicationDbContext _context;

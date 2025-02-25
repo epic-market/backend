@@ -14,7 +14,7 @@ using EpicMarket.Entities;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [Authorize(Roles = $"{ROLES.ADMIN}")]
+    [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
     public class AppUsersController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -151,6 +151,36 @@ namespace EpicMarket.Admin.MVC.Controllers
                 var result = await userManager.UpdateAsync(existingUser);
                 if (result.Succeeded)
                 {
+                    // Create simplified objects for serialization to avoid circular references
+                    var simplifiedOriginal = new
+                    {
+                        Id = originalUser.Id,
+                        UserName = originalUser.UserName,
+                        Email = originalUser.Email,
+                        FirstName = originalUser.FirstName,
+                        LastName = originalUser.LastName,
+                        PhoneNumber = originalUser.PhoneNumber,
+                        TwoFactorEnabled = originalUser.TwoFactorEnabled
+                    };
+                    
+                    var simplifiedUpdated = new
+                    {
+                        Id = existingUser.Id,
+                        UserName = existingUser.UserName,
+                        Email = existingUser.Email,
+                        FirstName = existingUser.FirstName,
+                        LastName = existingUser.LastName,
+                        PhoneNumber = existingUser.PhoneNumber,
+                        TwoFactorEnabled = existingUser.TwoFactorEnabled
+                    };
+                    
+                    // Configure JSON serializer options to handle circular references
+                    var options = new System.Text.Json.JsonSerializerOptions
+                    {
+                        ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve,
+                        MaxDepth = 32
+                    };
+                    
                     await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
                     {
                         EventName = EventConstants.EditAppUser,
@@ -159,10 +189,10 @@ namespace EpicMarket.Admin.MVC.Controllers
                         Description = $"Updated user '{existingUser.UserName}'",
                         Data = System.Text.Json.JsonSerializer.Serialize(new
                         {
-                            Original = originalUser,
-                            Updated = existingUser,
+                            Original = simplifiedOriginal,
+                            Updated = simplifiedUpdated,
                             Roles = SelectedRoles
-                        }),
+                        }, options),
                         RecordId = existingUser.Id,
                         BusinessID = 0,
                         LoggedInUserName = User.Identity.Name

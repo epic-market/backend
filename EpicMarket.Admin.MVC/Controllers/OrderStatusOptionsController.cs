@@ -7,9 +7,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
+using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Entities.CustomModels;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
+    [Authorize(Roles = $"{ROLES.ROOT}")]
     public class OrderStatusOptionsController : Controller
     {
         private readonly ApplicationDbContext _context;

@@ -1,4 +1,5 @@
-﻿<!doctype html>
+﻿@using EpicMarket.Entities.CustomModels
+<!doctype html>
 <html lang="en" class="semi-dark">
 
 <head>
@@ -60,102 +61,92 @@
 						<div class="menu-title">Home</div>
 					</a>
 				</li>
-			@* 	<li>
-					<a class="has-arrow" href="javascript:;">
-						<div class="parent-icon"><i class="bx bx-menu"></i></div>
-						<div class="menu-title">Menu Levels</div>
-					</a>
-					<ul>
-						<li>
-							<a class="has-arrow" href="javascript:;"><i class="bx bx-right-arrow-alt"></i>Level One</a>
-							<ul>
+				@if (User.IsInRole(ROLES.ROOT) || User.IsInRole(ROLES.ADMIN))
+				{
+					<li>
+						<a href="javascript:;" class="has-arrow">
+							<div class="parent-icon">
+								<i class='bx bx-cog'></i>
+							</div>
+							<div class="menu-title">Application Settings</div>
+						</a>
+						<ul>
+							@if (User.IsInRole(ROLES.ROOT))
+							{
 								<li>
-									<a class="has-arrow" href="javascript:;"><i class="bx bx-right-arrow-alt"></i>Level Two</a>
+									<a asp-area="" asp-controller="ApplicationConfigurations" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Application Configuations</a>
+								</li>
+								
+								<li>
+									<a asp-area="" asp-controller="ApplicationsTables" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Applications</a>
+								</li>
+
+								<li>
+									<a class="has-arrow" href="javascript:;"><i class="bx bx-right-arrow-alt"></i>Application Control</a>
 									<ul>
 										<li>
-											<a href="javascript:;"><i class="bx bx-right-arrow-alt"></i>Level Three</a>
+											<a asp-area="" asp-controller="AccessControlLists" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Access Control List</a>
+										</li>
+										<li>
+											<a asp-area="" asp-controller="ApplicationSecurables" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Application Securables</a>
+										</li>
+										<li>
+											<a asp-area="" asp-controller="AccessTypes" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Access Types OptionSet</a>
 										</li>
 									</ul>
 								</li>
-							</ul>
-						</li>
-					</ul>
-				</li> *@
-				<li>
-					<a href="javascript:;" class="has-arrow">
-						<div class="parent-icon">
-							<i class='bx bx-cog'></i>
-						</div>
-						<div class="menu-title">Application Settings</div>
-					</a>
-					<ul>
-						<li>
-							<a asp-area="" asp-controller="ApplicationConfigurations" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Application Configuations</a>
-						</li>
-						
-						<li>
-							<a asp-area="" asp-controller="ApplicationsTables" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Applications</a>
-						</li>
-
-						<li>
-							<a class="has-arrow" href="javascript:;"><i class="bx bx-right-arrow-alt"></i>Application Control</a>
-							<ul>
 								<li>
-									<a asp-area="" asp-controller="AccessControlLists" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Access Control List</a>
+									<a asp-area="" asp-controller="Entities" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Entities</a>
 								</li>
-								<li>
-									<a asp-area="" asp-controller="ApplicationSecurables" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Application Securables</a>
-								</li>
-								<li>
-									<a asp-area="" asp-controller="AccessTypes" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Access Types OptionSet</a>
-								</li>
-							</ul>
-						</li>
-						<li>
-							<a asp-area="" asp-controller="Entities" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Entities</a>
-						</li>
-						<li >
-							<a asp-area="" asp-controller="Pages" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Pages</a>
-						</li>
-						<li>
-							<a asp-area="" asp-controller="HelpItems" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Help Items</a>
-						</li>
-						
-						<li>
-							<a class="has-arrow" href="javascript:;"><i class="bx bx-right-arrow-alt"></i>OnBoarding Process</a>
-							<ul>
-								<li>
-									<a asp-area="" asp-controller="OnboardingSteps" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Onboarding Steps</a>
-								</li>
-								<li>
-									<a asp-area="" asp-controller="UserOnboardingProgresses" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>User Onboarding Progresses</a>
-								</li>
-							</ul>
-						</li>
-						
-					</ul>
-				</li>
-				<li>
-					<a href="javascript:;" class="has-arrow">
-						<div class="parent-icon">
-							<i class='bx bxs-message'></i>
-						</div>
-						<div class="menu-title">Comunications</div>
-					</a>
-					<ul>
-						<li>
-							<a asp-area="" asp-controller="CommunicationQueues" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Communication Queue</a>
-						</li>
-						<li class="list-group-item">
-							<a asp-area="" asp-controller="ContactMethods" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Contact Methods</a>
-						</li>
-						<li>
-							<a asp-area="" asp-controller="Notifications" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Notifications</a>
-						</li>
-					</ul>
-				</li>
-				<li class="menu-label">Admin Functionalitys</li>
-		
+							}
+							
+							<li>
+								<a asp-area="" asp-controller="Pages" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Pages</a>
+							</li>
+							<li>
+								<a asp-area="" asp-controller="HelpItems" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Help Items</a>
+							</li>
+							
+							<li>
+								<a class="has-arrow" href="javascript:;"><i class="bx bx-right-arrow-alt"></i>OnBoarding Process</a>
+								<ul>
+									<li>
+										<a asp-area="" asp-controller="OnboardingSteps" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Onboarding Steps</a>
+									</li>
+									<li>
+										<a asp-area="" asp-controller="UserOnboardingProgresses" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>User Onboarding Progresses</a>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</li>
+				}
+				
+				@if (User.IsInRole(ROLES.ROOT))
+				{
+					<li>
+						<a href="javascript:;" class="has-arrow">
+							<div class="parent-icon">
+								<i class='bx bxs-message'></i>
+							</div>
+							<div class="menu-title">Communications</div>
+						</a>
+						<ul>
+							<li>
+								<a asp-area="" asp-controller="CommunicationQueues" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Communication Queue</a>
+							</li>
+							<li class="list-group-item">
+								<a asp-area="" asp-controller="ContactMethods" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Contact Methods</a>
+							</li>
+							<li>
+								<a asp-area="" asp-controller="Notifications" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Notifications</a>
+							</li>
+						</ul>
+					</li>
+				}
+				
+				<li class="menu-label">Admin Functionality</li>
+				
 				<li>
 					<a href="javascript:;" class="has-arrow">
 						<div class="parent-icon">
@@ -164,211 +155,252 @@
 						<div class="menu-title">App Users</div>
 					</a>
 					<ul>
-						<li class="list-group-item">
-							<a asp-area="" asp-controller="AppUsers" asp-action="Index"> <i class="bx bx-right-arrow-alt"></i>Users</a>
-						</li>
-						<li class="list-group-item">
-							<a asp-area="" asp-controller="AppRoles" asp-action="Index"> <i class="bx bx-right-arrow-alt"></i>Roles</a>
-						</li>
-						<li class="list-group-item">
-							<a asp-area="" asp-controller="PersonTypes" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Person Types</a>
-						</li>
+						@if (User.IsInRole(ROLES.ROOT) || User.IsInRole(ROLES.ADMIN))
+						{
+							<li class="list-group-item">
+								<a asp-area="" asp-controller="AppUsers" asp-action="Index"> <i class="bx bx-right-arrow-alt"></i>Users</a>
+							</li>
+						}
+						@if (User.IsInRole(ROLES.ROOT))
+						{
+							<li class="list-group-item">
+								<a asp-area="" asp-controller="AppRoles" asp-action="Index"> <i class="bx bx-right-arrow-alt"></i>Roles</a>
+							</li>
+							<li class="list-group-item">
+								<a asp-area="" asp-controller="PersonTypes" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Person Types</a>
+							</li>
+						}
 					</ul>
 				</li>
-				<li>
-					<a href="javascript:;" class="has-arrow">
-						<div class="parent-icon">
-							<i class='bx bxs-lock'></i>
-						</div>
-						<div class="menu-title">Internal</div>
-					</a>
-					<ul>
-						<li class="list-group-item">
-							<a  asp-area="" asp-controller="BusinessCategoryInternals" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Bussiness Categorys(Interals)</a>
-						</li>
-						<li class="list-group-item">
-							<a  asp-area="" asp-controller="ProductInternals" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Product (Internal)</a>
-						</li>
-					</ul>
-				</li>
-				<li>
-					<a href="javascript:;" class="has-arrow">
-						<div class="parent-icon">
-							<i class='bx bx-category'></i>
-						</div>
-						<div class="menu-title">OptionSets</div>
-					</a>
-					<ul>
-					
-						<li class="list-group-item">
-							<a asp-area="" asp-controller="Events" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Events</a>
-						</li>
-					
-						<li class="list-group-item">
-							<a asp-area="" asp-controller="StatusOptionSets" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Status OptionSet</a>
-						</li>
 				
-					</ul>
-				</li>
-				<li>
-					<a href="javascript:;" class="has-arrow">
-						<div class="parent-icon">
-							<i class='bx bxs-user-pin'></i>
-						</div>
-						<div class="menu-title">Leads</div>
-					</a>
-					<ul>
-						<li class="list-group-item">
-							<a asp-area="" asp-controller="PromotionalLeads" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Promotional leads</a>
-						</li>
-					</ul>
-				</li>
-				<li>
-					<a href="javascript:;" class="has-arrow">
-						<div class="parent-icon">
-							<i class='bx bx-paperclip'></i>
-						</div>
-						<div class="menu-title">Attachments</div>
-					</a>
-					<ul>
-						<li class="list-group-item">
-							<a asp-area="" asp-controller="AttachmentTypes" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Attachment Types</a>
-						</li>
-						<li class="list-group-item">
-							<a asp-area="" asp-controller="Attachments" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Attachment</a>
-						</li>
-					</ul>
-				</li>
-				<li>
-					<a href="javascript:;" class="has-arrow">
-						<div class="parent-icon">
-							<i class='bx bx-detail'></i>
-						</div>
-						<div class="menu-title">Blogs</div>
-					</a>
-					<ul>
-						<li class="list-group-item">
-							<a asp-area="" asp-controller="Blogs" asp-action="Index"> <i class="bx bx-right-arrow-alt"></i>Blogs</a>
-						</li>
-						<li class="list-group-item">
-							<a asp-area="" asp-controller="BlogCategories" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Blogs Category</a>
-						</li>
-					</ul>
-				</li>
-				<li>
-					<a href="javascript:;" class="has-arrow">
-						<div class="parent-icon">
-							<i class='bx bxs-help-circle'></i>
-						</div>
-						<div class="menu-title">FAQ's</div>
-					</a>
-					<ul>
-						<li class="list-group-item">
-							<a asp-area="" asp-controller="FAQCategories" asp-action="Index"> <i class="bx bx-right-arrow-alt"></i>FAQs Categories</a>
-						</li>
-						<li class="list-group-item">
-							<a asp-area="" asp-controller="FAQs" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>FAQs</a>
-						</li>
-					</ul>
-				</li>
+				@if (User.IsInRole(ROLES.ROOT))
+				{
+					<li>
+						<a href="javascript:;" class="has-arrow">
+							<div class="parent-icon">
+								<i class='bx bxs-lock'></i>
+							</div>
+							<div class="menu-title">Internal</div>
+						</a>
+						<ul>
+							<li class="list-group-item">
+								<a asp-area="" asp-controller="BusinessCategoryInternals" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Business Categories (Internals)</a>
+							</li>
+							<li class="list-group-item">
+								<a asp-area="" asp-controller="ProductInternals" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Product (Internal)</a>
+							</li>
+						</ul>
+					</li>
+					
+					<li>
+						<a href="javascript:;" class="has-arrow">
+							<div class="parent-icon">
+								<i class='bx bx-category'></i>
+							</div>
+							<div class="menu-title">OptionSets</div>
+						</a>
+						<ul>
+							<li class="list-group-item">
+								<a asp-area="" asp-controller="Events" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Events</a>
+							</li>
+							<li class="list-group-item">
+								<a asp-area="" asp-controller="StatusOptionSets" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Status OptionSet</a>
+							</li>
+							<li class="list-group-item">
+								<a asp-area="" asp-controller="OrderStatusOptions" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Order Status Option</a>
+							</li>
+							<li>
+								<a asp-area="" asp-controller="OrderTypesOptions" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Order Type Options</a>
+							</li>
+							<li>
+								<a asp-area="" asp-controller="TaskTypes" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Task Types</a>
+							</li>
+							<li>
+								<a asp-area="" asp-controller="TaskStatusTypes" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Task Status OptionSet</a>
+							</li>
+						</ul>
+					</li>
+				}
+				
+				@if (User.IsInRole(ROLES.ROOT) || User.IsInRole(ROLES.ADMIN))
+				{
+					<li>
+						<a href="javascript:;" class="has-arrow">
+							<div class="parent-icon">
+								<i class='bx bxs-user-pin'></i>
+							</div>
+							<div class="menu-title">Leads</div>
+						</a>
+						<ul>
+							<li class="list-group-item">
+								<a asp-area="" asp-controller="PromotionalLeads" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Promotional leads</a>
+							</li>
+						</ul>
+					</li>
+					
+					<li>
+						<a href="javascript:;" class="has-arrow">
+							<div class="parent-icon">
+								<i class='bx bx-paperclip'></i>
+							</div>
+							<div class="menu-title">Attachments</div>
+						</a>
+						<ul>
+							@if (User.IsInRole(ROLES.ROOT))
+							{
+								<li class="list-group-item">
+									<a asp-area="" asp-controller="AttachmentTypes" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Attachment Types</a>
+								</li>
+							}
+							<li class="list-group-item">
+								<a asp-area="" asp-controller="Attachments" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Attachment</a>
+							</li>
+						</ul>
+					</li>
+					
+					<li>
+						<a href="javascript:;" class="has-arrow">
+							<div class="parent-icon">
+								<i class='bx bx-detail'></i>
+							</div>
+							<div class="menu-title">Blogs</div>
+						</a>
+						<ul>
+							<li class="list-group-item">
+								<a asp-area="" asp-controller="Blogs" asp-action="Index"> <i class="bx bx-right-arrow-alt"></i>Blogs</a>
+							</li>
+							<li class="list-group-item">
+								<a asp-area="" asp-controller="BlogCategories" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Blogs Category</a>
+							</li>
+						</ul>
+					</li>
+					
+					<li>
+						<a href="javascript:;" class="has-arrow">
+							<div class="parent-icon">
+								<i class='bx bxs-help-circle'></i>
+							</div>
+							<div class="menu-title">FAQ's</div>
+						</a>
+						<ul>
+							<li class="list-group-item">
+								<a asp-area="" asp-controller="FAQCategories" asp-action="Index"> <i class="bx bx-right-arrow-alt"></i>FAQs Categories</a>
+							</li>
+							<li class="list-group-item">
+								<a asp-area="" asp-controller="FAQs" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>FAQs</a>
+							</li>
+						</ul>
+					</li>
+				}
 
 				<li class="menu-label">Business Functionality</li>
-				<li>
-					<a class="has-arrow" href="javascript:;">
-						<div class="parent-icon">
-							<i class='bx bxs-business'></i>
-						</div>
-						<div class="menu-title">Businesses</div>
-					</a>
-					<ul>
-						<li>
-							<a asp-area="" asp-controller="Businesses" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Businesses</a>
-						</li>
-						<li>
-							<a asp-area="" asp-controller="EventLogs" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Event Logs</a>
-						</li>
-					</ul>
-				</li>
-				<li>
-					<a asp-area="" asp-controller="Catalogs" asp-action="Index">
-						<div class="parent-icon">
-							<i class='bx bxs-book'></i>
-						</div>
-						<div class="menu-title">Catalogs</div>
-					</a>
-				</li>
-				<li>
-					<a asp-area="" asp-controller="BusinessEmployeeMaps" asp-action="Index">
-						<div class="parent-icon">
-							<i class='bx bxs-group'></i>
-						</div>
-						<div class="menu-title">Employess</div>
-					</a>
-				</li>
-				<li>
-					<a class="has-arrow" href="javascript:;">
-						<div class="parent-icon">
-							<i class='bx bxs-store'></i>
-						</div>
-						<div class="menu-title">Outlets</div>
-					</a>
-					<ul>
-						<li>
-							<a asp-area="" asp-controller="Outlets" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Outlets</a>
-						</li>
-						<li>
-							<a asp-area="" asp-controller="OutletPersons" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Outlet Persons</a>
-						</li>
-						<li>
-							<a asp-area="" asp-controller="OutletProducts" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Outlet Products</a>
-						</li>
-					</ul>
-				</li>
-				<li>
-					<a class="has-arrow" href="javascript:;">
-						<div class="parent-icon">
-							<i class='bx bxs-receipt'></i>
-						</div>
-						<div class="menu-title">Orders</div>
-					</a>
-					<ul>
-						<li>
-							<a asp-area="" asp-controller="Orders" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Orders</a>
-						</li>
-						<li>
-							<a asp-area="" asp-controller="OrderDetails" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Order Details</a>
-						</li>
-						<li>
-							<a asp-area="" asp-controller="OrderStatusOptions" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Order Status Option</a>
-						</li>
-						<li >
-							<a asp-area="" asp-controller="OrderTypesOptions" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Order Type Options</a>
-						</li>
-					</ul>
-				</li>
+				@if (User.IsInRole(ROLES.ROOT) || User.IsInRole(ROLES.ADMIN))
+				{
+					<li>
+						<a class="has-arrow" href="javascript:;">
+							<div class="parent-icon">
+								<i class='bx bxs-business'></i>
+							</div>
+							<div class="menu-title">Businesses</div>
+						</a>
+						<ul>
+							<li>
+								<a asp-area="" asp-controller="Businesses" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Businesses</a>
+							</li>
+							<li>
+								<a asp-area="" asp-controller="EventLogs" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Event Logs</a>
+							</li>
+						</ul>
+					</li>
+					
+					<li>
+						<a asp-area="" asp-controller="Catalogs" asp-action="Index">
+							<div class="parent-icon">
+								<i class='bx bxs-book'></i>
+							</div>
+							<div class="menu-title">Catalogs</div>
+						</a>
+					</li>
+					
+					<li>
+						<a asp-area="" asp-controller="BusinessEmployeeMaps" asp-action="Index">
+							<div class="parent-icon">
+								<i class='bx bxs-group'></i>
+							</div>
+							<div class="menu-title">Employees</div>
+						</a>
+					</li>
+					
+					<li>
+						<a class="has-arrow" href="javascript:;">
+							<div class="parent-icon">
+								<i class='bx bxs-store'></i>
+							</div>
+							<div class="menu-title">Outlets</div>
+						</a>
+						<ul>
+							<li>
+								<a asp-area="" asp-controller="Outlets" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Outlets</a>
+							</li>
+							<li>
+								<a asp-area="" asp-controller="OutletPersons" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Outlet Persons</a>
+							</li>
+							@if (User.IsInRole(ROLES.ROOT))
+							{
+								<li>
+									<a asp-area="" asp-controller="OutletProducts" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Outlet Products</a>
+								</li>
+							}
+						</ul>
+					</li>
+					
+					<li>
+						<a class="has-arrow" href="javascript:;">
+							<div class="parent-icon">
+								<i class='bx bxs-receipt'></i>
+							</div>
+							<div class="menu-title">Orders</div>
+						</a>
+						<ul>
+							<li>
+								<a asp-area="" asp-controller="Orders" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Orders</a>
+							</li>
+							<li>
+								<a asp-area="" asp-controller="OrderDetails" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Order Details</a>
+							</li>
+						</ul>
+					</li>
+				}
+				
 				<li class="menu-label">Support Functionality</li>
-				<li>
-					<a class="has-arrow" href="javascript:;">
-						<div class="parent-icon">
-							<i class='bx bx-task'></i>
-						</div>
-						<div class="menu-title">Tasks</div>
-					</a>
-					<ul>
-						<li>
-							<a asp-area="" asp-controller="Tasks" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Tasks</a>
-						</li>
-						<li>
-							<a asp-area="" asp-controller="TaskTypes" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Tasks Types</a>
-						</li>				
-						<li>
-							<a asp-area="" asp-controller="TaskStatusTypes" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Task Status OptionSet</a>
-						</li>
-						<li class="list-group-item">
-							<a asp-area="" asp-controller="SupportQuerys" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Support Querys</a>
-						</li>
-					</ul>
-				</li>
+				@if (User.IsInRole(ROLES.ROOT) || User.IsInRole(ROLES.ADMIN) || User.IsInRole(ROLES.SUPPORT))
+				{
+					<li>
+						<a class="has-arrow" href="javascript:;">
+							<div class="parent-icon">
+								<i class='bx bx-task'></i>
+							</div>
+							<div class="menu-title">Tasks</div>
+						</a>
+						<ul>
+							<li>
+								<a asp-area="" asp-controller="Tasks" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Tasks</a>
+							</li>
+							@if (User.IsInRole(ROLES.ROOT))
+							{
+								<li>
+									<a asp-area="" asp-controller="TaskTypes" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Tasks Types</a>
+								</li>
+								<li>
+									<a asp-area="" asp-controller="TaskStatusTypes" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Task Status OptionSet</a>
+								</li>
+							}
+							<li class="list-group-item">
+								<a asp-area="" asp-controller="SupportQuerys" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Support Queries</a>
+							</li>
+						</ul>
+					</li>
+				}
 			</ul>
 			<!--end navigation-->
 		</div>

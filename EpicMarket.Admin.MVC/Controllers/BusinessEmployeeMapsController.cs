@@ -9,9 +9,11 @@ using EpicMarket.Data.Models;
 using EpicMarket.Entities.CustomModels;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
-
+using Microsoft.AspNetCore.Authorization;
 namespace EpicMarket.Admin.MVC.Controllers
 {
+
+    [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]  
     public class BusinessEmployeeMapsController : Controller
     {
         private readonly ApplicationDbContext _context;
