@@ -24,7 +24,8 @@
 		<div class="col-md-12">
 			<div class="card-body">
 				<div class="float-end">
-					<a asp-action="Edit" class="btn btn-primary px-5" asp-route-id="@Model?.Business.ID">Edit</a>
+					<a asp-action="UploadProducts" class="btn btn-success me-2" asp-route-id="@Model?.Business.ID">Upload Products</a>
+					<a asp-action="Edit" class="btn btn-primary" asp-route-id="@Model?.Business.ID">Edit</a>
 				</div>
 				<h4 class="card-title d-flex align-items-center">
 					@if (!string.IsNullOrEmpty(ViewBag.AttachmentLogo))
