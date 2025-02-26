@@ -101,96 +101,108 @@ namespace EpicMarket.Admin.MVC.Controllers
         {
             var products = _context.Inventory
                 .Where(p => p.OutletID == branchId)
-                .Include(p=>p.CatalogVariants)
-                .Select(p => new Product { Id = p.CatalogVariants.Catalog.ID,Name =  p.CatalogVariants.Catalog.Name,Price = (decimal)p.CatalogVariants.SalePrice })
+                .Include(p => p.CatalogVariants)
+                .ThenInclude(cv => cv.Catalog)
+                .Select(p => new {
+                    Id = p.CatalogVariants.Catalog.ID,
+                    Name = p.CatalogVariants.Catalog.Name,
+                    Price = (decimal)p.CatalogVariants.SalePrice,
+                    VariantId = p.CatalogVariants.ID
+                })
                 .ToList();
             return Json(products);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> PlaceOrder([FromBody] SingleOrder order)
-        {
+        // [HttpPost]
+        // public IActionResult PlaceOrder([FromBody] PlaceOrderViewModel model)
+        // {
+        //     if (!ModelState.IsValid)
+        //     {
+        //         return BadRequest(new { message = "Invalid order data" });
+        //     }
 
-            var orderplacedUser = new AppUser();
-            var totalItems = 0;
-            double totalPrice = 0.0;
-            var existingUser = await _context.Users
-            .FirstOrDefaultAsync(u => u.UserName == order.CustomerDetails.Email || u.PhoneNumber == order.CustomerDetails.Phone);
+        //     try
+        //     {
+        //         // // Get the current user
+        //         // var userName = User.Identity.Name;
+        //         // var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var orderStatusID =  _context.OrderStatusOptions.FirstOrDefault(c => c.OrderStatus == "Order Placed").Id;
+        //         // // Create customer if needed
+        //         // var customer = _context.ApplicationUsers.FirstOrDefault(u => u.Email == model.CustomerEmail);
+        //         // if (customer == null)
+        //         // {
+        //         //     // Create a new customer
+        //         //     customer = new AppUser
+        //         //     {
+        //         //         UserName = model.CustomerEmail,
+        //         //         Email = model.CustomerEmail,
+        //         //         PhoneNumber = model.CustomerPhone,
+        //         //         Name = model.CustomerName,
+        //         //         CreatedAt = DateTime.UtcNow,
+        //         //         CreatedBy = userName
+        //         //     };
+                    
+        //         //     // Note: In a real application, you would need to create this user properly through Identity
+        //         //     // This is a simplified version for demonstration
+        //         //     _context.ApplicationUsers.Add(customer);
+        //         //     _context.SaveChanges();
+        //         // }
 
-            var OrderTypeID = await _context.OrderTypesOptions
-                      .FirstOrDefaultAsync(u => u.Ordertype == OrderType.OFFLINE);
+        //         // // Create the order
+        //         // var order = new Order
+        //         // {
+        //         //     PersonID = int.Parse(userId),
+        //         //     OutletID = model.OutletId,
+        //         //     OrderTypeId = 2, // Assuming 2 is for offline/POS orders
+        //         //     TotalPrice = model.TotalPrice,
+        //         //     TotalItems = model.TotalItems,
+        //         //     OrderAt = DateTime.UtcNow,
+        //         //     StatusId = 1, // Initial status (e.g., "Pending")
+        //         //     PaymentMode = model.PaymentMode,
+        //         //     CreatedBy = userName,
+        //         //     CreatedAt = DateTime.UtcNow
+        //         // };
 
-            if (existingUser == null)
-            {
+        //         // _context.Orders.Add(order);
+        //         // _context.SaveChanges();
 
-                orderplacedUser.FirstName = order.CustomerDetails.Phone;
-                orderplacedUser.UserName = order.CustomerDetails.Email;
-                orderplacedUser.Email = order.CustomerDetails.Phone;
-                orderplacedUser.PhoneNumber = order.CustomerDetails.Phone;
-                await _context.Users.AddAsync(orderplacedUser);
-                await _context.SaveChangesAsync();
-            }
-            else
-            {
-                orderplacedUser.Id = existingUser.Id;
-            }
-            var listoforderDetails = new List<OrderDetail>();
+        //         // // Create order details
+        //         // foreach (var item in model.OrderDetails)
+        //         // {
+        //         //     var orderDetail = new OrderDetail
+        //         //     {
+        //         //         OrderID = order.ID,
+        //         //         VariantID = item.VariantId,
+        //         //         Quantity = item.Quantity,
+        //         //         Rate = item.Rate,
+        //         //         TotalPrice = item.TotalPrice,
+        //         //         CreatedBy = userName,
+        //         //         CreatedAt = DateTime.UtcNow
+        //         //     };
 
+        //         //     _context.OrderDetails.Add(orderDetail);
+        //         // }
 
-            foreach (var orderDetail in order.Items)
-            {
-                var productVariant = _context.CatalogVariants.FirstOrDefault(p => p.ID == orderDetail.ProductId);
-                var singleOrderDetail = new OrderDetail();
-                singleOrderDetail.VariantID = orderDetail.ProductId;
-                singleOrderDetail.Quantity = orderDetail.Quantity;
-                singleOrderDetail.Rate = productVariant.SalePrice;
-                singleOrderDetail.TotalPrice = productVariant.SalePrice * orderDetail.Quantity;
-                listoforderDetails.Add(singleOrderDetail);
-                totalItems += orderDetail.Quantity;
-                totalPrice += (productVariant.SalePrice * orderDetail.Quantity);
-            }
+        //         // _context.SaveChanges();
 
+        //         // // Log the event
+        //         // _eventService.LogEvent(new EventLog
+        //         // {
+        //         //     EventType = EventType.Create,
+        //         //     TableName = "Orders",
+        //         //     Data = System.Text.Json.JsonSerializer.Serialize(order),
+        //         //     RecordId = order.ID,
+        //         //     BusinessID = 0,
+        //         //     LoggedInUserName = userName
+        //         // });
 
-            var newOrder = new Order()
-            {
-                PersonID = orderplacedUser.Id,
-                OutletID = order.OutletID,
-                OrderTypeId = OrderTypeID.Id,
-                OrderAt = DateTime.Now,
-                StatusId = orderStatusID,
-                PaymentMode = order.PaymentMode,
-                TotalItems = totalItems,
-                TotalPrice = totalPrice,
-            };
-
-            await _context.Orders.AddAsync(newOrder);
-            await _context.SaveChangesAsync();
-
-
-            listoforderDetails.ForEach(od => od.OrderID = newOrder.ID);
-            await _context.OrderDetails.AddRangeAsync(listoforderDetails);
-            await _context.SaveChangesAsync();
-
-
-            var saved = _context.Orders.FirstOrDefault(o => o.ID == newOrder.ID);
-
-            // After saving the order
-            await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
-            {
-                EventName = EventConstants.CREATE,
-                EntityName = EntityConstants.Order,
-                Source = _urlContextService.CurrentPageUrl,
-                Description = $"Placed new order for customer: {order.CustomerDetails.Email}",
-                Data = System.Text.Json.JsonSerializer.Serialize(saved),
-                RecordId = saved.ID,
-                BusinessID = 0,
-                LoggedInUserName = User.Identity.Name
-            });
-
-             return RedirectToAction(nameof(Index)); ;
-        }
+        //         // return Ok(new { success = true, orderId = order.ID });
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return StatusCode(500, new { message = "An error occurred while placing the order: " + ex.Message });
+        //     }
+        // }
 
         public async Task<IActionResult> Delete(int? id)
         {
@@ -330,6 +342,20 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
             ViewData["OrderStatusID"] = new SelectList(_context.OrderStatusOptions, "Id", "OrderStatus", order.StatusId);
             return View(order);
+        }
+
+        [HttpGet]
+        public IActionResult GetProductVariants(int productId)
+        {
+            var variants = _context.CatalogVariants
+                .Where(v => v.CatalogID == productId)
+                .Select(v => new {
+                    id = v.ID,
+                    salePrice = v.SalePrice,
+                    attributes = v.Attributes
+                })
+                .ToList();
+            return Json(variants);
         }
 
     }
