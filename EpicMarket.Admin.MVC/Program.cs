@@ -58,6 +58,15 @@ builder.Services.AddAWSService<IAmazonS3>();
 builder.Services.AddSingleton<UrlContextService>();
 builder.Services.AddScoped<IUrlContextService>(sp => sp.GetRequiredService<UrlContextService>());
 
+// Add HttpContextAccessor
+builder.Services.AddHttpContextAccessor();
+
+// Register the SecurableService
+builder.Services.AddScoped<ISecurableService, SecurableService>();
+
+// Add this line with your other service registrations
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -83,12 +92,13 @@ app.MapControllerRoute(
 app.Use(async (context, next) =>
 {
           
-    // Define public URLs
+    // Define public URLs - updated to include both path formats
     var publicUrls = new List<string>
     {
         "/Identity/Account/Login",
         "/Identity/Account/Logout",
         "/Identity/Account/AccessDenied",
+        "/Account/AccessDenied",  // Added this path format
         "/Identity/Account/LoginWith2fa",
         "/Identity/Account/LoginWithRecoveryCode",
         
@@ -150,5 +160,8 @@ app.Use(async (context, next) =>
 });
 
 app.MapRazorPages();
+
+// Add this line to ensure Identity endpoints are properly mapped
+app.MapControllers();
 
 app.Run();
