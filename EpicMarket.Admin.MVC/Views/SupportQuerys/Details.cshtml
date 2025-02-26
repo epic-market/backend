@@ -1,74 +1,146 @@
 ﻿@model EpicMarket.Data.Models.SupportQuerys
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Support Query Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-
+<!-- Page Header -->
 <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-    <div class="breadcrumb-title pe-3">Blog</div>
+    <div class="breadcrumb-title pe-3">Support</div>
     <div class="ps-3">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0 p-0">
                 <li class="breadcrumb-item">
                     <a asp-action="Index"><i class="bx bx-home-alt"></i></a>
                 </li>
-                <li class="breadcrumb-item active" aria-current="page">Details</li>
+                <li class="breadcrumb-item">
+                    <a asp-action="Index">Support Queries</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Query Details</li>
             </ol>
         </nav>
     </div>
-</div>
-<hr />
-
-
-<div class="card mb-4">
-    <div class="card-body">
-        <div class="d-flex justify-content-end mb-3">
-            <a asp-action="Edit" class="btn btn-primary px-5" asp-route-id="@Model?.ID">Edit</a>
+    <div class="ms-auto">
+        <div class="btn-group">
+            <a asp-action="Edit" asp-route-id="@Model.ID" class="btn btn-primary">
+                <i class="bx bx-edit me-1"></i> Edit
+            </a>
+            <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="visually-hidden">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <a class="dropdown-item" asp-action="Delete" asp-route-id="@Model.ID">
+                        <i class="bx bx-trash me-1 text-danger"></i> Delete
+                    </a>
+                </li>
+            </ul>
         </div>
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Query)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Query)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PersonType)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PersonType.ID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TaskTypes)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TaskTypes.ID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreateDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreateDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreateBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreateBy)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ModifiedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ModifiedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ModifiedBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ModifiedBy)
-        </dd>
-    </dl>
+    </div>
 </div>
+
+<!-- Details Card -->
+<div class="card">
+    <div class="card-header bg-transparent py-3">
+        <div class="d-flex align-items-center">
+            <div class="me-3">
+                <span class="icon-circle bg-light text-primary">
+                    <i class="bx bx-help-circle"></i>
+                </span>
+            </div>
+            <div>
+                <h5 class="mb-0 fw-bold">Support Query #@Model.ID</h5>
+                <div class="text-muted mb-0 small mt-1">
+                    <div class="mb-1">
+                        <i class="bx bx-calendar-plus me-1"></i> Created on @Model.CreateDate
+                        @if (!string.IsNullOrEmpty(Model.CreateBy))
+                        {
+                            <span>by @Model.CreateBy</span>
+                        }
+                    </div>
+                    
+                    @if (Model.ModifiedDate != DateTime.MinValue && !string.IsNullOrEmpty(Model.ModifiedBy))
+                    {
+                        <div>
+                            <i class="bx bx-calendar-edit me-1"></i> Modified on @Model.ModifiedDate
+                            @if (!string.IsNullOrEmpty(Model.ModifiedBy))
+                            {
+                                <span>by @Model.ModifiedBy</span>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-12 mb-4">
+                <div class="detail-item">
+                    <label class="text-muted fw-semibold mb-1">Query</label>
+                    <div class="p-3 border rounded bg-light">@Model.Query</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="detail-item">
+                    <label class="text-muted fw-semibold mb-1">Person Type</label>
+                    <div class="d-flex align-items-center">
+                        <span class="icon-circle bg-light-subtle me-2 text-primary">
+                            <i class="bx bx-user"></i>
+                        </span>
+                        <span class="badge bg-light text-dark">@(Model.PersonType?.Type ?? "Not Specified")</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="detail-item">
+                    <label class="text-muted fw-semibold mb-1">Task Type</label>
+                    <div class="d-flex align-items-center">
+                        <span class="icon-circle bg-light-subtle me-2 text-primary">
+                            <i class="bx bx-task"></i>
+                        </span>
+                        <span class="badge bg-primary-subtle text-primary">@(Model.TaskTypes?.Name ?? "Not Specified")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <hr class="my-4">
+        
+        <div class="row">
+            <div class="col-12">
+                <a asp-action="Index" class="btn btn-light">
+                    <i class="bx bx-arrow-back me-1"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .icon-circle {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+    
+    .bg-primary-subtle {
+        background-color: rgba(var(--bs-primary-rgb), 0.15);
+    }
+    
+    .bg-light-subtle {
+        background-color: rgba(var(--bs-light-rgb), 0.5);
+    }
+    
+    .detail-item {
+        margin-bottom: 1rem;
+    }
+</style>
+
