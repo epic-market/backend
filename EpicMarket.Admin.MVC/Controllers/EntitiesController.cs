@@ -13,6 +13,9 @@ using EpicMarket.Entities.CustomModels;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
 using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
+
 namespace EpicMarket.Admin.MVC.Controllers
 {
     [Authorize(Roles = $"{ROLES.ROOT}")]
@@ -33,12 +36,14 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Entities
+        [SecurableAuthorize(SecurableConstants.EntitiesView)]
         public async Task<IActionResult> Index()
         {
             return View(await _context.Entity.ToListAsync());
         }
 
         // GET: Entities/Details/5
+        [SecurableAuthorize(SecurableConstants.EntitiesView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -57,6 +62,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Entities/Create
+        [SecurableAuthorize(SecurableConstants.EntitiesAdd)]
         public IActionResult Create()
         {
             return View();
@@ -67,6 +73,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.EntitiesAdd)]
         public async Task<IActionResult> Create([Bind("ID,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Entity entity)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -95,6 +102,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Entities/Edit/5
+        [SecurableAuthorize(SecurableConstants.EntitiesEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -115,6 +123,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.EntitiesEdit)]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] Entity entity)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -169,6 +178,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Entities/Delete/5
+        [SecurableAuthorize(SecurableConstants.EntitiesDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -189,6 +199,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: Entities/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.EntitiesDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var entity = await _context.Entity.FindAsync(id);

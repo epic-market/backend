@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Authorization;
 using EpicMarket.Entities.CustomModels;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -38,14 +40,14 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: AppUsers
+        [SecurableAuthorize(SecurableConstants.AppUsersView)]
         public async Task<IActionResult> Index()
         {
             return View(await _context.Users.ToListAsync());
         }
 
-
-
         [HttpGet]
+        [SecurableAuthorize(SecurableConstants.AppUsersView)]
         public JsonResult GetUsers(string search)
         {
             var users = _context.Users
@@ -57,9 +59,8 @@ namespace EpicMarket.Admin.MVC.Controllers
             return Json(users);
         }
 
-
-
         // GET: AppUsers/Details/5
+        [SecurableAuthorize(SecurableConstants.AppUsersView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -82,9 +83,52 @@ namespace EpicMarket.Admin.MVC.Controllers
             return View(appUser);
         }
 
+        // GET: AppUsers/Create
+        [SecurableAuthorize(SecurableConstants.AppUsersAdd)]
+        public async Task<IActionResult> Create()
+        {
+            var roles = await roleManager.Roles.ToListAsync();
+            ViewBag.Roles = roles.Select(r => new { Name = r.Name, Selected = false }).ToList();
+            return View();
+        }
 
+        // POST: AppUsers/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.AppUsersAdd)]
+        public async Task<IActionResult> Create(AppUser user, List<string> SelectedRoles)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await userManager.CreateAsync(user);
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRolesAsync(user, SelectedRoles);
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.CreateAppUser,
+                        EntityName = EntityConstants.AppUser,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Created user '{user.UserName}'",
+                        Data = System.Text.Json.JsonSerializer.Serialize(user),
+                        RecordId = user.Id,
+                        BusinessID = 0,
+                        LoggedInUserName = User.Identity.Name
+                    });
+                    return RedirectToAction(nameof(Index));
+                }
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+            var roles = await roleManager.Roles.ToListAsync();
+            ViewBag.Roles = roles.Select(r => new { Name = r.Name, Selected = SelectedRoles.Contains(r.Name) }).ToList();
+            return View(user);
+        }
 
         // GET: AppUsers/Edit/5
+        [SecurableAuthorize(SecurableConstants.AppUsersEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -114,7 +158,8 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("FirstName,LastName,UniqueGuid,OTP,LastActive,Id,UserName,NormalizedUserName,Email,NormalizedEmail,EmailConfirmed,PasswordHash,SecurityStamp,ConcurrencyStamp,PhoneNumber,PhoneNumberConfirmed,TwoFactorEnabled,LockoutEnd,LockoutEnabled,AccessFailedCount")] AppUser user, string[] SelectedRoles)
+        [SecurableAuthorize(SecurableConstants.AppUsersEdit)]
+        public async Task<IActionResult> Edit(int id, [Bind("FirstName,LastName,UniqueGuid,OTP,LastActive,Id,UserName,NormalizedUserName,Email,NormalizedEmail,EmailConfirmed,PasswordHash,SecurityStamp,ConcurrencyStamp,PhoneNumber,PhoneNumberConfirmed,TwoFactorEnabled,LockoutEnd,LockoutEnabled,AccessFailedCount")] AppUser user, List<string> SelectedRoles)
         {
             if (id != user.Id)
             {
@@ -218,6 +263,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: AppUsers/Delete/5
+        [SecurableAuthorize(SecurableConstants.AppUsersDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -238,6 +284,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: AppUsers/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.AppUsersDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var appUser = await _context.Users.FindAsync(id);

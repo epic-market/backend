@@ -12,10 +12,12 @@ using EpicMarket.Data.ApplicationModels;
 using System.Security.Claims;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [Authorize(Roles = $"{ROLES.ROOT}")]
+    [SecurableAuthorize(SecurableConstants.BusinessCategoryInternalsView)]
     public class BusinessCategoryInternalsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -33,12 +35,14 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: BusinessCategoryInternals
+        [SecurableAuthorize(SecurableConstants.BusinessCategoryInternalsView)]
         public async Task<IActionResult> Index()
         {
             return View(await _context.BusinessCategories.ToListAsync());
         }
 
         // GET: BusinessCategoryInternals/Details/5
+        [SecurableAuthorize(SecurableConstants.BusinessCategoryInternalsView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -57,6 +61,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: BusinessCategoryInternals/Create
+        [SecurableAuthorize(SecurableConstants.BusinessCategoryInternalsAdd)]
         public IActionResult Create()
         {
             return View();
@@ -67,6 +72,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.BusinessCategoryInternalsAdd)]
         public async Task<IActionResult> Create([Bind("ID,Name,Description,Type,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] BusinessCategoryInternal businessCategoryInternal)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -95,6 +101,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: BusinessCategoryInternals/Edit/5
+        [SecurableAuthorize(SecurableConstants.BusinessCategoryInternalsEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -115,6 +122,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.BusinessCategoryInternalsEdit)]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,Type,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] BusinessCategoryInternal businessCategoryInternal)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -169,6 +177,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: BusinessCategoryInternals/Delete/5
+        [SecurableAuthorize(SecurableConstants.BusinessCategoryInternalsDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -189,6 +198,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: BusinessCategoryInternals/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.BusinessCategoryInternalsDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var businessCategoryInternal = await _context.BusinessCategories.FindAsync(id);

@@ -13,10 +13,11 @@ using System.Reflection.Metadata;
 using System.Security.Claims;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [Authorize(Roles = $"{ROLES.ROOT}")]
     public class ApplicationSecurablesController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -34,12 +35,14 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: ApplicationSecurables
+        [SecurableAuthorize(SecurableConstants.ApplicationSecurablesView)]
         public async Task<IActionResult> Index()
         {
             return View(await _context.ApplicationSecurables.ToListAsync());
         }
 
         // GET: ApplicationSecurables/Details/5
+        [SecurableAuthorize(SecurableConstants.ApplicationSecurablesView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -58,6 +61,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: ApplicationSecurables/Create
+        [SecurableAuthorize(SecurableConstants.ApplicationSecurablesAdd)]
         public IActionResult Create()
         {
             return View();
@@ -68,6 +72,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.ApplicationSecurablesAdd)]
         public async Task<IActionResult> Create([Bind("Id,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] ApplicationSecurables applicationSecurables)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -97,6 +102,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: ApplicationSecurables/Edit/5
+        [SecurableAuthorize(SecurableConstants.ApplicationSecurablesEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -117,6 +123,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.ApplicationSecurablesEdit)]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] ApplicationSecurables applicationSecurables)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -172,6 +179,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: ApplicationSecurables/Delete/5
+        [SecurableAuthorize(SecurableConstants.ApplicationSecurablesDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -192,6 +200,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: ApplicationSecurables/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.ApplicationSecurablesDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var applicationSecurables = await _context.ApplicationSecurables.FindAsync(id);

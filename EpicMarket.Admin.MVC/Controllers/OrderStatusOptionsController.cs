@@ -9,6 +9,8 @@ using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using EpicMarket.Entities.CustomModels;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -23,12 +25,14 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: OrderStatusOptions
+        [SecurableAuthorize(SecurableConstants.OrderStatusOptionsView)]
         public async Task<IActionResult> Index()
         {
             return View(await _context.OrderStatusOptions.ToListAsync());
         }
 
         // GET: OrderStatusOptions/Details/5
+        [SecurableAuthorize(SecurableConstants.OrderStatusOptionsView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -47,6 +51,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: OrderStatusOptions/Create
+        [SecurableAuthorize(SecurableConstants.OrderStatusOptionsAdd)]
         public IActionResult Create()
         {
             return View();
@@ -57,6 +62,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.OrderStatusOptionsAdd)]
         public async Task<IActionResult> Create([Bind("Id,OrderStatus")] OrderStatusOptions orderStatusOptions)
         {
             if (ModelState.IsValid)
@@ -69,6 +75,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: OrderStatusOptions/Edit/5
+        [SecurableAuthorize(SecurableConstants.OrderStatusOptionsEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -89,6 +96,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.OrderStatusOptionsEdit)]
         public async Task<IActionResult> Edit(int id, [Bind("Id,OrderStatus")] OrderStatusOptions orderStatusOptions)
         {
             if (id != orderStatusOptions.Id)
@@ -120,6 +128,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: OrderStatusOptions/Delete/5
+        [SecurableAuthorize(SecurableConstants.OrderStatusOptionsDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -140,6 +149,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: OrderStatusOptions/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.OrderStatusOptionsDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var orderStatusOptions = await _context.OrderStatusOptions.FindAsync(id);

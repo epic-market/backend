@@ -13,9 +13,12 @@ using EpicMarket.Entities.CustomModels;
 using EpicMarket.Entities;
 using EpicMarket.Admin.MVC.Contracts;
 using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
+
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [Authorize(Roles = $"{ROLES.ROOT}")]
+    [SecurableAuthorize(SecurableConstants.AccessControlListsView)]
     public class AccessControlListsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -69,6 +72,7 @@ namespace EpicMarket.Admin.MVC.Controllers
 
 
         [HttpPost]
+        [SecurableAuthorize(SecurableConstants.AccessControlListsEdit)]
         public async Task<IActionResult> UpdateAccessType(string securable, string role, int accessTypeId)
         {
             try

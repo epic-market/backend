@@ -13,10 +13,12 @@ using Microsoft.CodeAnalysis;
 using EpicMarket.Admin.MVC.Models;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
+    [SecurableAuthorize(SecurableConstants.CatalogsView)]
     public class CatalogsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -40,6 +42,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Catalogs
+        [SecurableAuthorize(SecurableConstants.CatalogsView)]
         public async Task<IActionResult> Index()
         {
             var applicationDbContext = _context.Catalogs.Include(c => c.Business).Include(c=>c.StatusOptionSets);
@@ -47,6 +50,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Catalogs/Details/5
+        [SecurableAuthorize(SecurableConstants.CatalogsView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -105,6 +109,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Catalogs/Create
+        [SecurableAuthorize(SecurableConstants.CatalogsAdd)]
         public IActionResult Create()
         {
             ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID");
@@ -117,6 +122,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.CatalogsAdd)]
         public async Task<IActionResult> Create([Bind("ID,BusinessID,Barcode,Name,Description,Images,Category,Rate,InStock,IsRecommended,MaximumOrderPurchase,Rating,ReviewCount,OrderCount,StatusId,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Catalog catalog, IFormFile[] thumbnail, IFormFile[] ProductImages)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -180,6 +186,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Catalogs/Edit/5
+        [SecurableAuthorize(SecurableConstants.CatalogsEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -215,6 +222,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.CatalogsEdit)]
         public async Task<IActionResult> Edit(int id, [Bind("ID,BusinessID,Barcode,Name,Description,Images,Category,Rate,IsActive,InStock,IsRecommended,MaximumOrderPurchase,Rating,ReviewCount,OrderCount,StatusId,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] Catalog catalog, IFormFile[] newThumbnail, string? addedThumbnail, IFormFile[] newProductImages, string? removedProductImages, string? addedProductImages)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -324,6 +332,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Catalogs/Delete/5
+        [SecurableAuthorize(SecurableConstants.CatalogsDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -345,6 +354,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: Catalogs/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.CatalogsDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var catalog = await _context.Catalogs.FindAsync(id);

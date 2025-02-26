@@ -12,10 +12,11 @@ using EpicMarket.Entities.CustomModels;
 using System.Security.Claims;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [Authorize(Roles = $"{ROLES.ROOT}")]
     public class ApplicationConfigurationsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -33,12 +34,14 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: ApplicationConfigurations
+        [SecurableAuthorize(SecurableConstants.ApplicationConfigurationsView)]
         public async Task<IActionResult> Index(bool IsActive = true)
         {
             return View();
         }
 
         [HttpPost]
+        [SecurableAuthorize(SecurableConstants.ApplicationConfigurationsView)]
         public async Task<IActionResult> LoadData()
         {
             try
@@ -95,6 +98,7 @@ namespace EpicMarket.Admin.MVC.Controllers
  
 
 // GET: ApplicationConfigurations/Details/5
+[SecurableAuthorize(SecurableConstants.ApplicationConfigurationsView)]
 public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -113,6 +117,7 @@ public async Task<IActionResult> Details(int? id)
         }
 
         // GET: ApplicationConfigurations/Create
+        [SecurableAuthorize(SecurableConstants.ApplicationConfigurationsAdd)]
         public IActionResult Create()
         {
             return View();
@@ -123,7 +128,8 @@ public async Task<IActionResult> Details(int? id)
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Name,Value,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] ApplicationConfiguration applicationConfiguration)
+        [SecurableAuthorize(SecurableConstants.ApplicationConfigurationsAdd)]
+        public async Task<IActionResult> Create([Bind("ID,Name,Value,Description,IsActive,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] ApplicationConfiguration applicationConfiguration)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             applicationConfiguration.CreateBy = userName;
@@ -152,6 +158,7 @@ public async Task<IActionResult> Details(int? id)
         }
 
         // GET: ApplicationConfigurations/Edit/5
+        [SecurableAuthorize(SecurableConstants.ApplicationConfigurationsEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -172,7 +179,8 @@ public async Task<IActionResult> Details(int? id)
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Value,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] ApplicationConfiguration applicationConfiguration)
+        [SecurableAuthorize(SecurableConstants.ApplicationConfigurationsEdit)]
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Value,Description,IsActive,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] ApplicationConfiguration applicationConfiguration)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             applicationConfiguration.ModifiedBy = userName;
@@ -227,6 +235,7 @@ public async Task<IActionResult> Details(int? id)
         }
 
         // GET: ApplicationConfigurations/Delete/5
+        [SecurableAuthorize(SecurableConstants.ApplicationConfigurationsDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -247,6 +256,7 @@ public async Task<IActionResult> Details(int? id)
         // POST: ApplicationConfigurations/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.ApplicationConfigurationsDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var applicationConfiguration = await _context.ApplicationConfigurations.FindAsync(id);

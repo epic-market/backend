@@ -10,10 +10,11 @@ using Microsoft.AspNetCore.Authorization;
 using EpicMarket.Entities.CustomModels;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
     public class OrderDetailsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -31,6 +32,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: OrderDetails
+        [SecurableAuthorize(SecurableConstants.OrderDetailsView)]
         public async Task<IActionResult> Index()
         {
             var applicationDbContext = _context.OrderDetails.Include(o => o.CatalogVariants).Include(o => o.Order);
@@ -38,6 +40,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: OrderDetails/Details/5
+        [SecurableAuthorize(SecurableConstants.OrderDetailsView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -58,6 +61,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: OrderDetails/Create
+        [SecurableAuthorize(SecurableConstants.OrderDetailsAdd)]
         public IActionResult Create()
         {
             ViewData["CatalogID"] = new SelectList(_context.Catalogs, "ID", "ID");
@@ -66,10 +70,9 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // POST: OrderDetails/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.OrderDetailsAdd)]
         public async Task<IActionResult> Create([Bind("ID,OrderID,CatalogID,Quantity,Rate,TotalPrice,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] OrderDetail orderDetail)
         {
             if (ModelState.IsValid)
@@ -97,6 +100,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: OrderDetails/Edit/5
+        [SecurableAuthorize(SecurableConstants.OrderDetailsEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -104,7 +108,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var orderDetail = await _context.OrderDetails.Include(c=>c.CatalogVariants).FirstOrDefaultAsync(c=>c.ID == id);
+            var orderDetail = await _context.OrderDetails.FindAsync(id);
             if (orderDetail == null)
             {
                 return NotFound();
@@ -115,10 +119,9 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // POST: OrderDetails/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.OrderDetailsEdit)]
         public async Task<IActionResult> Edit(int id, [Bind("ID,OrderID,CatalogID,Quantity,Rate,TotalPrice,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] OrderDetail orderDetail)
         {
             if (id != orderDetail.ID)
@@ -169,6 +172,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: OrderDetails/Delete/5
+        [SecurableAuthorize(SecurableConstants.OrderDetailsDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -191,6 +195,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: OrderDetails/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.OrderDetailsDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var orderDetail = await _context.OrderDetails.FindAsync(id);
