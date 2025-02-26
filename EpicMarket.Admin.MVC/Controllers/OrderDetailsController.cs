@@ -15,6 +15,7 @@ using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
+    [SecurableAuthorize(SecurableConstants.OrderDetailsView)]
     public class OrderDetailsController : Controller
     {
         private readonly ApplicationDbContext _context;

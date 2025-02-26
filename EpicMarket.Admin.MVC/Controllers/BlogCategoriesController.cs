@@ -17,6 +17,7 @@ using EpicMarket.Admin.MVC.Attributes;
 using EpicMarket.Entities.Constants;
 namespace EpicMarket.Admin.MVC.Controllers
 {
+    [SecurableAuthorize(SecurableConstants.BlogCategoriesView)]
     public class BlogCategoriesController : Controller
     {
         private readonly ApplicationDbContext _context;
