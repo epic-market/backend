@@ -13,6 +13,7 @@ using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Admin.MVC.Models;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -36,8 +37,92 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: SupportQuerys
         public async Task<IActionResult> Index()
         {
-            var authDbContext = _context.SupportQuerys.Include(s => s.PersonType).Include(s => s.TaskTypes);
-            return View(await authDbContext.ToListAsync());
+            ViewBag.PersonTypes = await _context.PersonTypes.ToListAsync();
+            ViewBag.TaskTypes = await _context.TaskTypes.ToListAsync();
+            
+            // Return the view with empty model - data will be loaded via AJAX
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetFilteredData([FromBody] SupportQueryFilterModel filter)
+        {
+            try
+            {
+                // Start with the base query
+                var query = _context.SupportQuerys
+                    .Include(s => s.PersonType)
+                    .Include(s => s.TaskTypes)
+                    .AsQueryable();
+
+                // Apply filters
+                if (!string.IsNullOrEmpty(filter.Query))
+                {
+                    query = query.Where(s => s.Query.Contains(filter.Query));
+                }
+
+                if (filter.PersonTypeId.HasValue)
+                {
+                    query = query.Where(s => s.TypeofPersonid == filter.PersonTypeId);
+                }
+
+                if (filter.TaskTypeId.HasValue)
+                {
+                    query = query.Where(s => s.TaskTypeID == filter.TaskTypeId);
+                }
+
+                // Get total count for pagination
+                var totalRecords = await query.CountAsync();
+
+                // Apply sorting
+                query = ApplySorting(query, filter.SortColumn, filter.SortDirection);
+
+                // Apply pagination and project to DTO to avoid circular references
+                var supportQueries = await query
+                    .Skip((filter.PageNumber - 1) * filter.PageSize)
+                    .Take(filter.PageSize)
+                    .Select(s => new SupportQueryViewModel
+                    {
+                        ID = s.ID,
+                        Query = s.Query,
+                        PersonTypeName = s.PersonType.Type,
+                        TypeofPersonid = s.TypeofPersonid,
+                        TaskTypeName = s.TaskTypes.Name,
+                        TaskTypeID = s.TaskTypeID,
+                        CreateDate = s.CreateDate,
+                        CreateBy = s.CreateBy
+                    })
+                    .ToListAsync();
+
+                return Json(new
+                {
+                    data = supportQueries,
+                    totalRecords
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message });
+            }
+        }
+
+        private IQueryable<SupportQuerys> ApplySorting(IQueryable<SupportQuerys> query, string sortColumn, string sortDirection)
+        {
+            // Default sort by ID if column not specified
+            if (string.IsNullOrEmpty(sortColumn))
+            {
+                return sortDirection == "desc" ? query.OrderByDescending(s => s.ID) : query.OrderBy(s => s.ID);
+            }
+
+            // Apply sorting based on the column
+            return sortColumn.ToLower() switch
+            {
+                "query" => sortDirection == "desc" ? query.OrderByDescending(s => s.Query) : query.OrderBy(s => s.Query),
+                "persontype" => sortDirection == "desc" ? query.OrderByDescending(s => s.PersonType.Type) : query.OrderBy(s => s.PersonType.Type),
+                "tasktype" => sortDirection == "desc" ? query.OrderByDescending(s => s.TaskTypes.Name) : query.OrderBy(s => s.TaskTypes.Name),
+                "createdate" => sortDirection == "desc" ? query.OrderByDescending(s => s.CreateDate) : query.OrderBy(s => s.CreateDate),
+                _ => sortDirection == "desc" ? query.OrderByDescending(s => s.ID) : query.OrderBy(s => s.ID)
+            };
         }
 
         // GET: SupportQuerys/Details/5

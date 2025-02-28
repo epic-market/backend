@@ -6,13 +6,249 @@
 
     .card {
         box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        margin-bottom: 1.5rem;
+        border-radius: 0.5rem;
+        border: none;
+    }
+
+    .card-header {
+        background-color: #f1f5f9;
+        border-bottom: 1px solid #e0e7ee;
+        padding: 1rem 1.25rem;
+        font-weight: 600;
+        border-radius: 0.5rem 0.5rem 0 0 !important;
     }
 
     .table thead th {
         background-color: #343a40;
         color: white;
+        position: sticky;
+        top: 0;
+        z-index: 10;
     }
 
+    .product-table-container {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .product-search {
+        position: relative;
+    }
+
+    .product-search i {
+        position: absolute;
+        left: 10px;
+        top: 10px;
+        color: #6c757d;
+    }
+
+    .product-search input {
+        padding-left: 35px;
+        border-radius: 20px;
+    }
+
+    .quantity-select {
+        width: 80px;
+        margin: 0 auto;
+    }
+
+    .summary-section {
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .btn-place-order {
+        padding: 0.75rem 2rem;
+        font-size: 1.1rem;
+        border-radius: 0.5rem;
+        transition: all 0.3s;
+    }
+
+    .btn-place-order:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .variant-badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        margin-right: 0.5rem;
+        font-size: 0.75rem;
+        background-color: #e9ecef;
+    }
+
+    .order-summary-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        padding: 1rem;
+        border-radius: 0.5rem 0.5rem 0 0;
+    }
+
+    .order-summary-content {
+        padding: 1.5rem;
+    }
+
+    .order-summary-footer {
+        background-color: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+        padding: 1rem;
+        border-radius: 0 0 0.5rem 0.5rem;
+    }
+
+    .section-divider {
+        height: 1px;
+        background-color: #dee2e6;
+        margin: 1.5rem 0;
+    }
+
+    .customer-info-badge {
+        background-color: #e3f2fd;
+        border-radius: 0.25rem;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Loading spinner */
+    .loader {
+        display: none;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #3498db;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 2s linear infinite;
+        margin: 20px auto;
+    }
+
+    @@keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .product-row {
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .product-row:hover {
+        background-color: #f1f5f9;
+    }
+
+    .product-row.selected {
+        background-color: #e3f2fd;
+    }
+    
+    .has-variants {
+        position: relative;
+    }
+    
+    .has-variants:after {
+        content: '\f0dd';
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        color: #6c757d;
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    
+    .variant-options {
+        display: none;
+        background-color: white;
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        position: absolute;
+        z-index: 1000;
+        width: 300px;
+        max-height: 300px;
+        overflow-y: auto;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    
+    .variant-option {
+        padding: 0.5rem 1rem;
+        border-bottom: 1px solid #f8f9fa;
+        cursor: pointer;
+    }
+    
+    .variant-option:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .variant-option:last-child {
+        border-bottom: none;
+    }
+    
+    .selected-items-container {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .selected-item {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .selected-item:last-child {
+        border-bottom: none;
+    }
+    
+    .item-details {
+        flex-grow: 1;
+    }
+    
+    .item-quantity {
+        width: 60px;
+    }
+    
+    .item-total {
+        min-width: 80px;
+        text-align: right;
+    }
+    
+    .remove-item {
+        color: #dc3545;
+        cursor: pointer;
+        margin-left: 0.5rem;
+    }
+    
+    .order-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+    }
+    
+    .order-totals {
+        text-align: right;
+    }
+    
+    /* Mobile responsiveness */
+    @@media (max-width: 768px) {
+        .card-title {
+            font-size: 1.1rem;
+        }
+        
+        .quantity-select {
+            width: 60px;
+        }
+        
+        .table th, .table td {
+            padding: 0.5rem;
+        }
+        
+        .variant-options {
+            width: 100%;
+            left: 0;
+        }
+    }
 </style>
 
 <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
@@ -23,24 +259,26 @@
                 <li class="breadcrumb-item">
                     <a asp-action="Index"><i class="bx bx-home-alt"></i></a>
                 </li>
-                <li class="breadcrumb-item active" aria-current="page">Details</li>
+                <li class="breadcrumb-item active" aria-current="page">Create Order</li>
             </ol>
         </nav>
     </div>
 </div>
 <hr />
 
-<div class="container mt-4">
-    <h2 class="mb-4 text-center">POS System</h2>
+<div class="container-fluid mt-4">
+    <h2 class="mb-4 text-center">Point of Sale</h2>
 
     <div class="row">
-        <div class="col-md-6 mb-3">
+        <div class="col-lg-4 mb-3">
             <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-store me-2"></i> Business Information
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title">Business Selection</h5>
-                    <div class="form-group">
-                        <label for="businessSelect">Select Business:</label>
-                        <select id="businessSelect" class="form-control">
+                    <div class="form-group mb-3">
+                        <label for="businessSelect" class="form-label">Select Business:</label>
+                        <select id="businessSelect" class="form-select">
                             <option value="">-- Select Business --</option>
                             @foreach (var business in Model)
                             {
@@ -48,184 +286,804 @@
                             }
                         </select>
                     </div>
-                    <div class="form-group mt-3">
-                        <label for="OutletID">Select Branch:</label>
-                        <select id="OutletID" class="form-control" disabled>
+                    <div class="form-group">
+                        <label for="OutletID" class="form-label">Select Branch:</label>
+                        <select id="OutletID" class="form-select" disabled>
                             <option value="">-- Select Branch --</option>
+                        </select>
+                    </div>
+                    <div id="branchLoader" class="loader mt-2"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-user me-2"></i> Customer Details
+                </div>
+                <div class="card-body">
+                    <div class="form-floating mb-3">
+                        <input type="text" id="customerName" class="form-control" placeholder="Name">
+                        <label for="customerName">Customer Name</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="email" id="customerEmail" class="form-control" placeholder="Email">
+                        <label for="customerEmail">Email Address</label>
+                    </div>
+                    <div class="form-floating">
+                        <input type="tel" id="customerPhone" class="form-control" placeholder="Phone">
+                        <label for="customerPhone">Phone Number</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-money-bill-wave me-2"></i> Payment Information
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="paymentMode" class="form-label">Payment Mode:</label>
+                        <select id="paymentMode" class="form-select">
+                            <option value="cash">Cash</option>
+                            <option value="card">Card</option>
+                            <option value="upi">UPI</option>
                         </select>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6 mb-3">
+        <div class="col-lg-8">
             <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-shopping-basket me-2"></i> Product Selection
+                    </div>
+                    <div class="product-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="productSearch" class="form-control" placeholder="Search products...">
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div id="productLoader" class="loader my-4"></div>
+                    <div class="product-table-container">
+                        <table id="productTable" class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Price</th>
+                                    <th>Available</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Products will be loaded here -->
+                                <tr id="noProductsRow">
+                                    <td colspan="4" class="text-center py-4">
+                                        <i class="fas fa-store me-2"></i>
+                                        Select a business and branch to view products
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center h-100">
+                                <span id="productCount" class="text-muted">0 products</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Summary Section (Moved below the product table) -->
+            <div class="card summary-section">
+                <div class="card-header">
+                    <i class="fas fa-shopping-cart me-2"></i> Order Summary
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title">Customer Details</h5>
-                    <div class="form-group">
-                        <input type="text" id="customerName" class="form-control mb-2" placeholder="Name">
-                        <input type="email" id="customerEmail" class="form-control mb-2" placeholder="Email">
-                        <input type="tel" id="customerPhone" class="form-control mb-2" placeholder="Phone">
+                    <div id="emptyCartMessage" class="text-center py-4">
+                        <i class="fas fa-shopping-cart text-muted" style="font-size: 2rem;"></i>
+                        <p class="mt-2 text-muted">Your cart is empty</p>
+                        <p class="small text-muted">Select products to add them to your order</p>
+                    </div>
+                    
+                    <div id="selectedItemsContainer" class="selected-items-container" style="display: none;">
+                        <!-- Selected items will be added here -->
+                    </div>
+                    
+                    <div class="section-divider"></div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <!-- This column intentionally left blank for spacing -->
+                        </div>
+                        <div class="col-md-6">
+                            <div class="order-totals">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Total Items:</span>
+                                    <span id="summaryTotalItems" class="fw-bold">0</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span>Total Amount:</span>
+                                    <span id="summaryTotalAmount" class="fw-bold">₹0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="order-actions">
+                        <button id="clearCartBtn" class="btn btn-outline-secondary" disabled>
+                            <i class="fas fa-trash me-1"></i>Clear Cart
+                        </button>
+                        <button id="placeOrderBtn" class="btn btn-primary btn-lg btn-place-order" disabled>
+                            <i class="fas fa-shopping-cart me-2"></i>Place Order
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="card mt-4">
-        <div class="card-body">
-            <h5 class="card-title">Product Selection</h5>
-            <div class="table-responsive">
-                <table id="productTable" class="table table-striped table-hover">
-                    <thead class="thead-dark">
-                        <tr>
-                            <th>Product</th>
-                            <th>Price</th>
-                            <th>Quantity</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                    <tfoot>
-                        <tr class="table-info">
-                            <td colspan="2"></td>
-                            <td><strong>Total Items:</strong></td>
-                            <td id="totalItems">0</td>
-                        </tr>
-                        <tr class="table-info">
-                            <td colspan="2"></td>
-                            <td><strong>Total Amount:</strong></td>
-                            <td id="totalAmount">$0.00</td>
-                        </tr>
-                    </tfoot>
-                </table>
+<!-- Variant Selection Modal -->
+<div class="modal fade" id="variantModal" tabindex="-1" aria-labelledby="variantModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="variantModalLabel">Select Variant</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-        </div>
-    </div>
-
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="paymentMode">Payment Mode:</label>
-                <select id="paymentMode" class="form-control">
-                    <option value="cash">Cash</option>
-                    <option value="card">Card</option>
-                    <option value="upi">UPI</option>
-                </select>
+            <div class="modal-body" id="variantModalBody">
+                <!-- Variant options will be loaded here -->
             </div>
-        </div>
-        <div class="col-md-6">
-            <button id="placeOrderBtn" class="btn btn-primary btn-lg">
-                <i class="fas fa-shopping-cart mr-2"></i>Place Order
-            </button>
         </div>
     </div>
 </div>
 
+<!-- Order Summary Modal -->
+<div class="modal fade" id="orderSummaryModal" tabindex="-1" role="dialog" aria-labelledby="orderSummaryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header order-summary-header">
+                <h5 class="modal-title" id="orderSummaryModalLabel">
+                    <i class="fas fa-receipt me-2"></i>Order Summary
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body order-summary-content" id="orderSummaryContent">
+                <!-- Content will be dynamically populated -->
+            </div>
+            <div class="modal-footer order-summary-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-primary" id="confirmOrderBtn">
+                    <i class="fas fa-check me-1"></i>Confirm Order
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Order Placed Success Modal -->
+<div class="modal fade" id="orderSuccessModal" tabindex="-1" aria-labelledby="orderSuccessModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-4">
+                <div class="mb-4">
+                    <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="mb-3">Order Placed Successfully!</h4>
+                <p class="mb-4">Order has been created and is being processed.</p>
+                <div>
+                    <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal" id="newOrderBtn">
+                        <i class="fas fa-plus me-1"></i>New Order
+                    </button>
+                    <a href="/Orders/Index" class="btn btn-primary">
+                        <i class="fas fa-list me-1"></i>View All Orders
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <script>
         $(document).ready(function () {
-            debugger
+            // Initialize Map to track selected products with variants
+            const selectedProducts = new Map();
+            let productData = []; // Store full product data
+            
+            // Business selection change handler
             $('#businessSelect').change(function () {
                 var businessId = $(this).val();
                 if (businessId) {
+                    $('#branchLoader').show();
+                    $('#OutletID').prop('disabled', true);
+                    
                     $.get('/Orders/GetBranches', { businessId: businessId }, function (data) {
-                        $('#OutletID').prop('disabled', false).empty().append('<option value="">-- Select Branch --</option>');
+                        $('#OutletID').empty().append('<option value="">-- Select Branch --</option>');
                         $.each(data, function (index, branch) {
                             $('#OutletID').append($('<option></option>').val(branch.id).text(branch.name));
                         });
+                    })
+                    .fail(function(error) {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Failed to load branches. Please try again.',
+                            icon: 'error'
+                        });
+                        console.error("Error loading branches:", error);
+                    })
+                    .always(function() {
+                        $('#branchLoader').hide();
+                        $('#OutletID').prop('disabled', false);
                     });
                 } else {
                     $('#OutletID').prop('disabled', true).empty().append('<option value="">-- Select Branch --</option>');
                 }
-                $('#productTable tbody').empty();
-                updateTotals();
+                
+                // Reset products
+                $('#productTable tbody').html('<tr id="noProductsRow"><td colspan="4" class="text-center py-4"><i class="fas fa-store me-2"></i>Select a business and branch to view products</td></tr>');
+                $('#productCount').text('0 products');
+                selectedProducts.clear();
+                updateOrderSummary();
+                validateForm();
             });
+            
+            // Branch selection change handler
             $('#OutletID').change(function () {
                 var branchId = $(this).val();
                 if (branchId) {
+                    $('#productLoader').show();
+                    $('#productTable tbody').empty();
+                    
                     $.get('/Orders/GetProducts', { branchId: branchId }, function (data) {
-                        $('#productTable tbody').empty();
-                        $.each(data, function (index, product) {
-                            var price = parseFloat(product.price);
-                            var formattedPrice = isNaN(price) ? 'Invalid' : '₹' + price.toFixed(2);
-                            var row = `<tr data-product-id="${product.id}">
-                            <td>${product.name}</td>
-                            <td class="price-cell">${formattedPrice}</td>
-                            <td>
-                                <select class="quantity-select form-control">
-                                    ${[0, 1, 2, 3, 4, 5].map(q => `<option value="${q}">${q}</option>`).join('')}
-                                </select>
-                            </td>
-                            <td class="total">$0.00</td>
-                        </tr>`;
-                            $('#productTable tbody').append(row);
+                        productData = data; // Store the full product data
+                        
+                        if (data.length === 0) {
+                            $('#productTable tbody').html('<tr><td colspan="4" class="text-center py-4"><i class="fas fa-exclamation-circle me-2"></i>No products available for this branch</td></tr>');
+                            $('#productCount').text('0 products');
+                        } else {
+                            $('#productTable tbody').empty();
+                            
+                            // Group products by ID to identify variants
+                            const productGroups = {};
+                            data.forEach(product => {
+                                if (!productGroups[product.id]) {
+                                    productGroups[product.id] = [];
+                                }
+                                productGroups[product.id].push(product);
+                            });
+                            
+                            // Display products
+                            Object.values(productGroups).forEach(products => {
+                                const hasVariants = products.length > 1;
+                                const product = products[0]; // Use first variant for display
+                                
+                                var price = parseFloat(product.price);
+                                var formattedPrice = isNaN(price) ? 'Invalid' : '₹' + price.toFixed(2);
+                                
+                                var row = `<tr class="product-row" data-product-id="${product.id}">
+                                    <td>${product.name} ${hasVariants ? '<span class="variant-badge">Multiple Options</span>' : ''}</td>
+                                    <td class="price-cell">${formattedPrice}</td>
+                                    <td>${products.length} ${products.length === 1 ? 'variant' : 'variants'}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary select-product-btn" data-has-variants="${hasVariants}" data-product-id="${product.id}" data-product-name="${product.name}">
+                                            <i class="fas fa-plus me-1"></i>Add
+                                        </button>
+                                    </td>
+                                </tr>`;
+                                
+                                $('#productTable tbody').append(row);
+                            });
+                            
+                            $('#productCount').text(Object.keys(productGroups).length + ' products');
+                        }
+                    })
+                    .fail(function(error) {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Failed to load products. Please try again.',
+                            icon: 'error'
                         });
+                        console.error("Error loading products:", error);
+                        $('#productTable tbody').html('<tr><td colspan="4" class="text-center py-4"><i class="fas fa-exclamation-circle me-2"></i>Failed to load products</td></tr>');
+                    })
+                    .always(function() {
+                        $('#productLoader').hide();
                     });
                 } else {
-                    $('#productTable tbody').empty();
+                    $('#productTable tbody').html('<tr id="noProductsRow"><td colspan="4" class="text-center py-4"><i class="fas fa-store me-2"></i>Select a business and branch to view products</td></tr>');
+                    $('#productCount').text('0 products');
                 }
-                updateTotals();
+                
+                selectedProducts.clear();
+                updateOrderSummary();
+                validateForm();
             });
 
-            $(document).on('change', '.quantity-select', function () {
-                var row = $(this).closest('tr');
-                var priceText = row.find('.price-cell').text().replace('₹', '').trim();
-                var price = parseFloat(priceText);
-                var quantity = parseInt($(this).val());
-                var total = price * quantity;
-                if (!isNaN(total)) {
-                    row.find('.total').text('₹' + total.toFixed(2));
+            // Monitor customer fields for validation
+            $('#customerName, #customerEmail, #customerPhone').on('input', validateForm);
+
+            // Product search functionality
+            $('#productSearch').on('input', function() {
+                const searchTerm = $(this).val().toLowerCase();
+                if ($('#noProductsRow').length) return; // Don't search if no products loaded
+                
+                $('#productTable tbody tr').each(function() {
+                    const productName = $(this).find('td:first').text().toLowerCase();
+                    if (productName.includes(searchTerm)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            });
+
+            // Select product button click handler
+            $(document).on('click', '.select-product-btn', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const productId = $(this).data('product-id');
+                const productName = $(this).data('product-name');
+                const hasVariants = $(this).data('has-variants') === true;
+                
+                if (hasVariants) {
+                    showVariantSelection(productId, productName);
                 } else {
-                    row.find('.total').text('Invalid');
+                    // For products without variants, directly add the single variant
+                    const variant = productData.find(p => p.id === productId);
+                    if (variant) {
+                        addProductToCart(variant, 1);
+                    } else {
+                        console.error("Product not found:", productId);
+                    }
                 }
-                updateTotals();
+            });
+            
+            // Row click to select product
+            $(document).on('click', '.product-row', function(e) {
+                if (!$(e.target).hasClass('select-product-btn') && $(e.target).parents('.select-product-btn').length === 0) {
+                    const productId = $(this).data('product-id');
+                    const button = $(this).find('.select-product-btn');
+                    button.trigger('click');
+                }
+            });
+            
+            // Show variant selection modal
+            function showVariantSelection(productId, productName) {
+                const variants = productData.filter(p => p.id === productId);
+                
+                if (variants.length === 0) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No variants found for this product.',
+                        icon: 'error'
+                    });
+                    return;
+                }
+                
+                let modalContent = `<div class="list-group">`;
+                
+                variants.forEach(variant => {
+                    // Parse attributes to show in a more readable format
+                    let attributes = '';
+                    if (variant.attributes) {
+                        try {
+                            const attrObj = JSON.parse(variant.attributes);
+                            attributes = Object.entries(attrObj).map(([key, value]) => `${key}: ${value}`).join(', ');
+                        } catch (e) {
+                            attributes = variant.attributes;
+                        }
+                    }
+                    
+                    const price = parseFloat(variant.price);
+                    const formattedPrice = isNaN(price) ? 'Invalid' : '₹' + price.toFixed(2);
+                    
+                    modalContent += `
+                        <a href="#" class="list-group-item list-group-item-action select-variant" 
+                           data-variant-id="${variant.variantId}" 
+                           data-product-id="${variant.id}"
+                           data-product-name="${variant.name}"
+                           data-price="${variant.price}"
+                           data-attributes='${variant.attributes || ""}'>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">${variant.name}</h6>
+                                    ${attributes ? `<small class="text-muted">${attributes}</small>` : ''}
+                                </div>
+                                <span class="badge bg-primary rounded-pill">${formattedPrice}</span>
+                            </div>
+                        </a>
+                    `;
+                });
+                
+                modalContent += `</div>`;
+                
+                $('#variantModalBody').html(modalContent);
+                $('#variantModalLabel').text(`Select ${productName} Variant`);
+                $('#variantModal').modal('show');
+            }
+            
+            // Variant selection in modal
+            $(document).on('click', '.select-variant', function(e) {
+                e.preventDefault();
+                
+                const variantId = $(this).data('variant-id');
+                const productId = $(this).data('product-id');
+                const productName = $(this).data('product-name');
+                const price = $(this).data('price');
+                const attributes = $(this).data('attributes');
+                
+                $('#variantModal').modal('hide');
+                
+                // Show quantity selection for the selected variant
+                Swal.fire({
+                    title: 'Select Quantity',
+                    html: `
+                        <div class="form-group">
+                            <input type="number" id="quantityInput" class="form-control form-control-lg text-center" value="1" min="1" max="100">
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: 'Add to Cart',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        confirmButton: 'btn btn-primary',
+                        cancelButton: 'btn btn-outline-secondary'
+                    },
+                    preConfirm: () => {
+                        const quantity = parseInt($('#quantityInput').val());
+                        if (isNaN(quantity) || quantity < 1) {
+                            Swal.showValidationMessage('Please enter a valid quantity');
+                            return false;
+                        }
+                        return quantity;
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        addProductToCart({
+                            id: productId,
+                            variantId: variantId,
+                            name: productName,
+                            price: price,
+                            attributes: attributes
+                        }, result.value);
+                    }
+                });
+            });
+            
+            // Add product to cart
+            function addProductToCart(product, quantity) {
+                const variantId = product.variantId;
+                const price = parseFloat(product.price);
+                
+                if (isNaN(price)) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Invalid product price. Cannot add to cart.',
+                        icon: 'error'
+                    });
+                    return;
+                }
+                
+                if (selectedProducts.has(variantId)) {
+                    // Update existing product quantity
+                    const existingProduct = selectedProducts.get(variantId);
+                    existingProduct.quantity += quantity;
+                    existingProduct.total = existingProduct.price * existingProduct.quantity;
+                    selectedProducts.set(variantId, existingProduct);
+                } else {
+                    // Add new product
+                    selectedProducts.set(variantId, {
+                        id: product.id,
+                        variantId: variantId,
+                        name: product.name,
+                        attributes: product.attributes || '',
+                        price: price,
+                        quantity: quantity,
+                        total: price * quantity
+                    });
+                }
+                
+                updateOrderSummary();
+                validateForm();
+                
+                // Show notification
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+                
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Product added to cart'
+                });
+            }
+            
+            // Update quantity from the order summary
+            $(document).on('change', '.item-quantity-input', function() {
+                const variantId = $(this).data('variant-id');
+                const quantity = parseInt($(this).val());
+                
+                if (quantity <= 0) {
+                    // Remove product if quantity is 0 or negative
+                    selectedProducts.delete(variantId);
+                } else {
+                    // Update product quantity
+                    const product = selectedProducts.get(variantId);
+                    product.quantity = quantity;
+                    product.total = product.price * quantity;
+                    selectedProducts.set(variantId, product);
+                }
+                
+                updateOrderSummary();
+                validateForm();
+            });
+            
+            // Remove item from cart
+            $(document).on('click', '.remove-item', function() {
+                const variantId = $(this).data('variant-id');
+                selectedProducts.delete(variantId);
+                
+                updateOrderSummary();
+                validateForm();
+            });
+            
+            // Clear cart button
+            $('#clearCartBtn').click(function() {
+                Swal.fire({
+                    title: 'Clear Cart?',
+                    text: 'This will remove all items from your cart.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, clear it!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        selectedProducts.clear();
+                        updateOrderSummary();
+                        validateForm();
+                    }
+                });
             });
 
-            function updateTotals() {
+            // Update order summary function
+            function updateOrderSummary() {
                 var totalItems = 0;
                 var totalAmount = 0;
-                $('#productTable tbody tr').each(function () {
-                    var quantity = parseInt($(this).find('.quantity-select').val()) || 0;
-                    var totalText = $(this).find('.total').text().replace('₹', '').trim();
-                    var total = parseFloat(totalText) || 0;
-                    totalItems += quantity;
-                    if (!isNaN(total)) {
-                        totalAmount += total;
-                    }
-                });
-                $('#totalItems').text(totalItems);
-                $('#totalAmount').text('₹' + totalAmount.toFixed(2));
+                
+                if (selectedProducts.size === 0) {
+                    $('#emptyCartMessage').show();
+                    $('#selectedItemsContainer').hide().empty();
+                    $('#clearCartBtn').prop('disabled', true);
+                } else {
+                    $('#emptyCartMessage').hide();
+                    $('#selectedItemsContainer').show().empty();
+                    $('#clearCartBtn').prop('disabled', false);
+                    
+                    selectedProducts.forEach(product => {
+                        totalItems += product.quantity;
+                        totalAmount += product.total;
+                        
+                        // Format attributes if available
+                        let attributesDisplay = '';
+                        if (product.attributes) {
+                            try {
+                                const attrObj = JSON.parse(product.attributes);
+                                attributesDisplay = Object.entries(attrObj).map(([key, value]) => 
+                                    `<span class="variant-badge">${key}: ${value}</span>`
+                                ).join('');
+                            } catch (e) {
+                                attributesDisplay = product.attributes;
+                            }
+                        }
+                        
+                        const itemHtml = `
+                            <div class="selected-item">
+                                <div class="item-details">
+                                    <div>${product.name}</div>
+                                    <div class="small text-muted">₹${product.price.toFixed(2)} each ${attributesDisplay}</div>
+                                </div>
+                                <div class="item-quantity">
+                                    <input type="number" class="form-control form-control-sm item-quantity-input" 
+                                        value="${product.quantity}" min="1" data-variant-id="${product.variantId}">
+                                </div>
+                                <div class="item-total">
+                                    ₹${product.total.toFixed(2)}
+                                </div>
+                                <div class="remove-item" data-variant-id="${product.variantId}">
+                                    <i class="fas fa-times-circle"></i>
+                                </div>
+                            </div>
+                        `;
+                        
+                        $('#selectedItemsContainer').append(itemHtml);
+                    });
+                }
+                
+                $('#summaryTotalItems').text(totalItems);
+                $('#summaryTotalAmount').text('₹' + totalAmount.toFixed(2));
+            }
+            
+            // Validate form function
+            function validateForm() {
+                var isValid = true;
+                
+                // Validate business and branch selection
+                if (!$('#businessSelect').val() || !$('#OutletID').val()) {
+                    isValid = false;
+                }
+                
+                // Validate customer details
+                if (!$('#customerName').val() || !$('#customerEmail').val() || !$('#customerPhone').val()) {
+                    isValid = false;
+                }
+                
+                // Validate product selection
+                if (selectedProducts.size === 0) {
+                    isValid = false;
+                }
+                
+                // Enable/disable place order button
+                $('#placeOrderBtn').prop('disabled', !isValid);
+                
+                return isValid;
             }
 
-            $('#placeOrderBtn').click(function () {
-                var order = {
-                    items: [],
-                    totalAmount: parseFloat($('#totalAmount').text().replace('₹', '')),
-                    totalItems: parseInt($('#totalItems').text()),
-                    paymentMode: $('#paymentMode').val(),
-                    customerDetails: {
-                        name: $('#customerName').val(),
-                        email: $('#customerEmail').val(),
-                        phone: $('#customerPhone').val()
-                    },
-                    OutletID: $('#OutletID').val()
-                };
+            // Place order button click handler
+            $('#placeOrderBtn').click(function(e) {
+                e.preventDefault();
+                if (validateForm()) {
+                    showOrderSummary();
+                } else {
+                    Swal.fire({
+                        title: 'Incomplete Information',
+                        text: 'Please fill in all required fields and select at least one product.',
+                        icon: 'warning'
+                    });
+                }
+            });
+            
+            // Show order summary function
+            function showOrderSummary() {
+                const items = [...selectedProducts.values()];
+                const totalAmount = parseFloat($('#summaryTotalAmount').text().replace('₹', ''));
+                const totalItems = parseInt($('#summaryTotalItems').text());
+                
+                let summaryHtml = `
+                    <div class="customer-info-badge">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong><i class="fas fa-user me-2"></i>${$('#customerName').val()}</strong>
+                            </div>
+                            <div class="col-md-4">
+                                <i class="fas fa-envelope me-1"></i> ${$('#customerEmail').val()}
+                            </div>
+                            <div class="col-md-4">
+                                <i class="fas fa-phone me-1"></i> ${$('#customerPhone').val()}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="mb-2"><strong>Branch:</strong></div>
+                            <div>${$('#OutletID option:selected').text()}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-2"><strong>Payment Mode:</strong></div>
+                            <div>${$('#paymentMode option:selected').text()}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="section-divider"></div>
 
-                $('#productTable tbody tr').each(function () {
-                    var quantity = parseInt($(this).find('.quantity-select').val());
-                    if (quantity > 0) {
-                        order.items.push({
-                            productId: $(this).data('product-id'),
-                            productName: $(this).find('td:eq(0)').text(),
-                            price: parseFloat($(this).find('td:eq(1)').text().replace('₹', '')),
-                            quantity: quantity,
-                            totalPrice: parseFloat($(this).find('.total').text().replace('₹', ''))
-                        });
+                    <h5 class="mb-3"><i class="fas fa-shopping-basket me-2"></i>Order Items</h5>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                items.forEach(item => {
+                    // Format attributes if available
+                    let attributesDisplay = '';
+                    if (item.attributes) {
+                        try {
+                            const attrObj = JSON.parse(item.attributes);
+                            attributesDisplay = Object.entries(attrObj).map(([key, value]) => 
+                                `<div><small class="text-muted">${key}: ${value}</small></div>`
+                            ).join('');
+                        } catch (e) {
+                            attributesDisplay = item.attributes;
+                        }
                     }
+                    
+                    summaryHtml += `
+                        <tr>
+                            <td>
+                                ${item.name}
+                                ${attributesDisplay}
+                            </td>
+                            <td>₹${item.price.toFixed(2)}</td>
+                            <td>${item.quantity}</td>
+                            <td class="text-end">₹${item.total.toFixed(2)}</td>
+                        </tr>
+                    `;
                 });
+                
+                summaryHtml += `
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="section-divider"></div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 offset-md-6">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Total Items:</span>
+                                <strong>${totalItems}</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Total Amount:</span>
+                                <strong class="fs-5">₹${totalAmount.toFixed(2)}</strong>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                $('#orderSummaryContent').html(summaryHtml);
+                $('#orderSummaryModal').modal('show');
+            }
+
+            // Confirm order button click handler
+            $('#confirmOrderBtn').click(function() {
+                $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...');
+                submitOrder();
+            });
+            
+            // Submit order function
+            function submitOrder() {
+                const items = [...selectedProducts.values()].map(item => ({
+                    variantId: item.variantId,
+                    quantity: item.quantity,
+                    rate: item.price,
+                    totalPrice: item.total
+                }));
+                
+                const order = {
+                    outletId: $('#OutletID').val(),
+                    customerName: $('#customerName').val(),
+                    customerEmail: $('#customerEmail').val(),
+                    customerPhone: $('#customerPhone').val(),
+                    paymentMode: $('#paymentMode').val(),
+                    totalItems: parseInt($('#summaryTotalItems').text()),
+                    totalPrice: parseFloat($('#summaryTotalAmount').text().replace('₹', '')),
+                    orderDetails: items
+                };
 
                 $.ajax({
                     url: '/Orders/PlaceOrder',
@@ -233,14 +1091,104 @@
                     contentType: 'application/json',
                     data: JSON.stringify(order),
                     success: function (response) {
-                        alert('Order placed successfully!');
-                        // Reset the form or redirect to a new page
+                        $('#orderSummaryModal').modal('hide');
+                        
+                        // Show receipt option
+                        Swal.fire({
+                            title: 'Order Placed Successfully!',
+                            text: `Order #${response.orderId} has been created`,
+                            icon: 'success',
+                            showCancelButton: true,
+                            confirmButtonText: 'Print Receipt',
+                            cancelButtonText: 'Close',
+                            reverseButtons: true
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Open receipt in new window
+                                window.open(`/Orders/Receipt/${response.orderId}`, '_blank');
+                            }
+                            $('#orderSuccessModal').modal('show');
+                        });
                     },
-                    error: function () {
-                        alert('Error placing order. Please try again.');
+                    error: function (xhr) {
+                        $('#confirmOrderBtn').prop('disabled', false).html('<i class="fas fa-check me-1"></i>Confirm Order');
+                        
+                        var errorMessage = 'Error placing order. Please try again.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        
+                        Swal.fire({
+                            title: 'Error',
+                            text: errorMessage,
+                            icon: 'error'
+                        });
+                        
+                        $('#orderSummaryModal').modal('hide');
                     }
                 });
+            }
+            
+            // New order button click handler
+            $('#newOrderBtn').click(function() {
+                // Reset the form
+                $('#customerName, #customerEmail, #customerPhone').val('');
+                $('#paymentMode').val('cash');
+                
+                // Reset product selections
+                selectedProducts.clear();
+                updateOrderSummary();
+                validateForm();
+                
+                $('#orderSuccessModal').modal('hide');
             });
+            
+            // Keyboard shortcuts
+            $(document).keydown(function(e) {
+                // Alt+P to place order
+                if (e.altKey && e.keyCode === 80) {
+                    e.preventDefault();
+                    if (!$('#placeOrderBtn').prop('disabled')) {
+                        $('#placeOrderBtn').click();
+                    }
+                }
+                
+                // Alt+N for new order after success
+                if (e.altKey && e.keyCode === 78) {
+                    e.preventDefault();
+                    if ($('#orderSuccessModal').hasClass('show')) {
+                        $('#newOrderBtn').click();
+                    }
+                }
+                
+                // Alt+C to clear cart
+                if (e.altKey && e.keyCode === 67) {
+                    e.preventDefault();
+                    if (!$('#clearCartBtn').prop('disabled')) {
+                        $('#clearCartBtn').click();
+                    }
+                }
+                
+                // Escape to close modals manually
+                if (e.keyCode === 27) {
+                    if ($('#variantModal').hasClass('show')) {
+                        $('#variantModal').modal('hide');
+                    } else if ($('#orderSummaryModal').hasClass('show')) {
+                        $('#orderSummaryModal').modal('hide');
+                    }
+                }
+            });
+            
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+            
+            // Add keyboard navigation indicators
+            $('#placeOrderBtn').attr('title', 'Shortcut: Alt+P').attr('data-bs-toggle', 'tooltip');
+            $('#clearCartBtn').attr('title', 'Shortcut: Alt+C').attr('data-bs-toggle', 'tooltip');
+            $('#newOrderBtn').attr('title', 'Shortcut: Alt+N').attr('data-bs-toggle', 'tooltip');
         });
     </script>
     @{

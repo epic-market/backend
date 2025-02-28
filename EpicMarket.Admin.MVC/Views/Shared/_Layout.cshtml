@@ -8,6 +8,76 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<!--favicon-->
 	<link rel="icon" href="~/assets/images/favicon-32x32.png" type="image/png" />
+	
+	<!-- Add loader styles -->
+	<style>
+		/* Page loader - Make sure this is not overridden by other styles */
+		#page-loader {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: #ffffff;
+			z-index: 99999;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			transition: opacity 0.3s, visibility 0.3s;
+		}
+		
+		#page-loader.loaded {
+			opacity: 0;
+			visibility: hidden;
+			pointer-events: none;
+		}
+		
+		.loader-spinner {
+			width: 50px;
+			height: 50px;
+			border: 5px solid rgba(0, 0, 0, 0.1);
+			border-radius: 50%;
+			border-top: 5px solid #3498db;
+			animation: spin 1s linear infinite;
+		}
+		
+		@@keyframes spin {
+			0% { transform: rotate(0deg); }
+			100% { transform: rotate(360deg); }
+		}
+		
+		/* Initial state for sidebar to prevent flicker */
+		.sidebar-wrapper {
+			transform: translateX(-100%);
+			transition: none !important;
+		}
+		
+		@@media (min-width: 992px) {
+			body:not(.toggle-sidebar) .sidebar-wrapper {
+				transform: translateX(0);
+			}
+			body.toggle-sidebar .wrapper {
+				margin-left: 0;
+			}
+		}
+		
+		/* Add this class when DOM is fully loaded */
+		body.dom-loaded .sidebar-wrapper {
+			transition: transform .2s ease !important;
+		}
+	</style>
+	
+	<!-- Make sure loader is visible immediately -->
+	<script>
+		// Ensure loader is shown immediately
+		document.addEventListener('DOMContentLoaded', function() {
+			var loader = document.getElementById('page-loader');
+			if (loader) {
+				loader.style.display = 'flex';
+			}
+		});
+	</script>
+	
 	<!--plugins-->
 	<link href="~/assets/plugins/vectormap/jquery-jvectormap-2.0.2.css" rel="stylesheet" />
 	<link href="~/assets/plugins/simplebar/css/simplebar.css" rel="stylesheet" />
@@ -16,9 +86,6 @@
 	<link href="~/assets/plugins/datatable/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
 	<link href="~/assets/plugins/select2/css/select2.min.css" rel="stylesheet" />
 	<link href="~/assets/plugins/select2/css/select2-bootstrap4.css" rel="stylesheet" />
-	<!-- loader-->
-	<link href="~/assets/css/pace.min.css" rel="stylesheet" />
-	<script src="~/assets/js/pace.min.js"></script>
 	<!-- Bootstrap CSS -->
 	<link href="~/assets/css/bootstrap.min.css" rel="stylesheet">
 	<link href="~/assets/css/bootstrap-extended.css" rel="stylesheet">
@@ -36,6 +103,11 @@
 	@RenderSection("Styles", required: false)
 </head>
 <body>
+	<!-- Page Loader - This must be the first element in the body -->
+	<div id="page-loader">
+		<div class="loader-spinner"></div>
+	</div>
+	
 	<!--wrapper-->
 	<div class="wrapper">
 		<!--sidebar wrapper -->
@@ -464,7 +536,7 @@
 									</div>
 								</div>
 							</li>
-							<li class="nav-item dropdown dropdown-large">
+							<li class="nav-item dropdown dropdown-large" style="display: none;">
 								<a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 									<span class="alert-count">7</span>
 									<i class='bx bx-bell'></i>
@@ -624,7 +696,7 @@
 									</a>
 								</div>
 							</li>
-							<li class="nav-item dropdown dropdown-large">
+							<li class="nav-item dropdown dropdown-large" style="display: none;">
 								<a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 									<span class="alert-count">8</span>
 									<i class='bx bx-comment'></i>
@@ -897,7 +969,31 @@
 
 
 	@await RenderSectionAsync("Scripts", required: false)
+	
+	<!-- Add this script to handle sidebar initialization and loader -->
+	<script>
+		// Hide loader when everything is loaded
+		window.addEventListener('load', function() {
+			console.log('Page loaded, hiding loader...');
+			// Short delay to ensure everything is rendered
+			var loader = document.getElementById('page-loader');
+			if (loader) {
+				loader.classList.add('loaded');
+				console.log('Loader hidden');
+			}
+			
+			document.body.classList.add('dom-loaded');
+			
+			// Check screen size and set initial state
+			if (window.innerWidth >= 992) {
+				document.body.classList.remove('toggle-sidebar');
+			} else {
+				document.body.classList.add('toggle-sidebar');
+			}
+		});
+	</script>
 </body>
 
 </html>
+
 
