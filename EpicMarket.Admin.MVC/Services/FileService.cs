@@ -70,7 +70,32 @@ namespace EpicMarket.Admin.MVC.Services
 			};
 		}
 
-		public async Task<string> UploadFileAsync(IFormFile file, string prefix , string fileNameKey, string EntityName, int RecordId)
+
+
+
+
+		public async Task<string> UploadFileAsync(IFormFile file, string prefix , string fileNameKey)
+		{
+			
+			var request = new PutObjectRequest()
+			{
+				BucketName = _bucketName,
+				Key = string.IsNullOrEmpty(prefix) ? file.FileName : $"{prefix?.TrimEnd('/')}/{fileNameKey}",
+				InputStream = file.OpenReadStream()
+			};
+			request.Metadata.Add("Content-Type", file.ContentType);
+			await _s3Client.PutObjectAsync(request);
+
+			return fileNameKey;
+		}
+
+
+
+
+
+
+
+		public async Task<string> UploadFileWithInsertAttachmentAsync(IFormFile file, string prefix , string fileNameKey, string EntityName, int RecordId)
 		{
 			
 			var request = new PutObjectRequest()
