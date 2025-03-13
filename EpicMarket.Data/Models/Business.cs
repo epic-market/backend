@@ -7,6 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace EpicMarket.Data.Models
@@ -49,13 +50,17 @@ namespace EpicMarket.Data.Models
         // Navigation properties
         public virtual AppUser? Person { get; set; }
         public virtual BusinessCategoryInternal? BusinessCategory { get; set; }
+
+         [JsonIgnore]
         public virtual Address? Address   { get; set; }
 
 		[ForeignKey("StatusId")]
 		public virtual StatusOptionSet? Status { get; set; }
 
-        public virtual ICollection<BusinessEmployeeMap> BusinessEmployees { get; set; }
 
+        [JsonIgnore]
+        public virtual ICollection<BusinessEmployeeMap> BusinessEmployees { get; set; }
+        [JsonIgnore]
         public virtual ICollection<Category> Categories { get; set; }
     }
 }

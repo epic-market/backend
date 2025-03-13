@@ -39,8 +39,8 @@
                     <i class="bx bx-check-circle fs-3 text-white"></i>
                 </div>
                 <div>
-                    <h6 class="mb-0 text-secondary">Active Businesses</h6>
-                    <h3 class="mb-0 mt-2 fw-bold" id="activeBusinessesCount">--</h3>
+                    <h6 class="mb-0 text-secondary">Verified Businesses</h6>
+                    <h3 class="mb-0 mt-2 fw-bold" id="verifiedBusinessesCount">--</h3>
                 </div>
             </div>
         </div>
@@ -419,13 +419,23 @@
 
             // Load counts for stat cards (stub function - implement with real data)
             function loadStatCounts() {
-                // This would normally fetch data from the server
-                // For now, just populate with mock data
-                setTimeout(() => {
-                    $('#totalBusinessesCount').text('164');
-                    $('#activeBusinessesCount').text('143');
-                    $('#newBusinessesCount').text('10');
-                }, 500);
+                $.ajax({
+                    url: '/Business/GetStatistics',
+                    type: 'GET',
+                    success: function (response) {
+                        if (response.error) {
+                            console.error(response.error);
+                            return;
+                        }
+                        
+                        $('#totalBusinessesCount').text(response.totalBusinesses || '0');
+                        $('#verifiedBusinessesCount').text(response.verifiedBusinesses || '0');
+                        $('#newBusinessesCount').text(response.newBusinessesThisMonth || '0');
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error loading statistics:', error);
+                    }
+                });
             }
 
             // Event handlers

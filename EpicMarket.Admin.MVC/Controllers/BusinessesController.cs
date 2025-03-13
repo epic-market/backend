@@ -170,7 +170,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                             join entity in _context.Entity on link.EntityID equals entity.ID
                             where entity.Name == EntityConstants.Business && link.RecordID == id && link.AttachmentTypeID == attachmentTypeID_PROOF.ID
                             orderby attachment.CreateDate descending
-                            select new
+                            select new AttachmentProof
                             {
                                 ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}",
                                 Name = $"{attachment.DocumentFile}"
@@ -233,30 +233,33 @@ namespace EpicMarket.Admin.MVC.Controllers
                 });
 
                 if (Images?.Length > 0) {
-                    var attachmentLogo = new AttachmentModel()
+                    var attachmentLogo = new BusinessAttachmentModel()
                     {
                         Name = EntityConstants.Business,
                         Comment = EntityConstants.Business,
                         RecordID = business.ID,
                         Entity = EntityConstants.Business,
                         AttachmentType = AttachmentTypeConstants.LOGO,
-                        Files = Images
+                        Files = Images,
+                        BusinessID = business.ID
+
                     };
-                    await attachmentService.UploadAttachment(attachmentLogo);
+                    await attachmentService.UploadBusinessAttachment(attachmentLogo);
                 }
 
                 if (Proofs?.Length > 0)
                 {
-                    var attachmentProofs = new AttachmentModel()
+                    var attachmentProofs = new BusinessAttachmentModel()
                     {
                         Name = EntityConstants.Business,
                         Comment = EntityConstants.Business,
                         RecordID = business.ID,
                         Entity = EntityConstants.Business,
                         AttachmentType = AttachmentTypeConstants.PROOF,
-                        Files = Proofs
+                        Files = Proofs,
+                        BusinessID = business.ID
                     };
-                    await attachmentService.UploadAttachment(attachmentProofs);
+                    await attachmentService.UploadBusinessAttachment(attachmentProofs);
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -362,16 +365,17 @@ namespace EpicMarket.Admin.MVC.Controllers
                             await this.fileService.DeleteImage(ExisitingLogo, userName);
                         }
 
-                        var attachment = new AttachmentModel()
+                        var attachment = new BusinessAttachmentModel()
                         {
                             Name = EntityConstants.Business,
                             Comment = EntityConstants.Business,
                             RecordID = business.ID,
                             Entity = EntityConstants.Business,
                             AttachmentType = AttachmentTypeConstants.LOGO,
-                            Files = newLogo
+                            Files = newLogo,
+                            BusinessID  = business.ID
                         };
-                        await attachmentService.UploadAttachment(attachment);
+                        await attachmentService.UploadBusinessAttachment(attachment);
                     }
 
                     // Handle removed images
@@ -384,16 +388,18 @@ namespace EpicMarket.Admin.MVC.Controllers
                     // Handle added images
                     if (addedProofs != null && newProofs?.Length > 0)
                     {
-                        var attachmentProofs = new AttachmentModel()
+                        var attachmentProofs = new BusinessAttachmentModel()
                         {
                             Name = EntityConstants.Business,
                             Comment = EntityConstants.Business,
                             RecordID = business.ID,
                             Entity = EntityConstants.Business,
                             AttachmentType = AttachmentTypeConstants.PROOF,
-                            Files = newProofs
+                            Files = newProofs,
+                            BusinessID = business.ID
+
                         };
-                        await attachmentService.UploadAttachment(attachmentProofs);
+                        await attachmentService.UploadBusinessAttachment(attachmentProofs);
                     }
                 }
                 catch (DbUpdateConcurrencyException)
@@ -754,6 +760,46 @@ namespace EpicMarket.Admin.MVC.Controllers
             byte[] bytes = System.Text.Encoding.UTF8.GetBytes(csvContent);
             
             return File(bytes, "text/csv", "product_catalog_sample.csv");
+        }
+
+        [HttpGet]
+        [Route("Business/GetStatistics")]
+        public async Task<IActionResult> GetStatistics()
+        {
+            try
+            {
+                // Get current date and first day of current month
+                var currentDate = DateTime.UtcNow;
+                var firstDayOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
+                
+                // Get total business count
+                var totalBusinesses = await _context.Businesses.CountAsync();
+                
+                // Get verified businesses count (assuming there's a status named "Verified")
+                var verifiedStatusId = await _context.StatusOptionSets
+                    .Where(s => s.Status.ToLower() == "verified")
+                    .Select(s => s.Id)
+                    .FirstOrDefaultAsync();
+                    
+                var verifiedBusinesses = await _context.Businesses
+                    .Where(b => b.StatusId == verifiedStatusId)
+                    .CountAsync();
+                
+                // Get new businesses count (created this month)
+                var newBusinessesThisMonth = await _context.Businesses
+                    .Where(b => b.CreateDate >= firstDayOfMonth && b.CreateDate <= currentDate)
+                    .CountAsync();
+                
+                return Json(new { 
+                    totalBusinesses, 
+                    verifiedBusinesses, 
+                    newBusinessesThisMonth 
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message });
+            }
         }
     }
 }

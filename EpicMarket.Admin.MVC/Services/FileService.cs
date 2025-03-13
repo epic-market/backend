@@ -70,10 +70,6 @@ namespace EpicMarket.Admin.MVC.Services
 			};
 		}
 
-
-
-
-
 		public async Task<string> UploadFileAsync(IFormFile file, string prefix , string fileNameKey)
 		{
 			
@@ -85,15 +81,8 @@ namespace EpicMarket.Admin.MVC.Services
 			};
 			request.Metadata.Add("Content-Type", file.ContentType);
 			await _s3Client.PutObjectAsync(request);
-
 			return fileNameKey;
 		}
-
-
-
-
-
-
 
 		public async Task<string> UploadFileWithInsertAttachmentAsync(IFormFile file, string prefix , string fileNameKey, string EntityName, int RecordId)
 		{

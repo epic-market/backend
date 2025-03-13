@@ -4,9 +4,9 @@ namespace EpicMarket.Admin.MVC.Models
 {
 	public class BusinessDetailModel
 	{
-        public Business Business { get; set; }
+		public Business Business { get; set; }
 
-        public List<Outlet> Outlets { get; set; }
+		public List<Outlet> Outlets { get; set; }
 
 		public Outlet Outlet { get; set; }
 
@@ -20,8 +20,19 @@ namespace EpicMarket.Admin.MVC.Models
 		public Catalog Catalog { get; set; }
 
 
-		public List<EventLog> EventLogs{ get; set; }
+		public List<EventLog> EventLogs { get; set; }
 
 		public EventLog EventLog { get; set; }
+
+		public List<string> AttachmentProofs { get; set; }
+
+		public string Attachment { get; set; }
 	}
+
+
+    public class AttachmentProof
+    {
+        public string Name { get; set; }
+        public string ImagePath { get; set; }
+    }
 }

@@ -182,7 +182,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                     else
                     {
                         // Default path
-                        prefix = $"{entityName}/{DateTime.UtcNow.Year}/{DateTime.UtcNow.Month}";
+                        prefix = $"{entityName}";
                     }
                     
                     string fileNameKey = $"{System.Guid.NewGuid()}{fileExtension}";

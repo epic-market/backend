@@ -25,7 +25,7 @@ namespace EpicMarket.Data.Models
         [Required]
         public double CostPrice { get; set; } //cost of product for percharse
         [Required]
-         public double SalePrice { get; set; } //what price he what to show to users
+        public double SalePrice { get; set; } //what price he what to show to users
         public double? CompareAtPrice { get; set; }
         public string AdditionalHightlights { get; set; }
         public int? MaximumOrderQuantity { get; set; }
@@ -35,14 +35,11 @@ namespace EpicMarket.Data.Models
         public double? PackedDepth { get; set; }
         public string WeightUnit { get; set; }//kg,g,lbs,oz
         public double? Weight { get; set; } //value of weight
+        public bool IsDefaultVarient { get; set; }
         public virtual Catalog Catalog { get; set; }
-
         public virtual ICollection<Inventory> Inventory { get; set; }
 
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }
 
-
-
-    
     }
 }

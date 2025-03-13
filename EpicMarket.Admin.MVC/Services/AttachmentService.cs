@@ -192,7 +192,7 @@ namespace EpicMarket.Admin.MVC.Services
                             orderby attachment.CreateDate descending
                             select new
                             {
-                                ImagePath = $"{attachment.DocumentFolderPath}/{attachment.DocumentFile}"
+                                ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
                             };
 
 			return attachments.Select(a => a.ImagePath).ToList();
