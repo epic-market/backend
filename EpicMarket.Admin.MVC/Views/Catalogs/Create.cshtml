@@ -116,6 +116,10 @@
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="hasVariantsToggle">
                             <label class="form-check-label" for="hasVariantsToggle">Has Variants</label>
+                            <input type="hidden" name="hasVariants" id="hasVariantsField" value="false">
+                            <div class="form-text text-muted small mt-1" id="variantToggleHelp">
+                                Note: Single variants with default option can use the simple view. Products with multiple variants or non-default variants must use variant mode.
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -634,6 +638,38 @@
                     value: JSON.stringify(highlights)
                 }).appendTo(this);
 
+                // Collect variant options in the required format
+                const hasVariants = $('#hasVariantsToggle').is(':checked');
+                
+                if (hasVariants) {
+                    const variantOptions = {};
+                    
+                    // Collect all option names and their values
+                    $('.variant-option').each(function() {
+                        const optionName = $(this).find('.option-name').val();
+                        if (optionName) {
+                            const values = [];
+                            $(this).find('.option-value').each(function() {
+                                const value = $(this).val();
+                                if (value) values.push(value);
+                            });
+                            
+                            if (values.length > 0) {
+                                variantOptions[optionName] = values;
+                            }
+                        }
+                    });
+                    
+                    // Only add VariantOptions if we have actual variant options and variants
+                    if (Object.keys(variantOptions).length > 0 && $('.variant-combination').length > 0) {
+                        $('<input>').attr({
+                            type: 'hidden',
+                            name: 'VariantOptions',
+                            value: JSON.stringify(variantOptions)
+                        }).appendTo(this);
+                    }
+                }
+
                 // Collect variants with all fields
                 const variants = [];
                 $('.variant-combination').each(function(index) {
@@ -787,6 +823,7 @@
             // Handle variants toggle
             $('#hasVariantsToggle').change(function() {
                 const hasVariants = this.checked;
+                $('#hasVariantsField').val(hasVariants ? "true" : "false");
                 $('#defaultVariantCard').toggle(!hasVariants);
                 $('#variantsContainer').toggle(hasVariants);
                 
