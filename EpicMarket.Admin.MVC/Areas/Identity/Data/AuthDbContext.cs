@@ -63,7 +63,7 @@ public DbSet<EpicMarket.Data.Models.Attachment> Attachment { get; set; } = defau
 
 public DbSet<EpicMarket.Data.Models.PersonType> PersonType { get; set; } = default!;
 
-public DbSet<EpicMarket.Data.Models.SupportQuerys> SupportQuerys { get; set; } = default!;
+public DbSet<EpicMarket.Data.Models.SupportQueries> SupportQuerys { get; set; } = default!;
 
 public DbSet<EpicMarket.Data.Models.Event> Event { get; set; } = default!;
 

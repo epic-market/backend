@@ -185,7 +185,7 @@
                 <div class="card-body p-3">
                     @{
                         // Find the default variant
-                        var defaultVariant = Model.Catalog.CatalogVariants?.FirstOrDefault(v => v.IsDefaultVarient) ?? 
+                        var defaultVariant = Model.Catalog.CatalogVariants?.FirstOrDefault(v => v.IsDefaultVariant) ?? 
                                             Model.Catalog.CatalogVariants?.FirstOrDefault();
                         
                         // Get thumbnail for default variant
@@ -448,7 +448,7 @@
                                             <td>
                                                 <div class="d-flex flex-column">
                                                     <span class="fw-medium text-primary">@variant.SKU</span>
-                                                    @if (variant.IsDefaultVarient)
+                                                    @if (variant.IsDefaultVariant)
                                                     {
                                                         <span class="badge bg-success text-white mt-1" style="width: fit-content">Default</span>
                                                     }
@@ -554,7 +554,7 @@
                                                                         </div>
                                                                         <div class="key-value-item">
                                                                             <span class="text-muted">Is Default Variant</span>
-                                                                            <span class="fw-medium">@(variant.IsDefaultVarient ? "Yes" : "No")</span>
+                                                                            <span class="fw-medium">@(variant.IsDefaultVariant ? "Yes" : "No")</span>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -580,9 +580,9 @@
                                                                         <div class="key-value-item">
                                                                             <span class="text-muted">Dimensions (H x W x D)</span>
                                                                             <span class="fw-medium">
-                                                                                @if (variant.PackedHeight.HasValue && variant.PackedWidhth.HasValue && variant.PackedDepth.HasValue)
+                                                                                @if (variant.PackedHeight.HasValue && variant.PackedWidth.HasValue && variant.PackedDepth.HasValue)
                                                                                 {
-                                                                                    @($"{variant.PackedHeight.Value:N2} x {variant.PackedWidhth.Value:N2} x {variant.PackedDepth.Value:N2}")
+                                                                                    @($"{variant.PackedHeight.Value:N2} x {variant.PackedWidth.Value:N2} x {variant.PackedDepth.Value:N2}")
                                                                                 }
                                                                                 else
                                                                                 {

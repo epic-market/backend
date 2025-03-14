@@ -33,6 +33,6 @@ namespace EpicMarket.Data.Models
         [ForeignKey("TaskCategoryID")]
         public virtual ApplicationsTable EventCategorys { get; set; }
         public virtual ICollection<Tasks>? Tasks { get; set; }
-        public virtual ICollection<SupportQuerys>? SupportQuerys { get; set; }
+        public virtual ICollection<SupportQueries>? SupportQuerys { get; set; }
     }
 }

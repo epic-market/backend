@@ -102,22 +102,22 @@ namespace EpicMarket.Data.Webapp.AlterScripts
             }
 
             //add the status option set for unsubscribed
-            if (!dbContext.SusbcriptionStatuses.Any(cm => cm.Name == "Subscribed"))
+            if (!dbContext.SubscriptionStatus.Any(cm => cm.Name == "Subscribed"))
             {
-                var statusOptionSet = new SusbcriptionStatus
+                var statusOptionSet = new SubscriptionStatus
                 {
                     Name = "Subscribed",
                 };
-                dbContext.SusbcriptionStatuses.Add(statusOptionSet);
+                dbContext.SubscriptionStatus.Add(statusOptionSet);
             }
 
-            if (!dbContext.SusbcriptionStatuses.Any(cm => cm.Name == "Unsubscribed"))
+            if (!dbContext.SubscriptionStatus.Any(cm => cm.Name == "Unsubscribed"))
             {
-                var statusOptionSet = new SusbcriptionStatus
+                var statusOptionSet = new SubscriptionStatus
                 {
                     Name = "Unsubscribed",
                 };
-                dbContext.SusbcriptionStatuses.Add(statusOptionSet);
+                dbContext.SubscriptionStatus.Add(statusOptionSet);
             }
 
     dbContext.SaveChanges();    

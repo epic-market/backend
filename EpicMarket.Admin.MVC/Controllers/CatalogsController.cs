@@ -171,7 +171,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (catalog?.CatalogVariants != null)
             {
                 // Find default variant
-                var defaultVariant = catalog.CatalogVariants.FirstOrDefault(v => v.IsDefaultVarient) ?? 
+                var defaultVariant = catalog.CatalogVariants.FirstOrDefault(v => v.IsDefaultVariant) ?? 
                                      catalog.CatalogVariants.FirstOrDefault();
                 
                 // Fetch images for each variant
@@ -360,7 +360,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                                     CostPrice = variantData.GetProperty("CostPrice").GetDouble(),
                                     SalePrice = variantData.GetProperty("SalePrice").GetDouble(),
                                     Attributes = variantData.GetProperty("Attributes").GetString(),
-                                    IsDefaultVarient = variantData.TryGetProperty("IsDefault", out System.Text.Json.JsonElement isDefault) ? isDefault.GetBoolean() : false,
+                                    IsDefaultVariant = variantData.TryGetProperty("IsDefault", out System.Text.Json.JsonElement isDefault) ? isDefault.GetBoolean() : false,
                                     CreateBy = userName,
                                     CreateDate = DateTime.UtcNow
                                 };
@@ -379,7 +379,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                                     variant.PackedHeight = height.ValueKind != System.Text.Json.JsonValueKind.Null ? height.GetDouble() : null;
 
                                 if (variantData.TryGetProperty("PackedWidth", out System.Text.Json.JsonElement width))
-                                    variant.PackedWidhth = width.ValueKind != System.Text.Json.JsonValueKind.Null ? width.GetDouble() : null;
+                                    variant.PackedWidth = width.ValueKind != System.Text.Json.JsonValueKind.Null ? width.GetDouble() : null;
 
                                 if (variantData.TryGetProperty("PackedDepth", out System.Text.Json.JsonElement depth))
                                     variant.PackedDepth = depth.ValueKind != System.Text.Json.JsonValueKind.Null ? depth.GetDouble() : null;
@@ -414,7 +414,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                         Barcode = Request.Form["defaultVariant.Barcode"],
                         CostPrice = double.Parse(Request.Form["defaultVariant.CostPrice"]),
                         SalePrice = double.Parse(Request.Form["defaultVariant.SalePrice"]),
-                        IsDefaultVarient = true,
+                        IsDefaultVariant = true,
                         CreateBy = userName,
                         CreateDate = DateTime.UtcNow
                     };
@@ -433,7 +433,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                         defaultVariant.PackedHeight = double.Parse(Request.Form["defaultVariant.PackedHeight"]);
 
                     if (!string.IsNullOrEmpty(Request.Form["defaultVariant.PackedWidth"]))
-                        defaultVariant.PackedWidhth = double.Parse(Request.Form["defaultVariant.PackedWidth"]);
+                        defaultVariant.PackedWidth = double.Parse(Request.Form["defaultVariant.PackedWidth"]);
 
                     if (!string.IsNullOrEmpty(Request.Form["defaultVariant.PackedDepth"]))
                         defaultVariant.PackedDepth = double.Parse(Request.Form["defaultVariant.PackedDepth"]);
@@ -765,7 +765,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                             variant.CostPrice = variantData.GetProperty("CostPrice").GetDouble();
                             variant.SalePrice = variantData.GetProperty("SalePrice").GetDouble();
                             variant.Attributes = variantData.GetProperty("Attributes").GetString();
-                            variant.IsDefaultVarient = variantData.TryGetProperty("IsDefault", out System.Text.Json.JsonElement isDefault) ? isDefault.GetBoolean() : false;
+                            variant.IsDefaultVariant = variantData.TryGetProperty("IsDefault", out System.Text.Json.JsonElement isDefault) ? isDefault.GetBoolean() : false;
 
                             // Process optional numeric fields
                             if (variantData.TryGetProperty("CompareAtPrice", out System.Text.Json.JsonElement comparePrice))
@@ -781,7 +781,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                                 variant.PackedHeight = height.ValueKind != System.Text.Json.JsonValueKind.Null ? height.GetDouble() : null;
 
                             if (variantData.TryGetProperty("PackedWidth", out System.Text.Json.JsonElement width))
-                                variant.PackedWidhth = width.ValueKind != System.Text.Json.JsonValueKind.Null ? width.GetDouble() : null;
+                                variant.PackedWidth = width.ValueKind != System.Text.Json.JsonValueKind.Null ? width.GetDouble() : null;
 
                             if (variantData.TryGetProperty("PackedDepth", out System.Text.Json.JsonElement depth))
                                 variant.PackedDepth = depth.ValueKind != System.Text.Json.JsonValueKind.Null ? depth.GetDouble() : null;
@@ -912,7 +912,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                                 Barcode = Request.Form["defaultVariant.Barcode"],
                                 CostPrice = double.Parse(Request.Form["defaultVariant.CostPrice"]),
                                 SalePrice = double.Parse(Request.Form["defaultVariant.SalePrice"]),
-                                IsDefaultVarient = true,
+                                IsDefaultVariant = true,
                                 CreateBy = userName,
                                 CreateDate = DateTime.UtcNow
                             };
@@ -931,7 +931,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                                 defaultVariant.PackedHeight = double.Parse(Request.Form["defaultVariant.PackedHeight"]);
 
                             if (!string.IsNullOrEmpty(Request.Form["defaultVariant.PackedWidth"]))
-                                defaultVariant.PackedWidhth = double.Parse(Request.Form["defaultVariant.PackedWidth"]);
+                                defaultVariant.PackedWidth = double.Parse(Request.Form["defaultVariant.PackedWidth"]);
 
                             if (!string.IsNullOrEmpty(Request.Form["defaultVariant.PackedDepth"]))
                                 defaultVariant.PackedDepth = double.Parse(Request.Form["defaultVariant.PackedDepth"]);
@@ -987,13 +987,13 @@ namespace EpicMarket.Admin.MVC.Controllers
                         else
                         {
                             // Update existing default variant
-                            var defaultVariant = variants.FirstOrDefault(v => v.IsDefaultVarient) ?? variants.First();
+                            var defaultVariant = variants.FirstOrDefault(v => v.IsDefaultVariant) ?? variants.First();
                             
                             defaultVariant.SKU = Request.Form["defaultVariant.SKU"];
                             defaultVariant.Barcode = Request.Form["defaultVariant.Barcode"];
                             defaultVariant.CostPrice = double.Parse(Request.Form["defaultVariant.CostPrice"]);
                             defaultVariant.SalePrice = double.Parse(Request.Form["defaultVariant.SalePrice"]);
-                            defaultVariant.IsDefaultVarient = true;
+                            defaultVariant.IsDefaultVariant = true;
                             defaultVariant.ModifiedBy = userName;
                             defaultVariant.ModifiedDate = DateTime.UtcNow;
 
@@ -1019,9 +1019,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                                 defaultVariant.PackedHeight = null;
 
                             if (!string.IsNullOrEmpty(Request.Form["defaultVariant.PackedWidth"]))
-                                defaultVariant.PackedWidhth = double.Parse(Request.Form["defaultVariant.PackedWidth"]);
+                                defaultVariant.PackedWidth = double.Parse(Request.Form["defaultVariant.PackedWidth"]);
                             else
-                                defaultVariant.PackedWidhth = null;
+                                defaultVariant.PackedWidth = null;
 
                             if (!string.IsNullOrEmpty(Request.Form["defaultVariant.PackedDepth"]))
                                 defaultVariant.PackedDepth = double.Parse(Request.Form["defaultVariant.PackedDepth"]);

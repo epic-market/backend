@@ -11,14 +11,16 @@ namespace EpicMarket.Data.Models
 {
     public class TaskStatusType:BaseModel
     {
-        public int Id { get; set; }
+        [Key]
+        public int ID { get; set; }
+        
         [MaxLength(255)]
-
         [DisplayName("Task Status")]
         public string Status { get; set; }
+        
+        [MaxLength(500)]
         public string StatusDescription { get; set; }
 
         public virtual ICollection<Tasks> Tasks { get; set; }
-
     }
 }

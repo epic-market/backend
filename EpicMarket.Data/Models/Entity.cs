@@ -20,7 +20,7 @@ namespace EpicMarket.Data.Models
         public string Description { get; set; }
 
         public virtual ICollection<EventLog> EventLogs { get; set; } 
-        public virtual ICollection<Tasks> Taskss { get; set; }
+        public virtual ICollection<Tasks> Tasks { get; set; }
         public virtual ICollection<AttachmentLink> AttachmentLinks { get; set; }
 
 		public virtual ICollection<Comment> Comments { get; set; }

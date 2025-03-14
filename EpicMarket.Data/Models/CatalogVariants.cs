@@ -31,11 +31,11 @@ namespace EpicMarket.Data.Models
         public int? MaximumOrderQuantity { get; set; }
         public int? MinimumOrderQuantity { get; set; }
         public double? PackedHeight { get; set; }
-        public double? PackedWidhth { get; set; }
+        public double? PackedWidth { get; set; }
         public double? PackedDepth { get; set; }
         public string WeightUnit { get; set; }//kg,g,lbs,oz
         public double? Weight { get; set; } //value of weight
-        public bool IsDefaultVarient { get; set; }
+        public bool IsDefaultVariant { get; set; }
         public virtual Catalog Catalog { get; set; }
         public virtual ICollection<Inventory> Inventory { get; set; }
 

@@ -890,7 +890,7 @@
                 <text>
                 // Check if we should force variant view (multiple variants or single non-default variant)
                 const variantCount = @Model.CatalogVariants.Count();
-                    const hasDefaultVariant = @(Model.CatalogVariants.Any(v => v.IsDefaultVarient) ? "true" : "false");
+                    const hasDefaultVariant = @(Model.CatalogVariants.Any(v => v.IsDefaultVariant) ? "true" : "false");
                 const forceVariantView = variantCount > 1 || !hasDefaultVariant;
                 
                 // Set has variants toggle to true if multiple variants or the single one is not default
@@ -1004,7 +1004,7 @@
                 updateVariants();
                 
                 // Set default variant
-                const defaultVariant = @Html.Raw(Json.Serialize(Model.CatalogVariants.FirstOrDefault(v => v.IsDefaultVarient)));
+                const defaultVariant = @Html.Raw(Json.Serialize(Model.CatalogVariants.FirstOrDefault(v => v.IsDefaultVariant)));
                 if (defaultVariant) {
                     $(`.variant-combination[data-combo='${JSON.stringify(defaultVariant.Attributes)}']`)
                         .find('.set-as-default')
