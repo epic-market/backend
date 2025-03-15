@@ -98,6 +98,7 @@
 	<link rel="stylesheet" href="~/assets/css/header-colors.css" />
 	<link rel="stylesheet" href="~/assets/plugins/notifications/css/lobibox.min.css" />
 	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/css/spinner.css" asp-append-version="true" />
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 	<title>Epic Market</title>
 	@RenderSection("Styles", required: false)
@@ -980,6 +981,8 @@
 	<script src="~/assets/plugins/notifications/js/notifications.min.js"></script>
 	<script src="~/assets/plugins/select2/js/select2.min.js"></script>
 
+	<!-- Global spinner for data loading -->
+	<script src="~/js/spinner.js"></script>
 
 	@await RenderSectionAsync("Scripts", required: false)
 	
