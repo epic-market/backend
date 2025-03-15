@@ -85,5 +85,7 @@ public DbSet<EpicMarket.Data.Models.UserOnboardingProgress> UserOnboardingProgre
 
 public DbSet<EpicMarket.Data.Models.AttachmentLink> AttachmentLink { get; set; } = default!;
 
+public DbSet<EpicMarket.Data.Models.Inventory> Inventory { get; set; } = default!;
+
 
 }
