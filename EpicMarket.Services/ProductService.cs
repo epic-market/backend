@@ -644,7 +644,7 @@ namespace EpicMarket.Services
                     RequiresRefrigeration = c.RequiresRefrigeration,
                     BaseHightlights = c.BaseHightlights,
                     IsRecommended = c.IsRecommended,
-                    VariantOptions = c.VarientOptions,
+                    VariantOptions = c.VariantOptions,
                     Variants = c.CatalogVariants.Where(v => v.IsActive).Select(v => new VariantResultForDetails
                     {
                         VariantId = v.ID,

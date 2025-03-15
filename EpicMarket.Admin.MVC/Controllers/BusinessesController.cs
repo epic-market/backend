@@ -642,7 +642,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                     catalog.CategoryID = categoryId;
                     catalog.BusinessID = id;
                     catalog.CreateBy = User.Identity.Name;
-                    catalog.VarientOptions = GetVarientOptionsJson(group);
+                    catalog.VariantOptions = GetVarientOptionsJson(group);
                     
                     _context.Catalogs.Add(catalog);
                     await _context.SaveChangesAsync();

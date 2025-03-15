@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EpicMarket.Data.Common;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace EpicMarket.Data.Models
 {
@@ -36,6 +37,8 @@ namespace EpicMarket.Data.Models
         public string WeightUnit { get; set; }//kg,g,lbs,oz
         public double? Weight { get; set; } //value of weight
         public bool IsDefaultVariant { get; set; }
+
+        [JsonIgnore]
         public virtual Catalog Catalog { get; set; }
         public virtual ICollection<Inventory> Inventory { get; set; }
 

@@ -318,24 +318,25 @@ namespace EpicMarket.Admin.MVC.Controllers
                     _context.Add(catalog);
                     await _context.SaveChangesAsync();
 
-                    // Process variant data - improved check for actual variants
-                    bool hasValidVariants = Request.Form.ContainsKey("VariantData") && 
-                                           !string.IsNullOrEmpty(Request.Form["VariantData"]) && 
-                                           Request.Form["VariantData"] != "[]" &&
-                                           Request.Form.ContainsKey("hasVariants") &&
-                                           Request.Form["hasVariants"] == "true";
+                    // Process variant data - unified approach for all variants
+                    bool hasVariantData = Request.Form.ContainsKey("VariantData") && 
+                                         !string.IsNullOrEmpty(Request.Form["VariantData"]) && 
+                                         Request.Form["VariantData"] != "[]";
                     
-                    if (hasValidVariants)
+                    if (hasVariantData)
                     {
-                        // Multiple variants case
                         var variantDataJson = Request.Form["VariantData"].ToString();
                         var variantsData = System.Text.Json.JsonSerializer.Deserialize<List<dynamic>>(variantDataJson);
                         
                         // Double check if we actually have variants
                         if (variantsData != null && variantsData.Count > 0)
                         {
-                            // Validate and save variant options
-                            if (Request.Form.ContainsKey("VariantOptions"))
+                            // Validate and save variant options if in variant mode
+                            bool hasMultipleVariants = variantsData.Count > 1 || 
+                                                      (Request.Form.ContainsKey("hasVariants") && 
+                                                       Request.Form["hasVariants"] == "true");
+                            
+                            if (hasMultipleVariants && Request.Form.ContainsKey("VariantOptions"))
                             {
                                 string variantOptions = ValidateVariantOptions(
                                     Request.Form["VariantOptions"].ToString(), 
@@ -343,7 +344,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                                     variantsData.Count
                                 );
                                 
-                                catalog.VarientOptions = variantOptions;
+                                catalog.VariantOptions = variantOptions;
                                 _context.Update(catalog);
                                 await _context.SaveChangesAsync();
                             }
@@ -359,8 +360,8 @@ namespace EpicMarket.Admin.MVC.Controllers
                                     Barcode = variantData.TryGetProperty("Barcode", out System.Text.Json.JsonElement barcode) ? barcode.GetString() : null,
                                     CostPrice = variantData.GetProperty("CostPrice").GetDouble(),
                                     SalePrice = variantData.GetProperty("SalePrice").GetDouble(),
-                                    Attributes = variantData.GetProperty("Attributes").GetString(),
-                                    IsDefaultVariant = variantData.TryGetProperty("IsDefault", out System.Text.Json.JsonElement isDefault) ? isDefault.GetBoolean() : false,
+                                    Attributes = variantData.TryGetProperty("Attributes", out System.Text.Json.JsonElement attributes) ? attributes.GetString() : "{}",
+                                    IsDefaultVariant = variantData.TryGetProperty("IsDefault", out System.Text.Json.JsonElement isDefault) ? isDefault.GetBoolean() : (i == 0),
                                     CreateBy = userName,
                                     CreateDate = DateTime.UtcNow
                                 };
@@ -397,112 +398,91 @@ namespace EpicMarket.Admin.MVC.Controllers
                                 await _context.SaveChangesAsync();
 
                                 // Handle attachments for this variant
-                                await HandleVariantAttachments(variant.ID, i, catalog.BusinessID);
+                                // For default mode, use variants_0 naming
+                                // For variant mode, use variants_index naming
+                                bool isDefaultMode = !hasMultipleVariants && i == 0;
+                                
+                                var thumbnailFiles = isDefaultMode 
+                                    ? Request.Form.Files.Where(f => f.Name == "variants_0_thumbnail").ToArray()
+                                    : Request.Form.Files.Where(f => f.Name == $"variants_{i}_thumbnail").ToArray();
+                                    
+                                var productImageFiles = isDefaultMode
+                                    ? Request.Form.Files.Where(f => f.Name == "variants_0_productImages").ToArray()
+                                    : Request.Form.Files.Where(f => f.Name == $"variants_{i}_productImages").ToArray();
+
+                                if (thumbnailFiles.Length > 0)
+                                {
+                                    var attachmentModel = new BusinessAttachmentModel()
+                                    {
+                                        Name = EntityConstants.CatelogVariant,
+                                        Comment = $"Thumbnail for variant {variant.ID}",
+                                        RecordID = variant.ID,
+                                        Entity = EntityConstants.CatelogVariant,
+                                        AttachmentType = AttachmentTypeConstants.THUMBNAIL,
+                                        Files = thumbnailFiles,
+                                        BusinessID = catalog.BusinessID
+                                    };
+                                    await attachmentService.UploadBusinessAttachment(attachmentModel);
+                                }
+
+                                if (productImageFiles.Length > 0)
+                                {
+                                    var attachmentModel = new BusinessAttachmentModel()
+                                    {
+                                        Name = EntityConstants.CatelogVariant,
+                                        Comment = $"Product images for variant {variant.ID}",
+                                        RecordID = variant.ID,
+                                        Entity = EntityConstants.CatelogVariant,
+                                        AttachmentType = AttachmentTypeConstants.PRODUCTIMAGES,
+                                        Files = productImageFiles,
+                                        BusinessID = catalog.BusinessID
+                                    };
+                                    await attachmentService.UploadBusinessAttachment(attachmentModel);
+                                }
                             }
                             
-                            // We successfully processed variants, so return early
+                            // Log the event
+                            await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                            {
+                                EventName = EventConstants.AddCatalog,
+                                EntityName = EntityConstants.Catalog,
+                                Source = _urlContextService.CurrentPageUrl,
+                                Description = $"Added catalog '{catalog.Name}' with {variantsData.Count} variants",
+                                Data = System.Text.Json.JsonSerializer.Serialize(catalog),
+                                RecordId = catalog.ID,
+                                BusinessID = catalog.BusinessID,
+                                LoggedInUserName = User.Identity.Name
+                            });
+                            
                             return RedirectToAction(nameof(Index));
                         }
                     }
                     
-                    // If we get here, either there were no variants or variants processing failed
-                    // Default variant case - create one variant from form data
-                    var defaultVariant = new CatalogVariants
-                    {
-                        CatalogID = catalog.ID,
-                        SKU = Request.Form["defaultVariant.SKU"],
-                        Barcode = Request.Form["defaultVariant.Barcode"],
-                        CostPrice = double.Parse(Request.Form["defaultVariant.CostPrice"]),
-                        SalePrice = double.Parse(Request.Form["defaultVariant.SalePrice"]),
-                        IsDefaultVariant = true,
-                        CreateBy = userName,
-                        CreateDate = DateTime.UtcNow
-                    };
-
-                    // Process optional fields
-                    if (!string.IsNullOrEmpty(Request.Form["defaultVariant.CompareAtPrice"]))
-                        defaultVariant.CompareAtPrice = double.Parse(Request.Form["defaultVariant.CompareAtPrice"]);
-
-                    if (!string.IsNullOrEmpty(Request.Form["defaultVariant.MinimumOrderQuantity"]))
-                        defaultVariant.MinimumOrderQuantity = int.Parse(Request.Form["defaultVariant.MinimumOrderQuantity"]);
-
-                    if (!string.IsNullOrEmpty(Request.Form["defaultVariant.MaximumOrderQuantity"]))
-                        defaultVariant.MaximumOrderQuantity = int.Parse(Request.Form["defaultVariant.MaximumOrderQuantity"]);
-
-                    if (!string.IsNullOrEmpty(Request.Form["defaultVariant.PackedHeight"]))
-                        defaultVariant.PackedHeight = double.Parse(Request.Form["defaultVariant.PackedHeight"]);
-
-                    if (!string.IsNullOrEmpty(Request.Form["defaultVariant.PackedWidth"]))
-                        defaultVariant.PackedWidth = double.Parse(Request.Form["defaultVariant.PackedWidth"]);
-
-                    if (!string.IsNullOrEmpty(Request.Form["defaultVariant.PackedDepth"]))
-                        defaultVariant.PackedDepth = double.Parse(Request.Form["defaultVariant.PackedDepth"]);
-
-                    if (!string.IsNullOrEmpty(Request.Form["defaultVariant.WeightUnit"]))
-                        defaultVariant.WeightUnit = Request.Form["defaultVariant.WeightUnit"];
-
-                    if (!string.IsNullOrEmpty(Request.Form["defaultVariant.Weight"]))
-                        defaultVariant.Weight = double.Parse(Request.Form["defaultVariant.Weight"]);
-
-                    _context.CatalogVariants.Add(defaultVariant);
-                    await _context.SaveChangesAsync();
-
-                    // Handle default variant attachments
-                    var thumbnailFiles = Request.Form.Files
-                        .Where(f => f.Name == "defaultVariant.thumbnail")
-                        .ToArray();
+                    // If we get here, something went wrong with variant processing
+                    ModelState.AddModelError("", "No valid variant data was provided. Please try again.");
                     
-                    var productImageFiles = Request.Form.Files
-                        .Where(f => f.Name == "defaultVariant.productImages")
-                        .ToArray();
-
-                    if (thumbnailFiles.Length > 0)
+                    // Log the error for debugging
+                    System.Diagnostics.Debug.WriteLine("Failed to process variants. Form data:");
+                    foreach (var key in Request.Form.Keys)
                     {
-                        var attachmentModel = new BusinessAttachmentModel()
-                        {
-                            Name = EntityConstants.CatelogVariant,
-                            Comment = $"Thumbnail for default variant",
-                            RecordID = defaultVariant.ID,
-                            Entity = EntityConstants.CatelogVariant,
-                            AttachmentType = AttachmentTypeConstants.THUMBNAIL,
-                            Files = thumbnailFiles,
-                            BusinessID = catalog.BusinessID
-                        };
-                        await attachmentService.UploadBusinessAttachment(attachmentModel);
+                        System.Diagnostics.Debug.WriteLine($"{key}: {Request.Form[key]}");
                     }
-
-                    if (productImageFiles.Length > 0)
-                    {
-                        var attachmentModel = new BusinessAttachmentModel()
-                        {
-                            Name = EntityConstants.CatelogVariant,
-                            Comment = $"Product images for default variant",
-                            RecordID = defaultVariant.ID,
-                            Entity = EntityConstants.CatelogVariant,
-                            AttachmentType = AttachmentTypeConstants.PRODUCTIMAGES,
-                            Files = productImageFiles,
-                            BusinessID = catalog.BusinessID
-                        };
-                        await attachmentService.UploadBusinessAttachment(attachmentModel);
-                    }
-
-                    // Log the event
-                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
-                    {
-                        EventName = EventConstants.AddCatalog,
-                        EntityName = EntityConstants.Catalog,
-                        Source = _urlContextService.CurrentPageUrl,
-                        Description = $"Added catalog '{catalog.Name}'",
-                        Data = System.Text.Json.JsonSerializer.Serialize(catalog),
-                        RecordId = catalog.ID,
-                        BusinessID = catalog.BusinessID,
-                        LoggedInUserName = User.Identity.Name
-                    });
-
-                    return RedirectToAction(nameof(Index));
+                    
+                    ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "Name", catalog.BusinessID);
+                    ViewData["StatusId"] = new SelectList(_context.StatusOptionSets, "Id", "Status", catalog.StatusId);
+                    return View(catalog);
                 }
                 catch (Exception ex)
                 {
+                    // Log the exception details
+                    System.Diagnostics.Debug.WriteLine($"Error saving catalog: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                    
+                    if (ex.InnerException != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                    }
+                    
                     ModelState.AddModelError("", $"Error saving catalog: {ex.Message}");
                 }
             }
@@ -510,47 +490,6 @@ namespace EpicMarket.Admin.MVC.Controllers
             ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "Name", catalog.BusinessID);
             ViewData["StatusId"] = new SelectList(_context.StatusOptionSets, "Id", "Status", catalog.StatusId);
             return View(catalog);
-        }
-
-        private async Task HandleVariantAttachments(int variantId, int variantIndex, int businessId)
-        {
-            var thumbnailFiles = Request.Form.Files
-                .Where(f => f.Name == $"variants[{variantIndex}].thumbnail")
-                .ToArray();
-                
-            var productImageFiles = Request.Form.Files
-                .Where(f => f.Name == $"variants[{variantIndex}].productImages")
-                .ToArray();
-
-            if (thumbnailFiles.Length > 0)
-            {
-                var attachmentModel = new BusinessAttachmentModel()
-                {
-                    Name = EntityConstants.CatelogVariant,
-                    Comment = $"Thumbnail for variant {variantId}",
-                    RecordID = variantId,
-                    Entity = EntityConstants.CatelogVariant,
-                    AttachmentType = AttachmentTypeConstants.THUMBNAIL,
-                    Files = thumbnailFiles,
-                    BusinessID = businessId
-                };
-                await attachmentService.UploadBusinessAttachment(attachmentModel);
-            }
-
-            if (productImageFiles.Length > 0)
-            {
-                var attachmentModel = new BusinessAttachmentModel()
-                {
-                    Name = EntityConstants.CatelogVariant,
-                    Comment = $"Product images for variant {variantId}",
-                    RecordID = variantId,
-                    Entity = EntityConstants.CatelogVariant,
-                    AttachmentType = AttachmentTypeConstants.PRODUCTIMAGES,
-                    Files = productImageFiles,
-                    BusinessID = businessId
-                };
-                await attachmentService.UploadBusinessAttachment(attachmentModel);
-            }
         }
 
         // GET: Catalogs/Edit/5
@@ -719,7 +658,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                                 variantsData.Count
                             );
                             
-                            catalog.VarientOptions = variantOptions;
+                            catalog.VariantOptions = variantOptions;
                             _context.Update(catalog);
                             await _context.SaveChangesAsync();
                         }
@@ -806,96 +745,47 @@ namespace EpicMarket.Admin.MVC.Controllers
                             
                             await _context.SaveChangesAsync();
 
-                            // For new variants, we need to process attachments
-                            // For existing variants, check if there are new files
-                            if (isNewVariant)
+                            // Handle new variant attachments directly
+                            var thumbnailFiles = Request.Form.Files
+                                .Where(f => f.Name == $"variants_{i}_thumbnail")
+                                .ToArray();
+                                
+                            var productImageFiles = Request.Form.Files
+                                .Where(f => f.Name == $"variants_{i}_productImages")
+                                .ToArray();
+
+                            if (thumbnailFiles.Length > 0)
                             {
-                                await HandleVariantAttachments(variant.ID, i, catalog.BusinessID);
+                                var attachmentModel = new BusinessAttachmentModel()
+                                {
+                                    Name = EntityConstants.CatelogVariant,
+                                    Comment = $"Thumbnail for variant {variant.ID}",
+                                    RecordID = variant.ID,
+                                    Entity = EntityConstants.CatelogVariant,
+                                    AttachmentType = AttachmentTypeConstants.THUMBNAIL,
+                                    Files = thumbnailFiles,
+                                    BusinessID = catalog.BusinessID
+                                };
+                                await attachmentService.UploadBusinessAttachment(attachmentModel);
                             }
-                            else
+
+                            if (productImageFiles.Length > 0)
                             {
-                                // Handle attachment updates - similar to how BusinessesController does it
-                                string variantThumbnailUpdateFlag = $"variants[{i}].thumbnailUpdated";
-                                string variantImagesUpdateFlag = $"variants[{i}].imagesUpdated";
-                                
-                                if (Request.Form.ContainsKey(variantThumbnailUpdateFlag) && Request.Form[variantThumbnailUpdateFlag] == "true")
+                                var attachmentModel = new BusinessAttachmentModel()
                                 {
-                                    var thumbnailFiles = Request.Form.Files
-                                        .Where(f => f.Name == $"variants[{i}].thumbnail")
-                                        .ToArray();
-                                        
-                                    if (thumbnailFiles.Length > 0)
-                                    {
-                                        // Delete existing thumbnails
-                                        var existingThumbnails = await attachmentService.GetAttachmentLinks(new GetAttachmentLink()
-                                        {
-                                            AttachmentType = AttachmentTypeConstants.THUMBNAIL,
-                                            Entity = EntityConstants.CatelogVariant,
-                                            RecordID = variant.ID
-                                        });
-                                        
-                                        if (existingThumbnails?.Count > 0)
-                                        {
-                                            await fileService.DeleteImage(existingThumbnails, userName);
-                                        }
-                                        
-                                        // Upload new thumbnail
-                                        var attachmentModel = new BusinessAttachmentModel()
-                                        {
-                                            Name = EntityConstants.CatelogVariant,
-                                            Comment = $"Thumbnail for variant {variant.ID}",
-                                            RecordID = variant.ID,
-                                            Entity = EntityConstants.CatelogVariant,
-                                            AttachmentType = AttachmentTypeConstants.THUMBNAIL,
-                                            Files = thumbnailFiles,
-                                            BusinessID = catalog.BusinessID
-                                        };
-                                        await attachmentService.UploadBusinessAttachment(attachmentModel);
-                                    }
-                                }
-                                
-                                if (Request.Form.ContainsKey(variantImagesUpdateFlag) && Request.Form[variantImagesUpdateFlag] == "true")
-                                {
-                                    var productImageFiles = Request.Form.Files
-                                        .Where(f => f.Name == $"variants[{i}].productImages")
-                                        .ToArray();
-                                        
-                                    if (productImageFiles.Length > 0)
-                                    {
-                                        // Instead of deleting existing images, we might want to keep them
-                                        // and just add new ones. If deletion is required, uncomment:
-                                        /*
-                                        var existingImages = await attachmentService.GetAttachmentLinks(new GetAttachmentLink()
-                                        {
-                                            AttachmentType = AttachmentTypeConstants.PRODUCTIMAGES,
-                                            Entity = EntityConstants.CatelogVariant,
-                                            RecordID = variant.ID
-                                        });
-                                        
-                                        if (existingImages?.Count > 0)
-                                        {
-                                            await fileService.DeleteImage(existingImages, userName);
-                                        }
-                                        */
-                                        
-                                        // Upload new product images
-                                        var attachmentModel = new BusinessAttachmentModel()
-                                        {
-                                            Name = EntityConstants.CatelogVariant,
-                                            Comment = $"Product images for variant {variant.ID}",
-                                            RecordID = variant.ID,
-                                            Entity = EntityConstants.CatelogVariant,
-                                            AttachmentType = AttachmentTypeConstants.PRODUCTIMAGES,
-                                            Files = productImageFiles,
-                                            BusinessID = catalog.BusinessID
-                                        };
-                                        await attachmentService.UploadBusinessAttachment(attachmentModel);
-                                    }
-                                }
+                                    Name = EntityConstants.CatelogVariant,
+                                    Comment = $"Product images for variant {variant.ID}",
+                                    RecordID = variant.ID,
+                                    Entity = EntityConstants.CatelogVariant,
+                                    AttachmentType = AttachmentTypeConstants.PRODUCTIMAGES,
+                                    Files = productImageFiles,
+                                    BusinessID = catalog.BusinessID
+                                };
+                                await attachmentService.UploadBusinessAttachment(attachmentModel);
                             }
                         }
                     }
-                    else if (Request.Form.ContainsKey("defaultVariant.SKU"))
+                    else if (Request.Form.ContainsKey("defaultVariant_SKU"))
                     {
                         // Handle default variant update
                         var variants = await _context.CatalogVariants
@@ -908,50 +798,50 @@ namespace EpicMarket.Admin.MVC.Controllers
                             var defaultVariant = new CatalogVariants
                             {
                                 CatalogID = catalog.ID,
-                                SKU = Request.Form["defaultVariant.SKU"],
-                                Barcode = Request.Form["defaultVariant.Barcode"],
-                                CostPrice = double.Parse(Request.Form["defaultVariant.CostPrice"]),
-                                SalePrice = double.Parse(Request.Form["defaultVariant.SalePrice"]),
+                                SKU = Request.Form["defaultVariant_SKU"],
+                                Barcode = Request.Form["defaultVariant_Barcode"],
+                                CostPrice = double.Parse(Request.Form["defaultVariant_CostPrice"]),
+                                SalePrice = double.Parse(Request.Form["defaultVariant_SalePrice"]),
                                 IsDefaultVariant = true,
                                 CreateBy = userName,
                                 CreateDate = DateTime.UtcNow
                             };
 
                             // Process optional fields
-                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant.CompareAtPrice"]))
-                                defaultVariant.CompareAtPrice = double.Parse(Request.Form["defaultVariant.CompareAtPrice"]);
+                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant_CompareAtPrice"]))
+                                defaultVariant.CompareAtPrice = double.Parse(Request.Form["defaultVariant_CompareAtPrice"]);
 
-                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant.MinimumOrderQuantity"]))
-                                defaultVariant.MinimumOrderQuantity = int.Parse(Request.Form["defaultVariant.MinimumOrderQuantity"]);
+                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant_MinimumOrderQuantity"]))
+                                defaultVariant.MinimumOrderQuantity = int.Parse(Request.Form["defaultVariant_MinimumOrderQuantity"]);
 
-                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant.MaximumOrderQuantity"]))
-                                defaultVariant.MaximumOrderQuantity = int.Parse(Request.Form["defaultVariant.MaximumOrderQuantity"]);
+                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant_MaximumOrderQuantity"]))
+                                defaultVariant.MaximumOrderQuantity = int.Parse(Request.Form["defaultVariant_MaximumOrderQuantity"]);
 
-                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant.PackedHeight"]))
-                                defaultVariant.PackedHeight = double.Parse(Request.Form["defaultVariant.PackedHeight"]);
+                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant_PackedHeight"]))
+                                defaultVariant.PackedHeight = double.Parse(Request.Form["defaultVariant_PackedHeight"]);
 
-                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant.PackedWidth"]))
-                                defaultVariant.PackedWidth = double.Parse(Request.Form["defaultVariant.PackedWidth"]);
+                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant_PackedWidth"]))
+                                defaultVariant.PackedWidth = double.Parse(Request.Form["defaultVariant_PackedWidth"]);
 
-                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant.PackedDepth"]))
-                                defaultVariant.PackedDepth = double.Parse(Request.Form["defaultVariant.PackedDepth"]);
+                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant_PackedDepth"]))
+                                defaultVariant.PackedDepth = double.Parse(Request.Form["defaultVariant_PackedDepth"]);
 
-                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant.WeightUnit"]))
-                                defaultVariant.WeightUnit = Request.Form["defaultVariant.WeightUnit"];
+                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant_WeightUnit"]))
+                                defaultVariant.WeightUnit = Request.Form["defaultVariant_WeightUnit"];
 
-                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant.Weight"]))
-                                defaultVariant.Weight = double.Parse(Request.Form["defaultVariant.Weight"]);
+                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant_Weight"]))
+                                defaultVariant.Weight = double.Parse(Request.Form["defaultVariant_Weight"]);
 
                             _context.CatalogVariants.Add(defaultVariant);
                             await _context.SaveChangesAsync();
 
                             // Handle default variant attachments
                             var thumbnailFiles = Request.Form.Files
-                                .Where(f => f.Name == "defaultVariant.thumbnail")
+                                .Where(f => f.Name == "defaultVariant_thumbnail")
                                 .ToArray();
                                 
                             var productImageFiles = Request.Form.Files
-                                .Where(f => f.Name == "defaultVariant.productImages")
+                                .Where(f => f.Name == "defaultVariant_productImages")
                                 .ToArray();
 
                             if (thumbnailFiles.Length > 0)
@@ -989,52 +879,52 @@ namespace EpicMarket.Admin.MVC.Controllers
                             // Update existing default variant
                             var defaultVariant = variants.FirstOrDefault(v => v.IsDefaultVariant) ?? variants.First();
                             
-                            defaultVariant.SKU = Request.Form["defaultVariant.SKU"];
-                            defaultVariant.Barcode = Request.Form["defaultVariant.Barcode"];
-                            defaultVariant.CostPrice = double.Parse(Request.Form["defaultVariant.CostPrice"]);
-                            defaultVariant.SalePrice = double.Parse(Request.Form["defaultVariant.SalePrice"]);
+                            defaultVariant.SKU = Request.Form["defaultVariant_SKU"];
+                            defaultVariant.Barcode = Request.Form["defaultVariant_Barcode"];
+                            defaultVariant.CostPrice = double.Parse(Request.Form["defaultVariant_CostPrice"]);
+                            defaultVariant.SalePrice = double.Parse(Request.Form["defaultVariant_SalePrice"]);
                             defaultVariant.IsDefaultVariant = true;
                             defaultVariant.ModifiedBy = userName;
                             defaultVariant.ModifiedDate = DateTime.UtcNow;
 
                             // Process optional fields
-                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant.CompareAtPrice"]))
-                                defaultVariant.CompareAtPrice = double.Parse(Request.Form["defaultVariant.CompareAtPrice"]);
+                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant_CompareAtPrice"]))
+                                defaultVariant.CompareAtPrice = double.Parse(Request.Form["defaultVariant_CompareAtPrice"]);
                             else
                                 defaultVariant.CompareAtPrice = null;
 
-                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant.MinimumOrderQuantity"]))
-                                defaultVariant.MinimumOrderQuantity = int.Parse(Request.Form["defaultVariant.MinimumOrderQuantity"]);
+                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant_MinimumOrderQuantity"]))
+                                defaultVariant.MinimumOrderQuantity = int.Parse(Request.Form["defaultVariant_MinimumOrderQuantity"]);
                             else
                                 defaultVariant.MinimumOrderQuantity = null;
 
-                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant.MaximumOrderQuantity"]))
-                                defaultVariant.MaximumOrderQuantity = int.Parse(Request.Form["defaultVariant.MaximumOrderQuantity"]);
+                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant_MaximumOrderQuantity"]))
+                                defaultVariant.MaximumOrderQuantity = int.Parse(Request.Form["defaultVariant_MaximumOrderQuantity"]);
                             else
                                 defaultVariant.MaximumOrderQuantity = null;
 
-                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant.PackedHeight"]))
-                                defaultVariant.PackedHeight = double.Parse(Request.Form["defaultVariant.PackedHeight"]);
+                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant_PackedHeight"]))
+                                defaultVariant.PackedHeight = double.Parse(Request.Form["defaultVariant_PackedHeight"]);
                             else
                                 defaultVariant.PackedHeight = null;
 
-                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant.PackedWidth"]))
-                                defaultVariant.PackedWidth = double.Parse(Request.Form["defaultVariant.PackedWidth"]);
+                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant_PackedWidth"]))
+                                defaultVariant.PackedWidth = double.Parse(Request.Form["defaultVariant_PackedWidth"]);
                             else
                                 defaultVariant.PackedWidth = null;
 
-                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant.PackedDepth"]))
-                                defaultVariant.PackedDepth = double.Parse(Request.Form["defaultVariant.PackedDepth"]);
+                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant_PackedDepth"]))
+                                defaultVariant.PackedDepth = double.Parse(Request.Form["defaultVariant_PackedDepth"]);
                             else
                                 defaultVariant.PackedDepth = null;
 
-                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant.WeightUnit"]))
-                                defaultVariant.WeightUnit = Request.Form["defaultVariant.WeightUnit"];
+                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant_WeightUnit"]))
+                                defaultVariant.WeightUnit = Request.Form["defaultVariant_WeightUnit"];
                             else
                                 defaultVariant.WeightUnit = null;
 
-                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant.Weight"]))
-                                defaultVariant.Weight = double.Parse(Request.Form["defaultVariant.Weight"]);
+                            if (!string.IsNullOrEmpty(Request.Form["defaultVariant_Weight"]))
+                                defaultVariant.Weight = double.Parse(Request.Form["defaultVariant_Weight"]);
                             else
                                 defaultVariant.Weight = null;
 
@@ -1042,11 +932,11 @@ namespace EpicMarket.Admin.MVC.Controllers
                             await _context.SaveChangesAsync();
 
                             // Handle default variant thumbnail update
-                            if (Request.Form.ContainsKey("defaultVariant.thumbnailUpdated") && 
-                                Request.Form["defaultVariant.thumbnailUpdated"] == "true")
+                            if (Request.Form.ContainsKey("defaultVariant_thumbnailUpdated") && 
+                                Request.Form["defaultVariant_thumbnailUpdated"] == "true")
                             {
                                 var thumbnailFiles = Request.Form.Files
-                                    .Where(f => f.Name == "defaultVariant.thumbnail")
+                                    .Where(f => f.Name == "defaultVariant_thumbnail")
                                     .ToArray();
                                     
                                 if (thumbnailFiles.Length > 0)
@@ -1080,11 +970,11 @@ namespace EpicMarket.Admin.MVC.Controllers
                             }
 
                             // Handle default variant product images update
-                            if (Request.Form.ContainsKey("defaultVariant.imagesUpdated") && 
-                                Request.Form["defaultVariant.imagesUpdated"] == "true")
+                            if (Request.Form.ContainsKey("defaultVariant_imagesUpdated") && 
+                                Request.Form["defaultVariant_imagesUpdated"] == "true")
                             {
                                 var productImageFiles = Request.Form.Files
-                                    .Where(f => f.Name == "defaultVariant.productImages")
+                                    .Where(f => f.Name == "defaultVariant_productImages")
                                     .ToArray();
                                     
                                 if (productImageFiles.Length > 0)
