@@ -35,13 +35,12 @@ namespace EpicMarket.Admin.MVC.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-
             var roles = _context.Roles.ToList();
             var securables = _context.ApplicationSecurables.ToList();
-            var accessTypes = _context.AccessTypes.ToList();
+            var accessTypes = _context.AccessTypes.OrderBy(at => at.Priority).ToList();
 
             // Assume "Denied" has ID 0
-            var deniedAccessTypeId = 0;
+            var deniedAccessTypeId = accessTypes.FirstOrDefault(at => at.Name.ToLower() == "denied")?.Id ?? 0;
 
             var viewModel = new SecurityMatrixViewModel
             {
@@ -54,7 +53,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                         r => _context.AccessControlLists
                             .FirstOrDefault(rs => rs.RoleID == r.Id && rs.SecurableID == s.Id)?.AccessTypeID ?? deniedAccessTypeId
                     )
-                }).ToList(),
+                }).OrderBy(s => s.Name).ToList(),
                 AccessTypes = accessTypes.Select(at => new AccessTypeViewModel
                 {
                     ID = at.Id,
@@ -64,12 +63,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             };
 
             return View(viewModel);
-
-
-            //var authDbContext = _context.AccessControlLists.Include(a => a.AccessType).Include(a => a.Role).Include(a => a.Securable);
-            //return View(await authDbContext.ToListAsync());
         }
-
 
         [HttpPost]
         [SecurableAuthorize(SecurableConstants.AccessControlListsEdit)]
@@ -132,9 +126,5 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return Json(new { success = false, message = "An error occurred while updating the access type." });
             }
         }
-
-   
-
-     
     }
 }

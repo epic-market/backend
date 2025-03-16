@@ -43,7 +43,84 @@ namespace EpicMarket.Admin.MVC.Controllers
         [SecurableAuthorize(SecurableConstants.AppUsersView)]
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Users.ToListAsync());
+            return View();
+        }
+
+        [HttpPost]
+        [Route("AppUsers/GetFilteredData")]
+        [SecurableAuthorize(SecurableConstants.AppUsersView)]
+        public async Task<IActionResult> GetFilteredData([FromBody] UserFilterViewModel filter)
+        {
+            try
+            {
+                var query = _context.Users.AsQueryable();
+
+                // Apply filters
+                if (!string.IsNullOrWhiteSpace(filter.UserId))
+                {
+                    if (int.TryParse(filter.UserId, out int userId))
+                    {
+                        query = query.Where(u => u.Id == userId);
+                    }
+                    else
+                    {
+                        query = query.Where(u => u.Id.ToString().Contains(filter.UserId));
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(filter.Username))
+                {
+                    query = query.Where(u => u.UserName.Contains(filter.Username));
+                }
+
+                if (!string.IsNullOrWhiteSpace(filter.Email))
+                {
+                    query = query.Where(u => u.Email.Contains(filter.Email));
+                }
+
+                if (!string.IsNullOrWhiteSpace(filter.Name))
+                {
+                    query = query.Where(u => 
+                        (u.FirstName != null && u.FirstName.Contains(filter.Name)) || 
+                        (u.LastName != null && u.LastName.Contains(filter.Name)) ||
+                        ((u.FirstName + " " + u.LastName).Contains(filter.Name))
+                    );
+                }
+
+                var totalRecords = await query.CountAsync();
+
+                // Apply sorting
+                query = filter.SortColumn?.ToLower() switch
+                {
+                    "id" => filter.SortDirection == "asc" ? query.OrderBy(u => u.Id) : query.OrderByDescending(u => u.Id),
+                    "username" => filter.SortDirection == "asc" ? query.OrderBy(u => u.UserName) : query.OrderByDescending(u => u.UserName),
+                    "name" => filter.SortDirection == "asc" ? query.OrderBy(u => u.FirstName).ThenBy(u => u.LastName) : query.OrderByDescending(u => u.FirstName).ThenByDescending(u => u.LastName),
+                    "email" => filter.SortDirection == "asc" ? query.OrderBy(u => u.Email) : query.OrderByDescending(u => u.Email),
+                    "phone" => filter.SortDirection == "asc" ? query.OrderBy(u => u.PhoneNumber) : query.OrderByDescending(u => u.PhoneNumber),
+                    _ => query.OrderBy(u => u.Id)
+                };
+
+                // Apply pagination and project to DTO
+                var users = await query
+                    .Skip((filter.PageNumber - 1) * filter.PageSize)
+                    .Take(filter.PageSize)
+                    .Select(u => new UserDto
+                    {
+                        Id = u.Id,
+                        UserName = u.UserName,
+                        FirstName = u.FirstName,
+                        LastName = u.LastName,
+                        Email = u.Email,
+                        PhoneNumber = u.PhoneNumber
+                    })
+                    .ToListAsync();
+
+                return Json(new { totalRecords, data = users });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message });
+            }
         }
 
         [HttpGet]
@@ -88,7 +165,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         public async Task<IActionResult> Create()
         {
             var roles = await roleManager.Roles.ToListAsync();
-            ViewBag.Roles = roles.Select(r => new { Name = r.Name, Selected = false }).ToList();
+            ViewBag.Roles = roles.Select(r => new RoleViewModel { Name = r.Name, Selected = false }).ToList();
             return View();
         }
 
@@ -123,7 +200,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
             }
             var roles = await roleManager.Roles.ToListAsync();
-            ViewBag.Roles = roles.Select(r => new { Name = r.Name, Selected = SelectedRoles.Contains(r.Name) }).ToList();
+            ViewBag.Roles = roles.Select(r => new RoleViewModel { Name = r.Name, Selected = SelectedRoles.Contains(r.Name) }).ToList();
             return View(user);
         }
 
@@ -139,17 +216,22 @@ namespace EpicMarket.Admin.MVC.Controllers
             var appUser = await _context.Users
                 .FirstOrDefaultAsync(m => m.Id == id);
 
-            var roles = await userManager.GetRolesAsync(appUser);
-            var allRoles = await roleManager.Roles.ToListAsync();
-
-            var selectedRoles = allRoles.Select(r => new { Name = r.Name, Selected = roles.Contains(r.Name) }).ToList();
-
-            ViewBag.Roles = selectedRoles;
-
             if (appUser == null)
             {
                 return NotFound();
             }
+
+            var userRoles = await userManager.GetRolesAsync(appUser);
+            var allRoles = await roleManager.Roles.ToListAsync();
+
+            var roleViewModels = allRoles.Select(r => new RoleViewModel 
+            { 
+                Name = r.Name, 
+                Selected = userRoles.Contains(r.Name) 
+            }).ToList();
+
+            ViewBag.Roles = roleViewModels;
+
             return View(appUser);
         }
 
@@ -256,8 +338,12 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             // If we got this far, something failed, redisplay form
             var roles = await roleManager.Roles.ToListAsync();
-            var selectedRoles = roles.Select(r => new { Name = r.Name, Selected = SelectedRoles.Contains(r.Name) }).ToList();
-            ViewBag.Roles = selectedRoles;
+            var roleViewModels = roles.Select(r => new RoleViewModel 
+            { 
+                Name = r.Name, 
+                Selected = SelectedRoles?.Contains(r.Name) ?? false 
+            }).ToList();
+            ViewBag.Roles = roleViewModels;
 
             return View(user);
         }
@@ -313,5 +399,33 @@ namespace EpicMarket.Admin.MVC.Controllers
         {
             return _context.Users.Any(e => e.Id == id);
         }
+    }
+
+    public class UserFilterViewModel
+    {
+        public string UserId { get; set; }
+        public string Username { get; set; }
+        public string Email { get; set; }
+        public string Name { get; set; }
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+        public string SortColumn { get; set; } = "id";
+        public string SortDirection { get; set; } = "asc";
+    }
+
+    public class UserDto
+    {
+        public int Id { get; set; }
+        public string UserName { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string PhoneNumber { get; set; }
+    }
+
+    public class RoleViewModel
+    {
+        public string Name { get; set; }
+        public bool Selected { get; set; }
     }
 }

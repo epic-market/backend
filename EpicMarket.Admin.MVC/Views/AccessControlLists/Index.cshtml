@@ -1,11 +1,11 @@
 ﻿@model EpicMarket.Admin.MVC.Models.SecurityMatrixViewModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Access Control Lists";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-
+<!-- Page Header -->
 <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
     <div class="breadcrumb-title pe-3">Access Control</div>
     <div class="ps-3">
@@ -18,6 +18,8 @@
         </nav>
     </div>
 </div>
+
+<!-- Remove old toast container -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
     <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
@@ -30,12 +32,80 @@
     </div>
 </div>
 
-<div class="card">
+<!-- Filter Card -->
+<div class="card border-0 shadow-sm mb-4">
     <div class="card-body">
-        <div class="table-responsive">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h5 class="card-title mb-0">
+                <i class="bx bx-filter me-2 text-primary"></i>Search & Filter
+            </h5>
+            <button class="btn btn-sm btn-link text-decoration-none" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="true">
+                <i class="bx bx-chevron-down"></i>
+            </button>
+        </div>
+        <div class="collapse show" id="filterCollapse">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Securable</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bx bx-lock"></i></span>
+                        <input type="text" id="securableFilter" class="form-control border-start-0 ps-0" placeholder="Search securables">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Role</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bx bx-user-circle"></i></span>
+                        <select id="roleFilter" class="form-control border-start-0 ps-0">
+                            <option value="">All Roles</option>
+                            @foreach (var role in Model.RoleNames)
+                            {
+                                <option value="@role">@role</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Access Type</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bx bx-check-shield"></i></span>
+                        <select id="accessTypeFilter" class="form-control border-start-0 ps-0">
+                            <option value="">All Access Types</option>
+                            @foreach (var accessType in Model.AccessTypes)
+                            {
+                                <option value="@accessType.ID">@accessType.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-12 d-flex justify-content-end">
+                    <button type="button" class="btn btn-primary me-2 px-4" id="applyFiltersBtn">
+                        <i class='bx bx-search me-1'></i>Apply Filters
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="resetFiltersBtn">
+                        <i class='bx bx-reset me-1'></i>Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-            <table id="example" class="table table-striped table-bordered" style="width:100%">
-                <thead>
+<!-- Main Card -->
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <!-- Action Bar -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex align-items-center">
+                <h5 class="mb-0 me-2">Access Control Matrix</h5>
+                <span class="badge bg-primary rounded-pill" id="tableRecordsCount">@Model.Securables.Count</span>
+            </div>
+        </div>
+        
+        <!-- Table Wrapper -->
+        <div class="table-responsive">
+            <table id="accessControlMatrix" class="table table-hover align-middle" style="width:100%">
+                <thead class="table-light">
                     <tr>
                         <th>Securable</th>
                         @foreach (var role in Model.RoleNames)
@@ -47,47 +117,182 @@
                 <tbody>
                     @foreach (var securable in Model.Securables)
                     {
-                        <tr>
-                            <td>@securable.Name</td>
+                        <tr data-securable="@securable.Name">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm bg-light rounded-circle text-center me-2" style="width: 32px; height: 32px; line-height: 32px;">
+                                        <i class="bx bx-lock text-primary"></i>
+                                    </div>
+                                    <span class="fw-medium">@securable.Name</span>
+                                </div>
+                            </td>
                             @foreach (var role in Model.RoleNames)
                             {
-                                <td>
-                                    @Html.DropDownList($"AccessType_{securable.Name}_{role}",
-                                             new SelectList(Model.AccessTypes, "ID", "Name", securable.RoleAccess[role]),
-                                             new
-                                             {
-                                                 @class = "form-control access-type-dropdown",
-                                                 data_securable = securable.Name,
-                                                 data_role = role
-                                             })
+                                <td data-role="@role">
+                                    <select class="form-select access-type-dropdown" 
+                                            data-securable="@securable.Name" 
+                                            data-role="@role">
+                                        @foreach (var accessType in Model.AccessTypes)
+                                        {
+                                            if (securable.RoleAccess[role] == accessType.ID)
+                                            {
+                                                <option value="@accessType.ID" selected>@accessType.Name</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@accessType.ID">@accessType.Name</option>
+                                            }
+                                        }
+                                    </select>
                                 </td>
                             }
                         </tr>
                     }
                 </tbody>
             </table>
+            
+            <!-- Loading Indicator -->
+            <div id="loading-indicator" class="text-center py-5 d-none">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading access control data...</p>
             </div>
+            
+            <!-- Empty State -->
+            <div id="empty-state" class="text-center py-5 d-none">
+                <i class="bx bx-lock text-muted" style="font-size: 4rem;"></i>
+                <h5 class="mt-3">No access control entries found</h5>
+                <p class="text-muted">Try adjusting your filter criteria</p>
+            </div>
+        </div>
     </div>
 </div>
 
-
+<!-- Custom CSS -->
+<style>
+    .cursor-pointer { cursor: pointer; }
+    .table th { font-weight: 600; }
+    .access-type-dropdown {
+        min-width: 120px;
+    }
+    .access-type-dropdown option[value="0"] {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+    .access-type-dropdown option[value="1"] {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+    .access-type-dropdown option[value="2"] {
+        background-color: #fff3cd;
+        color: #664d03;
+    }
+</style>
 
 @section Scripts {
+    <!-- Add SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
+    
     <script>
         $(document).ready(function () {
-            var toast = new bootstrap.Toast(document.getElementById('liveToast'));
+            var isLoading = false;
+            // Check if SweetAlert2 is available
+            const isSwalAvailable = typeof Swal !== 'undefined';
+            console.log("SweetAlert2 available:", isSwalAvailable);
 
-            $('.access-type-dropdown').change(function () {
-                var dropdown = $(this);
-                var securable = dropdown.data('securable');
-                var role = dropdown.data('role');
-                var accessTypeId = dropdown.val();
-                var accessTypeName = dropdown.find("option:selected").text();
+            // Apply filters
+            $('#applyFiltersBtn').click(function() {
+                applyFilters();
+            });
 
+            // Reset filters
+            $('#resetFiltersBtn').click(function() {
+                $('#securableFilter, #roleFilter, #accessTypeFilter').val('');
+                applyFilters();
+            });
+
+            // Apply filters function
+            function applyFilters() {
+                const securableFilter = $('#securableFilter').val().toLowerCase().trim();
+                const roleFilter = $('#roleFilter').val();
+                const accessTypeFilter = $('#accessTypeFilter').val();
+                
+                // Show loading indicator
+                $('#loading-indicator').removeClass('d-none');
+                $('#accessControlMatrix tbody tr').addClass('d-none');
+                
+                setTimeout(function() {
+                    // Hide loading indicator
+                    $('#loading-indicator').addClass('d-none');
+                    
+                    // Filter rows based on securable
+                    let visibleRows = $('#accessControlMatrix tbody tr');
+                    
+                    if (securableFilter) {
+                        visibleRows = visibleRows.filter(function() {
+                            const securableName = $(this).data('securable').toLowerCase();
+                            return securableName.includes(securableFilter);
+                        });
+                    }
+                    
+                    // Show filtered rows
+                    visibleRows.removeClass('d-none');
+                    
+                    // Filter columns based on role
+                    if (roleFilter) {
+                        // Hide all role columns except the filtered one
+                        $('#accessControlMatrix th').each(function(index) {
+                            if (index > 0 && $(this).text() !== roleFilter) {
+                                const columnIndex = $(this).index();
+                                $('#accessControlMatrix tr').find(`td:nth-child(${columnIndex + 1})`).addClass('d-none');
+                                $(this).addClass('d-none');
+                            }
+                        });
+                    } else {
+                        // Show all columns
+                        $('#accessControlMatrix th, #accessControlMatrix td').removeClass('d-none');
+                    }
+                    
+                    // Filter by access type if specified
+                    if (accessTypeFilter) {
+                        // Hide rows where no cell has the selected access type
+                        $('#accessControlMatrix tbody tr:visible').each(function() {
+                            const row = $(this);
+                            const hasMatchingAccessType = row.find('select:visible').toArray().some(select => 
+                                $(select).val() === accessTypeFilter
+                            );
+                            
+                            if (!hasMatchingAccessType) {
+                                row.addClass('d-none');
+                            }
+                        });
+                    }
+                    
+                    // Show empty state if no visible rows
+                    if ($('#accessControlMatrix tbody tr:visible').length === 0) {
+                        $('#empty-state').removeClass('d-none');
+                    } else {
+                        $('#empty-state').addClass('d-none');
+                    }
+                    
+                    // Update record count
+                    $('#tableRecordsCount').text($('#accessControlMatrix tbody tr:visible').length);
+                }, 300); // Simulate loading delay
+            }
+
+            // Handle access type dropdown change
+            $('.access-type-dropdown').change(function() {
+                const dropdown = $(this);
+                const securable = dropdown.data('securable');
+                const role = dropdown.data('role');
+                const accessTypeId = dropdown.val();
+                const accessTypeName = dropdown.find("option:selected").text();
+                
                 // Add loading indicator
                 dropdown.prop('disabled', true);
                 dropdown.addClass('opacity-50');
-
+                
                 $.ajax({
                     url: '@Url.Action("UpdateAccessType", "AccessControlLists")',
                     type: 'POST',
@@ -96,42 +301,84 @@
                         role: role,
                         accessTypeId: accessTypeId
                     },
-                    success: function (result) {
+                    success: function(result) {
                         if (result.success) {
                             showToast(`Access type for ${securable} - ${role} updated to ${accessTypeName}.`, 'success');
                         } else {
-                            showToast('An error occurred while updating the access type.', 'danger');
+                            showToast('An error occurred while updating the access type.', 'error');
+                            // Revert to previous value
+                            dropdown.val(dropdown.data('previous-value'));
                         }
                     },
-                    error: function (error) {
-                        showToast('An error occurred while updating the access type.', 'danger');
+                    error: function(error) {
+                        showToast('An error occurred while updating the access type.', 'error');
+                        // Revert to previous value
+                        dropdown.val(dropdown.data('previous-value'));
                     },
-                    complete: function () {
+                    complete: function() {
                         // Remove loading indicator
                         dropdown.prop('disabled', false);
                         dropdown.removeClass('opacity-50');
                     }
                 });
+                
+                // Store the current value as previous value for potential revert
+                dropdown.data('previous-value', accessTypeId);
+            });
+            
+            // Store initial values for potential revert
+            $('.access-type-dropdown').each(function() {
+                $(this).data('previous-value', $(this).val());
+            });
+            
+            // Handle Enter key in securable filter
+            $('#securableFilter').keypress(function(e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    applyFilters();
+                }
             });
 
+            // Toast notification function using SweetAlert2
             function showToast(message, type = 'success') {
-                var toastEl = document.getElementById('liveToast');
-                var toastBody = toastEl.querySelector('.toast-body');
-
-                // Set the message
-                toastBody.textContent = message;
-
-                // Set the color based on the type
-                toastEl.className = 'toast';
-                if (type === 'success') {
-                    toastEl.classList.add('bg-success', 'text-white');
-                } else if (type === 'danger') {
-                    toastEl.classList.add('bg-danger', 'text-white');
+                if (isSwalAvailable) {
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                    });
+                    
+                    Toast.fire({
+                        icon: type,
+                        title: message
+                    });
+                } else {
+                    // Fallback to alert if SweetAlert2 is not available
+                    alert(message);
                 }
-
-                // Show the toast
-                toast.show();
             }
+            
+            // Initialize DataTable for better sorting and pagination
+            $('#accessControlMatrix').DataTable({
+                paging: true,
+                searching: false, // We have our own filters
+                info: true,
+                ordering: true,
+                lengthChange: true,
+                pageLength: 25,
+                lengthMenu: [10, 25, 50, 100],
+                columnDefs: [
+                    { orderable: true, targets: 0 },
+                    { orderable: false, targets: '_all' }
+                ],
+                dom: '<"row"<"col-md-6"l><"col-md-6"f>>rtip'
+            });
         });
     </script>
 }
