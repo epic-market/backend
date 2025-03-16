@@ -58,7 +58,6 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             var outletDetails = new OutletsDetailsModel();
 
-
             var outlet = await _context.Outlets
                 .Include(o => o.Address)
                 .Include(o => o.Bussiness)
@@ -74,38 +73,32 @@ namespace EpicMarket.Admin.MVC.Controllers
             outletDetails.Inventorys = outletProducts;
             outletDetails.OutletEmployees = outletPersons;
 
+            var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.BRANCH_THUMBNAIL);
+            var attachmentTypeID_Photos = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.BRANCH_PHOTOS);
 
+            var thumbnails = from attachment in _context.Attachments
+                          join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                          join entity in _context.Entity on link.EntityID equals entity.ID
+                          where entity.Name == EntityConstants.Branch && link.RecordID == id && link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
+                          orderby attachment.CreateDate descending
+                          select new
+                          {
+                              ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
+                          };
 
-			var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.BRANCH_THUMBNAIL);
-			var attachmentTypeID_Product = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.BRANCH_PHOTOS);
+            var photos = from attachment in _context.Attachments
+                       join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                       join entity in _context.Entity on link.EntityID equals entity.ID
+                       where entity.Name == EntityConstants.Branch && link.RecordID == id && link.AttachmentTypeID == attachmentTypeID_Photos.ID
+                       select new
+                       {
+                           ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
+                       };
 
+            ViewBag.thumbnail = thumbnails.Select(a => a.ImagePath).FirstOrDefault();
+            ViewBag.attachments = photos.Select(a => a.ImagePath).ToList();
 
-
-			var attachments = from attachment in _context.Attachments
-							  join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
-							  join entity in _context.Entity on link.EntityID equals entity.ID
-							  where entity.Name == EntityConstants.Branch && link.RecordID == id && link.AttachmentTypeID == attachmentTypeID_Product.ID
-							  select new
-							  {
-								  ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
-							  };
-
-			var thumbnail = from attachment in _context.Attachments
-							join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
-							join entity in _context.Entity on link.EntityID equals entity.ID
-							where entity.Name == EntityConstants.Branch && link.RecordID == id && link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
-							orderby attachment.CreateDate descending
-							select new
-							{
-								ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
-							};
-
-
-			ViewBag.thumbnail = thumbnail.Select(a => a.ImagePath).FirstOrDefault();
-			ViewBag.attachments = attachments.Select(a => a.ImagePath).ToList();
-
-
-			if (outlet == null)
+            if (outlet == null)
             {
                 return NotFound();
             }
@@ -116,15 +109,12 @@ namespace EpicMarket.Admin.MVC.Controllers
         // GET: Outlets/Create
         public IActionResult Create()
         {
-            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id");
-            ViewData["BussinessID"] = new SelectList(_context.Businesses, "ID", "ID");
+            ViewData["BussinessID"] = new SelectList(_context.Businesses, "ID", "Name");
             ViewData["StatusId"] = new SelectList(_context.StatusOptionSets, "Id", "Status");
             return View();
         }
 
         // POST: Outlets/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,BussinessID,AddressID,Name,Description,ContactNumber,ContactEmail,Rating,ReviewCount,IsOpen,Weight,StatusId,CreateDate,CreateBy,ModifiedDate,ModifiedBy,Address")] Outlet outlet, IFormFile[] thumbnail, IFormFile[] OutletImages)
@@ -150,55 +140,70 @@ namespace EpicMarket.Admin.MVC.Controllers
                     Description = $"Created outlet: {outlet.Name}",
                     Data = JsonSerializer.Serialize(outlet),
                     RecordId = outlet.ID,
-                    BusinessID = 0,
+                    BusinessID = outlet.BussinessID,
                     LoggedInUserName = userName
                 });
                 
+                // Upload thumbnail if provided
                 if (thumbnail?.Length > 0)
                 {
-                    var attachmentThumbnail = new AttachmentModel()
+                    var attachmentThumbnail = new BusinessAttachmentModel()
                     {
                         Name = EntityConstants.Branch,
                         Comment = EntityConstants.Branch,
                         RecordID = outlet.ID,
                         Entity = EntityConstants.Branch,
                         AttachmentType = AttachmentTypeConstants.BRANCH_THUMBNAIL,
-                        Files = thumbnail
+                        Files = thumbnail,
+                        BusinessID = outlet.BussinessID
                     };
-                    await attachmentService.UploadAttachment(attachmentThumbnail);
+                    await attachmentService.UploadBusinessAttachment(attachmentThumbnail);
                 }
 
+                // Upload outlet images if provided
                 if (OutletImages?.Length > 0)
                 {
-                    var attachmentOutletImages = new AttachmentModel()
+                    var attachmentOutletImages = new BusinessAttachmentModel()
                     {
                         Name = EntityConstants.Branch,
                         Comment = EntityConstants.Branch,
                         RecordID = outlet.ID,
                         Entity = EntityConstants.Branch,
                         AttachmentType = AttachmentTypeConstants.BRANCH_PHOTOS,
-                        Files = OutletImages
+                        Files = OutletImages,
+                        BusinessID = outlet.BussinessID
                     };
-                    await attachmentService.UploadAttachment(attachmentOutletImages);
+                    await attachmentService.UploadBusinessAttachment(attachmentOutletImages);
                 }
+                
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", outlet.AddressID);
-            ViewData["BussinessID"] = new SelectList(_context.Businesses, "ID", "ID", outlet.BussinessID);
-            ViewData["StatusId"] = new SelectList(_context.StatusOptionSets, "Id", "Status",outlet.StatusId);
+            
+            ViewData["BussinessID"] = new SelectList(_context.Businesses, "ID", "Name", outlet.BussinessID);
+            ViewData["StatusId"] = new SelectList(_context.StatusOptionSets, "Id", "Status", outlet.StatusId);
             return View(outlet);
         }
 
         // GET: Outlets/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-
             if (id == null)
             {
                 return NotFound();
             }
 
-            var outlet = await _context.Outlets.Where(b => b.ID == id).Include(c => c.Address).Include(c => c.StatusOptionSets).FirstOrDefaultAsync();
+            var outlet = await _context.Outlets
+                .Where(b => b.ID == id)
+                .Include(c => c.Address)
+                .Include(c => c.StatusOptionSets)
+                .FirstOrDefaultAsync();
+                
+            if (outlet == null)
+            {
+                return NotFound();
+            }
+            
+            // Get thumbnail images
             ViewBag.thumbnails = await this.attachmentService.GetAttachmentLinks(new GetAttachmentLink()
             {
                 AttachmentType = AttachmentTypeConstants.BRANCH_THUMBNAIL,
@@ -206,25 +211,20 @@ namespace EpicMarket.Admin.MVC.Controllers
                 RecordID = outlet.ID
             });
 
+            // Get outlet images
             ViewBag.BranchImages = await this.attachmentService.GetAttachmentLinks(new GetAttachmentLink()
             {
                 AttachmentType = AttachmentTypeConstants.BRANCH_PHOTOS,
                 Entity = EntityConstants.Branch,
                 RecordID = outlet.ID
             });
-            if (outlet == null)
-            {
-                return NotFound();
-            }
-            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", outlet.AddressID);
-            ViewData["BussinessID"] = new SelectList(_context.Businesses, "ID", "ID", outlet.BussinessID);
+            
+            ViewData["BussinessID"] = new SelectList(_context.Businesses, "ID", "Name", outlet.BussinessID);
             ViewData["StatusId"] = new SelectList(_context.StatusOptionSets, "Id", "Status", outlet.StatusId);
             return View(outlet);
         }
 
         // POST: Outlets/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ID,BussinessID,AddressID,Name,Description,ContactNumber,ContactEmail,Rating,ReviewCount,IsOpen,Weight,StatusId,CreateDate,CreateBy,ModifiedDate,ModifiedBy,Address,IsActive")] Outlet outlet, IFormFile[] newThumbnail, string? addedThumbnail, IFormFile[] newOutletImages, string? removedOutletImages, string? addedOutletImages)
@@ -234,18 +234,20 @@ namespace EpicMarket.Admin.MVC.Controllers
             // Get original entity for event logging
             var originalEntity = await _context.Outlets
                 .AsNoTracking()
+                .Include(o => o.Address)
                 .FirstOrDefaultAsync(o => o.ID == id);
-
-            outlet.Address.ModifiedBy = userName;
-            outlet.Address.ModifiedDate = DateTime.UtcNow;
-            outlet.Address.Id = outlet.AddressID;
-            outlet.ModifiedBy = userName;
-            outlet.ModifiedDate = DateTime.UtcNow;
 
             if (id != outlet.ID)
             {
                 return NotFound();
             }
+
+            // Update modification info
+            outlet.Address.ModifiedBy = userName;
+            outlet.Address.ModifiedDate = DateTime.UtcNow;
+            outlet.Address.Id = outlet.AddressID;
+            outlet.ModifiedBy = userName;
+            outlet.ModifiedDate = DateTime.UtcNow;
 
             if (ModelState.IsValid)
             {
@@ -267,58 +269,63 @@ namespace EpicMarket.Admin.MVC.Controllers
                             Updated = outlet
                         }),
                         RecordId = outlet.ID,
-                        BusinessID = 0,
+                        BusinessID = outlet.BussinessID,
                         LoggedInUserName = userName
                     });
                     
-                    if (addedThumbnail != null && addedThumbnail?.Length > 0)
+                    // Handle thumbnail update
+                    if (addedThumbnail != null && newThumbnail?.Length > 0)
                     {
-                        List<string> ExisitingThumbnail = await this.attachmentService.GetAttachmentLinks(new GetAttachmentLink()
+                        // Get existing thumbnails
+                        List<string> existingThumbnails = await this.attachmentService.GetAttachmentLinks(new GetAttachmentLink()
                         {
                             AttachmentType = AttachmentTypeConstants.BRANCH_THUMBNAIL,
                             Entity = EntityConstants.Branch,
                             RecordID = outlet.ID
                         });
-                        if (ExisitingThumbnail?.Count > 0)
+                        
+                        // Delete existing thumbnails if any
+                        if (existingThumbnails?.Count > 0)
                         {
-                            await this.fileService.DeleteImage(ExisitingThumbnail, userName);
+                            await this.fileService.DeleteImage(existingThumbnails, userName);
                         }
 
-                        var attachmentThumbnail = new AttachmentModel()
+                        // Upload new thumbnail
+                        var attachmentThumbnail = new BusinessAttachmentModel()
                         {
                             Name = EntityConstants.Branch,
                             Comment = EntityConstants.Branch,
                             RecordID = outlet.ID,
                             Entity = EntityConstants.Branch,
                             AttachmentType = AttachmentTypeConstants.BRANCH_THUMBNAIL,
-                            Files = newThumbnail
+                            Files = newThumbnail,
+                            BusinessID = outlet.BussinessID
                         };
-                        await attachmentService.UploadAttachment(attachmentThumbnail);
-
+                        await attachmentService.UploadBusinessAttachment(attachmentThumbnail);
                     }
 
-                    // Handle removed images
+                    // Handle removed outlet images
                     if (!string.IsNullOrEmpty(removedOutletImages))
                     {
                         var removedImageUrls = removedOutletImages.Split(',').ToList();
                         await this.fileService.DeleteImage(removedImageUrls, userName);
                     }
 
-                    // Handle added images
+                    // Handle added outlet images
                     if (addedOutletImages != null && newOutletImages?.Length > 0)
                     {
-
-                        var attachmentOutletImages = new AttachmentModel()
+                        var attachmentOutletImages = new BusinessAttachmentModel()
                         {
                             Name = EntityConstants.Branch,
                             Comment = EntityConstants.Branch,
                             RecordID = outlet.ID,
                             Entity = EntityConstants.Branch,
                             AttachmentType = AttachmentTypeConstants.BRANCH_PHOTOS,
-                            Files = newOutletImages
-                        };
-                        await attachmentService.UploadAttachment(attachmentOutletImages);
+                            Files = newOutletImages,
+                            BusinessID = outlet.BussinessID
 
+                        };
+                        await attachmentService.UploadBusinessAttachment(attachmentOutletImages);
                     }
                 }
                 catch (DbUpdateConcurrencyException)
@@ -334,8 +341,8 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AddressID"] = new SelectList(_context.Addresses, "Id", "Id", outlet.AddressID);
-            ViewData["BussinessID"] = new SelectList(_context.Businesses, "ID", "ID", outlet.BussinessID);
+            
+            ViewData["BussinessID"] = new SelectList(_context.Businesses, "ID", "Name", outlet.BussinessID);
             ViewData["StatusId"] = new SelectList(_context.StatusOptionSets, "Id", "Status", outlet.StatusId);
             return View(outlet);
         }
@@ -351,7 +358,9 @@ namespace EpicMarket.Admin.MVC.Controllers
             var outlet = await _context.Outlets
                 .Include(o => o.Address)
                 .Include(o => o.Bussiness)
+                .Include(o => o.StatusOptionSets)
                 .FirstOrDefaultAsync(m => m.ID == id);
+                
             if (outlet == null)
             {
                 return NotFound();
@@ -365,9 +374,13 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var outlet = await _context.Outlets.FindAsync(id);
+            var outlet = await _context.Outlets
+                .Include(o => o.Bussiness)
+                .FirstOrDefaultAsync(o => o.ID == id);
+                
             if (outlet != null)
             {
+                
                 _context.Outlets.Remove(outlet);
                 
                 // Log event before saving changes
@@ -379,18 +392,95 @@ namespace EpicMarket.Admin.MVC.Controllers
                     Description = $"Deleted outlet: {outlet.Name}",
                     Data = JsonSerializer.Serialize(outlet),
                     RecordId = outlet.ID,
-                    BusinessID = 0,
+                    BusinessID = outlet.BussinessID,
                     LoggedInUserName = User.Identity.Name
                 });
+                
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool OutletExists(int id)
         {
             return _context.Outlets.Any(e => e.ID == id);
+        }
+
+        [HttpPost]
+        [Route("Outlet/GetFilteredData")]
+        public async Task<IActionResult> GetFilteredData([FromBody] OutletFilterViewModel filter)
+        {
+            try
+            {
+                var query = _context.Outlets
+                    .Include(o => o.Address)
+                    .Include(o => o.Bussiness)
+                    .Include(o => o.StatusOptionSets)
+                    .AsQueryable();
+
+                // Apply filters
+                if (!string.IsNullOrWhiteSpace(filter.OutletId))
+                {
+                    query = query.Where(o => o.ID.ToString().Contains(filter.OutletId));
+                }
+
+                if (!string.IsNullOrWhiteSpace(filter.OutletName))
+                {
+                    query = query.Where(o => o.Name.Contains(filter.OutletName));
+                }
+
+                if (!string.IsNullOrWhiteSpace(filter.BusinessName))
+                {
+                    query = query.Where(o => o.Bussiness.Name.Contains(filter.BusinessName));
+                }
+
+                // Add filter for Business ID
+                if (!string.IsNullOrWhiteSpace(filter.BusinessId))
+                {
+                    if (int.TryParse(filter.BusinessId, out int businessId))
+                    {
+                        query = query.Where(o => o.BussinessID == businessId);
+                    }
+                }
+
+                var totalRecords = await query.CountAsync();
+
+                // Apply sorting
+                query = filter.SortColumn?.ToLower() switch
+                {
+                    "id" => filter.SortDirection == "asc" ? query.OrderBy(o => o.ID) : query.OrderByDescending(o => o.ID),
+                    "name" => filter.SortDirection == "asc" ? query.OrderBy(o => o.Name) : query.OrderByDescending(o => o.Name),
+                    "businessname" => filter.SortDirection == "asc" ? query.OrderBy(o => o.Bussiness.Name) : query.OrderByDescending(o => o.Bussiness.Name),
+                    "city" => filter.SortDirection == "asc" ? query.OrderBy(o => o.Address.City) : query.OrderByDescending(o => o.Address.City),
+                    "status" => filter.SortDirection == "asc" ? query.OrderBy(o => o.StatusOptionSets.Status) : query.OrderByDescending(o => o.StatusOptionSets.Status),
+                    _ => query.OrderBy(o => o.ID)
+                };
+
+                // Apply pagination and project to DTO
+                var outlets = await query
+                    .Skip((filter.PageNumber - 1) * filter.PageSize)
+                    .Take(filter.PageSize)
+                    .Select(o => new OutletDto
+                    {
+                        ID = o.ID,
+                        Name = o.Name,
+                        BusinessName = o.Bussiness.Name,
+                        BusinessID = o.BussinessID,
+                        ContactNumber = o.ContactNumber,
+                        ContactEmail = o.ContactEmail,
+                        City = o.Address.City,
+                        StatusName = o.StatusOptionSets.Status,
+                        IsOpen = o.IsOpen
+                    })
+                    .ToListAsync();
+
+                return Json(new { totalRecords, data = outlets });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message });
+            }
         }
     }
 }

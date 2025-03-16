@@ -24,7 +24,7 @@ namespace EpicMarket.Data.Models
         public int? OrderCount { get; set; }
         public bool RequiresRefrigeration { get; set; }
         public string BaseHightlights { get; set; }
-        public string VarientOptions { get; set; }
+        public string VariantOptions { get; set; }
 
         [ForeignKey("StatusOptionSets")]
         public int StatusId { get; set; }

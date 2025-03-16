@@ -19,7 +19,7 @@ namespace EpicMarket.Data.Models
         public AppUser Customer { get; set; }
         public Outlet Outlet { get; set; }
 
-        public SusbcriptionStatus Status { get; set; }
+        public SubscriptionStatus Status { get; set; }
 
     }
 

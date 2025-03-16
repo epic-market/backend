@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Security.Principal;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace EpicMarket.Data.Models
@@ -24,6 +25,8 @@ namespace EpicMarket.Data.Models
         public DateTime LastActive { get; set; } = DateTime.Now;
  
         public virtual ICollection<Business> Businesses { get; set; }
+
+        [JsonIgnore]
         public virtual ICollection<Order> Orders { get; set; }
 
         public virtual ICollection<AppUserRole> UserRoles { get; set; }

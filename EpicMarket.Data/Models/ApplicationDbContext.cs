@@ -214,7 +214,7 @@ namespace EpicMarket.Data.Models
         public DbSet<AttachmentLink> AttachmentLinks { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
         public DbSet<AttachmentType> AttachmentTypes { get; set; }
-        public DbSet<SupportQuerys> SupportQuerys { get; set; }
+        public DbSet<SupportQueries> SupportQueries { get; set; }
 
         public DbSet<DatabaseVersion> DatabaseVersions { get; set; }
 
@@ -225,7 +225,7 @@ namespace EpicMarket.Data.Models
 
         public DbSet<Subscription> Subscriptions { get; set; }
 
-        public DbSet<SusbcriptionStatus> SusbcriptionStatuses{ get; set; }
+        public DbSet<SubscriptionStatus> SubscriptionStatus{ get; set; }
 
 
         public DbSet<Rating> Ratings { get; set; }
@@ -440,7 +440,7 @@ namespace EpicMarket.Data.Models
 					typeof(TaskStatusType),
 					typeof(Tasks),
 					typeof(SupportTicket),
-					typeof(SupportQuerys),
+					typeof(SupportQueries),
 					typeof(StatusOptionSet),
 					typeof(ProductInternal),
 					typeof(Outlet),

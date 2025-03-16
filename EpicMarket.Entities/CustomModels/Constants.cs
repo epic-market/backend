@@ -144,6 +144,7 @@ namespace EpicMarket.Entities.CustomModels
     }
     public static class AttachmentTypeConstants
     {
+        public const string BUSINESS_CATEGORY = "BusinessCategory";
         public const string LOGO = "Logo";
         public const string PROOF = "Proof";
 		public const string PRODUCTIMAGES = "Products";

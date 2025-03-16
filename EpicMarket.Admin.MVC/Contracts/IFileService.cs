@@ -10,9 +10,8 @@ namespace EpicMarket.Admin.MVC.Contracts
 {
 	public interface IFileService
 	{
-		Task<string> UploadFileAsync(IFormFile file, string prefix , string fileNameKey, string EntityName, int RecordId);
-
-
+		Task<string> UploadFileAsync(IFormFile file, string prefix , string fileNameKey);
+		Task<string> UploadFileWithInsertAttachmentAsync(IFormFile file, string prefix , string fileNameKey, string EntityName, int RecordId);
 		Task<List<S3ObjectDto>> GetAllFilesAsync(string prefix);
 
 		Task<FileDto> GetFileByKeyAsync(string key);
@@ -20,7 +19,5 @@ namespace EpicMarket.Admin.MVC.Contracts
 		Task<bool> DeleteFileAsync(string key);
 
 		Task<bool> DeleteImage(List<string> ImageKeys, string UserName);
-
-
     }
 }

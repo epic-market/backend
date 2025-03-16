@@ -29,63 +29,69 @@
                         <div>
                             <i class="bx bxs-user me-1 font-22 text-info"></i>
                         </div>
-                        <h5 class="mb-0 text-info">Attachment</h5>
+                        <h5 class="mb-0 text-info">Upload Attachment</h5>
                     </div>
                     <hr />
-        <form asp-action="Create">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="row mb-3">
-                <label asp-for="Name" class="col-sm-3 col-form-label"></label>
+                <label asp-for="Name" class="col-sm-3 col-form-label">Name*</label>
                     <div class="col-sm-9">
-                <input asp-for="Name" class="form-control" />
+                <input asp-for="Name" class="form-control" required />
                 <span asp-validation-for="Name" class="text-danger"></span>
                 </div>
             </div>
             <div class="row mb-3">
-                <label asp-for="Comment" class="col-sm-3 col-form-label"></label>
+                <label asp-for="Comment" class="col-sm-3 col-form-label">Comment</label>
                         <div class="col-sm-9">
-                <input asp-for="Comment" class="form-control" />
+                <textarea asp-for="Comment" class="form-control" rows="3"></textarea>
                 <span asp-validation-for="Comment" class="text-danger"></span>
             </div>
             </div>
             <div class="row mb-3">
-                <label asp-for="DocumentType" class="col-sm-3 col-form-label"></label>
-                            <div class="col-sm-9">
-                <input asp-for="DocumentType" class="form-control" />
-                <span asp-validation-for="DocumentType" class="text-danger"></span>
-            </div>
-            </div>
-            <div class="row mb-3">
-                <label asp-for="DocumentFileType" class="col-sm-3 col-form-label"></label>
-                                <div class="col-sm-9">
-                <input asp-for="DocumentFileType" class="form-control" />
-                <span asp-validation-for="DocumentFileType" class="text-danger"></span>
-            </div>
-            </div>
-            <div class="row mb-3">
-                <label asp-for="DocumentFolderPath" class="col-sm-3 col-form-label"></label>
-                                    <div class="col-sm-9">
-                <input asp-for="DocumentFolderPath" class="form-control" />
-                <span asp-validation-for="DocumentFolderPath" class="text-danger"></span>
-            </div>
+                <label asp-for="DocumentType" class="col-sm-3 col-form-label">Document Type*</label>
+                <div class="col-sm-9">
+                    <select asp-for="DocumentType" class="form-select" required data-val="true" data-val-required="The Document Type field is required.">
+                        <option value="">-- Select Document Type --</option>
+                        <option value="PDF">PDF Document</option>
+                        <option value="Word">Word Document</option>
+                        <option value="Excel">Excel Spreadsheet</option>
+                        <option value="Image">Image</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <span asp-validation-for="DocumentType" class="text-danger"></span>
+                </div>
             </div>
             <div class="row mb-3">
-                <label asp-for="DocumentFile" class="col-sm-3 col-form-label"></label>
-                                        <div class="col-sm-9">
-                <input asp-for="DocumentFile" class="form-control" />
-                <span asp-validation-for="DocumentFile" class="text-danger"></span>
+                <label asp-for="DocumentFolderPath" class="col-sm-3 col-form-label">Folder Path</label>
+                <div class="col-sm-9">
+                    <input asp-for="DocumentFolderPath" class="form-control" placeholder="e.g., Attachment/CustomFolder/ (leave empty for default)" />
+                    <small class="form-text text-muted">Optional. Specify a custom folder path or leave empty to use the default path.</small>
+                    <span asp-validation-for="DocumentFolderPath" class="text-danger"></span>
+                </div>
             </div>
+            <div class="row mb-3">
+                <label for="fileUpload" class="col-sm-3 col-form-label">Document File*</label>
+                <div class="col-sm-9">
+                    <input type="file" id="fileUpload" name="fileUpload" class="form-control" required data-val="true" data-val-required="Please select a file to upload." />
+                    <small class="form-text text-muted">Supported file types: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, GIF</small>
+                </div>
             </div>
             <div class="row">
                 <label class="col-sm-3 col-form-label"></label>
                 <div class="col-sm-9">
-                    <button type="submit" class="btn btn-info px-5"> Save</button>
-                </div>
-                <div>
-                    <a asp-action="Index">Back to List</a>
+                    <button type="submit" class="btn btn-info px-5"><i class="bx bx-upload me-1"></i> Upload</button>
+                    <a asp-action="Index" class="btn btn-secondary ms-2"><i class="bx bx-arrow-back me-1"></i> Back to List</a>
                 </div>
             </div>
         </form>
     </div>
 </div>
+</div>
+</div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
 

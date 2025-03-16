@@ -248,7 +248,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         [HttpGet]
         public IActionResult Create(int? parentTaskId)
         {
-            ViewData["TaskStatusID"] = new SelectList(_context.Set<TaskStatusType>(), "Id", "Status");
+            ViewData["TaskStatusID"] = new SelectList(_context.Set<TaskStatusType>(), "ID", "Status");
             ViewData["TaskTypeID"] = new SelectList(_context.Set<TaskType>(), "ID", "Name");
             ViewData["ParentTaskId"] = new SelectList(_context.Set<Tasks>().Select(t => new { ID = t.ID, Name = t.Name }), "ID", "ID", parentTaskId);
 
@@ -337,7 +337,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             ViewData["ParentTaskId"] = new SelectList(_context.Set<Tasks>().Select(t => new { ID = t.ID, Name = t.Name }), "ID", "ID", tasks.ParentID);
             ViewData["Priority"] = new SelectList(numbers, tasks.TaskPriorityID); 
             ViewData["Admin"] = new SelectList(admins, "Id", "UserName", tasks.PrimaryAssignedToPersonID);
-            ViewData["TaskStatusID"] = new SelectList(_context.TaskStatusTypes, "Id", "Status", tasks.TaskStatusID);
+            ViewData["TaskStatusID"] = new SelectList(_context.TaskStatusTypes, "ID", "Status", tasks.TaskStatusID);
             ViewData["TaskTypeID"] = new SelectList(_context.TaskTypes, "ID", "Name", tasks.TaskTypeID);
             
             return View(tasks);
@@ -356,7 +356,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 return NotFound();
             }
-            ViewData["TaskStatusID"] = new SelectList(_context.Set<TaskStatusType>(), "Id", "Status");
+            ViewData["TaskStatusID"] = new SelectList(_context.Set<TaskStatusType>(), "ID", "Status");
             ViewData["TaskTypeID"] = new SelectList(_context.Set<TaskType>(), "ID", "Name");
             ViewData["ParentTaskId"] = new SelectList(_context.Set<Tasks>(), "ID", "ID");
 
@@ -443,7 +443,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["TaskStatusID"] = new SelectList(_context.TaskStatusTypes, "Id", "Status", tasks.TaskStatusID);
+            ViewData["TaskStatusID"] = new SelectList(_context.TaskStatusTypes, "ID", "Status", tasks.TaskStatusID);
             ViewData["TaskTypeID"] = new SelectList(_context.TaskTypes, "ID", "Name", tasks.TaskTypeID);
             return View(tasks);
         }

@@ -47,7 +47,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
 
             var taskStatusType = await _context.TaskStatusTypes
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.ID == id);
             if (taskStatusType == null)
             {
                 return NotFound();
@@ -86,7 +86,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                     Source = _urlContextService.CurrentPageUrl,
                     Description = $"Added task status type '{taskStatusType.Status}'",
                     Data = System.Text.Json.JsonSerializer.Serialize(taskStatusType),
-                    RecordId = taskStatusType.Id,
+                    RecordId = taskStatusType.ID,
                     LoggedInUserName = User.Identity.Name
                 });
                 
@@ -122,7 +122,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             taskStatusType.ModifiedBy = userName;
             taskStatusType.ModifiedDate = DateTime.UtcNow;
             
-            if (id != taskStatusType.Id)
+            if (id != taskStatusType.ID)
             {
                 return NotFound();
             }
@@ -130,7 +130,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             // Get the original entity for comparison
             var originalTaskStatusType = await _context.TaskStatusTypes
                 .AsNoTracking()
-                .FirstOrDefaultAsync(e => e.Id == id);
+                .FirstOrDefaultAsync(e => e.ID == id);
 
             if (ModelState.IsValid)
             {
@@ -149,7 +149,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                             Original = originalTaskStatusType, 
                             Updated = taskStatusType 
                         }),
-                        RecordId = taskStatusType.Id,
+                        RecordId = taskStatusType.ID,
                         LoggedInUserName = User.Identity.Name
                     });
                     
@@ -157,7 +157,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TaskStatusTypeExists(taskStatusType.Id))
+                    if (!TaskStatusTypeExists(taskStatusType.ID))
                     {
                         return NotFound();
                     }
@@ -180,7 +180,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
 
             var taskStatusType = await _context.TaskStatusTypes
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.ID == id);
             if (taskStatusType == null)
             {
                 return NotFound();
@@ -207,7 +207,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                     Source = _urlContextService.CurrentPageUrl,
                     Description = $"Deleted task status type '{taskStatusType.Status}'",
                     Data = System.Text.Json.JsonSerializer.Serialize(taskStatusType),
-                    RecordId = taskStatusType.Id,
+                    RecordId = taskStatusType.ID,
                     LoggedInUserName = User.Identity.Name
                 });
             }
@@ -218,7 +218,7 @@ namespace EpicMarket.Admin.MVC.Controllers
 
         private bool TaskStatusTypeExists(int id)
         {
-            return _context.TaskStatusTypes.Any(e => e.Id == id);
+            return _context.TaskStatusTypes.Any(e => e.ID == id);
         }
     }
 }

@@ -54,7 +54,7 @@ namespace EpicMarket.Services
         }
         public Task<List<DropDownOptions>> GetAllSupportQuery(int personTypeId)
         {
-            return _context.SupportQuerys.Where(c => c.TypeofPersonid == personTypeId).Select(c => new DropDownOptions { Text = c.Query, Value = c.ID }).ToListAsync();
+            return _context.SupportQueries.Where(c => c.TypeofPersonid == personTypeId).Select(c => new DropDownOptions { Text = c.Query, Value = c.ID }).ToListAsync();
         }
 
         public async Task<List<DropDownOptions>> GetOrderStatusOptions()

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EpicMarket.Data.Common;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace EpicMarket.Data.Models
 {
@@ -25,24 +26,23 @@ namespace EpicMarket.Data.Models
         [Required]
         public double CostPrice { get; set; } //cost of product for percharse
         [Required]
-         public double SalePrice { get; set; } //what price he what to show to users
+        public double SalePrice { get; set; } //what price he what to show to users
         public double? CompareAtPrice { get; set; }
         public string AdditionalHightlights { get; set; }
         public int? MaximumOrderQuantity { get; set; }
         public int? MinimumOrderQuantity { get; set; }
         public double? PackedHeight { get; set; }
-        public double? PackedWidhth { get; set; }
+        public double? PackedWidth { get; set; }
         public double? PackedDepth { get; set; }
         public string WeightUnit { get; set; }//kg,g,lbs,oz
         public double? Weight { get; set; } //value of weight
-        public virtual Catalog Catalog { get; set; }
+        public bool IsDefaultVariant { get; set; }
 
+        [JsonIgnore]
+        public virtual Catalog Catalog { get; set; }
         public virtual ICollection<Inventory> Inventory { get; set; }
 
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }
 
-
-
-    
     }
 }

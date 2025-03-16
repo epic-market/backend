@@ -12,8 +12,8 @@ using EpicMarket.Data.ApplicationModels;
 using System.Security.Claims;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
-using EpicMarket.Admin.MVC.Attributes;
-using EpicMarket.Entities.Constants;
+using Microsoft.AspNetCore.Http;
+using EpicMarket.Admin.MVC.Models;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -23,15 +23,21 @@ namespace EpicMarket.Admin.MVC.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IEventService _eventService;
         private readonly IUrlContextService _urlContextService;
+        private readonly IFileService _fileService;
+        private readonly IAttachmentService _attachmentService;
 
         public BusinessCategoryInternalsController(
             ApplicationDbContext context,
             IEventService eventService,
-            IUrlContextService urlContextService)
+            IFileService fileService,
+            IUrlContextService urlContextService,
+            IAttachmentService attachmentService)
         {
             _context = context;
             _eventService = eventService;
             _urlContextService = urlContextService;
+            _attachmentService = attachmentService;
+            _fileService = fileService;
         }
 
         // GET: BusinessCategoryInternals
@@ -57,6 +63,16 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
+            // Get attached images
+            var images = await _attachmentService.GetAttachmentLinks(new GetAttachmentLink
+            {
+                AttachmentType = AttachmentTypeConstants.BUSINESS_CATEGORY,
+                Entity = EntityConstants.BusinessCategory,
+                RecordID = businessCategoryInternal.ID
+            });
+
+            ViewBag.CategoryImages = images;
+
             return View(businessCategoryInternal);
         }
 
@@ -72,8 +88,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [SecurableAuthorize(SecurableConstants.BusinessCategoryInternalsAdd)]
-        public async Task<IActionResult> Create([Bind("ID,Name,Description,Type,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] BusinessCategoryInternal businessCategoryInternal)
+        public async Task<IActionResult> Create([Bind("ID,Name,Description,Type,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] BusinessCategoryInternal businessCategoryInternal, IFormFile[] files)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             businessCategoryInternal.CreateBy = userName;
@@ -82,6 +97,22 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 _context.Add(businessCategoryInternal);
                 await _context.SaveChangesAsync();
+
+                // Handle file upload if files are present
+                if (files != null && files.Length > 0)
+                {
+                    var attachmentModel = new AttachmentModel
+                    {
+                        Name = businessCategoryInternal.Name,
+                        Comment = "Business Category Image",
+                        RecordID = businessCategoryInternal.ID,
+                        Entity = EntityConstants.BusinessCategory,
+                        AttachmentType = AttachmentTypeConstants.BUSINESS_CATEGORY, // Set appropriate BusinessID if needed
+                        Files = files
+                    };
+
+                    await _attachmentService.UploadAttachment(attachmentModel);
+                }
 
                 await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
                 {
@@ -114,6 +145,17 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 return NotFound();
             }
+
+            // Get attached images
+            var images = await _attachmentService.GetAttachmentLinks(new GetAttachmentLink
+            {
+                AttachmentType = AttachmentTypeConstants.BUSINESS_CATEGORY,
+                Entity = EntityConstants.BusinessCategory,
+                RecordID = businessCategoryInternal.ID
+            });
+
+            ViewBag.CategoryImages = images;
+
             return View(businessCategoryInternal);
         }
 
@@ -122,8 +164,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [SecurableAuthorize(SecurableConstants.BusinessCategoryInternalsEdit)]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,Type,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] BusinessCategoryInternal businessCategoryInternal)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,Type,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] BusinessCategoryInternal businessCategoryInternal, IFormFile[] files, string removedImages)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             businessCategoryInternal.ModifiedBy = userName;
@@ -142,6 +183,29 @@ namespace EpicMarket.Admin.MVC.Controllers
 
                     _context.Update(businessCategoryInternal);
                     await _context.SaveChangesAsync();
+
+                    // Handle file upload if files are present
+                    if (files != null && files.Length > 0)
+                    {
+                        var attachmentModel = new AttachmentModel
+                        {
+                            Name = businessCategoryInternal.Name,
+                            Comment = "Business Category Image",
+                            RecordID = businessCategoryInternal.ID,
+                            Entity = EntityConstants.BusinessCategory,
+                            AttachmentType = AttachmentTypeConstants.BUSINESS_CATEGORY,
+                            Files = files
+                        };
+
+                        await _attachmentService.UploadAttachment(attachmentModel);
+                    }
+
+                    // Handle image removal if any images are selected for removal
+                    if (!string.IsNullOrEmpty(removedImages))
+                    {
+                        var removedImageUrls = removedImages.Split(',').ToList();
+                        await _fileService.DeleteImage(removedImageUrls, userName);
+                    }
 
                     await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
                     {
@@ -173,6 +237,17 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
+            // If we got this far, something failed, redisplay form with images
+            var images = await _attachmentService.GetAttachmentLinks(new GetAttachmentLink
+            {
+                AttachmentType = AttachmentTypeConstants.BUSINESS_CATEGORY,
+                Entity = EntityConstants.BusinessCategory,
+                RecordID = businessCategoryInternal.ID
+            });
+
+            ViewBag.CategoryImages = images;
+            
             return View(businessCategoryInternal);
         }
 

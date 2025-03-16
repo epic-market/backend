@@ -1,225 +1,412 @@
 ﻿@model EpicMarket.Admin.MVC.Models.OrderDetailsModel
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = $"Order #{Model.Order.ID} - Details";
 }
 
+<style>
+    .badge {
+        padding: 0.5rem 0.75rem;
+        font-weight: 500;
+        border-radius: 30px;
+    }
+    .list-group-item {
+        border-width: 0;
+        padding: 0.8rem 0;
+        border-bottom: 1px solid rgba(0,0,0,.1);
+    }
+    .card {
+        box-shadow: 0 2px 15px rgba(0,0,0,.04);
+        border: 1px solid rgba(0,0,0,.05);
+        border-radius: 0.75rem;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+    .card-header {
+        background-color: rgba(0,0,0,.02);
+        border-bottom: 1px solid rgba(0,0,0,.05);
+    }
+    .fw-medium {
+        font-weight: 500;
+    }
+    .info-section {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .info-title {
+        font-size: 1rem;
+        color: #666;
+        margin-bottom: 1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+    .info-title i {
+        margin-right: 0.5rem;
+        font-size: 1.1rem;
+    }
+    .key-value-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(0,0,0,.05);
+    }
+    .key-value-item:last-child {
+        border-bottom: none;
+    }
+    .order-header {
+        position: relative;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+        border-radius: 0.75rem;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    .status-badge {
+        transition: all 0.3s ease;
+    }
+    .status-badge:hover {
+        transform: translateY(-2px);
+    }
+    .detail-section {
+        background-color: #fff;
+        border-radius: 0.75rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,.03);
+        overflow: hidden;
+    }
+    .tab-content {
+        background-color: #fff;
+        border-radius: 0 0 0.75rem 0.75rem;
+    }
+    .nav-tabs .nav-link.active {
+        border-color: transparent;
+        border-bottom: 3px solid #0d6efd;
+        background-color: transparent;
+        color: #0d6efd;
+    }
+    .nav-tabs .nav-link {
+        border: none;
+        color: #6c757d;
+        font-weight: 500;
+        padding: 0.75rem 1rem;
+    }
+    @@media (max-width: 768px) {
+        .key-value-item {
+            flex-direction: column;
+        }
+    }
+    .product-card {
+        transition: all 0.3s ease;
+        border-radius: 0.75rem;
+    }
+    .product-card:hover {
+        transform: translateY(-5px);
+    }
+    .product-icon {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
 
-<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-	<div class="breadcrumb-title pe-3">Orders</div>
-	<div class="ps-3">
-		<nav aria-label="breadcrumb">
-			<ol class="breadcrumb mb-0 p-0">
-				<li class="breadcrumb-item">
-					<a asp-action="Index"><i class="bx bx-home-alt"></i></a>
-				</li>
-				<li class="breadcrumb-item active" aria-current="page">Details</li>
-			</ol>
-		</nav>
-	</div>
+<div class="container-fluid px-4 py-3">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Home</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Orders")">Orders</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Order #@Model.Order.ID</li>
+        </ol>
+    </nav>
+
+    <!-- Order Header -->
+    <div class="order-header mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+            <h3 class="mb-0 text-dark d-flex align-items-center">
+                <div class="me-2">
+                    <div class="rounded-circle d-flex justify-content-center align-items-center bg-light"
+                         style="width: 40px; height: 40px; border: 1px solid #ddd;">
+                        <i class="bx bx-cart text-primary" style="font-size: 20px;"></i>
+                    </div>
+                </div>
+                Order #@Html.DisplayFor(model => model.Order.ID)
+            </h3>
+            <div>
+                <a asp-action="Edit" class="btn btn-primary" asp-route-id="@Model?.Order.ID">
+                    <i class="bx bx-edit me-1"></i> Edit
+                </a>
+            </div>
+        </div>
+
+        <!-- Status Pills -->
+        <div class="d-flex flex-wrap gap-2 mt-3">
+            @{
+                var orderStatus = Model.Order.OrderStatusOptions.OrderStatus;
+                var statusColor = orderStatus.Equals("Completed", StringComparison.OrdinalIgnoreCase) ? "success" : 
+                                 orderStatus.Equals("Pending", StringComparison.OrdinalIgnoreCase) ? "warning" : 
+                                 orderStatus.Equals("Cancelled", StringComparison.OrdinalIgnoreCase) ? "danger" : "info";
+                
+                var orderType = Model.Order.OrderTypesOptions.Ordertype;
+                var typeColor = orderType.Equals("Delivery", StringComparison.OrdinalIgnoreCase) ? "info" : 
+                               orderType.Equals("Pickup", StringComparison.OrdinalIgnoreCase) ? "primary" : "secondary";
+            }
+            
+            <span class="status-badge badge bg-@statusColor text-white">
+                <i class="bx bx-check-circle me-1"></i>
+                @Html.DisplayFor(model => model.Order.OrderStatusOptions.OrderStatus)
+            </span>
+            <span class="status-badge badge bg-@typeColor text-white">
+                <i class="bx bx-package me-1"></i>
+                @Html.DisplayFor(model => model.Order.OrderTypesOptions.Ordertype)
+            </span>
+            <span class="status-badge badge bg-success text-white">
+                <i class="bx bx-money me-1"></i>
+                @Html.DisplayFor(model => model.Order.PaymentMode)
+            </span>
+            <span class="status-badge badge bg-dark text-white">
+                <i class="bx bx-calendar me-1"></i>
+                @Model.Order.OrderAt.ToString("dd MMM yyyy HH:mm")
+            </span>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Order Summary -->
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header py-3">
+                    <h5 class="mb-0">
+                        <i class="bx bx-receipt me-2"></i>
+                        Order Summary
+                    </h5>
+                </div>
+                <div class="card-body p-3">
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted">Total Items</span>
+                            <span class="fw-bold fs-5">@Html.DisplayFor(model => model.Order.TotalItems)</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Total Amount</span>
+                            <span class="fw-bold fs-4 text-primary">₹@Html.DisplayFor(model => model.Order.TotalPrice)</span>
+                        </div>
+                    </div>
+
+                    <!-- Customer Information -->
+                    <div class="mb-4">
+                        <h5 class="info-title border-bottom pb-2 mb-3">
+                            <i class="bx bx-user-circle"></i> Customer Information
+                        </h5>
+                        <div class="key-value-item">
+                            <span class="text-muted">Name</span>
+                            <span class="fw-medium">@Html.DisplayFor(model => model.Order.Person.UserName)</span>
+                        </div>
+                        <div class="key-value-item">
+                            <span class="text-muted">Phone</span>
+                            <span class="fw-medium">@Html.DisplayFor(model => model.Order.Person.PhoneNumber)</span>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Address -->
+                    <div class="mb-4">
+                        <h5 class="info-title border-bottom pb-2 mb-3">
+                            <i class="bx bx-map"></i> Delivery Address
+                        </h5>
+                        <address class="mb-0">
+                            @Html.DisplayFor(model => model.Order.Address.Address1)<br>
+                            @Html.DisplayFor(model => model.Order.Address.City),<br>
+                            @Html.DisplayFor(model => model.Order.Address.State) - @Html.DisplayFor(model => model.Order.Address.Pincode)
+                        </address>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Details -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-body p-0">
+                    <div class="row g-0">
+                        <!-- Basic Info -->
+                        <div class="col-md-6 info-section border-end">
+                            <h5 class="info-title">
+                                <i class="bx bx-info-circle"></i> Order Information
+                            </h5>
+                            <div class="key-value-item">
+                                <span class="text-muted">Order ID</span>
+                                <span class="fw-medium">@Html.DisplayFor(model => model.Order.ID)</span>
+                            </div>
+                            <div class="key-value-item">
+                                <span class="text-muted">Order Type</span>
+                                <span class="fw-medium">@Html.DisplayFor(model => model.Order.OrderTypesOptions.Ordertype)</span>
+                            </div>
+                            <div class="key-value-item">
+                                <span class="text-muted">Order Date</span>
+                                <span class="fw-medium">@Model.Order.OrderAt.ToString("dd MMM yyyy HH:mm")</span>
+                            </div>
+                            <div class="key-value-item">
+                                <span class="text-muted">Order Status</span>
+                                <span class="fw-medium">@Html.DisplayFor(model => model.Order.OrderStatusOptions.OrderStatus)</span>
+                            </div>
+                            <div class="key-value-item">
+                                <span class="text-muted">Payment Mode</span>
+                                <span class="fw-medium">@Html.DisplayFor(model => model.Order.PaymentMode)</span>
+                            </div>
+                        </div>
+
+                        <!-- Outlet Info -->
+                        <div class="col-md-6 info-section">
+                            <h5 class="info-title">
+                                <i class="bx bx-store"></i> Outlet Information
+                            </h5>
+                            <div class="key-value-item">
+                                <span class="text-muted">Outlet Name</span>
+                                <span class="fw-medium">
+                                    <a asp-controller="Outlets" asp-action="Details" asp-route-id="@Model.Order.Outlet.ID" class="text-primary">
+                                        @Html.DisplayFor(model => model.Order.Outlet.Name)
+                                    </a>
+                                </span>
+                            </div>
+                            <div class="key-value-item">
+                                <span class="text-muted">Business Name</span>
+                                <span class="fw-medium">
+                                    <a asp-controller="Businesses" asp-action="Details" asp-route-id="@Model.Order.Outlet.Bussiness.ID" class="text-primary">
+                                        @Html.DisplayFor(model => model.Order.Outlet.Bussiness.Name)
+                                    </a>
+                                </span>
+                            </div>
+                            <div class="key-value-item">
+                                <span class="text-muted">Created Date</span>
+                                <span class="fw-medium">@Model.Order.CreateDate.ToString("dd MMM yyyy HH:mm")</span>
+                            </div>
+                            <div class="key-value-item">
+                                <span class="text-muted">Created By</span>
+                                <span class="fw-medium">@Html.DisplayFor(model => model.Order.CreateBy)</span>
+                            </div>
+                            <div class="key-value-item">
+                                <span class="text-muted">Modified Date</span>
+                                <span class="fw-medium">@(Model.Order.ModifiedDate?.ToString("dd MMM yyyy HH:mm") ?? "N/A")</span>
+                            </div>
+                            <div class="key-value-item">
+                                <span class="text-muted">Modified By</span>
+                                <span class="fw-medium">@Html.DisplayFor(model => model.Order.ModifiedBy)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Items Section -->
+            <div class="card">
+                <div class="card-header py-3">
+                    <h5 class="mb-0">
+                        <i class="bx bx-package me-2"></i>
+                        Order Items
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.OrderDetails != null && Model.OrderDetails.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-borderless">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 40%">Product</th>
+                                        <th style="width: 15%">Quantity</th>
+                                        <th style="width: 15%">Rate</th>
+                                        <th style="width: 15%">Total</th>
+                                        <th style="width: 15%">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.OrderDetails)
+                                    {
+                                        <tr class="border-bottom">
+                                            <td>
+                                                <div class="d-flex align-items-center py-2">
+                                                    <div class="me-3 bg-light rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                        <i class="bx bx-package text-primary"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-0">
+                                                            <a asp-controller="Catalogs" asp-action="Details" asp-route-id="@item.CatalogVariants.CatalogID" 
+                                                               class="text-decoration-none text-dark">
+                                                                @(item.CatalogVariants.Catalog?.Name ?? $"Product #{item.CatalogVariants.CatalogID}")
+                                                            </a>
+                                                        </h6>
+                                                        <div class="d-flex flex-wrap gap-2 mt-1">
+                                                            @if (!string.IsNullOrEmpty(item.CatalogVariants.Attributes))
+                                                            {
+                                                                <span class="badge bg-light text-dark">@item.CatalogVariants.Attributes</span>
+                                                            }
+                                                            <span class="badge bg-light text-dark">SKU: @item.CatalogVariants.SKU</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="align-middle">
+                                                <span class="fw-medium">@item.Quantity</span>
+                                            </td>
+                                            <td class="align-middle">
+                                                <span class="fw-medium">₹@item.Rate</span>
+                                            </td>
+                                            <td class="align-middle">
+                                                <span class="fw-bold text-primary">₹@item.TotalPrice</span>
+                                            </td>
+                                            <td class="align-middle">
+                                                <div class="d-flex gap-2">
+                                                    <a asp-controller="OrderDetails" asp-action="Details" asp-route-id="@item.ID" 
+                                                       class="btn btn-sm btn-outline-info">
+                                                        <i class="bx bx-detail"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot class="border-top">
+                                    <tr>
+                                        <td colspan="3" class="text-end fw-medium pt-3">
+                                            Order Total (@Model.Order.TotalItems items):
+                                        </td>
+                                        <td class="pt-3">
+                                            <span class="fw-bold fs-5 text-primary">₹@Model.Order.TotalPrice</span>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info mb-0">
+                            <i class="bx bx-info-circle me-2"></i>
+                            No items found for this order.
+                        </div>
+                    }
+                </div>
+                <div class="card-footer">
+                    <a href="javascript:history.go(-1)" class="btn btn-secondary">
+                        <i class="bx bx-arrow-back me-1"></i> Back
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-<hr />
 
-<div class="card">
-	<div class="row g-0">
-		<div class="col-md-12">
-			<div class="card-body">
-				<div class="float-end">
-					<a asp-action="Edit" class="btn btn-primary px-5" asp-route-id="@Model?.Order.ID">Edit</a>
-				</div>
-				<div class="row">
-					<dl class="row col-6">
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Order.ID)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Order.ID)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Order.OrderTypesOptions.Ordertype)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Order.OrderTypesOptions.Ordertype)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Order.OrderAt)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Order.OrderAt)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Order.OrderStatusOptions.OrderStatus)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Order.OrderStatusOptions.OrderStatus)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Order.PaymentMode)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Order.PaymentMode)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Order.PaymentMode)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Order.PaymentMode)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Order.TotalItems)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Order.TotalItems)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Order.TotalPrice)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Order.TotalPrice)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Order.Address)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Order.Address.Address1),
-							@Html.DisplayFor(model => model.Order.Address.City),
-							@Html.DisplayFor(model => model.Order.Address.State),
-							@Html.DisplayFor(model => model.Order.Address.Pincode)
-						</dd>
-
-					</dl>
-					<dl class="row col-6">
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Order.Outlet.Name)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Order.Outlet.Name)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Order.Outlet.Bussiness.Name)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Order.Outlet.Bussiness.Name)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Order.Person.UserName)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Order.Person.UserName)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Order.Person.PhoneNumber)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Order.Person.PhoneNumber)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Order.CreateDate)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Order.CreateDate)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Order.CreateBy)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Order.CreateBy)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Order.ModifiedDate)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Order.ModifiedDate)
-						</dd>
-						<dt class="col-sm-4">
-							@Html.DisplayNameFor(model => model.Order.ModifiedBy)
-						</dt>
-						<dd class="col-sm-8">
-							@Html.DisplayFor(model => model.Order.ModifiedBy)
-						</dd>
-					</dl>
-				</div>
-			</div>
-		</div>
-	</div>
-	<hr />
-	<div class="card-body">
-		<ul class="nav nav-tabs nav-primary mb-0" role="tablist">
-			<li class="nav-item" role="presentation">
-				<a class="nav-link active" data-bs-toggle="tab" href="#primaryorders" role="tab" aria-selected="true">
-					<div class="d-flex align-items-center">
-						<div class="tab-icon">
-							<i class='bx bx-comment-detail font-18 me-1'></i>
-						</div>
-						<div class="tab-title"> Orders </div>
-					</div>
-				</a>
-			</li>
-		</ul>
-		<div class="tab-content pt-3">
-			<div class="tab-pane fade show active" id="primaryorders" role="tabpanel">
-				<div class="card">
-					<div class="card-body">
-						<div class="table-responsive">
-							<table id="example" class="table table-striped table-bordered" style="width:100%">
-								<thead>
-									<tr>
-										<th>
-											@Html.DisplayNameFor(model => model.OrderDetail.CatalogVariants)
-										</th>
-										<th>
-											@Html.DisplayNameFor(model => model.OrderDetail.Quantity)
-										</th>
-										<th>
-											@Html.DisplayNameFor(model => model.OrderDetail.Rate)
-										</th>
-										<th>
-											@Html.DisplayNameFor(model => model.OrderDetail.TotalPrice)
-										</th>
-
-
-										<th></th>
-									</tr>
-								</thead>
-								<tbody>
-									@foreach (var item in Model.OrderDetails)
-									{
-										<tr>
-											<td>
-												<a asp-controller="Catalogs" asp-action="Details" asp-route-id="@item.CatalogVariants.CatalogID"> @Html.DisplayFor(modelItem => item.CatalogVariants.CatalogID)</a>
-											</td>
-											<td>
-												@Html.DisplayFor(modelItem => item.Quantity)
-											</td>
-											<td>
-												@Html.DisplayFor(modelItem => item.Rate)
-											</td>
-											<td>
-												@Html.DisplayFor(modelItem => item.TotalPrice)
-											</td>
-											<td>
-												<a asp-controller="OrderDetails" asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-												<a asp-controller="OrderDetails" asp-action="Details" asp-route-id="@item.ID">Details</a> |
-												<a asp-controller="OrderDetails" asp-action="Delete" asp-route-id="@item.ID">Delete</a>
-											</td>
-										</tr>
-									}
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-
-</div>
 @section Scripts {
-	<script>
-		$(document).ready(function () {
-			$('#example').DataTable();
-			$('#example1').DataTable();
-			$('#example2').DataTable();
-		});
-	</script>
+    <script>
+        $(document).ready(function () {
+            // Tooltips initialization
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl, {
+                    delay: { show: 300, hide: 100 }
+                });
+            });
+        });
+    </script>
 }

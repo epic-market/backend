@@ -1,419 +1,789 @@
 ﻿@model EpicMarket.Admin.MVC.Models.CatelogModel
 
 @{
-    ViewData["Title"] = "Product Details";
+    ViewData["Title"] = $"{Model.Catalog.Name} - Product Details";
 }
 
 <style>
     .badge {
-        padding: 8px 12px;
+        padding: 0.5rem 0.75rem;
         font-weight: 500;
+        border-radius: 30px;
     }
     .list-group-item {
         border-width: 0;
-        padding-left: 0;
-        padding-right: 0;
+        padding: 0.8rem 0;
         border-bottom: 1px solid rgba(0,0,0,.1);
     }
     .card {
-        box-shadow: 0 2px 6px rgba(0,0,0,.04);
-        border: 1px solid rgba(0,0,0,.075);
+        box-shadow: 0 2px 15px rgba(0,0,0,.04);
+        border: 1px solid rgba(0,0,0,.05);
+        border-radius: 0.75rem;
+        overflow: hidden;
+    }
+    .card-header {
+        background-color: rgba(0,0,0,.02);
+        border-bottom: 1px solid rgba(0,0,0,.05);
     }
     .fw-medium {
         font-weight: 500;
     }
+    .product-image {
+        height: 300px;
+        object-fit: cover;
+        border-radius: 0.5rem;
+        transition: transform 0.3s ease;
+    }
+    .product-image:hover {
+        transform: scale(1.02);
+    }
+    .gallery-item {
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .gallery-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    }
+    .gallery-img {
+        height: 180px;
+        object-fit: cover;
+        width: 100%;
+    }
+    .variant-row:hover {
+        background-color: rgba(0,0,0,.02);
+    }
+    .variant-detail-card {
+        border-radius: 0.5rem;
+        border: 1px solid rgba(0,0,0,.08);
+        background-color: #f9f9f9;
+    }
+    .info-section {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .info-title {
+        font-size: 1rem;
+        color: #666;
+        margin-bottom: 1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+    .info-title i {
+        margin-right: 0.5rem;
+        font-size: 1.1rem;
+    }
+    .btn-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        padding: 0;
+        border-radius: 0.5rem;
+    }
+    .key-value-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(0,0,0,.05);
+    }
+    .key-value-item:last-child {
+        border-bottom: none;
+    }
+    .product-header {
+        position: relative;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+        border-radius: 0.75rem;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    .status-badge {
+        transition: all 0.3s ease;
+    }
+    .status-badge:hover {
+        transform: translateY(-2px);
+    }
+    .detail-section {
+        background-color: #fff;
+        border-radius: 0.75rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,.03);
+        overflow: hidden;
+    }
+    @@media (max-width: 768px) {
+        .product-image {
+            height: 200px;
+        }
+        .gallery-img {
+            height: 120px;
+        }
+    }
 </style>
 
-<div class="container-fluid">
-    <!-- Product Header -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">@Model.Catalog.Name</h4>
-                <a asp-action="Edit" asp-route-id="@Model.Catalog.ID" class="btn btn-primary">
-                    <i class="bx bx-edit me-1"></i> Edit
-                </a>
-            </div>
+<div class="container-fluid px-4 py-3">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Home</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Catalogs")">Products</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.Catalog.Name</li>
+        </ol>
+    </nav>
 
-            <!-- Status Pills -->
-            <div class="mt-3">
-                <span class="badge rounded-pill bg-light text-dark border me-2">
-                    <i class="bx bx-check-circle text-success me-1"></i>
-                    IsActive: @(Model.Catalog.IsActive ? "Active" : "Inactive")
+    <!-- Product Header -->
+    <div class="product-header mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+            <h3 class="mb-0 text-dark">@Model.Catalog.Name</h3>
+            <a asp-action="Edit" asp-route-id="@Model.Catalog.ID" class="btn btn-primary px-4">
+                <i class="bx bx-edit me-2"></i> Edit Product
+            </a>
+        </div>
+
+        <!-- Status Pills -->
+        <div class="d-flex flex-wrap gap-2 mt-3">
+            <span class="status-badge badge bg-@(Model.Catalog.IsActive ? "success" : "secondary") text-white">
+                <i class="bx bx-check-circle me-1"></i>
+                @(Model.Catalog.IsActive ? "Active" : "Inactive")
+            </span>
+            @if (Model.Catalog.IsRecommended)
+            {
+                <span class="status-badge badge bg-info text-white">
+                    <i class="bx bx-badge-check me-1"></i>
+                    Recommended
                 </span>
-                <span class="badge rounded-pill bg-light text-dark border me-2">
-                    <i class="bx bx-badge-check text-info me-1"></i>
-                    IsRecommended: @(Model.Catalog.IsRecommended ? "Recommended" : "Not Recommended")
+            }
+            <span class="status-badge badge bg-warning text-dark">
+                <i class="bx bx-star me-1"></i>
+                Rating: @Model.Catalog.Rating
+            </span>
+            <span class="status-badge badge bg-primary text-white">
+                <i class="bx bx-shopping-bag me-1"></i>
+                Orders: @Model.Catalog.OrderCount
+            </span>
+            <span class="status-badge badge bg-danger text-white">
+                <i class="bx bx-check-shield me-1"></i>
+                Verified
+            </span>
+            @if (Model.Catalog.RequiresRefrigeration)
+            {
+                <span class="status-badge badge bg-info text-white">
+                    <i class="bx bx-cool me-1"></i>
+                    Refrigeration Required
                 </span>
-                <span class="badge rounded-pill bg-light text-dark border me-2">
-                    <i class="bx bx-star text-warning me-1"></i>
-                    Rating: @Model.Catalog.Rating
-                </span>
-                <span class="badge rounded-pill bg-danger text-white me-2">
-                    <i class="bx bx-check-circle me-1"></i>
-                    Verified
-                </span>
-            </div>
+            }
         </div>
     </div>
 
-    <div class="row">
-        <!-- Product Image -->
-        <div class="col-md-3">
-            <div class="card mb-4">
-                <div class="card-body">
-                    @if (!string.IsNullOrEmpty(ViewBag.thumbnail))
-                    {
-                        <img src="@Url.Action("DisplayImage", "File", new { key = ViewBag.thumbnail })" 
-                             alt="@Model.Catalog.Name"
-                             class="img-fluid rounded" 
-                             style="width: 100%; object-fit: cover;">
+    <div class="row g-4">
+        <!-- Product Image & Gallery -->
+        <div class="col-lg-4">
+            <div class="card mb-4 h-100">
+                <div class="card-body p-3">
+                    @{
+                        // Find the default variant
+                        var defaultVariant = Model.Catalog.CatalogVariants?.FirstOrDefault(v => v.IsDefaultVariant) ?? 
+                                            Model.Catalog.CatalogVariants?.FirstOrDefault();
+                        
+                        // Get thumbnail for default variant
+                        string thumbnailImage = null;
+                        if (defaultVariant != null && ViewBag.variantImages != null && 
+                            ViewBag.variantImages.ContainsKey(defaultVariant.ID) && 
+                            ViewBag.variantImages[defaultVariant.ID].Count > 0)
+                        {
+                            thumbnailImage = ViewBag.variantImages[defaultVariant.ID][0];
+                        }
+                        else if (ViewBag.thumbnail != null)
+                        {
+                            thumbnailImage = ViewBag.thumbnail;
+                        }
                     }
-                    else
-                    {
-                        <div class="text-center p-4 bg-light rounded">
-                            <i class="bx bx-image-alt" style="font-size: 48px;"></i>
-                            <p class="text-muted mb-0">No thumbnail available</p>
-                        </div>
-                    }
+                    
+                    <div class="text-center mb-4">
+                        @if (!string.IsNullOrEmpty(thumbnailImage))
+                        {
+                            <a href="@Url.Action("DisplayImage", "File", new { key = thumbnailImage })" target="_blank" 
+                               class="d-block" data-lightbox="product-image">
+                                <img src="@Url.Action("DisplayImage", "File", new { key = thumbnailImage })" 
+                                     alt="@Model.Catalog.Name"
+                                     class="product-image img-fluid shadow-sm mb-3" 
+                                     style="width: 100%;">
+                            </a>
+                        }
+                        else
+                        {
+                            <div class="text-center p-5 bg-light rounded shadow-sm mb-3">
+                                <i class="bx bx-image-alt text-muted" style="font-size: 80px;"></i>
+                                <p class="text-muted mb-0 mt-3">No thumbnail available</p>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Product Images Gallery -->
+                    <div class="mt-4">
+                        <h5 class="info-title border-bottom pb-2 mb-3">
+                            <i class="bx bx-images"></i> Product Gallery
+                        </h5>
+
+                        @{
+                            // Get all product images
+                            List<string> allProductImages = new List<string>();
+                            
+                            // Add catalog-level images if any
+                            if (ViewBag.productImages != null)
+                            {
+                                allProductImages.AddRange(ViewBag.productImages);
+                            }
+                            
+                            // Add default variant images if any
+                            if (defaultVariant != null && ViewBag.variantImages != null && 
+                                ViewBag.variantImages.ContainsKey(defaultVariant.ID))
+                            {
+                                allProductImages.AddRange(ViewBag.variantImages[defaultVariant.ID]);
+                            }
+                        }
+                        
+                        @if (allProductImages.Any())
+                        {
+                            <div class="row row-cols-2 row-cols-md-2 g-3">
+                                @foreach (var imageKey in allProductImages.Take(4))
+                                {
+                                    <div class="col">
+                                        <div class="gallery-item">
+                                            <a href="@Url.Action("DisplayImage", "File", new { key = imageKey })" 
+                                               target="_blank" data-lightbox="product-gallery">
+                                                <img src="@Url.Action("DisplayImage", "File", new { key = imageKey })"
+                                                     class="gallery-img"
+                                                     alt="Product Image">
+                                            </a>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            @if (allProductImages.Count > 4)
+                            {
+                                <div class="text-center mt-3">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" 
+                                            data-bs-toggle="modal" data-bs-target="#galleryModal">
+                                        View All @allProductImages.Count Images
+                                    </button>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="alert alert-info mb-0">
+                                <i class="bx bx-info-circle me-1"></i>
+                                No product images available
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Product Details -->
-        <div class="col-md-9">
+        <div class="col-lg-8">
             <div class="card mb-4">
-                <div class="card-body">
-                    <div class="row g-4">
+                <div class="card-body p-0">
+                    <div class="row g-0">
                         <!-- Basic Info -->
-                        <div class="col-md-6">
-                            <div class="mb-4">
-                                <h6 class="text-muted mb-3">Basic Information</h6>
-                                <div class="list-group list-group-flush">
-                                    <div class="list-group-item px-0 d-flex justify-content-between">
-                                        <span class="text-muted">ID</span>
-                                        <span class="fw-medium">@Model.Catalog.ID</span>
-                                    </div>
-                                    <div class="list-group-item px-0 d-flex justify-content-between">
-                                        <span class="text-muted">Business ID</span>
-                                        <span class="fw-medium">@Model.Catalog.BusinessID</span>
-                                    </div>
-                                    <div class="list-group-item px-0 d-flex justify-content-between">
-                                        <span class="text-muted">Category ID</span>
-                                        <span class="fw-medium">@Model.Catalog.CategoryID</span>
-                                    </div>
-                                    <div class="list-group-item px-0 d-flex justify-content-between">
-                                        <span class="text-muted">Review Count</span>
-                                        <span class="fw-medium">@Model.Catalog.ReviewCount</span>
-                                    </div>
-                                    <div class="list-group-item px-0 d-flex justify-content-between">
-                                        <span class="text-muted">Order Count</span>
-                                        <span class="fw-medium">@Model.Catalog.OrderCount</span>
-                                    </div>
-                                </div>
+                        <div class="col-md-6 info-section border-end">
+                            <h5 class="info-title">
+                                <i class="bx bx-info-circle"></i> Basic Information
+                            </h5>
+                            <div class="key-value-item">
+                                <span class="text-muted">ID</span>
+                                <span class="fw-medium">@Model.Catalog.ID</span>
+                            </div>
+                            <div class="key-value-item">
+                                <span class="text-muted">Business ID</span>
+                                <span class="fw-medium">@Model.Catalog.BusinessID</span>
+                            </div>
+                            <div class="key-value-item">
+                                <span class="text-muted">Business Name</span>
+                                <span class="fw-medium">@Model.Catalog.Business.Name</span>
+                            </div>
+                            <div class="key-value-item">
+                                <span class="text-muted">Category ID</span>
+                                <span class="fw-medium">@Model.Catalog.CategoryID</span>
+                            </div>
+                            <div class="key-value-item">
+                                <span class="text-muted">Review Count</span>
+                                <span class="fw-medium">@Model.Catalog.ReviewCount</span>
+                            </div>
+                            <div class="key-value-item">
+                                <span class="text-muted">Order Count</span>
+                                <span class="fw-medium">@Model.Catalog.OrderCount</span>
+                            </div>
+                            <div class="key-value-item">
+                                <span class="text-muted">Created By</span>
+                                <span class="fw-medium">@Model.Catalog.CreateBy</span>
+                            </div>
+                            <div class="key-value-item">
+                                <span class="text-muted">Created Date</span>
+                                <span class="fw-medium">@Model.Catalog.CreateDate.ToString("dd MMM yyyy HH:mm")</span>
                             </div>
                         </div>
 
                         <!-- Additional Info -->
-                        <div class="col-md-6">
-                            <div class="mb-4">
-                                <h6 class="text-muted mb-3">Additional Information</h6>
-                                <div class="list-group list-group-flush">
-                                    <div class="list-group-item px-0">
-                                        <span class="text-muted d-block mb-1">Description</span>
-                                        <p class="mb-0">@Model.Catalog.Description</p>
-                                    </div>
-                                    <div class="list-group-item px-0">
-									<span class="text-muted d-block mb-1">Base Highlights</span>
-									<div class="mb-0">
-										@{
-											// Check if the highlights exist
-											if (!string.IsNullOrEmpty(Model.Catalog.BaseHightlights))
-											{
-												try
-												{
-													// Deserialize the JSON string to dictionary
-													var highlights = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(
-														Model.Catalog.BaseHightlights
-													);
+                        <div class="col-md-6 info-section">
+                            <h5 class="info-title">
+                                <i class="bx bx-detail"></i> Additional Information
+                            </h5>
+                            <div class="mb-3">
+                                <h6 class="text-muted mb-2">Description</h6>
+                                <p class="mb-0">@Model.Catalog.Description</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6 class="text-muted mb-2">Base Highlights</h6>
+                                <div class="mb-0">
+                                    @{
+                                        // Check if the highlights exist
+                                        if (!string.IsNullOrEmpty(Model.Catalog.BaseHightlights))
+                                        {
+                                            try
+                                            {
+                                                // Deserialize the JSON string to dictionary
+                                                var highlights = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(
+                                                    Model.Catalog.BaseHightlights
+                                                );
 
-													// Loop through each key-value pair
-													foreach (var item in highlights)
-													{
-														<div class="d-flex justify-content-between">
-															<span>@item.Key</span>
-															<span>@item.Value</span>
-														</div>
-													}
-												}
-												catch
-												{
-													// Fallback if JSON is invalid
-													@Model.Catalog.BaseHightlights
-												}
-											}
-											else
-											{
-												<span class="text-muted">No highlights available</span>
-											}
-										}
-									</div>
-								</div>
-                                    <div class="list-group-item px-0 d-flex justify-content-between">
-                                        <span class="text-muted">Requires Refrigeration</span>
-                                        <span class="fw-medium">
-                                            @(Model.Catalog.RequiresRefrigeration ? "Yes" : "No")
-                                        </span>
-                                    </div>
+                                                // Loop through each key-value pair
+                                                foreach (var item in highlights)
+                                                {
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <span class="text-muted">@item.Key</span>
+                                                        <span class="fw-medium">@item.Value</span>
+                                                    </div>
+                                                }
+                                            }
+                                            catch
+                                            {
+                                                // Fallback if JSON is invalid
+                                                @Model.Catalog.BaseHightlights
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No highlights available</span>
+                                        }
+                                    }
                                 </div>
+                            </div>
+                            
+                            <div class="key-value-item">
+                                <span class="text-muted">Requires Refrigeration</span>
+                                <span class="fw-medium">
+                                    <span class="badge bg-@(Model.Catalog.RequiresRefrigeration ? "info" : "secondary")">
+                                        @(Model.Catalog.RequiresRefrigeration ? "Yes" : "No")
+                                    </span>
+                                </span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Product Variants Card -->
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center py-3">
-            <h5 class="mb-0">Product Variants</h5>
-            <a asp-controller="CatalogVariants" asp-action="Create" asp-route-catalogId="@Model.Catalog.ID" 
-               class="btn btn-primary btn-sm">
-                <i class="bx bx-plus"></i> Add Variant
-            </a>
-        </div>
-        <div class="card-body">
-            @if (Model.Catalog.CatalogVariants?.Any() == true)
-            {
-                <div class="table-responsive">
-                    <table class="table table-hover" id="variantsTable">
-                        <thead class="table-light">
-                            <tr>
-                                <th style="width: 80px">Image</th>
-                                <th>SKU</th>
-                                <th>Attributes</th>
-                                <th class="text-end">Cost Price</th>
-                                <th class="text-end">Sale Price</th>
-                                <th class="text-end">Compare Price</th>
-                                <th>Weight</th>
-                                <th style="width: 120px">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var variant in Model.Catalog.CatalogVariants)
-                            {
-                                <tr>
-                                    <td>
-                                        <div class="avatar avatar-lg">
-                                            @if (!string.IsNullOrEmpty(ViewBag.thumbnail))
-                                            {
-                                                <img src="@Url.Action("DisplayImage", "File", new { key = ViewBag.thumbnail })" 
-                                                     alt="@variant.SKU"
-                                                     class="rounded"
-                                                     style="width: 40px; height: 40px; object-fit: cover;">
-                                            }
-                                            else
-                                            {
-                                                <div class="rounded bg-light d-flex align-items-center justify-content-center" 
-                                                     style="width: 40px; height: 40px;">
-                                                    <i class="bx bx-image text-muted"></i>
+            <!-- Product Variants Card -->
+            <div class="card mb-4">
+                <div class="card-header py-3">
+                    <h5 class="mb-0">
+                        <i class="bx bx-package me-2"></i>
+                        Product Variants (@Model.Catalog.CatalogVariants?.Count ?? 0)
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.Catalog.CatalogVariants?.Any() == true)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0" id="variantsTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 80px">Image</th>
+                                        <th>SKU</th>
+                                        <th>Attributes</th>
+                                        <th class="text-end">Cost ₹</th>
+                                        <th class="text-end">Sale ₹</th>
+                                        <th>Weight</th>
+                                        <th style="width: 100px">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var variant in Model.Catalog.CatalogVariants)
+                                    {
+                                        <tr class="variant-row">
+                                            <td>
+                                                <div class="avatar avatar-lg">
+                                                    @{
+                                                        string variantThumbnail = null;
+                                                        if (ViewBag.variantImages != null && 
+                                                            ViewBag.variantImages.ContainsKey(variant.ID) && 
+                                                            ViewBag.variantImages[variant.ID].Count > 0)
+                                                        {
+                                                            variantThumbnail = ViewBag.variantImages[variant.ID][0];
+                                                        }
+                                                    }
+                                                    
+                                                    @if (!string.IsNullOrEmpty(variantThumbnail))
+                                                    {
+                                                        <img src="@Url.Action("DisplayImage", "File", new { key = variantThumbnail })" 
+                                                             alt="@variant.SKU"
+                                                             class="rounded shadow-sm"
+                                                             style="width: 50px; height: 50px; object-fit: cover;">
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="rounded bg-light d-flex align-items-center justify-content-center shadow-sm" 
+                                                             style="width: 50px; height: 50px;">
+                                                            <i class="bx bx-image text-muted"></i>
+                                                        </div>
+                                                    }
                                                 </div>
-                                            }
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <span class="fw-medium">@variant.SKU</span>
-                                        </div>
-                                    </td>
-									<td>
-					@{
-						// Debug: Show raw value first
-						<!-- <div>Raw: @variant.Attributes</div> -->
-						
-						if (!string.IsNullOrEmpty(variant.Attributes))
-						{
-							try
-							{
-								// Clean the JSON string by removing escape characters
-								var cleanJson = variant.Attributes.Replace("\\\"", "\"");
-								
-								var attributes = Newtonsoft.Json.JsonConvert
-									.DeserializeObject<Dictionary<string, string>>(cleanJson);
-								
-								<div class="d-flex flex-wrap gap-1">
-									@foreach (var value in attributes.Values)
-									{
-										<span class="badge bg-primary me-1 mb-1">@value</span>
-									}
-								</div>
-							}
-							catch (Exception ex)
-							{
-								<!-- Helpful error message for debugging -->
-								<div class="text-danger">
-									Error: @ex.Message
-									<br>
-									Content: @variant.Attributes
-								</div>
-							}
-						}
-						else
-						{
-							<span class="text-muted">N/A</span>
-						}
-					}
-				</td>
-                                    <td class="text-end">₹@variant.CostPrice.ToString("N2")</td>
-                                    <td class="text-end">₹@variant.SalePrice.ToString("N2")</td>
-                                    <td class="text-end">
-                                        @(variant.CompareAtPrice.HasValue ? $"₹{variant.CompareAtPrice.Value:N2}" : "-")
-                                    </td>
-                                    <td>
-                                        @(variant.Weight.HasValue ? $"{variant.Weight:N2} {variant.WeightUnit}" : "-")
-                                    </td>
-                                    <td>
-                                        <div class="btn-group btn-group-sm">
-                                            <a asp-controller="CatalogVariants" asp-action="Edit" 
-                                               asp-route-id="@variant.ID" 
-                                               class="btn btn-outline-primary"
-                                               title="Edit Variant">
-                                                <i class="bx bx-edit"></i>
-                                            </a>
-                                            <button type="button" 
-                                                    class="btn btn-outline-info" 
-                                                    data-bs-toggle="collapse" 
-                                                    data-bs-target="#inventoryCollapse-@variant.ID"
-                                                    title="View Inventory">
-                                                <i class="bx bx-package"></i>
-                                            </button>
-                                            <button type="button" 
-                                                    class="btn btn-outline-secondary"
-                                                    data-bs-toggle="modal" 
-                                                    data-bs-target="#imagesModal-@variant.ID"
-                                                    title="View Images">
-                                                <i class="bx bx-images"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                
-                                <!-- Inventory Collapse Section -->
-                                <tr>
-                                    <td colspan="8" class="p-0">
-                                        <div class="collapse" id="inventoryCollapse-@variant.ID">
-                                            <div class="card card-body m-3 border">
-                                                <h6 class="mb-3">Outlet Inventory for @variant.SKU</h6>
-                                                @if (variant.Inventory?.Any() == true)
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column">
+                                                    <span class="fw-medium text-primary">@variant.SKU</span>
+                                                    @if (variant.IsDefaultVariant)
+                                                    {
+                                                        <span class="badge bg-success text-white mt-1" style="width: fit-content">Default</span>
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td>
+                                            @{
+                                                if (!string.IsNullOrEmpty(variant.Attributes))
                                                 {
-                                                    <div class="table-responsive">
-                                                        <table class="table table-sm table-bordered mb-0">
-                                                            <thead class="table-light">
-                                                                <tr>
-                                                                    <th>Outlet</th>
-                                                                    <th class="text-end">Available</th>
-                                                                    <th class="text-end">Min Stock</th>
-                                                                    <th class="text-end">Max Stock</th>
-                                                                    <th class="text-end">Reorder Point</th>
-                                                                    <th>Status</th>
-                                                                    <th style="width: 80px">Actions</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                @foreach (var inventory in variant.Inventory)
-                                                                {
-                                                                    <tr>
-                                                                        <td>@inventory.Outlet.Name</td>
-                                                                        <td class="text-end">@inventory.QuantityAvailable</td>
-                                                                        <td class="text-end">@inventory.MinimumStockLevel</td>
-                                                                        <td class="text-end">@inventory.MaximumStockLevel</td>
-                                                                        <td class="text-end">@inventory.ReorderPoint</td>
-                                                                        <td>
-                                                                            <span class="badge bg-@(inventory.IsInStock ? "success" : "danger")">
-                                                                                @(inventory.IsInStock ? "In Stock" : "Out of Stock")
-                                                                            </span>
-                                                                        </td>
-                                                                        <td class="text-center">
-                                                                            <a asp-controller="Inventory" asp-action="Edit" 
-                                                                               asp-route-id="@inventory.ID" 
-                                                                               class="btn btn-sm btn-outline-primary">
-                                                                                <i class="bx bx-edit"></i>
-                                                                            </a>
-                                                                        </td>
-                                                                    </tr>
-                                                                }
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
+                                                    try
+                                                    {
+                                                        // Clean the JSON string by removing escape characters
+                                                        var cleanJson = variant.Attributes.Replace("\\\"", "\"");
+                                                        
+                                                        var attributes = Newtonsoft.Json.JsonConvert
+                                                            .DeserializeObject<Dictionary<string, string>>(cleanJson);
+                                                        
+                                                        <div class="d-flex flex-wrap gap-1">
+                                                            @foreach (var value in attributes.Values)
+                                                            {
+                                                                <span class="badge bg-light text-dark border me-1 mb-1">@value</span>
+                                                            }
+                                                        </div>
+                                                    }
+                                                    catch (Exception ex)
+                                                    {
+                                                        <div class="text-muted">@variant.Attributes</div>
+                                                    }
                                                 }
                                                 else
                                                 {
-                                                    <div class="alert alert-info mb-0">
-                                                        <i class="bx bx-info-circle me-1"></i>
-                                                        No inventory records found for this variant
+                                                    <span class="text-muted">N/A</span>
+                                                }
+                                            }
+                                            </td>
+                                            <td class="text-end">₹@variant.CostPrice.ToString("N2")</td>
+                                            <td class="text-end">
+                                                <span class="fw-medium">₹@variant.SalePrice.ToString("N2")</span>
+                                                @if (variant.CompareAtPrice.HasValue && variant.CompareAtPrice > variant.SalePrice)
+                                                {
+                                                    <div class="text-decoration-line-through text-muted small">
+                                                        ₹@variant.CompareAtPrice.Value.ToString("N2")
                                                     </div>
                                                 }
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <!-- Images Modal -->
-                                <div class="modal fade" id="imagesModal-@variant.ID" tabindex="-1">
-                                    <div class="modal-dialog modal-lg">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">
-                                                    <i class="bx bx-images me-1"></i>
-                                                    Images for @variant.SKU
-                                                </h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                @if (ViewBag.attachments != null && ViewBag.attachments.Count > 0)
-                                                {
-                                                    <div class="row row-cols-2 row-cols-md-4 g-3">
-                                                        @foreach (var imageKey in ViewBag.attachments)
+                                            </td>
+                                            <td>
+                                                @(variant.Weight.HasValue ? $"{variant.Weight:N2} {variant.WeightUnit}" : "-")
+                                            </td>
+                                            <td>
+                                                <div class="d-flex">
+                                                    <button type="button" 
+                                                            class="btn btn-icon btn-outline-info me-2" 
+                                                            data-bs-toggle="collapse" 
+                                                            data-bs-target="#variantDetails-@variant.ID"
+                                                            title="View Details">
+                                                        <i class="bx bx-detail"></i>
+                                                    </button>
+                                                    <button type="button" 
+                                                            class="btn btn-icon btn-outline-secondary"
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#imagesModal-@variant.ID"
+                                                            title="View Images">
+                                                        <i class="bx bx-images"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        
+                                        <!-- Variant Details Collapse Section -->
+                                        <tr>
+                                            <td colspan="7" class="p-0">
+                                                <div class="collapse" id="variantDetails-@variant.ID">
+                                                    <div class="variant-detail-card card-body m-3">
+                                                        <h6 class="fw-bold mb-4 border-bottom pb-2">
+                                                            <i class="bx bx-cube me-2"></i>Variant Details for @variant.SKU
+                                                        </h6>
+                                                        <div class="row g-4">
+                                                            <div class="col-md-6">
+                                                                <div class="card border h-100">
+                                                                    <div class="card-header bg-light py-2">
+                                                                        <h6 class="mb-0">Basic Information</h6>
+                                                                    </div>
+                                                                    <div class="card-body">
+                                                                        <div class="key-value-item">
+                                                                            <span class="text-muted">SKU</span>
+                                                                            <span class="fw-medium">@variant.SKU</span>
+                                                                        </div>
+                                                                        <div class="key-value-item">
+                                                                            <span class="text-muted">Barcode</span>
+                                                                            <span class="fw-medium">@(string.IsNullOrEmpty(variant.Barcode) ? "N/A" : variant.Barcode)</span>
+                                                                        </div>
+                                                                        <div class="key-value-item">
+                                                                            <span class="text-muted">Cost Price</span>
+                                                                            <span class="fw-medium">₹@variant.CostPrice.ToString("N2")</span>
+                                                                        </div>
+                                                                        <div class="key-value-item">
+                                                                            <span class="text-muted">Sale Price</span>
+                                                                            <span class="fw-medium">₹@variant.SalePrice.ToString("N2")</span>
+                                                                        </div>
+                                                                        <div class="key-value-item">
+                                                                            <span class="text-muted">Compare At Price</span>
+                                                                            <span class="fw-medium">@(variant.CompareAtPrice.HasValue ? $"₹{variant.CompareAtPrice.Value:N2}" : "N/A")</span>
+                                                                        </div>
+                                                                        <div class="key-value-item">
+                                                                            <span class="text-muted">Is Default Variant</span>
+                                                                            <span class="fw-medium">@(variant.IsDefaultVariant ? "Yes" : "No")</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <div class="card border h-100">
+                                                                    <div class="card-header bg-light py-2">
+                                                                        <h6 class="mb-0">Shipping & Packaging</h6>
+                                                                    </div>
+                                                                    <div class="card-body">
+                                                                        <div class="key-value-item">
+                                                                            <span class="text-muted">Min Order Quantity</span>
+                                                                            <span class="fw-medium">@(variant.MinimumOrderQuantity.HasValue ? variant.MinimumOrderQuantity.Value.ToString() : "N/A")</span>
+                                                                        </div>
+                                                                        <div class="key-value-item">
+                                                                            <span class="text-muted">Max Order Quantity</span>
+                                                                            <span class="fw-medium">@(variant.MaximumOrderQuantity.HasValue ? variant.MaximumOrderQuantity.Value.ToString() : "N/A")</span>
+                                                                        </div>
+                                                                        <div class="key-value-item">
+                                                                            <span class="text-muted">Weight</span>
+                                                                            <span class="fw-medium">@(variant.Weight.HasValue ? $"{variant.Weight.Value:N2} {variant.WeightUnit}" : "N/A")</span>
+                                                                        </div>
+                                                                        <div class="key-value-item">
+                                                                            <span class="text-muted">Dimensions (H x W x D)</span>
+                                                                            <span class="fw-medium">
+                                                                                @if (variant.PackedHeight.HasValue && variant.PackedWidth.HasValue && variant.PackedDepth.HasValue)
+                                                                                {
+                                                                                    @($"{variant.PackedHeight.Value:N2} x {variant.PackedWidth.Value:N2} x {variant.PackedDepth.Value:N2}")
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    @("N/A")
+                                                                                }
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <!-- Inventory Section for this variant -->
+                                                        <h6 class="fw-bold mb-3 mt-4 border-bottom pb-2">
+                                                            <i class="bx bx-store me-2"></i>Outlet Inventory for @variant.SKU
+                                                        </h6>
+                                                        @if (variant.Inventory?.Any() == true)
                                                         {
-                                                            <div class="col">
-                                                                <div class="card h-100 border">
-                                                                    <a href="@Url.Action("DisplayImage", "File", new { key = imageKey })" 
-                                                                       target="_blank" 
-                                                                       class="h-100">
-                                                                        <img src="@Url.Action("DisplayImage", "File", new { key = imageKey })"
-                                                                             class="card-img-top h-100"
-                                                                             alt="Variant Image"
-                                                                             style="object-fit: cover;">
-                                                                    </a>
+                                                            <div class="table-responsive">
+                                                                <table class="table table-sm table-bordered mb-0">
+                                                                    <thead class="table-light">
+                                                                        <tr>
+                                                                            <th>Outlet</th>
+                                                                            <th class="text-end">Available</th>
+                                                                            <th class="text-end">Min Stock</th>
+                                                                            <th class="text-end">Max Stock</th>
+                                                                            <th class="text-end">Reorder Point</th>
+                                                                            <th>Status</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        @foreach (var inventory in variant.Inventory)
+                                                                        {
+                                                                            <tr>
+                                                                                <td>@inventory.Outlet.Name</td>
+                                                                                <td class="text-end">@inventory.QuantityAvailable</td>
+                                                                                <td class="text-end">@inventory.MinimumStockLevel</td>
+                                                                                <td class="text-end">@inventory.MaximumStockLevel</td>
+                                                                                <td class="text-end">@inventory.ReorderPoint</td>
+                                                                                <td>
+                                                                                    <span class="badge bg-@(inventory.IsInStock ? "success" : "danger")">
+                                                                                        @(inventory.IsInStock ? "In Stock" : "Out of Stock")
+                                                                                    </span>
+                                                                                </td>
+                                                                            </tr>
+                                                                        }
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="alert alert-info mb-0">
+                                                                <i class="bx bx-info-circle me-1"></i>
+                                                                No inventory records found for this variant
+                                                            </div>
+                                                        }
+                                                        
+                                                        <!-- Additional Highlights if any -->
+                                                        @if (!string.IsNullOrEmpty(variant.AdditionalHightlights))
+                                                        {
+                                                            <h6 class="fw-bold mb-3 mt-4 border-bottom pb-2">
+                                                                <i class="bx bx-list-plus me-2"></i>Additional Highlights
+                                                            </h6>
+                                                            <div class="card">
+                                                                <div class="card-body bg-light">
+                                                                    @try
+                                                                    {
+                                                                        var additionalHighlights = Newtonsoft.Json.JsonConvert
+                                                                            .DeserializeObject<Dictionary<string, string>>(variant.AdditionalHightlights);
+                                                                        
+                                                                        <div class="row">
+                                                                            @foreach (var item in additionalHighlights)
+                                                                            {
+                                                                                <div class="col-md-6 mb-2">
+                                                                                    <strong>@item.Key:</strong> @item.Value
+                                                                                </div>
+                                                                            }
+                                                                        </div>
+                                                                    }
+                                                                    catch
+                                                                    {
+                                                                        <p>@variant.AdditionalHightlights</p>
+                                                                    }
                                                                 </div>
                                                             </div>
                                                         }
                                                     </div>
-                                                }
-                                                else
-                                                {
-                                                    <div class="alert alert-info mb-0">
-                                                        <i class="bx bx-info-circle me-1"></i>
-                                                        No images available for this variant
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Images Modal -->
+                                        <div class="modal fade" id="imagesModal-@variant.ID" tabindex="-1">
+                                            <div class="modal-dialog modal-lg">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">
+                                                            <i class="bx bx-images me-1"></i>
+                                                            Images for @variant.SKU
+                                                        </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                     </div>
-                                                }
+                                                    <div class="modal-body">
+                                                        @{
+                                                            List<string> variantImages = new List<string>();
+                                                            if (ViewBag.variantImages != null && ViewBag.variantImages.ContainsKey(variant.ID))
+                                                            {
+                                                                variantImages = ViewBag.variantImages[variant.ID];
+                                                            }
+                                                        }
+                                                        
+                                                        @if (variantImages.Count > 0)
+                                                        {
+                                                            <div class="row row-cols-2 row-cols-md-3 g-3">
+                                                                @foreach (var imageKey in variantImages)
+                                                                {
+                                                                    <div class="col">
+                                                                        <div class="card h-100 border gallery-item">
+                                                                            <a href="@Url.Action("DisplayImage", "File", new { key = imageKey })" 
+                                                                               target="_blank" 
+                                                                               class="h-100"
+                                                                               data-lightbox="variant-@variant.ID">
+                                                                                <img src="@Url.Action("DisplayImage", "File", new { key = imageKey })"
+                                                                                     class="card-img-top gallery-img"
+                                                                                     alt="Variant Image">
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="alert alert-info mb-0">
+                                                                <i class="bx bx-info-circle me-1"></i>
+                                                                No images available for this variant
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info m-3">
+                            <i class="bx bx-info-circle me-1"></i>
+                            No variants available for this product
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Full Gallery Modal -->
+<div class="modal fade" id="galleryModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bx bx-images me-1"></i>
+                    All Product Images
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                @if (allProductImages.Any())
+                {
+                    <div class="row row-cols-2 row-cols-md-4 g-3">
+                        @foreach (var imageKey in allProductImages)
+                        {
+                            <div class="col">
+                                <div class="card h-100 border gallery-item">
+                                    <a href="@Url.Action("DisplayImage", "File", new { key = imageKey })" 
+                                       target="_blank" 
+                                       class="h-100"
+                                       data-lightbox="product-gallery-all">
+                                        <img src="@Url.Action("DisplayImage", "File", new { key = imageKey })"
+                                             class="card-img-top gallery-img"
+                                             alt="Product Image">
+                                    </a>
                                 </div>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-            else
-            {
-                <div class="alert alert-info mb-0">
-                    <i class="bx bx-info-circle me-1"></i>
-                    No variants available for this product
-                </div>
-            }
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info mb-0">
+                        <i class="bx bx-info-circle me-1"></i>
+                        No product images available
+                    </div>
+                }
+            </div>
         </div>
     </div>
 </div>
@@ -431,6 +801,58 @@
                     searchPlaceholder: "Search variants..."
                 }
             });
+            
+            // Image hover effects
+            $('.gallery-item').hover(
+                function() { $(this).addClass('shadow'); },
+                function() { $(this).removeClass('shadow'); }
+            );
+            
+            // Collapse management for variant details
+            $('.variant-row').on('click', function(e) {
+                if (!$(e.target).closest('button').length) {
+                    const variantId = $(this).next().find('.collapse').attr('id');
+                    $(`#${variantId}`).collapse('toggle');
+                }
+            });
+            
+            // Auto-hide alerts after 5 seconds
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+            
+            // Tooltips initialization
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl, {
+                    delay: { show: 300, hide: 100 }
+                });
+            });
+            
+            // Animation for status badges
+            $('.status-badge').each(function(index) {
+                const badge = $(this);
+                setTimeout(function() {
+                    badge.addClass('animate__animated animate__fadeIn');
+                }, index * 100);
+            });
+            
+            // Make sure tables inside collapses are responsive
+            $('.collapse').on('shown.bs.collapse', function () {
+                $(window).trigger('resize');
+            });
         });
     </script>
+    
+    <!-- Optional: Include the lightbox library if not already included -->
+    @if (!Context.Items.ContainsKey("LightboxIncluded"))
+    {
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" integrity="sha512-ZKX+BvQihRJPA8CROKBhDNvoc2aDMOdAlcm7TUQY+35XYtrd3yh95QOOhsPDQY9QnKE0Wqag9y38OIgEvb88cA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js" integrity="sha512-k2GFCTbp9rQU412BStrcD/rlwv1PYec9SNrkbQlo6RZCf75l6KcC3UwDY8H5n5hl4v77IDtIPwOk9Dqjs/mMBQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        
+        Context.Items["LightboxIncluded"] = true;
+    }
+    
+    <!-- Include animate.css for animations -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 }

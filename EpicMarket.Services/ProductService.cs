@@ -89,7 +89,7 @@ namespace EpicMarket.Services
                         MaximumOrderQuantity = variantDto.MaximumOrderQuantity,
                         MinimumOrderQuantity = variantDto.MinimumOrderQuantity,
                         PackedHeight = variantDto.PackedHeight,
-                        PackedWidhth = variantDto.PackedWidhth,
+                        PackedWidth = variantDto.PackedWidhth,
                         PackedDepth = variantDto.PackedDepth,
                         WeightUnit = variantDto.WeightUnit,
                         Weight = variantDto.Weight,
@@ -220,7 +220,7 @@ namespace EpicMarket.Services
                         existingVariant.MaximumOrderQuantity = variantDto.MaximumOrderQuantity;
                         existingVariant.MinimumOrderQuantity = variantDto.MinimumOrderQuantity;
                         existingVariant.PackedHeight = variantDto.PackedHeight;
-                        existingVariant.PackedWidhth = variantDto.PackedWidhth;
+                        existingVariant.PackedWidth = variantDto.PackedWidhth;
                         existingVariant.PackedDepth = variantDto.PackedDepth;
                         existingVariant.WeightUnit = variantDto.WeightUnit;
                         existingVariant.Weight = variantDto.Weight;
@@ -244,7 +244,7 @@ namespace EpicMarket.Services
                             MaximumOrderQuantity = variantDto.MaximumOrderQuantity,
                             MinimumOrderQuantity = variantDto.MinimumOrderQuantity,
                             PackedHeight = variantDto.PackedHeight,
-                            PackedWidhth = variantDto.PackedWidhth,
+                            PackedWidth = variantDto.PackedWidhth,
                             PackedDepth = variantDto.PackedDepth,
                             WeightUnit = variantDto.WeightUnit,
                             Weight = variantDto.Weight,
@@ -644,7 +644,7 @@ namespace EpicMarket.Services
                     RequiresRefrigeration = c.RequiresRefrigeration,
                     BaseHightlights = c.BaseHightlights,
                     IsRecommended = c.IsRecommended,
-                    VariantOptions = c.VarientOptions,
+                    VariantOptions = c.VariantOptions,
                     Variants = c.CatalogVariants.Where(v => v.IsActive).Select(v => new VariantResultForDetails
                     {
                         VariantId = v.ID,
@@ -656,7 +656,7 @@ namespace EpicMarket.Services
                         MaximumOrderQuantity = v.MaximumOrderQuantity,
                         MinimumOrderQuantity = v.MinimumOrderQuantity,
                         PackedHeight = v.PackedHeight,
-                        PackedWidhth = v.PackedWidhth,
+                        PackedWidhth = v.PackedWidth,
                         PackedDepth = v.PackedDepth,
                         WeightUnit = v.WeightUnit,
                         Weight = v.Weight,
@@ -729,7 +729,7 @@ namespace EpicMarket.Services
                 Description = VerificationConstants.CatelogDescription,
                 TaskTypeID = taskTypeID.ID,
                 ParentID = null,
-                TaskStatusID = newTaskStatus.Id,
+                TaskStatusID = newTaskStatus.ID,
                 TaskPriorityID = 1,
                 PrimaryAssignedToPersonID = AdminPersonID,
                 TaskEntityID = taskEntity.ID,

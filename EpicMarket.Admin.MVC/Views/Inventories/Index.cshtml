@@ -1,0 +1,597 @@
+﻿@model IEnumerable<EpicMarket.Data.Models.Inventory>
+
+@{
+    ViewData["Title"] = "Inventory Management";
+}
+
+<!-- Page Header -->
+<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+    <div class="breadcrumb-title pe-3">Inventory</div>
+    <div class="ps-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 p-0">
+                <li class="breadcrumb-item">
+                    <a asp-action="Index"><i class="bx bx-home-alt"></i></a>
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<!-- Filter Card -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h5 class="card-title mb-0">
+                <i class="bx bx-filter me-2 text-primary"></i>Search & Filter
+            </h5>
+            <button class="btn btn-sm btn-link text-decoration-none" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="true">
+                <i class="bx bx-chevron-down"></i>
+            </button>
+        </div>
+        <div class="collapse show" id="filterCollapse">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Business</label>
+                    <select id="businessFilter" class="form-control select2" asp-items="ViewBag.BusinessID">
+                        <option value="">-- Select Business --</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Outlet</label>
+                    <select id="outletFilter" class="form-control select2">
+                        <option value="">-- Select Outlet --</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Catalog</label>
+                    <select id="catalogFilter" class="form-control select2">
+                        <option value="">-- Select Catalog --</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Product Variant</label>
+                    <select id="variantFilter" class="form-control select2">
+                        <option value="">-- Select Variant --</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Catalog Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bx bx-search"></i></span>
+                        <input type="text" id="catalogNameFilter" class="form-control border-start-0 ps-0" placeholder="Search by catalog name">
+                    </div>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="button" class="btn btn-primary me-2 px-4" id="searchBtn">
+                        <i class='bx bx-search me-1'></i>Search
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="resetBtn">
+                        <i class='bx bx-reset me-1'></i>Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Card -->
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <!-- Action Bar -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex align-items-center">
+                <h5 class="mb-0 me-2">Inventory List</h5>
+                <span class="badge bg-primary rounded-pill" id="tableRecordsCount">0</span>
+            </div>
+            <a asp-action="Create" class="btn btn-primary d-flex align-items-center">
+                <i class='bx bx-plus me-1'></i>Add Inventory
+            </a>
+        </div>
+        
+        <!-- Table Wrapper -->
+        <div class="table-responsive">
+            <table id="inventoryTable" class="table table-hover align-middle" style="width:100%">
+                <thead class="table-light">
+                    <tr>
+                        <th data-sort="id" class="cursor-pointer">
+                            <div class="d-flex align-items-center">
+                                ID <i class="bx bx-sort-alt-2 ms-1 text-muted"></i>
+                            </div>
+                        </th>
+                        <th data-sort="businessname" class="cursor-pointer">
+                            <div class="d-flex align-items-center">
+                                Business <i class="bx bx-sort-alt-2 ms-1 text-muted"></i>
+                            </div>
+                        </th>
+                        <th data-sort="outletname" class="cursor-pointer">
+                            <div class="d-flex align-items-center">
+                                Outlet <i class="bx bx-sort-alt-2 ms-1 text-muted"></i>
+                            </div>
+                        </th>
+                        <th data-sort="catalogname" class="cursor-pointer">
+                            <div class="d-flex align-items-center">
+                                Product <i class="bx bx-sort-alt-2 ms-1 text-muted"></i>
+                            </div>
+                        </th>
+                        <th>SKU</th>
+                        <th>Track Inventory</th>
+                        <th>In Stock</th>
+                        <th data-sort="quantityavailable" class="cursor-pointer">
+                            <div class="d-flex align-items-center">
+                                Quantity <i class="bx bx-sort-alt-2 ms-1 text-muted"></i>
+                            </div>
+                        </th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Table data will be loaded dynamically -->
+                </tbody>
+            </table>
+            
+            <!-- Loading Indicator -->
+            <div id="loading-indicator" class="text-center py-5 d-none">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading inventory...</p>
+            </div>
+            
+            <!-- Empty State -->
+            <div id="empty-state" class="text-center py-5 d-none">
+                <i class="bx bx-box text-muted" style="font-size: 4rem;"></i>
+                <h5 class="mt-3">No inventory records found</h5>
+                <p class="text-muted">Try adjusting your search criteria or add a new inventory record</p>
+                <a asp-action="Create" class="btn btn-primary mt-2">
+                    <i class='bx bx-plus me-1'></i>Add Inventory
+                </a>
+            </div>
+        </div>
+        
+        <!-- Pagination Info and Controls -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mt-4">
+            <div id="pagination-info" class="text-muted mb-3 mb-md-0">
+                Showing 0 to 0 of 0 entries
+            </div>
+            <div id="pagination-controls"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+    .cursor-pointer { cursor: pointer; }
+    .table th { font-weight: 600; }
+    .action-btn {
+        padding: 5px;
+        margin-right: 5px;
+        border-radius: 4px;
+    }
+    .action-btn:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            let currentPage = 1;
+            let pageSize = 10;
+            let sortColumn = 'id';
+            let sortDirection = 'desc';
+            let isLoading = false;
+
+            // Check URL parameters and set filter values
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('businessId')) {
+                const businessId = urlParams.get('businessId');
+                $('#businessFilter').val(businessId).trigger('change');
+                // We'll load outlets and catalogs after business is selected
+            }
+            if (urlParams.has('outletId')) {
+                const outletId = urlParams.get('outletId');
+                // We'll set this after outlets are loaded
+                window.outletIdFromUrl = outletId;
+            }
+            if (urlParams.has('catalogId')) {
+                const catalogId = urlParams.get('catalogId');
+                // We'll set this after catalogs are loaded
+                window.catalogIdFromUrl = catalogId;
+            }
+            if (urlParams.has('variantId')) {
+                const variantId = urlParams.get('variantId');
+                // We'll set this after variants are loaded
+                window.variantIdFromUrl = variantId;
+            }
+            if (urlParams.has('catalogName')) {
+                $('#catalogNameFilter').val(urlParams.get('catalogName'));
+            }
+            if (urlParams.has('page')) {
+                currentPage = parseInt(urlParams.get('page')) || 1;
+            }
+            if (urlParams.has('sort')) {
+                sortColumn = urlParams.get('sort');
+            }
+            if (urlParams.has('dir')) {
+                sortDirection = urlParams.get('dir');
+            }
+
+            function updateUrl() {
+                const params = new URLSearchParams();
+                const businessId = $('#businessFilter').val();
+                const outletId = $('#outletFilter').val();
+                const catalogId = $('#catalogFilter').val();
+                const variantId = $('#variantFilter').val();
+                const catalogName = $('#catalogNameFilter').val();
+                
+                if (businessId) params.set('businessId', businessId);
+                if (outletId) params.set('outletId', outletId);
+                if (catalogId) params.set('catalogId', catalogId);
+                if (variantId) params.set('variantId', variantId);
+                if (catalogName) params.set('catalogName', catalogName);
+                if (currentPage > 1) params.set('page', currentPage);
+                if (sortColumn !== 'id') params.set('sort', sortColumn);
+                if (sortDirection !== 'desc') params.set('dir', sortDirection);
+                
+                const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+                history.pushState({}, '', newUrl);
+            }
+
+            function loadData() {
+                // Show loading indicator
+                $('#loading-indicator').removeClass('d-none');
+                $('#empty-state').addClass('d-none');
+                $('#inventoryTable tbody').empty();
+                
+                isLoading = true;
+                
+                $.ajax({
+                    url: '/Inventories/GetFilteredData',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        businessID: $('#businessFilter').val() || null,
+                        outletID: $('#outletFilter').val() || null,
+                        catalogID: $('#catalogFilter').val() || null,
+                        productVariantID: $('#variantFilter').val() || null,
+                        catalogName: $('#catalogNameFilter').val() || null,
+                        pageNumber: currentPage,
+                        pageSize: pageSize,
+                        sortColumn: sortColumn,
+                        sortDirection: sortDirection
+                    }),
+                    success: function (response) {
+                        isLoading = false;
+                        $('#loading-indicator').addClass('d-none');
+                        
+                        if (response.error) {
+                            console.error(response.error);
+                            toastr.error('Error loading data: ' + response.error);
+                            return;
+                        }
+                        
+                        // Update record count
+                        $('#tableRecordsCount').text(response.totalRecords);
+                        
+                        if (response.data && response.data.length > 0) {
+                            updateTable(response.data);
+                            updatePagination(response.totalRecords);
+                        } else {
+                            $('#empty-state').removeClass('d-none');
+                            $('#pagination-info').text('Showing 0 to 0 of 0 entries');
+                            $('#pagination-controls').empty();
+                        }
+                        
+                        // Update URL with current filters
+                        updateUrl();
+                    },
+                    error: function (xhr, status, error) {
+                        isLoading = false;
+                        $('#loading-indicator').addClass('d-none');
+                        console.error('Error:', error);
+                        toastr.error('Failed to load data. Please try again.');
+                    }
+                });
+            }
+
+            function updateTable(data) {
+                const tbody = $('#inventoryTable tbody');
+                tbody.empty();
+
+                data.forEach(function (item) {
+                    const row = `
+                    <tr>
+                        <td><span class="fw-medium">${item.id}</span></td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm bg-light rounded-circle text-center me-2" style="width: 32px; height: 32px; line-height: 32px;">
+                                    <i class="bx bx-store text-primary"></i>
+                                </div>
+                                <div>
+                                    <span class="fw-medium">${item.businessName || ''}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${item.outletName || '-'}</td>
+                        <td>${item.catalogName || '-'}</td>
+                        <td><span class="badge bg-light text-dark">${item.sku || '-'}</span></td>
+                        <td>
+                            ${item.trackInventory ? 
+                                '<span class="badge bg-success">Yes</span>' : 
+                                '<span class="badge bg-secondary">No</span>'}
+                        </td>
+                        <td>
+                            ${item.isInStock ? 
+                                '<span class="badge bg-success">Yes</span>' : 
+                                '<span class="badge bg-danger">No</span>'}
+                        </td>
+                        <td>
+                            ${item.quantityAvailable !== null ? 
+                                `<span class="fw-medium">${item.quantityAvailable}</span>` : 
+                                '<span class="text-muted">N/A</span>'}
+                        </td>
+                        <td>
+                            <div class="d-flex justify-content-end">
+                                <a href="/Inventories/Details/${item.id}" class="action-btn text-primary" title="View Details">
+                                    <i class="bx bx-show"></i>
+                                </a>
+                                <a href="/Inventories/Edit/${item.id}" class="action-btn text-warning" title="Edit">
+                                    <i class="bx bx-edit"></i>
+                                </a>
+                                <a href="/Inventories/Delete/${item.id}" class="action-btn text-danger" title="Delete">
+                                    <i class="bx bx-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>`;
+                    tbody.append(row);
+                });
+            }
+
+            function updatePagination(totalRecords) {
+                const totalPages = Math.ceil(totalRecords / pageSize);
+                const start = ((currentPage - 1) * pageSize) + 1;
+                const end = Math.min(currentPage * pageSize, totalRecords);
+
+                $('#pagination-info').text(`Showing ${start} to ${end} of ${totalRecords} entries`);
+
+                let paginationHtml = '<ul class="pagination pagination-sm mb-0 justify-content-end">';
+
+                // Previous button
+                paginationHtml += `
+                    <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                        <a class="page-link" href="#" data-page="${currentPage - 1}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>`;
+
+                // Determine page range to show
+                let startPage = Math.max(1, currentPage - 2);
+                let endPage = Math.min(totalPages, startPage + 4);
+                
+                if (endPage - startPage < 4) {
+                    startPage = Math.max(1, endPage - 4);
+                }
+
+                // First page if not in range
+                if (startPage > 1) {
+                    paginationHtml += `
+                        <li class="page-item">
+                            <a class="page-link" href="#" data-page="1">1</a>
+                        </li>`;
+                    
+                    if (startPage > 2) {
+                        paginationHtml += `
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#">...</a>
+                            </li>`;
+                    }
+                }
+                
+                // Page numbers
+                for (let i = startPage; i <= endPage; i++) {
+                    paginationHtml += `
+                        <li class="page-item ${currentPage === i ? 'active' : ''}">
+                            <a class="page-link" href="#" data-page="${i}">${i}</a>
+                        </li>`;
+                }
+                
+                // Last page if not in range
+                if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) {
+                        paginationHtml += `
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#">...</a>
+                            </li>`;
+                    }
+                    
+                    paginationHtml += `
+                        <li class="page-item">
+                            <a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a>
+                        </li>`;
+                }
+
+                // Next button
+                paginationHtml += `
+                    <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                        <a class="page-link" href="#" data-page="${currentPage + 1}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>`;
+
+                paginationHtml += '</ul>';
+                $('#pagination-controls').html(paginationHtml);
+            }
+
+            // Cascading dropdowns
+            $('#businessFilter').change(function() {
+                var businessId = $(this).val();
+                if (businessId) {
+                    loadOutlets(businessId);
+                    loadCatalogs(businessId);
+                } else {
+                    $('#outletFilter').empty().append('<option value="">-- Select Outlet --</option>').trigger('change');
+                    $('#catalogFilter').empty().append('<option value="">-- Select Catalog --</option>').trigger('change');
+                    $('#variantFilter').empty().append('<option value="">-- Select Variant --</option>').trigger('change');
+                }
+            });
+            
+            $('#catalogFilter').change(function() {
+                var catalogId = $(this).val();
+                if (catalogId) {
+                    loadVariants(catalogId);
+                } else {
+                    $('#variantFilter').empty().append('<option value="">-- Select Variant --</option>').trigger('change');
+                }
+            });
+            
+            function loadOutlets(businessId) {
+                $.ajax({
+                    url: '/Inventories/GetOutletsByBusiness',
+                    type: 'GET',
+                    data: { businessId: businessId },
+                    success: function (data) {
+                        var options = '<option value="">-- Select Outlet --</option>';
+                        $.each(data, function (i, item) {
+                            options += `<option value="${item.id}">${item.name}</option>`;
+                        });
+                        $('#outletFilter').html(options);
+                        
+                        // Set outlet from URL if it exists
+                        if (window.outletIdFromUrl) {
+                            $('#outletFilter').val(window.outletIdFromUrl).trigger('change');
+                            window.outletIdFromUrl = null; // Clear it after use
+                        } else {
+                            $('#outletFilter').trigger('change');
+                        }
+                    }
+                });
+            }
+            
+            function loadCatalogs(businessId) {
+                $.ajax({
+                    url: '/Inventories/GetCatalogsByBusiness',
+                    type: 'GET',
+                    data: { businessId: businessId },
+                    success: function (data) {
+                        var options = '<option value="">-- Select Catalog --</option>';
+                        $.each(data, function (i, item) {
+                            options += `<option value="${item.id}">${item.name}</option>`;
+                        });
+                        $('#catalogFilter').html(options);
+                        
+                        // Set catalog from URL if it exists
+                        if (window.catalogIdFromUrl) {
+                            $('#catalogFilter').val(window.catalogIdFromUrl).trigger('change');
+                            window.catalogIdFromUrl = null; // Clear it after use
+                        } else {
+                            $('#catalogFilter').trigger('change');
+                        }
+                    }
+                });
+            }
+            
+            function loadVariants(catalogId) {
+                $.ajax({
+                    url: '/Inventories/GetVariantsByCatalog',
+                    type: 'GET',
+                    data: { catalogId: catalogId },
+                    success: function (data) {
+                        var options = '<option value="">-- Select Variant --</option>';
+                        $.each(data, function (i, item) {
+                            options += `<option value="${item.id}">${item.name}</option>`;
+                        });
+                        $('#variantFilter').html(options);
+                        
+                        // Set variant from URL if it exists
+                        if (window.variantIdFromUrl) {
+                            $('#variantFilter').val(window.variantIdFromUrl).trigger('change');
+                            window.variantIdFromUrl = null; // Clear it after use
+                        } else {
+                            $('#variantFilter').trigger('change');
+                        }
+                    }
+                });
+            }
+
+            // Initial load - if we have URL parameters, wait a moment for the cascading dropdowns
+            if (urlParams.has('businessId') || urlParams.has('outletId') || 
+                urlParams.has('catalogId') || urlParams.has('variantId')) {
+                // Wait a short time for dropdowns to populate
+                setTimeout(function() {
+                    loadData();
+                }, 500);
+            } else {
+                loadData();
+            }
+            
+            // Event handlers
+            $('#searchBtn').click(function () {
+                if (isLoading) return;
+                currentPage = 1;
+                loadData();
+            });
+
+            $('#resetBtn').click(function () {
+                if (isLoading) return;
+                $('#businessFilter, #outletFilter, #catalogFilter, #variantFilter').val('').trigger('change');
+                $('#catalogNameFilter').val('');
+                currentPage = 1;
+                loadData();
+            });
+
+            // Handle Enter key in filter inputs
+            $('#catalogNameFilter').keypress(function(e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    $('#searchBtn').click();
+                }
+            });
+
+            $(document).on('click', '.page-link', function (e) {
+                e.preventDefault();
+                if (isLoading) return;
+                
+                const newPage = $(this).data('page');
+                if (newPage >= 1) {
+                    currentPage = newPage;
+                    loadData();
+                    // Scroll back to top of table on page change
+                    $('html, body').animate({
+                        scrollTop: $("#inventoryTable").offset().top - 100
+                    }, 200);
+                }
+            });
+
+            $('#inventoryTable th[data-sort]').click(function () {
+                if (isLoading) return;
+                
+                const newSortColumn = $(this).data('sort');
+                
+                // Update visual indicators
+                $('#inventoryTable th i').removeClass('text-primary').addClass('text-muted');
+                $(this).find('i').removeClass('text-muted').addClass('text-primary');
+                
+                if (sortColumn === newSortColumn) {
+                    sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                    // Update icon
+                    if (sortDirection === 'asc') {
+                        $(this).find('i').removeClass('bx-sort-down').addClass('bx-sort-up');
+                    } else {
+                        $(this).find('i').removeClass('bx-sort-up').addClass('bx-sort-down');
+                    }
+                } else {
+                    sortColumn = newSortColumn;
+                    sortDirection = 'asc';
+                    // Reset and set new icon
+                    $('#inventoryTable th i').removeClass('bx-sort-up bx-sort-down').addClass('bx-sort-alt-2');
+                    $(this).find('i').removeClass('bx-sort-alt-2').addClass('bx-sort-up');
+                }
+                
+                currentPage = 1;
+                loadData();
+            });
+        });
+    </script>
+}
