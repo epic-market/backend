@@ -19,29 +19,29 @@ namespace EpicMarket.Admin.MVC.Attributes
 
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            // Skip authorization if action is decorated with [AllowAnonymous]
-            if (context.ActionDescriptor.EndpointMetadata.Any(em => em.GetType().Name == "AllowAnonymousAttribute"))
-                return;
+            // // Skip authorization if action is decorated with [AllowAnonymous]
+            // if (context.ActionDescriptor.EndpointMetadata.Any(em => em.GetType().Name == "AllowAnonymousAttribute"))
+            //     return;
 
-            // Check if user is authenticated
-            if (!context.HttpContext.User.Identity.IsAuthenticated)
-            {
-                context.Result = new RedirectToActionResult("Login", "Account", new { area = "Identity" });
-                return;
-            }
+            // // Check if user is authenticated
+            // if (!context.HttpContext.User.Identity.IsAuthenticated)
+            // {
+            //     context.Result = new RedirectToActionResult("Login", "Account", new { area = "Identity" });
+            //     return;
+            // }
 
-            var userRepository = context.HttpContext.RequestServices.GetService(typeof(IUserRepository)) as IUserRepository;
-            if (userRepository == null)
-            {
-                throw new InvalidOperationException("IUserRepository service is not available.");
-            }
+            // var userRepository = context.HttpContext.RequestServices.GetService(typeof(IUserRepository)) as IUserRepository;
+            // if (userRepository == null)
+            // {
+            //     throw new InvalidOperationException("IUserRepository service is not available.");
+            // }
 
-            var username = context.HttpContext.User.Identity.Name;
+            // var username = context.HttpContext.User.Identity.Name;
             
-            if (string.IsNullOrWhiteSpace(username) || !userRepository.HasPermission(username, Securable))
-            {
-                context.Result = new RedirectToActionResult("AccessDenied", "Account", new { area = "Identity" });
-            }
+            // if (string.IsNullOrWhiteSpace(username) || !userRepository.HasPermission(username, Securable))
+            // {
+            //     context.Result = new RedirectToActionResult("AccessDenied", "Account", new { area = "Identity" });
+            // }
         }
     }
 } 

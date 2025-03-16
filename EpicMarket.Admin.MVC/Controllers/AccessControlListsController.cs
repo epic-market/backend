@@ -33,6 +33,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         [HttpGet]
+        [SecurableAuthorize(SecurableConstants.AccessControlListsView)]
         public async Task<IActionResult> Index()
         {
             var roles = _context.Roles.ToList();
