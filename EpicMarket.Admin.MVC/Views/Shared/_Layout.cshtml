@@ -469,7 +469,7 @@
 							}
 						</ul>
 					</li> *@
-@* 					
+			@* 					
 					<li>
 						<a class="has-arrow" href="javascript:;">
 							<div class="parent-icon">
@@ -489,7 +489,27 @@
 				}
 				
 				<li class="menu-label">Support Functionality</li>
-				@if (User.IsInRole(ROLES.ROOT) || User.IsInRole(ROLES.ADMIN) || User.IsInRole(ROLES.SUPPORT))
+					<li>
+						<a asp-area="" asp-controller="Tasks" asp-action="Index">
+							<div class="parent-icon">
+								<i class='bx bx-task'></i>
+							</div>
+							<div class="menu-title">Tasks</div>
+						</a>
+					</li>
+					<li>
+						<a asp-area="" asp-controller="SupportQuerys" asp-action="Index">
+							<div class="parent-icon">
+								<i class='bx bx-support'></i>
+							</div>
+							<div class="menu-title">Support Queries</div>
+						</a>
+					</li>
+
+
+
+				
+				@* @if (User.IsInRole(ROLES.ROOT) || User.IsInRole(ROLES.ADMIN) || User.IsInRole(ROLES.SUPPORT))
 				{
 					<li>
 						<a class="has-arrow" href="javascript:;">
@@ -516,7 +536,7 @@
 							</li>
 						</ul>
 					</li>
-				}
+				} *@
 			</ul>
 			<!--end navigation-->
 		</div>
