@@ -25,4 +25,4 @@ AND NOT EXISTS (
 
 
 
-
+SELECT COUNT(*) From AccessControlLists

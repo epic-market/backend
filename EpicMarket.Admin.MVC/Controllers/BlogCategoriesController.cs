@@ -17,7 +17,7 @@ using EpicMarket.Admin.MVC.Attributes;
 using EpicMarket.Entities.Constants;
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [SecurableAuthorize(SecurableConstants.BlogCategoriesView)]
+    [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
     public class BlogCategoriesController : Controller
     {
         private readonly ApplicationDbContext _context;

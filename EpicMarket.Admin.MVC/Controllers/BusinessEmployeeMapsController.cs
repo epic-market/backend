@@ -15,7 +15,7 @@ using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [SecurableAuthorize(SecurableConstants.BusinessEmployeeMapsView)]
+     [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
     public class BusinessEmployeeMapsController : Controller
     {
         private readonly ApplicationDbContext _context;

@@ -20,7 +20,7 @@ using EpicMarket.Admin.MVC.Attributes;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [SecurableAuthorize(SecurableConstants.AttachmentsView)]
+    [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
     public class AttachmentsController : Controller
     {
         private readonly ApplicationDbContext _context;

@@ -19,7 +19,7 @@ using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [SecurableAuthorize(SecurableConstants.BusinessCategoryInternalsView)]
+    [Authorize(Roles = $"{ROLES.ROOT}")]
     public class BusinessCategoryInternalsController : Controller
     {
         private readonly ApplicationDbContext _context;

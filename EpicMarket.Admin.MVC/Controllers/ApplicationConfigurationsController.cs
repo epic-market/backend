@@ -17,6 +17,7 @@ using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
+    [Authorize(Roles = $"{ROLES.ROOT}")]
     public class ApplicationConfigurationsController : Controller
     {
         private readonly ApplicationDbContext _context;

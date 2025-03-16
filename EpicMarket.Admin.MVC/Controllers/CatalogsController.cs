@@ -19,7 +19,7 @@ using EpicMarket.Admin.MVC.Attributes;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [SecurableAuthorize(SecurableConstants.CatalogsView)]
+    [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
     public class CatalogsController : Controller
     {
         private readonly ApplicationDbContext _context;

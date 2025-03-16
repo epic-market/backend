@@ -18,7 +18,7 @@ using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [SecurableAuthorize(SecurableConstants.AccessControlListsView)]
+    [Authorize(Roles = $"{ROLES.ROOT}")]
     public class AccessControlListsController : Controller
     {
         private readonly ApplicationDbContext _context;
