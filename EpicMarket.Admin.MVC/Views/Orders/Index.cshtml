@@ -295,10 +295,11 @@
             function loadFilterOptions() {
                 // Load order statuses
                 $.ajax({
-                    url: '/Order/GetOrderStatuses',
+                    url: '/Orders/GetOrderStatuses',
                     type: 'GET',
                     success: function(statuses) {
                         const statusSelect = $('#orderStatusFilter');
+                        statusSelect.empty().append('<option value="">All Statuses</option>');
                         statuses.forEach(function(status) {
                             statusSelect.append(`<option value="${status.id}">${status.orderStatus}</option>`);
                         });
@@ -307,15 +308,19 @@
                         if (urlParams.has('orderStatus')) {
                             statusSelect.val(urlParams.get('orderStatus'));
                         }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error loading order statuses:', error);
                     }
                 });
                 
                 // Load order types
                 $.ajax({
-                    url: '/Order/GetOrderTypes',
+                    url: '/Orders/GetOrderTypes',
                     type: 'GET',
                     success: function(types) {
                         const typeSelect = $('#orderTypeFilter');
+                        typeSelect.empty().append('<option value="">All Types</option>');
                         types.forEach(function(type) {
                             typeSelect.append(`<option value="${type.id}">${type.ordertype}</option>`);
                         });
@@ -324,6 +329,9 @@
                         if (urlParams.has('orderType')) {
                             typeSelect.val(urlParams.get('orderType'));
                         }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error loading order types:', error);
                     }
                 });
             }
@@ -364,7 +372,7 @@
                 isLoading = true;
                 
                 $.ajax({
-                    url: '/Order/GetFilteredData',
+                    url: '/Orders/GetFilteredData',
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify({

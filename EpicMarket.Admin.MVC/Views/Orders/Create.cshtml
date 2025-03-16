@@ -251,6 +251,9 @@
     }
 </style>
 
+<!-- Add SweetAlert2 CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css">
+
 <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
     <div class="breadcrumb-title pe-3">Orders</div>
     <div class="ps-3">
@@ -493,11 +496,18 @@
 </div>
 
 @section Scripts {
+    <!-- Add SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
+    
     <script>
         $(document).ready(function () {
             // Initialize Map to track selected products with variants
             const selectedProducts = new Map();
             let productData = []; // Store full product data
+            
+            // Check if SweetAlert2 is available
+            const isSwalAvailable = typeof Swal !== 'undefined';
+            console.log("SweetAlert2 available:", isSwalAvailable);
             
             // Business selection change handler
             $('#businessSelect').change(function () {
@@ -659,47 +669,160 @@
             
             // Show variant selection modal
             function showVariantSelection(productId, productName) {
+                console.log("Showing variants for product ID:", productId, "Name:", productName);
+                
+                // First, check if we need to fetch variants from the server
                 const variants = productData.filter(p => p.id === productId);
+                console.log("Variants from productData:", variants);
                 
                 if (variants.length === 0) {
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'No variants found for this product.',
-                        icon: 'error'
+                    // If no variants found in productData, fetch them from the server
+                    $.ajax({
+                        url: '/Orders/GetProductVariants',
+                        type: 'GET',
+                        data: { productId: productId },
+                        beforeSend: function() {
+                            // Show loading indicator
+                            $('#variantModalBody').html('<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Loading variants...</p></div>');
+                            $('#variantModal').modal('show');
+                        },
+                        success: function(data) {
+                            console.log("Variants from server:", data);
+                            if (data.length === 0) {
+                                $('#variantModalBody').html('<div class="alert alert-warning">No variants found for this product.</div>');
+                                return;
+                            }
+                            
+                            // Log each variant's attributes for debugging
+                            data.forEach((variant, index) => {
+                                console.log(`Variant ${index} attributes:`, variant.attributes);
+                            });
+                            
+                            displayVariantsInModal(data, productName);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("Error loading variants:", error, xhr.responseText);
+                            $('#variantModalBody').html('<div class="alert alert-danger">Failed to load variants. Please try again.</div>');
+                        }
                     });
-                    return;
+                } else {
+                    // Use variants from productData
+                    $('#variantModal').modal('show');
+                    displayVariantsInModal(variants, productName);
                 }
-                
+            }
+            
+            // Display variants in modal
+            function displayVariantsInModal(variants, productName) {
+                console.log("Displaying variants in modal:", variants);
                 let modalContent = `<div class="list-group">`;
                 
-                variants.forEach(variant => {
+                variants.forEach((variant, index) => {
                     // Parse attributes to show in a more readable format
-                    let attributes = '';
+                    let attributesDisplay = '';
+                    let attributesJson = '{}'; // Default to empty object
+                    
+                    console.log(`Processing variant ${index}:`, variant);
+                    
                     if (variant.attributes) {
+                        console.log(`Variant ${index} has attributes:`, variant.attributes);
+                        
                         try {
-                            const attrObj = JSON.parse(variant.attributes);
-                            attributes = Object.entries(attrObj).map(([key, value]) => `${key}: ${value}`).join(', ');
+                            // Try to parse as JSON if it's a string
+                            let attrObj;
+                            if (typeof variant.attributes === 'string') {
+                                // Try to parse JSON string
+                                try {
+                                    attrObj = JSON.parse(variant.attributes);
+                                    attributesJson = JSON.stringify(attrObj); // Re-stringify to ensure valid JSON
+                                } catch (e) {
+                                    console.log(`Error parsing JSON string for variant ${index}:`, e);
+                                    // If it's not valid JSON, create a simple object with the string as value
+                                    attributesJson = JSON.stringify({ value: variant.attributes });
+                                }
+                            } else if (typeof variant.attributes === 'object' && variant.attributes !== null) {
+                                // Already an object
+                                attrObj = variant.attributes;
+                                attributesJson = JSON.stringify(attrObj);
+                                console.log(`Attributes already an object for variant ${index}, stringified:`, attributesJson);
+                            } else {
+                                // Handle other types
+                                attributesJson = JSON.stringify({ value: variant.attributes });
+                                console.log(`Variant ${index} attributes is not a string or object, stringified:`, attributesJson);
+                            }
+                            
+                            // Create display for attributes
+                            if (attrObj && typeof attrObj === 'object' && Object.keys(attrObj).length > 0) {
+                                // Create badges for each attribute
+                                attributesDisplay = Object.entries(attrObj).map(([key, value]) => 
+                                    `<span class="variant-badge me-1 mb-1 d-inline-block" style="background-color: #e9ecef; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem;">
+                                        <strong>${key}:</strong> ${value}
+                                    </span>`
+                                ).join(' ');
+                                console.log(`Created attribute badges for variant ${index}:`, attributesDisplay);
+                            } else {
+                                console.log(`No attributes found in parsed object for variant ${index}`);
+                                attributesDisplay = '<small class="text-muted">No attributes</small>';
+                            }
                         } catch (e) {
-                            attributes = variant.attributes;
+                            console.log(`Error processing attributes for variant ${index}:`, e, variant.attributes);
+                            
+                            // Try to display as is if it's not valid JSON
+                            if (typeof variant.attributes === 'string' && variant.attributes.trim() !== '') {
+                                attributesDisplay = `<span class="variant-badge">${variant.attributes}</span>`;
+                                attributesJson = JSON.stringify({ value: variant.attributes });
+                            } else if (typeof variant.attributes === 'object' && variant.attributes !== null) {
+                                // Try to stringify the object for display
+                                try {
+                                    attributesJson = JSON.stringify(variant.attributes);
+                                    attributesDisplay = `<span class="variant-badge">${attributesJson}</span>`;
+                                } catch (e) {
+                                    attributesDisplay = '<small class="text-muted">Invalid attributes</small>';
+                                    attributesJson = '{}';
+                                }
+                            } else {
+                                attributesDisplay = '<small class="text-muted">No attributes</small>';
+                                attributesJson = '{}';
+                            }
                         }
+                    } else {
+                        console.log(`No attributes property for variant ${index}`);
+                        attributesDisplay = '<small class="text-muted">No attributes</small>';
+                        attributesJson = '{}';
                     }
                     
-                    const price = parseFloat(variant.price);
+                    // Ensure attributesJson is properly escaped for HTML attribute
+                    // Use single quotes for the HTML attribute to avoid conflicts with JSON double quotes
+                    
+                    // Handle different property names based on data source
+                    const variantId = variant.variantId || variant.id;
+                    const price = parseFloat(variant.price || variant.salePrice);
                     const formattedPrice = isNaN(price) ? 'Invalid' : '₹' + price.toFixed(2);
+                    
+                    console.log(`Final variant ${index} data for modal:`, {
+                        variantId: variantId,
+                        productId: variant.id || variant.catalogID || productName,
+                        productName: productName,
+                        price: price,
+                        attributesDisplay: attributesDisplay,
+                        attributesJson: attributesJson
+                    });
                     
                     modalContent += `
                         <a href="#" class="list-group-item list-group-item-action select-variant" 
-                           data-variant-id="${variant.variantId}" 
-                           data-product-id="${variant.id}"
-                           data-product-name="${variant.name}"
-                           data-price="${variant.price}"
-                           data-attributes='${variant.attributes || ""}'>
+                           data-variant-id="${variantId}" 
+                           data-product-id="${variant.id || variant.catalogID || productName}" 
+                           data-product-name="${productName}"
+                           data-price="${price}"
+                           data-attributes='${attributesJson}'>
                             <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">${variant.name}</h6>
-                                    ${attributes ? `<small class="text-muted">${attributes}</small>` : ''}
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">${productName}</h6>
+                                    <div class="mt-2">
+                                        ${attributesDisplay}
+                                    </div>
                                 </div>
-                                <span class="badge bg-primary rounded-pill">${formattedPrice}</span>
+                                <span class="badge bg-primary rounded-pill ms-2">${formattedPrice}</span>
                             </div>
                         </a>
                     `;
@@ -709,68 +832,138 @@
                 
                 $('#variantModalBody').html(modalContent);
                 $('#variantModalLabel').text(`Select ${productName} Variant`);
-                $('#variantModal').modal('show');
             }
             
             // Variant selection in modal
             $(document).on('click', '.select-variant', function(e) {
                 e.preventDefault();
                 
-                const variantId = $(this).data('variant-id');
+                const variantId = parseInt($(this).data('variant-id'));
                 const productId = $(this).data('product-id');
                 const productName = $(this).data('product-name');
-                const price = $(this).data('price');
-                const attributes = $(this).data('attributes');
+                const price = parseFloat($(this).data('price'));
+                const attributesStr = $(this).data('attributes');
+                
+                console.log("Raw attributes from data attribute:", attributesStr);
+                
+                // Parse attributes from the data attribute
+                let attributes = {};
+                try {
+                    if (typeof attributesStr === 'string') {
+                        attributes = JSON.parse(attributesStr);
+                    } else if (typeof attributesStr === 'object' && attributesStr !== null) {
+                        attributes = attributesStr;
+                    }
+                } catch (e) {
+                    console.error("Error parsing attributes:", e, attributesStr);
+                    // Use a simple object if parsing fails
+                    attributes = { value: String(attributesStr) };
+                }
+                
+                console.log("Selected variant:", {
+                    variantId: variantId,
+                    productId: productId,
+                    productName: productName,
+                    price: price,
+                    attributesStr: attributesStr,
+                    parsedAttributes: attributes
+                });
                 
                 $('#variantModal').modal('hide');
                 
-                // Show quantity selection for the selected variant
-                Swal.fire({
-                    title: 'Select Quantity',
-                    html: `
-                        <div class="form-group">
-                            <input type="number" id="quantityInput" class="form-control form-control-lg text-center" value="1" min="1" max="100">
-                        </div>
-                    `,
-                    showCancelButton: true,
-                    confirmButtonText: 'Add to Cart',
-                    cancelButtonText: 'Cancel',
-                    customClass: {
-                        confirmButton: 'btn btn-primary',
-                        cancelButton: 'btn btn-outline-secondary'
-                    },
-                    preConfirm: () => {
-                        const quantity = parseInt($('#quantityInput').val());
-                        if (isNaN(quantity) || quantity < 1) {
-                            Swal.showValidationMessage('Please enter a valid quantity');
-                            return false;
+                if (isSwalAvailable) {
+                    // Use SweetAlert2 for quantity selection
+                    Swal.fire({
+                        title: 'Select Quantity',
+                        html: `
+                            <div class="form-group">
+                                <input type="number" id="quantityInput" class="form-control form-control-lg text-center" value="1" min="1" max="100">
+                            </div>
+                        `,
+                        showCancelButton: true,
+                        confirmButtonText: 'Add to Cart',
+                        cancelButtonText: 'Cancel',
+                        customClass: {
+                            confirmButton: 'btn btn-primary',
+                            cancelButton: 'btn btn-outline-secondary'
+                        },
+                        preConfirm: () => {
+                            const quantity = parseInt($('#quantityInput').val());
+                            if (isNaN(quantity) || quantity < 1) {
+                                Swal.showValidationMessage('Please enter a valid quantity');
+                                return false;
+                            }
+                            return quantity;
                         }
-                        return quantity;
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Convert attributes back to string for storage
+                            const attributesForStorage = JSON.stringify(attributes);
+                                
+                            addProductToCart({
+                                id: productId,
+                                variantId: variantId,
+                                name: productName,
+                                price: price,
+                                attributes: attributesForStorage
+                            }, result.value);
+                        }
+                    });
+                } else {
+                    // Fallback to a simple prompt if SweetAlert2 is not available
+                    const quantity = prompt('Enter quantity:', '1');
+                    if (quantity !== null) {
+                        const parsedQuantity = parseInt(quantity);
+                        if (!isNaN(parsedQuantity) && parsedQuantity > 0) {
+                            // Convert attributes back to string for storage
+                            const attributesForStorage = JSON.stringify(attributes);
+                                
+                            addProductToCart({
+                                id: productId,
+                                variantId: variantId,
+                                name: productName,
+                                price: price,
+                                attributes: attributesForStorage
+                            }, parsedQuantity);
+                        } else {
+                            alert('Please enter a valid quantity.');
+                        }
                     }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        addProductToCart({
-                            id: productId,
-                            variantId: variantId,
-                            name: productName,
-                            price: price,
-                            attributes: attributes
-                        }, result.value);
-                    }
-                });
+                }
             });
             
             // Add product to cart
             function addProductToCart(product, quantity) {
-                const variantId = product.variantId;
+                console.log("Adding to cart:", product, "Quantity:", quantity);
+                
+                const variantId = parseInt(product.variantId);
                 const price = parseFloat(product.price);
                 
+                if (isNaN(variantId)) {
+                    console.error("Invalid variant ID:", product.variantId);
+                    if (isSwalAvailable) {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Invalid variant ID. Cannot add to cart.',
+                            icon: 'error'
+                        });
+                    } else {
+                        alert('Invalid variant ID. Cannot add to cart.');
+                    }
+                    return;
+                }
+                
                 if (isNaN(price)) {
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'Invalid product price. Cannot add to cart.',
-                        icon: 'error'
-                    });
+                    console.error("Invalid price:", product.price);
+                    if (isSwalAvailable) {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Invalid product price. Cannot add to cart.',
+                            icon: 'error'
+                        });
+                    } else {
+                        alert('Invalid product price. Cannot add to cart.');
+                    }
                     return;
                 }
                 
@@ -780,9 +973,10 @@
                     existingProduct.quantity += quantity;
                     existingProduct.total = existingProduct.price * existingProduct.quantity;
                     selectedProducts.set(variantId, existingProduct);
+                    console.log("Updated existing product in cart:", existingProduct);
                 } else {
                     // Add new product
-                    selectedProducts.set(variantId, {
+                    const newProduct = {
                         id: product.id,
                         variantId: variantId,
                         name: product.name,
@@ -790,29 +984,37 @@
                         price: price,
                         quantity: quantity,
                         total: price * quantity
-                    });
+                    };
+                    selectedProducts.set(variantId, newProduct);
+                    console.log("Added new product to cart:", newProduct);
                 }
                 
+                console.log("Cart contents:", Array.from(selectedProducts.values()));
                 updateOrderSummary();
                 validateForm();
                 
                 // Show notification
-                const Toast = Swal.mixin({
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.addEventListener('mouseenter', Swal.stopTimer)
-                        toast.addEventListener('mouseleave', Swal.resumeTimer)
-                    }
-                });
-                
-                Toast.fire({
-                    icon: 'success',
-                    title: 'Product added to cart'
-                });
+                if (isSwalAvailable) {
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                    });
+                    
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'Product added to cart'
+                    });
+                } else {
+                    // Simple notification if SweetAlert2 is not available
+                    alert('Product added to cart');
+                }
             }
             
             // Update quantity from the order summary
@@ -846,24 +1048,60 @@
             
             // Clear cart button
             $('#clearCartBtn').click(function() {
-                Swal.fire({
-                    title: 'Clear Cart?',
-                    text: 'This will remove all items from your cart.',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, clear it!',
-                    cancelButtonText: 'Cancel'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        selectedProducts.clear();
-                        updateOrderSummary();
-                        validateForm();
+                if (selectedProducts.size === 0) {
+                    return; // Do nothing if cart is already empty
+                }
+                
+                if (isSwalAvailable) {
+                    Swal.fire({
+                        title: 'Clear Cart?',
+                        text: 'This will remove all items from your cart.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, clear it!',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            clearCart();
+                        }
+                    });
+                } else {
+                    // Fallback to confirm dialog if SweetAlert2 is not available
+                    if (confirm('Are you sure you want to clear your cart?')) {
+                        clearCart();
                     }
-                });
+                }
             });
+            
+            // Function to clear the cart
+            function clearCart() {
+                selectedProducts.clear();
+                updateOrderSummary();
+                validateForm();
+                
+                // Show notification
+                if (isSwalAvailable) {
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                    
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'Cart cleared successfully'
+                    });
+                } else {
+                    // Simple notification if SweetAlert2 is not available
+                    alert('Cart cleared successfully');
+                }
+            }
 
             // Update order summary function
             function updateOrderSummary() {
+                console.log("Updating order summary, cart size:", selectedProducts.size);
                 var totalItems = 0;
                 var totalAmount = 0;
                 
@@ -876,7 +1114,10 @@
                     $('#selectedItemsContainer').show().empty();
                     $('#clearCartBtn').prop('disabled', false);
                     
-                    selectedProducts.forEach(product => {
+                    selectedProducts.forEach((product, key) => {
+                        console.log("Rendering product in summary:", product, "Key:", key);
+                        console.log("Product attributes:", product.attributes);
+                        
                         totalItems += product.quantity;
                         totalAmount += product.total;
                         
@@ -884,20 +1125,64 @@
                         let attributesDisplay = '';
                         if (product.attributes) {
                             try {
-                                const attrObj = JSON.parse(product.attributes);
-                                attributesDisplay = Object.entries(attrObj).map(([key, value]) => 
-                                    `<span class="variant-badge">${key}: ${value}</span>`
-                                ).join('');
+                                let attrObj;
+                                
+                                // Handle different attribute formats
+                                if (typeof product.attributes === 'string') {
+                                    if (product.attributes.trim() === '{}' || product.attributes.trim() === '') {
+                                        // Empty object or string, no attributes to display
+                                        attributesDisplay = '';
+                                    } else {
+                                        try {
+                                            attrObj = JSON.parse(product.attributes);
+                                            
+                                            // Check if we have a non-empty object
+                                            if (attrObj && typeof attrObj === 'object' && Object.keys(attrObj).length > 0) {
+                                                attributesDisplay = Object.entries(attrObj).map(([key, value]) => 
+                                                    `<span class="variant-badge me-1" style="background-color: #e9ecef; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">
+                                                        <strong>${key}:</strong> ${value}
+                                                    </span>`
+                                                ).join(' ');
+                                            }
+                                        } catch (e) {
+                                            console.log("Error parsing attributes JSON in summary:", e, product.attributes);
+                                            // If it's not valid JSON but has content, display as is
+                                            if (product.attributes.trim() !== '') {
+                                                attributesDisplay = `<span class="variant-badge">${product.attributes}</span>`;
+                                            }
+                                        }
+                                    }
+                                } else if (typeof product.attributes === 'object' && product.attributes !== null) {
+                                    // Already an object
+                                    attrObj = product.attributes;
+                                    
+                                    // Check if we have a non-empty object
+                                    if (Object.keys(attrObj).length > 0) {
+                                        attributesDisplay = Object.entries(attrObj).map(([key, value]) => 
+                                            `<span class="variant-badge me-1" style="background-color: #e9ecef; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">
+                                                <strong>${key}:</strong> ${value}
+                                            </span>`
+                                        ).join(' ');
+                                    }
+                                }
                             } catch (e) {
-                                attributesDisplay = product.attributes;
+                                console.log("Error processing attributes in summary:", e, product.attributes);
+                                // If all else fails, try to display something
+                                if (typeof product.attributes === 'string' && product.attributes.trim() !== '' && 
+                                    product.attributes.trim() !== '{}') {
+                                    attributesDisplay = `<span class="variant-badge">${product.attributes}</span>`;
+                                }
                             }
                         }
+                        
+                        console.log("Attributes display:", attributesDisplay);
                         
                         const itemHtml = `
                             <div class="selected-item">
                                 <div class="item-details">
                                     <div>${product.name}</div>
-                                    <div class="small text-muted">₹${product.price.toFixed(2)} each ${attributesDisplay}</div>
+                                    <div class="small text-muted mt-1">₹${product.price.toFixed(2)} each</div>
+                                    ${attributesDisplay ? `<div class="mt-1">${attributesDisplay}</div>` : ''}
                                 </div>
                                 <div class="item-quantity">
                                     <input type="number" class="form-control form-control-sm item-quantity-input" 
@@ -918,6 +1203,7 @@
                 
                 $('#summaryTotalItems').text(totalItems);
                 $('#summaryTotalAmount').text('₹' + totalAmount.toFixed(2));
+                console.log("Order summary updated. Total items:", totalItems, "Total amount:", totalAmount);
             }
             
             // Validate form function
@@ -951,11 +1237,15 @@
                 if (validateForm()) {
                     showOrderSummary();
                 } else {
-                    Swal.fire({
-                        title: 'Incomplete Information',
-                        text: 'Please fill in all required fields and select at least one product.',
-                        icon: 'warning'
-                    });
+                    if (isSwalAvailable) {
+                        Swal.fire({
+                            title: 'Incomplete Information',
+                            text: 'Please fill in all required fields and select at least one product.',
+                            icon: 'warning'
+                        });
+                    } else {
+                        alert('Please fill in all required fields and select at least one product.');
+                    }
                 }
             });
             
@@ -1012,12 +1302,49 @@
                     let attributesDisplay = '';
                     if (item.attributes) {
                         try {
-                            const attrObj = JSON.parse(item.attributes);
-                            attributesDisplay = Object.entries(attrObj).map(([key, value]) => 
-                                `<div><small class="text-muted">${key}: ${value}</small></div>`
-                            ).join('');
+                            let attrObj;
+                            
+                            // Handle different attribute formats
+                            if (typeof item.attributes === 'string') {
+                                if (item.attributes.trim() === '{}' || item.attributes.trim() === '') {
+                                    // Empty object or string, no attributes to display
+                                    attributesDisplay = '';
+                                } else {
+                                    try {
+                                        attrObj = JSON.parse(item.attributes);
+                                        
+                                        // Check if we have a non-empty object
+                                        if (attrObj && typeof attrObj === 'object' && Object.keys(attrObj).length > 0) {
+                                            attributesDisplay = Object.entries(attrObj).map(([key, value]) => 
+                                                `<div><small class="text-muted"><strong>${key}:</strong> ${value}</small></div>`
+                                            ).join('');
+                                        }
+                                    } catch (e) {
+                                        console.log("Error parsing attributes JSON in order summary:", e, item.attributes);
+                                        // If it's not valid JSON but has content, display as is
+                                        if (item.attributes.trim() !== '') {
+                                            attributesDisplay = `<div><small class="text-muted">${item.attributes}</small></div>`;
+                                        }
+                                    }
+                                }
+                            } else if (typeof item.attributes === 'object' && item.attributes !== null) {
+                                // Already an object
+                                attrObj = item.attributes;
+                                
+                                // Check if we have a non-empty object
+                                if (Object.keys(attrObj).length > 0) {
+                                    attributesDisplay = Object.entries(attrObj).map(([key, value]) => 
+                                        `<div><small class="text-muted"><strong>${key}:</strong> ${value}</small></div>`
+                                    ).join('');
+                                }
+                            }
                         } catch (e) {
-                            attributesDisplay = item.attributes;
+                            console.log("Error processing attributes in order summary:", e, item.attributes);
+                            // If all else fails, try to display something
+                            if (typeof item.attributes === 'string' && item.attributes.trim() !== '' && 
+                                item.attributes.trim() !== '{}') {
+                                attributesDisplay = `<div><small class="text-muted">${item.attributes}</small></div>`;
+                            }
                         }
                     }
                     
