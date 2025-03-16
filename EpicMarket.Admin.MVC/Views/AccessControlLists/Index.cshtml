@@ -201,6 +201,14 @@
             const isSwalAvailable = typeof Swal !== 'undefined';
             console.log("SweetAlert2 available:", isSwalAvailable);
 
+            // Critical securables that should have a warning when changing permissions
+            const criticalSecurables = [
+                'AccessControlListsView',
+                'AccessControlListsEdit',
+                'ApplicationSecurablesView',
+                'ApplicationSecurablesEdit'
+            ];
+
             // Apply filters
             $('#applyFiltersBtn').click(function() {
                 applyFilters();
@@ -289,6 +297,44 @@
                 const accessTypeId = dropdown.val();
                 const accessTypeName = dropdown.find("option:selected").text();
                 
+                // Check if this is a critical securable and the access type is being set to Denied
+                if (criticalSecurables.includes(securable) && accessTypeName.toLowerCase() === 'denied' && role === 'root') {
+                    // Show a warning for critical securables
+                    if (isSwalAvailable) {
+                        Swal.fire({
+                            title: 'Warning!',
+                            text: `Setting ${securable} to Denied for the root role may prevent you from managing permissions. Are you sure?`,
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#d33',
+                            cancelButtonColor: '#3085d6',
+                            confirmButtonText: 'Yes, change it',
+                            cancelButtonText: 'Cancel'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                updateAccessType(dropdown, securable, role, accessTypeId, accessTypeName);
+                            } else {
+                                // Revert to previous value if canceled
+                                dropdown.val(dropdown.data('previous-value'));
+                            }
+                        });
+                    } else {
+                        // Fallback if SweetAlert2 is not available
+                        if (confirm(`Warning: Setting ${securable} to Denied for the root role may prevent you from managing permissions. Are you sure?`)) {
+                            updateAccessType(dropdown, securable, role, accessTypeId, accessTypeName);
+                        } else {
+                            // Revert to previous value if canceled
+                            dropdown.val(dropdown.data('previous-value'));
+                        }
+                    }
+                } else {
+                    // For non-critical securables, update directly
+                    updateAccessType(dropdown, securable, role, accessTypeId, accessTypeName);
+                }
+            });
+            
+            // Function to update access type
+            function updateAccessType(dropdown, securable, role, accessTypeId, accessTypeName) {
                 // Add loading indicator
                 dropdown.prop('disabled', true);
                 dropdown.addClass('opacity-50');
@@ -304,8 +350,17 @@
                     success: function(result) {
                         if (result.success) {
                             showToast(`Access type for ${securable} - ${role} updated to ${accessTypeName}.`, 'success');
+                            
+                            // Refresh permissions in the client-side to ensure changes take effect immediately
+                            if (typeof SecurableHelper !== 'undefined' && SecurableHelper.refreshPermissions) {
+                                SecurableHelper.refreshPermissions().then(() => {
+                                    console.log('Permissions refreshed successfully');
+                                }).catch(error => {
+                                    console.error('Error refreshing permissions:', error);
+                                });
+                            }
                         } else {
-                            showToast('An error occurred while updating the access type.', 'error');
+                            showToast(result.message || 'An error occurred while updating the access type.', 'error');
                             // Revert to previous value
                             dropdown.val(dropdown.data('previous-value'));
                         }
@@ -324,7 +379,7 @@
                 
                 // Store the current value as previous value for potential revert
                 dropdown.data('previous-value', accessTypeId);
-            });
+            }
             
             // Store initial values for potential revert
             $('.access-type-dropdown').each(function() {

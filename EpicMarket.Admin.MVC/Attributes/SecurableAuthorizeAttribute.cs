@@ -2,6 +2,7 @@ using EpicMarket.Admin.MVC.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
 
@@ -19,29 +20,39 @@ namespace EpicMarket.Admin.MVC.Attributes
 
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            // // Skip authorization if action is decorated with [AllowAnonymous]
-            // if (context.ActionDescriptor.EndpointMetadata.Any(em => em.GetType().Name == "AllowAnonymousAttribute"))
-            //     return;
+            // Skip authorization if action is decorated with [AllowAnonymous]
+            if (context.ActionDescriptor.EndpointMetadata.Any(em => em.GetType() == typeof(AllowAnonymousAttribute)))
+                return;
 
-            // // Check if user is authenticated
-            // if (!context.HttpContext.User.Identity.IsAuthenticated)
-            // {
-            //     context.Result = new RedirectToActionResult("Login", "Account", new { area = "Identity" });
-            //     return;
-            // }
+            // Check if user is authenticated
+            if (!context.HttpContext.User.Identity.IsAuthenticated)
+            {
+                context.Result = new RedirectToActionResult("Login", "Account", new { area = "Identity", returnUrl = context.HttpContext.Request.Path });
+                return;
+            }
 
-            // var userRepository = context.HttpContext.RequestServices.GetService(typeof(IUserRepository)) as IUserRepository;
-            // if (userRepository == null)
-            // {
-            //     throw new InvalidOperationException("IUserRepository service is not available.");
-            // }
-
-            // var username = context.HttpContext.User.Identity.Name;
+            // Get the securable service from DI
+            var securableService = context.HttpContext.RequestServices.GetRequiredService<ISecurableService>();
             
-            // if (string.IsNullOrWhiteSpace(username) || !userRepository.HasPermission(username, Securable))
-            // {
-            //     context.Result = new RedirectToActionResult("AccessDenied", "Account", new { area = "Identity" });
-            // }
+            // Check if the user has access to the securable
+            if (!securableService.HasAccess(Securable))
+            {
+                // Set ViewData for the access denied view
+                context.HttpContext.Items["AccessDeniedSecurable"] = Securable;
+                
+                // Redirect to access denied view
+                context.Result = new ViewResult
+                {
+                    ViewName = "~/Views/Shared/_AccessDeniedPartial.cshtml",
+                    ViewData = new Microsoft.AspNetCore.Mvc.ViewFeatures.ViewDataDictionary(
+                        new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
+                        new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
+                    {
+                        Model = Securable,
+                        ["AccessDeniedMessage"] = $"You do not have permission to access this feature ({Securable})."
+                    }
+                };
+            }
         }
     }
 } 
