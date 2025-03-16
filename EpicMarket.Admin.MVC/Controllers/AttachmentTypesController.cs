@@ -11,6 +11,9 @@ using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
+
 namespace EpicMarket.Admin.MVC.Controllers
 {
     [Authorize(Roles = $"{ROLES.ROOT}")]
@@ -31,12 +34,14 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: AttachmentTypes
+        [SecurableAuthorize(SecurableConstants.AttachmentTypesView)]
         public async Task<IActionResult> Index()
         {
             return View(await _context.AttachmentTypes.ToListAsync());
         }
 
         // GET: AttachmentTypes/Details/5
+        [SecurableAuthorize(SecurableConstants.AttachmentTypesView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -55,6 +60,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: AttachmentTypes/Create
+        [SecurableAuthorize(SecurableConstants.AttachmentTypesAdd)]
         public IActionResult Create()
         {
             return View();
@@ -65,7 +71,8 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Name,Description")] AttachmentType attachmentType)
+        [SecurableAuthorize(SecurableConstants.AttachmentTypesAdd)]
+        public async Task<IActionResult> Create([Bind("ID,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] AttachmentType attachmentType)
         {
             if (ModelState.IsValid)
             {
@@ -90,6 +97,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: AttachmentTypes/Edit/5
+        [SecurableAuthorize(SecurableConstants.AttachmentTypesEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -110,7 +118,8 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description")] AttachmentType attachmentType)
+        [SecurableAuthorize(SecurableConstants.AttachmentTypesEdit)]
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] AttachmentType attachmentType)
         {
             if (id != attachmentType.ID)
             {
@@ -161,6 +170,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: AttachmentTypes/Delete/5
+        [SecurableAuthorize(SecurableConstants.AttachmentTypesDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -181,6 +191,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: AttachmentTypes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.AttachmentTypesDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var attachmentType = await _context.AttachmentTypes.FindAsync(id);

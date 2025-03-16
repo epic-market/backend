@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace EpicMarket.Data.Models
@@ -26,11 +27,35 @@ namespace EpicMarket.Data.Models
         public int? AddressID { get; set; }
         public virtual AppUser? Person { get; set; }
         public virtual Outlet? Outlet { get; set; }
+
+        [JsonIgnore]
         public virtual Address? Address { get; set; }
 
         public virtual OrderStatusOptions? OrderStatusOptions { get; set; }
 
         public virtual OrderTypesOptions? OrderTypesOptions { get; set; }
+
+        [JsonIgnore]
         public virtual ICollection<OrderDetail>? OrderDetails { get; set; }
+    }
+
+    public class PlaceOrderViewModel
+    {
+        public string CustomerEmail { get; set; }
+        public string CustomerPhone { get; set; }
+        public string CustomerName { get; set; }
+        public int OutletId { get; set; }
+        public double TotalPrice { get; set; }
+        public int TotalItems { get; set; }
+        public string PaymentMode { get; set; }
+        public List<OrderDetailViewModel> OrderDetails { get; set; }
+    }
+
+    public class OrderDetailViewModel
+    {
+        public int VariantId { get; set; }
+        public int Quantity { get; set; }
+        public double Rate { get; set; }
+        public double TotalPrice { get; set; }
     }
 }

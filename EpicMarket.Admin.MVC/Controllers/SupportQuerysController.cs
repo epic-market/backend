@@ -50,7 +50,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             try
             {
                 // Start with the base query
-                var query = _context.SupportQuerys
+                var query = _context.SupportQueries
                     .Include(s => s.PersonType)
                     .Include(s => s.TaskTypes)
                     .AsQueryable();
@@ -106,7 +106,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
         }
 
-        private IQueryable<SupportQuerys> ApplySorting(IQueryable<SupportQuerys> query, string sortColumn, string sortDirection)
+        private IQueryable<SupportQueries> ApplySorting(IQueryable<SupportQueries> query, string sortColumn, string sortDirection)
         {
             // Default sort by ID if column not specified
             if (string.IsNullOrEmpty(sortColumn))
@@ -133,7 +133,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var supportQuerys = await _context.SupportQuerys
+            var supportQuerys = await _context.SupportQueries
                 .Include(s => s.PersonType)
                 .Include(s => s.TaskTypes)
                 .FirstOrDefaultAsync(m => m.ID == id);
@@ -158,7 +158,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Query,TaskTypeID,TypeofPersonid,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] SupportQuerys supportQuerys)
+        public async Task<IActionResult> Create([Bind("ID,Query,TaskTypeID,TypeofPersonid,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] SupportQueries supportQuerys)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             supportQuerys.CreateBy = userName;
@@ -196,7 +196,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var supportQuerys = await _context.SupportQuerys.FindAsync(id);
+            var supportQuerys = await _context.SupportQueries.FindAsync(id);
             if (supportQuerys == null)
             {
                 return NotFound();
@@ -211,7 +211,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Query,TaskTypeID,TypeofPersonid,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] SupportQuerys supportQuerys)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Query,TaskTypeID,TypeofPersonid,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] SupportQueries supportQuerys)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             supportQuerys.ModifiedBy = userName;
@@ -223,7 +223,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
 
             // Get the original entity for comparison
-            var originalSupportQuery = await _context.SupportQuerys
+            var originalSupportQuery = await _context.SupportQueries
                 .AsNoTracking()
                 .FirstOrDefaultAsync(e => e.ID == id);
 
@@ -276,7 +276,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var supportQuerys = await _context.SupportQuerys
+            var supportQuerys = await _context.SupportQueries
                 .Include(s => s.PersonType)
                 .Include(s => s.TaskTypes)
                 .FirstOrDefaultAsync(m => m.ID == id);
@@ -293,10 +293,10 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var supportQuerys = await _context.SupportQuerys.FindAsync(id);
+            var supportQuerys = await _context.SupportQueries.FindAsync(id);
             if (supportQuerys != null)
             {
-                _context.SupportQuerys.Remove(supportQuerys);
+                _context.SupportQueries.Remove(supportQuerys);
                 
                 // Log the event
                 await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
@@ -317,7 +317,7 @@ namespace EpicMarket.Admin.MVC.Controllers
 
         private bool SupportQuerysExists(int id)
         {
-            return _context.SupportQuerys.Any(e => e.ID == id);
+            return _context.SupportQueries.Any(e => e.ID == id);
         }
     }
 }

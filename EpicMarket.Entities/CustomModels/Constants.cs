@@ -144,6 +144,7 @@ namespace EpicMarket.Entities.CustomModels
     }
     public static class AttachmentTypeConstants
     {
+        public const string BUSINESS_CATEGORY = "BusinessCategory";
         public const string LOGO = "Logo";
         public const string PROOF = "Proof";
 		public const string PRODUCTIMAGES = "Products";
@@ -275,6 +276,8 @@ namespace EpicMarket.Entities.CustomModels
         public const string CreateInventory = "CreateInventory";
         public const string EditInventory = "EditInventory";
         public const string DeleteInventory = "DeleteInventory";
+
+        public static string CreateAppUser { get; set; }
     }
     public static class ContactMethodConstants
     {

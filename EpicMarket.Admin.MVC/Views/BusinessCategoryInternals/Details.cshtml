@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Business Category Internal Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var categoryImages = ViewBag.CategoryImages as List<string>;
 }
 
 <div class="page-breadcrumb d-flex align-items-center mb-3">
@@ -60,6 +61,24 @@
                 </tr>
             </table>
         </div>
+        
+        <!-- Category Images Section -->
+        @if (categoryImages != null && categoryImages.Any())
+        {
+            <div class="mt-4">
+                <h5>Category Images</h5>
+                <div class="row">
+                    @foreach (var imageKey in categoryImages)
+                    {
+                        <div class="col-md-3 mb-3">
+                            <div class="card">
+                                <img src="@Url.Action("DisplayImage", "File", new { key = imageKey })" class="card-img-top" alt="Category Image" style="height: 200px; object-fit: cover;">
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
     </div>
 	<div class="card-body">
 		<ul class="nav nav-tabs nav-primary mb-0" role="tablist">

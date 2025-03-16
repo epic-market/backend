@@ -45,7 +45,7 @@ namespace EpicMarket.Services
                 Name = tasksDTO.Name,
                 Description = tasksDTO.Description,
                 TaskTypeID = GetTaskType.ID,
-                TaskStatusID = taskStatusTypes.Id,
+                TaskStatusID = taskStatusTypes.ID,
                 TaskPriorityID = tasksDTO.TaskPriorityID,
                 PrimaryAssignedToPersonID = AdminPersonID,
                 DateAssigned = DateTime.Now,
@@ -162,7 +162,7 @@ namespace EpicMarket.Services
         }
         public async Task<long> AddSupportTask(SupportDTO supportDTO, int AdminPersonID)
         {
-            var supportQuery = _context.SupportQuerys.Where(row => row.ID == supportDTO.QueryId).FirstOrDefault();
+            var supportQuery = _context.SupportQueries.Where(row => row.ID == supportDTO.QueryId).FirstOrDefault();
 
             // Check for the static user
             var staticUserEmail = "supportuser@epicmarket.in";

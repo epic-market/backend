@@ -29,10 +29,10 @@
                         <div>
                             <i class="bx bxs-user me-1 font-22 text-info"></i>
                         </div>
-                        <h5 class="mb-0 text-info">Attachment</h5>
+                        <h5 class="mb-0 text-info">Edit Attachment</h5>
                     </div>
                     <hr />
-                    <form asp-action="Edit">
+                    <form asp-action="Edit" enctype="multipart/form-data">
                         <input type="hidden" asp-for="ID" />
                         <input type="hidden" asp-for="CreateDate" />
                         <input type="hidden" asp-for="CreateBy" />
@@ -43,52 +43,57 @@
                         <input type="hidden" asp-for="DocumentFileType" />
                         <input type="hidden" asp-for="DocumentFolderPath" />
                         <input type="hidden" asp-for="DocumentFile" />
+                        <input type="hidden" asp-for="EntityId" />
+                        <input type="hidden" asp-for="Name" />
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
                         <div class="row mb-3">
-                            <label asp-for="Name" class="col-sm-3 col-form-label"></label>
+                            <label asp-for="Name" class="col-sm-3 col-form-label">Name</label>
                             <div class="col-sm-9">
-                                <input asp-for="Name" class="form-control" />
-                                <span asp-validation-for="Name" class="text-danger"></span>
+                                <input value="@Model.Name" class="form-control" disabled />
                             </div>
                         </div>
+                        
                         <div class="row mb-3">
-                            <label asp-for="Comment" class="col-sm-3 col-form-label"></label>
+                            <label asp-for="Comment" class="col-sm-3 col-form-label">Comment</label>
                             <div class="col-sm-9">
-                                <input asp-for="Comment" class="form-control" />
+                                <textarea asp-for="Comment" class="form-control" rows="3"></textarea>
                                 <span asp-validation-for="Comment" class="text-danger"></span>
                             </div>
                         </div>
+                        
                         <div class="row mb-3">
-                            <label asp-for="DocumentType" class="col-sm-3 col-form-label"></label>
+                            <label class="col-sm-3 col-form-label">Document Type</label>
                             <div class="col-sm-9">
-                                <input asp-for="DocumentType" class="form-control"  disabled />
+                                <input value="@Model.DocumentType" class="form-control" disabled />
                             </div>
                         </div>
+                        
                         <div class="row mb-3">
-                            <label asp-for="DocumentFileType" class="col-sm-3 col-form-label"></label>
+                            <label class="col-sm-3 col-form-label">Current File</label>
                             <div class="col-sm-9">
-                                <input asp-for="DocumentFileType" class="form-control"  disabled />
+                                <div class="d-flex align-items-center">
+                                    <span class="me-2">@Model.DocumentFile</span>
+                                        <a asp-action="DownloadImage" asp-route-key="@Model.DocumentFolderPath/@Model.DocumentFile" class="btn btn-sm btn-outline-primary">
+                                        <i class="bx bx-download"></i> Download
+                                    </a>
+                                </div>
                             </div>
                         </div>
+                        
                         <div class="row mb-3">
-                            <label asp-for="DocumentFolderPath" class="col-sm-3 col-form-label"></label>
+                            <label for="fileUpload" class="col-sm-3 col-form-label">Replace File</label>
                             <div class="col-sm-9">
-                                <input asp-for="DocumentFolderPath" class="form-control"  disabled />
+                                <input type="file" id="fileUpload" name="fileUpload" class="form-control" />
+                                <small class="form-text text-muted">Leave empty to keep the current file. Supported file types: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, GIF</small>
                             </div>
                         </div>
-                        <div class="row mb-3">
-                            <label asp-for="DocumentFile" class="col-sm-3 col-form-label"></label>
-                            <div class="col-sm-9">
-                                <input asp-for="DocumentFile" class="form-control"  disabled />
-                            </div>
-                        </div>
+                        
                         <div class="row">
                             <label class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
-                                <button type="submit" class="btn btn-info px-5"> Save</button>
-                            </div>
-                            <div>
-                                <a asp-action="Index">Back to List</a>
+                                <button type="submit" class="btn btn-info px-5"><i class="bx bx-save me-1"></i> Save Changes</button>
+                                <a asp-action="Index" class="btn btn-secondary ms-2"><i class="bx bx-arrow-back me-1"></i> Back to List</a>
                             </div>
                         </div>
                     </form>
@@ -97,3 +102,7 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -10,10 +10,12 @@ using EpicMarket.Entities.CustomModels;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
 using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
+
 namespace EpicMarket.Admin.MVC.Controllers
 {
-
-    [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]  
+     [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
     public class BusinessEmployeeMapsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -31,6 +33,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: BusinessEmployeeMaps
+        [SecurableAuthorize(SecurableConstants.BusinessEmployeeMapsView)]
         public async Task<IActionResult> Index()
         {
             var applicationDbContext = _context.BusinessEmployeeMaps.Include(b => b.Bussiness).Include(b => b.Employee);
@@ -38,6 +41,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: BusinessEmployeeMaps/Details/5
+        [SecurableAuthorize(SecurableConstants.BusinessEmployeeMapsView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -58,6 +62,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: BusinessEmployeeMaps/Create
+        [SecurableAuthorize(SecurableConstants.BusinessEmployeeMapsAdd)]
         public IActionResult Create()
         {
             ViewData["BussinessID"] = new SelectList(_context.Businesses, "ID", "ID");
@@ -70,7 +75,8 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,BussinessID,EmployeeID")] BusinessEmployeeMap businessEmployeeMap)
+        [SecurableAuthorize(SecurableConstants.BusinessEmployeeMapsAdd)]
+        public async Task<IActionResult> Create([Bind("ID,BussinessID,EmployeeID,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] BusinessEmployeeMap businessEmployeeMap)
         {
             if (ModelState.IsValid)
             {
@@ -97,6 +103,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: BusinessEmployeeMaps/Edit/5
+        [SecurableAuthorize(SecurableConstants.BusinessEmployeeMapsEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -119,7 +126,8 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,BussinessID,EmployeeID")] BusinessEmployeeMap businessEmployeeMap)
+        [SecurableAuthorize(SecurableConstants.BusinessEmployeeMapsEdit)]
+        public async Task<IActionResult> Edit(int id, [Bind("ID,BussinessID,EmployeeID,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] BusinessEmployeeMap businessEmployeeMap)
         {
             if (id != businessEmployeeMap.ID)
             {
@@ -172,6 +180,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: BusinessEmployeeMaps/Delete/5
+        [SecurableAuthorize(SecurableConstants.BusinessEmployeeMapsDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -194,6 +203,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: BusinessEmployeeMaps/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.BusinessEmployeeMapsDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var businessEmployeeMap = await _context.BusinessEmployeeMaps.FindAsync(id);

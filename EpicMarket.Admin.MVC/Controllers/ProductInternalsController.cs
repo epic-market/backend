@@ -56,19 +56,20 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             var productInternal = await _context.ProductInternals
                 .FirstOrDefaultAsync(m => m.ID == id);
+            if (productInternal == null)
+            {
+                return NotFound();
+            }
 
-            ViewBag.attachments = await this.attachmentService.GetAttachmentLinks(new GetAttachmentLink()
+            // Get attached images
+            var images = await attachmentService.GetAttachmentLinks(new GetAttachmentLink
             {
                 AttachmentType = AttachmentTypeConstants.ProductInternal,
                 Entity = EntityConstants.ProductInternal,
                 RecordID = productInternal.ID
             });
-           
 
-            if (productInternal == null)
-            {
-                return NotFound();
-            }
+            ViewBag.ProductImages = images;
 
             return View(productInternal);
         }
@@ -84,7 +85,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,BarCode,Name,Description")] ProductInternalModel productInternalModel, IFormFile[] images)
+        public async Task<IActionResult> Create([Bind("ID,BarCode,Name,Description")] ProductInternalModel productInternalModel, IFormFile[] files)
         {
             var productInternal = new ProductInternal();
 
@@ -98,29 +99,35 @@ namespace EpicMarket.Admin.MVC.Controllers
             _context.Add(productInternal);
             await _context.SaveChangesAsync();
             
+            // Handle file upload if files are present
+            if (files != null && files.Length > 0)
+            {
+                var attachmentModel = new AttachmentModel
+                {
+                    Name = productInternal.Name,
+                    Comment = "Product Internal Image",
+                    RecordID = productInternal.ID,
+                    Entity = EntityConstants.ProductInternal,
+                    AttachmentType = AttachmentTypeConstants.ProductInternal,
+                    Files = files
+                };
+
+                await attachmentService.UploadAttachment(attachmentModel);
+            }
+            
             // Log event
             await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
             {
                 EventName = EventConstants.CREATE,
                 EntityName = EntityConstants.ProductInternal,
                 Source = _urlContextService.CurrentPageUrl,
-                Description = $"Created product internal: {productInternal.Name}",
+                Description = $"Added product internal '{productInternal.Name}'",
                 Data = JsonSerializer.Serialize(productInternal),
                 RecordId = productInternal.ID,
                 BusinessID = 0,
                 LoggedInUserName = userName
             });
             
-            var attachment = new AttachmentModel()
-            {
-                Name = EntityConstants.ProductInternal,
-                Comment = EntityConstants.ProductInternal,
-                RecordID = productInternal.ID,
-                Entity = EntityConstants.ProductInternal,
-                AttachmentType = AttachmentTypeConstants.ProductInternal,
-                Files = images
-            };
-            await attachmentService.UploadAttachment(attachment);
             return RedirectToAction(nameof(Index));
         }
 
@@ -132,19 +139,21 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
             var productInternal = await _context.ProductInternals.FindAsync(id);
+            if (productInternal == null)
+            {
+                return NotFound();
+            }
 
-            ViewBag.attachments = await this.attachmentService.GetAttachmentLinks(new GetAttachmentLink()
+            // Get attached images
+            var images = await attachmentService.GetAttachmentLinks(new GetAttachmentLink
             {
                 AttachmentType = AttachmentTypeConstants.ProductInternal,
                 Entity = EntityConstants.ProductInternal,
                 RecordID = productInternal.ID
             });
 
+            ViewBag.ProductImages = images;
 
-            if (productInternal == null)
-            {
-                return NotFound();
-            }
             return View(productInternal);
         }
 
@@ -153,28 +162,52 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,BarCode,Name,Description,Images,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] ProductInternal productInternal, IFormFile[] newImages , string? removedImages, string? addedImages)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,BarCode,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] ProductInternal productInternal, IFormFile[] files, string removedImages)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             productInternal.ModifiedBy = userName;
             productInternal.ModifiedDate = DateTime.UtcNow;
             
-            // Get original entity for event logging
-            var originalEntity = await _context.ProductInternals
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.ID == id);
-                
             if (id != productInternal.ID)
             {
                 return NotFound();
             }
 
+            // Remove the removedImages from ModelState to prevent validation errors
+            ModelState.Remove("removedImages");
+
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var originalEntity = await _context.ProductInternals.AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.ID == id);
+
                     _context.Update(productInternal);
                     await _context.SaveChangesAsync();
+                    
+                    // Handle file upload if files are present
+                    if (files != null && files.Length > 0)
+                    {
+                        var attachmentModel = new AttachmentModel
+                        {
+                            Name = productInternal.Name,
+                            Comment = "Product Internal Image",
+                            RecordID = productInternal.ID,
+                            Entity = EntityConstants.ProductInternal,
+                            AttachmentType = AttachmentTypeConstants.ProductInternal,
+                            Files = files
+                        };
+
+                        await attachmentService.UploadAttachment(attachmentModel);
+                    }
+
+                    // Handle image removal if any images are selected for removal
+                    if (!string.IsNullOrEmpty(removedImages))
+                    {
+                        var removedImageUrls = removedImages.Split(',').ToList();
+                        await fileService.DeleteImage(removedImageUrls, userName);
+                    }
                     
                     // Log event
                     await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
@@ -182,7 +215,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                         EventName = EventConstants.UPDATE,
                         EntityName = EntityConstants.ProductInternal,
                         Source = _urlContextService.CurrentPageUrl,
-                        Description = $"Updated product internal: {productInternal.Name}",
+                        Description = $"Updated product internal '{productInternal.Name}'",
                         Data = JsonSerializer.Serialize(new
                         {
                             Original = originalEntity,
@@ -192,30 +225,6 @@ namespace EpicMarket.Admin.MVC.Controllers
                         BusinessID = 0,
                         LoggedInUserName = userName
                     });
-                    
-                    // Handle removed images
-                    if (!string.IsNullOrEmpty(removedImages))
-                    {
-                        var removedImageUrls = removedImages.Split(',').ToList();
-                        await  this.fileService.DeleteImage(removedImageUrls, userName);
-                    }
-
-                    // Handle added images
-                    if (addedImages != null && newImages?.Length > 0 )
-                    {
-
-                            var attachment = new AttachmentModel()
-                            {
-                                Name = EntityConstants.ProductInternal,
-                                Comment = EntityConstants.ProductInternal,
-                                RecordID = productInternal.ID,
-                                Entity = EntityConstants.ProductInternal,
-                                AttachmentType = AttachmentTypeConstants.ProductInternal,
-                                Files = newImages
-                            };
-                            await attachmentService.UploadAttachment(attachment);
-      
-                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -230,6 +239,17 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
+            // If we got this far, something failed, redisplay form with images
+            var images = await attachmentService.GetAttachmentLinks(new GetAttachmentLink
+            {
+                AttachmentType = AttachmentTypeConstants.ProductInternal,
+                Entity = EntityConstants.ProductInternal,
+                RecordID = productInternal.ID
+            });
+
+            ViewBag.ProductImages = images;
+            
             return View(productInternal);
         }
 
@@ -261,13 +281,12 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 _context.ProductInternals.Remove(productInternal);
                 
-                // Log event before saving changes
                 await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
                 {
                     EventName = EventConstants.DELETE,
                     EntityName = EntityConstants.ProductInternal,
                     Source = _urlContextService.CurrentPageUrl,
-                    Description = $"Deleted product internal: {productInternal.Name}",
+                    Description = $"Deleted product internal '{productInternal.Name}'",
                     Data = JsonSerializer.Serialize(productInternal),
                     RecordId = productInternal.ID,
                     BusinessID = 0,

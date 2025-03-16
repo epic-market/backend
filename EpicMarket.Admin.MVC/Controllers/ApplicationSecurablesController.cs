@@ -13,6 +13,8 @@ using System.Reflection.Metadata;
 using System.Security.Claims;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -34,12 +36,70 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: ApplicationSecurables
+        [SecurableAuthorize(SecurableConstants.ApplicationSecurablesView)]
         public async Task<IActionResult> Index()
         {
-            return View(await _context.ApplicationSecurables.ToListAsync());
+            return View();
+        }
+
+        [HttpPost]
+        [Route("ApplicationSecurables/GetFilteredData")]
+        [SecurableAuthorize(SecurableConstants.ApplicationSecurablesView)]
+        public async Task<IActionResult> GetFilteredData([FromBody] SecurableFilterViewModel filter)
+        {
+            try
+            {
+                var query = _context.ApplicationSecurables.AsQueryable();
+
+                // Apply filters
+                if (!string.IsNullOrWhiteSpace(filter.SecurableId))
+                {
+                    query = query.Where(s => s.Id.ToString().Contains(filter.SecurableId));
+                }
+
+                if (!string.IsNullOrWhiteSpace(filter.SecurableName))
+                {
+                    query = query.Where(s => s.Name.Contains(filter.SecurableName));
+                }
+
+                if (!string.IsNullOrWhiteSpace(filter.Description))
+                {
+                    query = query.Where(s => s.Description.Contains(filter.Description));
+                }
+
+                var totalRecords = await query.CountAsync();
+
+                // Apply sorting
+                query = filter.SortColumn?.ToLower() switch
+                {
+                    "id" => filter.SortDirection == "asc" ? query.OrderBy(s => s.Id) : query.OrderByDescending(s => s.Id),
+                    "name" => filter.SortDirection == "asc" ? query.OrderBy(s => s.Name) : query.OrderByDescending(s => s.Name),
+                    "description" => filter.SortDirection == "asc" ? query.OrderBy(s => s.Description) : query.OrderByDescending(s => s.Description),
+                    _ => query.OrderBy(s => s.Id)
+                };
+
+                // Apply pagination and project to DTO
+                var securables = await query
+                    .Skip((filter.PageNumber - 1) * filter.PageSize)
+                    .Take(filter.PageSize)
+                    .Select(s => new SecurableDto
+                    {
+                        Id = s.Id,
+                        Name = s.Name,
+                        Description = s.Description
+                    })
+                    .ToListAsync();
+
+                return Json(new { totalRecords, data = securables });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message });
+            }
         }
 
         // GET: ApplicationSecurables/Details/5
+        [SecurableAuthorize(SecurableConstants.ApplicationSecurablesView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -58,6 +118,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: ApplicationSecurables/Create
+        [SecurableAuthorize(SecurableConstants.ApplicationSecurablesAdd)]
         public IActionResult Create()
         {
             return View();
@@ -68,6 +129,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.ApplicationSecurablesAdd)]
         public async Task<IActionResult> Create([Bind("Id,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] ApplicationSecurables applicationSecurables)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -97,6 +159,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: ApplicationSecurables/Edit/5
+        [SecurableAuthorize(SecurableConstants.ApplicationSecurablesEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -117,6 +180,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.ApplicationSecurablesEdit)]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] ApplicationSecurables applicationSecurables)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -172,6 +236,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: ApplicationSecurables/Delete/5
+        [SecurableAuthorize(SecurableConstants.ApplicationSecurablesDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -192,6 +257,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: ApplicationSecurables/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.ApplicationSecurablesDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var applicationSecurables = await _context.ApplicationSecurables.FindAsync(id);
@@ -220,5 +286,23 @@ namespace EpicMarket.Admin.MVC.Controllers
         {
             return _context.ApplicationSecurables.Any(e => e.Id == id);
         }
+    }
+
+    public class SecurableFilterViewModel
+    {
+        public string SecurableId { get; set; }
+        public string SecurableName { get; set; }
+        public string Description { get; set; }
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+        public string SortColumn { get; set; } = "id";
+        public string SortDirection { get; set; } = "asc";
+    }
+
+    public class SecurableDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
     }
 }

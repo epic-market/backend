@@ -88,7 +88,7 @@ namespace EpicMarket.Admin.MVC.Models
                 MaximumOrderQuantity = MaximumOrderQuantity,
                 MinimumOrderQuantity = MinimumOrderQuantity,
                 PackedHeight = PackedHeight,
-                PackedWidhth = PackedWidth,  // Note: The model has a typo, so we match it
+                PackedWidth = PackedWidth,  // Note: The model has a typo, so we match it
                 PackedDepth = PackedDepth,
                 Weight = Weight,
                 WeightUnit = "g",  // Default unit

@@ -1,0 +1,16 @@
+@{
+    var message = ViewData["AccessDeniedMessage"] as string ?? "You do not have permission to access this resource.";
+}
+
+<div class="alert alert-danger mt-3">
+    <div class="d-flex align-items-center">
+        <i class="fas fa-exclamation-triangle me-3" style="font-size: 2rem;"></i>
+        <div>
+            <h4 class="alert-heading">Access Denied</h4>
+            <p class="mb-0">@message</p>
+            <p class="mt-2">
+                If you believe you should have access to this feature, please contact your administrator.
+            </p>
+        </div>
+    </div>
+</div> 

@@ -876,7 +876,7 @@ namespace EpicMarket.Data.Migrations
                     b.Property<int>("StatusId")
                         .HasColumnType("int");
 
-                    b.Property<string>("VarientOptions")
+                    b.Property<string>("VariantOptions")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
@@ -931,6 +931,9 @@ namespace EpicMarket.Data.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValueSql("1");
 
+                    b.Property<bool>("IsDefaultVariant")
+                        .HasColumnType("bit");
+
                     b.Property<int?>("MaximumOrderQuantity")
                         .HasColumnType("int");
 
@@ -949,7 +952,7 @@ namespace EpicMarket.Data.Migrations
                     b.Property<double?>("PackedHeight")
                         .HasColumnType("float");
 
-                    b.Property<double?>("PackedWidhth")
+                    b.Property<double?>("PackedWidth")
                         .HasColumnType("float");
 
                     b.Property<string>("SKU")
@@ -1815,9 +1818,6 @@ namespace EpicMarket.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
-                    b.Property<int?>("CatalogVariantsID")
-                        .HasColumnType("int");
-
                     b.Property<string>("CreateBy")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(max)")
@@ -1856,9 +1856,9 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("CatalogVariantsID");
-
                     b.HasIndex("OrderID");
+
+                    b.HasIndex("VariantID");
 
                     b.ToTable("OrderDetails");
                 });
@@ -2313,7 +2313,25 @@ namespace EpicMarket.Data.Migrations
                     b.ToTable("Subscriptions");
                 });
 
-            modelBuilder.Entity("EpicMarket.Data.Models.SupportQuerys", b =>
+            modelBuilder.Entity("EpicMarket.Data.Models.SubscriptionStatus", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("SubscriptionStatus");
+                });
+
+            modelBuilder.Entity("EpicMarket.Data.Models.SupportQueries", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -2343,7 +2361,9 @@ namespace EpicMarket.Data.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Query")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int?>("TaskTypeID")
                         .HasColumnType("int");
@@ -2357,7 +2377,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.HasIndex("TypeofPersonid");
 
-                    b.ToTable("SupportQuerys");
+                    b.ToTable("SupportQueries");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.SupportTicket", b =>
@@ -2418,29 +2438,13 @@ namespace EpicMarket.Data.Migrations
                     b.ToTable("SupportTickets");
                 });
 
-            modelBuilder.Entity("EpicMarket.Data.Models.SusbcriptionStatus", b =>
+            modelBuilder.Entity("EpicMarket.Data.Models.TaskStatusType", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("SusbcriptionStatuses");
-                });
-
-            modelBuilder.Entity("EpicMarket.Data.Models.TaskStatusType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CreateBy")
                         .ValueGeneratedOnAdd()
@@ -2468,9 +2472,10 @@ namespace EpicMarket.Data.Migrations
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("StatusDescription")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
-                    b.HasKey("Id");
+                    b.HasKey("ID");
 
                     b.ToTable("TaskStatusTypes");
                 });
@@ -3199,14 +3204,16 @@ namespace EpicMarket.Data.Migrations
 
             modelBuilder.Entity("EpicMarket.Data.Models.OrderDetail", b =>
                 {
-                    b.HasOne("EpicMarket.Data.Models.CatalogVariants", "CatalogVariants")
-                        .WithMany("OrderDetails")
-                        .HasForeignKey("CatalogVariantsID");
-
                     b.HasOne("EpicMarket.Data.Models.Order", "Order")
                         .WithMany("OrderDetails")
                         .HasForeignKey("OrderID")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("EpicMarket.Data.Models.CatalogVariants", "CatalogVariants")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("VariantID")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("CatalogVariants");
@@ -3319,7 +3326,7 @@ namespace EpicMarket.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("EpicMarket.Data.Models.SusbcriptionStatus", "Status")
+                    b.HasOne("EpicMarket.Data.Models.SubscriptionStatus", "Status")
                         .WithMany("Subscriptions")
                         .HasForeignKey("StatusID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3332,7 +3339,7 @@ namespace EpicMarket.Data.Migrations
                     b.Navigation("Status");
                 });
 
-            modelBuilder.Entity("EpicMarket.Data.Models.SupportQuerys", b =>
+            modelBuilder.Entity("EpicMarket.Data.Models.SupportQueries", b =>
                 {
                     b.HasOne("EpicMarket.Data.Models.TaskType", "TaskTypes")
                         .WithMany("SupportQuerys")
@@ -3384,16 +3391,18 @@ namespace EpicMarket.Data.Migrations
                         .HasForeignKey("PrimaryAssignedToPersonID");
 
                     b.HasOne("EpicMarket.Data.Models.Entity", "Entity")
-                        .WithMany("Taskss")
+                        .WithMany("Tasks")
                         .HasForeignKey("TaskEntityID");
 
                     b.HasOne("EpicMarket.Data.Models.TaskStatusType", "TaskStatusType")
                         .WithMany("Tasks")
-                        .HasForeignKey("TaskStatusID");
+                        .HasForeignKey("TaskStatusID")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("EpicMarket.Data.Models.TaskType", "TaskTypes")
                         .WithMany("Tasks")
-                        .HasForeignKey("TaskTypeID");
+                        .HasForeignKey("TaskTypeID")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("AppUser");
 
@@ -3603,7 +3612,7 @@ namespace EpicMarket.Data.Migrations
 
                     b.Navigation("EventLogs");
 
-                    b.Navigation("Taskss");
+                    b.Navigation("Tasks");
                 });
 
             modelBuilder.Entity("EpicMarket.Data.Models.Event", b =>
@@ -3679,7 +3688,7 @@ namespace EpicMarket.Data.Migrations
                     b.Navigation("Outlets");
                 });
 
-            modelBuilder.Entity("EpicMarket.Data.Models.SusbcriptionStatus", b =>
+            modelBuilder.Entity("EpicMarket.Data.Models.SubscriptionStatus", b =>
                 {
                     b.Navigation("Subscriptions");
                 });

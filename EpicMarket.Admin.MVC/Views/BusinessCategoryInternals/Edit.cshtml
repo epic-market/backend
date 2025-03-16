@@ -1,7 +1,8 @@
-﻿@model EpicMarket.Data.Models.BusinessCategoryInternal
+@model EpicMarket.Data.Models.BusinessCategoryInternal
 
 @{
     ViewData["Title"] = "Edit";
+    var categoryImages = ViewBag.CategoryImages as List<string>;
 }
 
 
@@ -32,7 +33,7 @@
                         <h5 class="mb-0 text-info">Business Category Internal</h5>
                     </div>
                     <hr />
-                    <form asp-action="Edit">
+                    <form asp-action="Edit" enctype="multipart/form-data">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <input type="hidden" asp-for="ID" />
                         <input type="hidden" asp-for="CreateDate" />
@@ -40,6 +41,7 @@
                         <input type="hidden" asp-for="ModifiedDate" />
                         <input type="hidden" asp-for="IsActive" />
                         <input type="hidden" asp-for="ModifiedBy" />
+                        <input type="hidden" id="removedImagesInput" name="removedImages" value="" />
                         <div class="row mb-3">
                             <label asp-for="Name" class="col-sm-3 col-form-label"></label>
                             <div class="col-sm-9">
@@ -61,6 +63,36 @@
                                 <span asp-validation-for="Type" class="text-danger"></span>
                             </div>
                         </div>
+                        
+                        <!-- Existing Images Section -->
+                        @if (categoryImages != null && categoryImages.Any())
+                        {
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Current Images</label>
+                                <div class="col-sm-9">
+                                    <div class="row" id="existingImagesContainer">
+                                        @foreach (var imageKey in categoryImages)
+                                        {
+                                            <div class="col-md-3 mb-3 position-relative image-container" data-image-key="@imageKey">
+                                                <img src="@Url.Action("DisplayImage", "File", new { key = imageKey })" class="card-img-top" alt="Category Image" style="height: 150px; object-fit: cover;">
+                                                <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0" onclick="removeImage('@imageKey')">
+                                                    <i class="bx bx-trash"></i>
+                                                </button>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        
+                        <!-- Upload New Images Section -->
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Add New Images</label>
+                            <div class="col-sm-9">
+                                <input type="file" name="files" class="form-control" multiple accept="image/*" />
+                                <small class="text-muted">Upload one or more new images for this category</small>
+                            </div>
+                        </div>
 
                         <div class="row">
                             <label class="col-sm-3 col-form-label"></label>
@@ -78,4 +110,23 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Function to handle image removal
+        function removeImage(imageKey) {
+            // Add the image key to the hidden input (comma-separated)
+            var currentValue = $("#removedImagesInput").val();
+            if (currentValue) {
+                $("#removedImagesInput").val(currentValue + ',' + imageKey);
+            } else {
+                $("#removedImagesInput").val(imageKey);
+            }
+            
+            // Hide the image visually
+            $(`[data-image-key="${imageKey}"]`).fadeOut();
+            
+            console.log("Image marked for removal: " + imageKey);
+            console.log("Current removedImages value: " + $("#removedImagesInput").val());
+        }
+    </script>
 }

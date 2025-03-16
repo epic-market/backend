@@ -11,6 +11,8 @@ using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
 using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -32,12 +34,14 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: OnboardingSteps
+        [SecurableAuthorize(SecurableConstants.OnboardingStepsView)]
         public async Task<IActionResult> Index()
         {
             return View(await _context.OnboardingSteps.Include(n => n.Page).ToListAsync());
         }
 
         // GET: OnboardingSteps/Details/5
+        [SecurableAuthorize(SecurableConstants.OnboardingStepsView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -57,6 +61,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: OnboardingSteps/Create
+        [SecurableAuthorize(SecurableConstants.OnboardingStepsAdd)]
         public IActionResult Create()
         {
             ViewData["PageId"] = new SelectList(_context.Pages, "ID", "Url");
@@ -68,6 +73,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.OnboardingStepsAdd)]
         public async Task<IActionResult> Create([Bind("Id,StepName,StepDescription,StepOrder,PageId")] OnboardingStep onboardingStep)
         {
             if (ModelState.IsValid)
@@ -94,6 +100,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: OnboardingSteps/Edit/5
+        [SecurableAuthorize(SecurableConstants.OnboardingStepsEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -115,6 +122,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.OnboardingStepsEdit)]
         public async Task<IActionResult> Edit(int id, [Bind("Id,StepName,StepDescription,StepOrder,PageId")] OnboardingStep onboardingStep)
         {
             if (id != onboardingStep.Id)
@@ -164,6 +172,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: OnboardingSteps/Delete/5
+        [SecurableAuthorize(SecurableConstants.OnboardingStepsDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -185,6 +194,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: OnboardingSteps/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.OnboardingStepsDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var onboardingStep = await _context.OnboardingSteps.FindAsync(id);

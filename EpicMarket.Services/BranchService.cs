@@ -405,7 +405,7 @@ namespace EpicMarket.Services
                 Description = VerificationConstants.BranchDescription,
                 TaskTypeID = taskTypeID.ID,
                 ParentID = null,
-                TaskStatusID = newTaskStatus.Id,
+                TaskStatusID = newTaskStatus.ID,
                 TaskEntityID = taskEntity.ID,
                 TaskPriorityID = 1,
                 PrimaryAssignedToPersonID = AdminPersonID,
@@ -585,7 +585,7 @@ namespace EpicMarket.Services
             int pageSize = 10)
         {
             var attachmentTypeID = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.BRANCH_THUMBNAIL);
-            var subscribedStatusID = _context.SusbcriptionStatuses.FirstOrDefault(c => c.Name == SubscriptionStatusConstants.Subscribed).ID;
+            var subscribedStatusID = _context.SubscriptionStatus.FirstOrDefault(c => c.Name == SubscriptionStatusConstants.Subscribed).ID;
             var query = _context.Subscriptions
                 .Include(s => s.Outlet)
                 .Include(s => s.Outlet.Address)
@@ -632,10 +632,10 @@ namespace EpicMarket.Services
             if (outlet == null) 
                 return false;
 
-            var subscribedStatusID = _context.SusbcriptionStatuses
+            var subscribedStatusID = _context.SubscriptionStatus
                 .FirstOrDefault(c => c.Name == SubscriptionStatusConstants.Subscribed)?.ID;
 
-            var unsubscribedStatusID = _context.SusbcriptionStatuses
+            var unsubscribedStatusID = _context.SubscriptionStatus
                 .FirstOrDefault(c => c.Name == SubscriptionStatusConstants.Unsubscribed)?.ID;
 
             if (subscribedStatusID == null || unsubscribedStatusID == null)
