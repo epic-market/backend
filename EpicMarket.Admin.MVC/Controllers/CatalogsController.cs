@@ -1195,5 +1195,128 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return null;
             }
         }
+
+        [HttpPost]
+        [Route("Catalogs/MapToOutlet")]
+        public async Task<IActionResult> MapToOutlet([FromBody] MapToOutletViewModel model)
+        {
+            try
+            {
+                if (model == null || model.OutletId <= 0 || model.CatalogIds == null || !model.CatalogIds.Any())
+                {
+                    return Json(new { success = false, message = "Invalid outlet or no catalogs selected" });
+                }
+
+                // Get the outlet to verify it exists
+                var outlet = await _context.Outlets.FindAsync(model.OutletId);
+                if (outlet == null)
+                {
+                    return Json(new { success = false, message = "Selected outlet not found" });
+                }
+
+                // Get all catalog variants for the selected catalogs
+                var variants = await _context.CatalogVariants
+                    .Where(v => model.CatalogIds.Contains(v.CatalogID))
+                    .ToListAsync();
+
+                if (!variants.Any())
+                {
+                    return Json(new { success = false, message = "No variants found for the selected catalogs" });
+                }
+
+                // Check if inventory entries already exist for these variants and outlet
+                var existingInventories = await _context.Inventory
+                    .Where(i => i.OutletID == model.OutletId && variants.Select(v => v.ID).Contains(i.ProductVariantID))
+                    .ToListAsync();
+
+                var existingVariantIds = existingInventories.Select(i => i.ProductVariantID).ToList();
+
+                // Create new inventory entries for variants that don't already have one for this outlet
+                var newInventories = new List<Inventory>();
+                foreach (var variant in variants)
+                {
+                    if (!existingVariantIds.Contains(variant.ID))
+                    {
+                        newInventories.Add(new Inventory
+                        {
+                            OutletID = model.OutletId,
+                            ProductVariantID = variant.ID,
+                            TrackInventory = false,
+                            IsInStock = true,
+                            QuantityAvailable = null,
+                            MinimumStockLevel = null,
+                            MaximumStockLevel = null,
+                            ReorderPoint = null,
+                            BackOrders = false
+                        });
+                    }
+                }
+
+                if (newInventories.Any())
+                {
+                    await _context.Inventory.AddRangeAsync(newInventories);
+                    await _context.SaveChangesAsync();
+                }
+
+                // Log the event
+                // await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                // {
+                //     EventName = EventConstants.MapCatalogsToOutlet,
+                //     EntityName = EntityConstants.Inventory,
+                //     Source = _urlContextService.CurrentPageUrl,
+                //     Description = $"Mapped {model.CatalogIds.Count} catalogs to outlet ID {model.OutletId}",
+                //     Data = System.Text.Json.JsonSerializer.Serialize(new { 
+                //         OutletId = model.OutletId, 
+                //         CatalogIds = model.CatalogIds,
+                //         NewInventoryCount = newInventories.Count
+                //     }),
+                //     RecordId = model.OutletId,
+                //     BusinessID = outlet.BussinessID,
+                //     LoggedInUserName = User.Identity.Name
+                // });
+
+                return Json(new { 
+                    success = true, 
+                    message = $"Successfully mapped {newInventories.Count} new variants to the outlet",
+                    totalVariants = variants.Count,
+                    newVariants = newInventories.Count,
+                    existingVariants = existingVariantIds.Count
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error mapping catalogs to outlet: {ex.Message}" });
+            }
+        }
+
+        [HttpGet]
+        [Route("Catalogs/GetOutletsByBusiness/{businessId}")]
+        public async Task<IActionResult> GetOutletsByBusiness(int businessId)
+        {
+            try
+            {
+                // Note: In Outlet.cs, the property is named "BussinessID" (with double 's')
+                var outlets = await _context.Outlets
+                    .Where(o => o.BussinessID == businessId)
+                    .Select(o => new { 
+                        id = o.ID, 
+                        name = o.Name, 
+                        address = o.Address != null ? (o.Address.Address1 ?? o.Address.City ?? "No address") : "No address"
+                    })
+                    .ToListAsync();
+
+                return Json(new { success = true, data = outlets });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error fetching outlets: {ex.Message}" });
+            }
+        }
+    }
+
+    public class MapToOutletViewModel
+    {
+        public int OutletId { get; set; }
+        public List<int> CatalogIds { get; set; } = new List<int>();
     }
 }
