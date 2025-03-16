@@ -12,6 +12,8 @@ using EpicMarket.Entities.CustomModels;
 using System.Security.Claims;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -33,12 +35,83 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: ApplicationConfigurations
+        [SecurableAuthorize(SecurableConstants.ApplicationConfigurationsView)]
         public async Task<IActionResult> Index(bool IsActive = true)
         {
             return View();
         }
 
         [HttpPost]
+        [Route("ApplicationConfigurations/GetFilteredData")]
+        [SecurableAuthorize(SecurableConstants.ApplicationConfigurationsView)]
+        public async Task<IActionResult> GetFilteredData([FromBody] ConfigFilterViewModel filter)
+        {
+            try
+            {
+                var query = _context.ApplicationConfigurations.AsQueryable();
+
+                // Apply filters
+                if (!string.IsNullOrWhiteSpace(filter.ConfigId))
+                {
+                    query = query.Where(c => c.ID.ToString().Contains(filter.ConfigId));
+                }
+
+                if (!string.IsNullOrWhiteSpace(filter.ConfigName))
+                {
+                    query = query.Where(c => c.Name.Contains(filter.ConfigName));
+                }
+
+                if (!string.IsNullOrWhiteSpace(filter.Value))
+                {
+                    query = query.Where(c => c.Value.Contains(filter.Value));
+                }
+
+                // Filter by active status if specified
+                if (!string.IsNullOrWhiteSpace(filter.IsActive))
+                {
+                    if (bool.TryParse(filter.IsActive, out bool isActive))
+                    {
+                        query = query.Where(c => c.IsActive == isActive);
+                    }
+                }
+
+                var totalRecords = await query.CountAsync();
+
+                // Apply sorting
+                query = filter.SortColumn?.ToLower() switch
+                {
+                    "id" => filter.SortDirection == "asc" ? query.OrderBy(c => c.ID) : query.OrderByDescending(c => c.ID),
+                    "name" => filter.SortDirection == "asc" ? query.OrderBy(c => c.Name) : query.OrderByDescending(c => c.Name),
+                    "value" => filter.SortDirection == "asc" ? query.OrderBy(c => c.Value) : query.OrderByDescending(c => c.Value),
+                    "description" => filter.SortDirection == "asc" ? query.OrderBy(c => c.Description) : query.OrderByDescending(c => c.Description),
+                    "isactive" => filter.SortDirection == "asc" ? query.OrderBy(c => c.IsActive) : query.OrderByDescending(c => c.IsActive),
+                    _ => query.OrderBy(c => c.ID)
+                };
+
+                // Apply pagination and project to DTO
+                var configurations = await query
+                    .Skip((filter.PageNumber - 1) * filter.PageSize)
+                    .Take(filter.PageSize)
+                    .Select(c => new ConfigDto
+                    {
+                        Id = c.ID,
+                        Name = c.Name,
+                        Value = c.Value,
+                        Description = c.Description,
+                        IsActive = c.IsActive
+                    })
+                    .ToListAsync();
+
+                return Json(new { totalRecords, data = configurations });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        [SecurableAuthorize(SecurableConstants.ApplicationConfigurationsView)]
         public async Task<IActionResult> LoadData()
         {
             try
@@ -95,6 +168,7 @@ namespace EpicMarket.Admin.MVC.Controllers
  
 
 // GET: ApplicationConfigurations/Details/5
+[SecurableAuthorize(SecurableConstants.ApplicationConfigurationsView)]
 public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -113,6 +187,7 @@ public async Task<IActionResult> Details(int? id)
         }
 
         // GET: ApplicationConfigurations/Create
+        [SecurableAuthorize(SecurableConstants.ApplicationConfigurationsAdd)]
         public IActionResult Create()
         {
             return View();
@@ -123,7 +198,8 @@ public async Task<IActionResult> Details(int? id)
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Name,Value,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] ApplicationConfiguration applicationConfiguration)
+        [SecurableAuthorize(SecurableConstants.ApplicationConfigurationsAdd)]
+        public async Task<IActionResult> Create([Bind("ID,Name,Value,Description,IsActive,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] ApplicationConfiguration applicationConfiguration)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             applicationConfiguration.CreateBy = userName;
@@ -152,6 +228,7 @@ public async Task<IActionResult> Details(int? id)
         }
 
         // GET: ApplicationConfigurations/Edit/5
+        [SecurableAuthorize(SecurableConstants.ApplicationConfigurationsEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -172,7 +249,8 @@ public async Task<IActionResult> Details(int? id)
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Value,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] ApplicationConfiguration applicationConfiguration)
+        [SecurableAuthorize(SecurableConstants.ApplicationConfigurationsEdit)]
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Value,Description,IsActive,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] ApplicationConfiguration applicationConfiguration)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             applicationConfiguration.ModifiedBy = userName;
@@ -227,6 +305,7 @@ public async Task<IActionResult> Details(int? id)
         }
 
         // GET: ApplicationConfigurations/Delete/5
+        [SecurableAuthorize(SecurableConstants.ApplicationConfigurationsDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -247,6 +326,7 @@ public async Task<IActionResult> Details(int? id)
         // POST: ApplicationConfigurations/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.ApplicationConfigurationsDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var applicationConfiguration = await _context.ApplicationConfigurations.FindAsync(id);
@@ -275,5 +355,26 @@ public async Task<IActionResult> Details(int? id)
         {
             return _context.ApplicationConfigurations.Any(e => e.ID == id);
         }
+    }
+
+    public class ConfigFilterViewModel
+    {
+        public string ConfigId { get; set; }
+        public string ConfigName { get; set; }
+        public string Value { get; set; }
+        public string IsActive { get; set; }
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+        public string SortColumn { get; set; } = "id";
+        public string SortDirection { get; set; } = "asc";
+    }
+
+    public class ConfigDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Value { get; set; }
+        public string Description { get; set; }
+        public bool IsActive { get; set; }
     }
 }

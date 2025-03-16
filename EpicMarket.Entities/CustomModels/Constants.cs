@@ -276,6 +276,8 @@ namespace EpicMarket.Entities.CustomModels
         public const string CreateInventory = "CreateInventory";
         public const string EditInventory = "EditInventory";
         public const string DeleteInventory = "DeleteInventory";
+
+        public static string CreateAppUser { get; set; }
     }
     public static class ContactMethodConstants
     {

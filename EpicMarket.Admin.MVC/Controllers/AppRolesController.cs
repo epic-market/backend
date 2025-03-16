@@ -11,9 +11,12 @@ using EpicMarket.Entities.CustomModels;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
 using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
+
 namespace EpicMarket.Admin.MVC.Controllers
 {
-     [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
+    [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
     public class AppRolesController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -31,12 +34,14 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: AppRoles
+        [SecurableAuthorize(SecurableConstants.AppRolesView)]
         public async Task<IActionResult> Index()
         {
             return View(await _context.Roles.ToListAsync());
         }
 
         // GET: AppRoles/Details/5
+        [SecurableAuthorize(SecurableConstants.AppRolesView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -55,6 +60,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: AppRoles/Create
+        [SecurableAuthorize(SecurableConstants.AppRolesAdd)]
         public IActionResult Create()
         {
             return View();
@@ -65,6 +71,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.AppRolesAdd)]
         public async Task<IActionResult> Create([Bind("Id,Name,NormalizedName,ConcurrencyStamp")] AppRole appRole)
         {
             appRole.NormalizedName = appRole.Name.ToUpper();
@@ -91,6 +98,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: AppRoles/Edit/5
+        [SecurableAuthorize(SecurableConstants.AppRolesEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -111,6 +119,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.AppRolesEdit)]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,NormalizedName,ConcurrencyStamp")] AppRole appRole)
         {
             appRole.NormalizedName = appRole.Name.ToUpper();
@@ -163,6 +172,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: AppRoles/Delete/5
+        [SecurableAuthorize(SecurableConstants.AppRolesDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -183,6 +193,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: AppRoles/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.AppRolesDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var appRole = await _context.Roles.FindAsync(id);

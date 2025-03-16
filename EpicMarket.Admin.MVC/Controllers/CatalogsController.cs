@@ -14,6 +14,8 @@ using EpicMarket.Admin.MVC.Models;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
 using Microsoft.AspNetCore.Http;
+using EpicMarket.Entities.Constants;
+using EpicMarket.Admin.MVC.Attributes;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -122,6 +124,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Catalogs/Details/5
+        [SecurableAuthorize(SecurableConstants.CatalogsView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -275,6 +278,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Catalogs/Create
+        [SecurableAuthorize(SecurableConstants.CatalogsAdd)]
         public IActionResult Create()
         {
             ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID");
@@ -493,6 +497,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Catalogs/Edit/5
+        [SecurableAuthorize(SecurableConstants.CatalogsEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -1038,6 +1043,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Catalogs/Delete/5
+        [SecurableAuthorize(SecurableConstants.CatalogsDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -1059,6 +1065,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: Catalogs/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.CatalogsDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var catalog = await _context.Catalogs

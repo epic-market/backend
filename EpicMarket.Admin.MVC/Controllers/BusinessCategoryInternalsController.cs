@@ -14,6 +14,8 @@ using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
 using Microsoft.AspNetCore.Http;
 using EpicMarket.Admin.MVC.Models;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -41,12 +43,14 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: BusinessCategoryInternals
+        [SecurableAuthorize(SecurableConstants.BusinessCategoryInternalsView)]
         public async Task<IActionResult> Index()
         {
             return View(await _context.BusinessCategories.ToListAsync());
         }
 
         // GET: BusinessCategoryInternals/Details/5
+        [SecurableAuthorize(SecurableConstants.BusinessCategoryInternalsView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -75,6 +79,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: BusinessCategoryInternals/Create
+        [SecurableAuthorize(SecurableConstants.BusinessCategoryInternalsAdd)]
         public IActionResult Create()
         {
             return View();
@@ -129,6 +134,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: BusinessCategoryInternals/Edit/5
+        [SecurableAuthorize(SecurableConstants.BusinessCategoryInternalsEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -248,6 +254,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: BusinessCategoryInternals/Delete/5
+        [SecurableAuthorize(SecurableConstants.BusinessCategoryInternalsDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -268,6 +275,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: BusinessCategoryInternals/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.BusinessCategoryInternalsDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var businessCategoryInternal = await _context.BusinessCategories.FindAsync(id);

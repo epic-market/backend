@@ -13,6 +13,8 @@ using EpicMarket.Entities.CustomModels;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
 using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -34,12 +36,14 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: ApplicationsTables
+        [SecurableAuthorize(SecurableConstants.ApplicationTablesView)]
         public async Task<IActionResult> Index()
         {
             return View(await _context.ApplicationsTable.ToListAsync());
         }
 
         // GET: ApplicationsTables/Details/5
+        [SecurableAuthorize(SecurableConstants.ApplicationTablesView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -58,6 +62,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: ApplicationsTables/Create
+        [SecurableAuthorize(SecurableConstants.ApplicationTablesAdd)]
         public IActionResult Create()
         {
             return View();
@@ -68,6 +73,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.ApplicationTablesAdd)]
         public async Task<IActionResult> Create([Bind("ID,Name,Description,Sequence,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] ApplicationsTable applicationsTable)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -97,6 +103,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: ApplicationsTables/Edit/5
+        [SecurableAuthorize(SecurableConstants.ApplicationTablesEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -117,6 +124,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.ApplicationTablesEdit)]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,Sequence,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] ApplicationsTable applicationsTable)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -172,6 +180,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: ApplicationsTables/Delete/5
+        [SecurableAuthorize(SecurableConstants.ApplicationTablesDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -192,6 +201,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: ApplicationsTables/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.ApplicationTablesDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var applicationsTable = await _context.ApplicationsTable.FindAsync(id);

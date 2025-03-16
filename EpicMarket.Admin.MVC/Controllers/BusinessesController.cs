@@ -18,6 +18,8 @@ using Microsoft.IdentityModel.Tokens;
 using EpicMarket.Entities;
 using System.IO;
 using System.Text.Json;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -43,10 +45,14 @@ namespace EpicMarket.Admin.MVC.Controllers
             _eventService = eventService;
             _urlContextService = urlContextService;
         }
-        public IActionResult Index()
+
+        // GET: Businesses
+        [SecurableAuthorize(SecurableConstants.BusinessesView)]
+        public async Task<IActionResult> Index()
         {
             return View();
         }
+
         [HttpPost]
         [Route("Business/GetFilteredData")]
         public async Task<IActionResult> GetFilteredData([FromBody] BusinessFilterViewModel filter)
@@ -113,8 +119,8 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
         }
 
-
         // GET: Businesses/Details/5
+        [SecurableAuthorize(SecurableConstants.BusinessesView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -122,48 +128,40 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-
             var businessDetailModel = new BusinessDetailModel();
 
-			var business = await _context.Businesses
+            var business = await _context.Businesses
                 .Include(b => b.Address)
                 .Include(b => b.BusinessCategory)
                 .Include(b => b.Person)
-                .Include(b=> b.Status)
+                .Include(b => b.Status)
                 .FirstOrDefaultAsync(m => m.ID == id);
 
+            var braches = await _context.Outlets
+                .Include(b => b.Address)
+                .Where(m => m.BussinessID == id)
+                .ToListAsync();
 
+            var employees = await _context.BusinessEmployeeMaps
+                .Include(b => b.Employee)
+                .Where(m => m.BussinessID == id)
+                .ToListAsync();
 
-			var braches = await _context.Outlets
-                         .Include(b => b.Address)        
-				        .Where(m => m.BussinessID == id)
-                        .ToListAsync();
+            var products = await _context.Catalogs
+                .Where(m => m.BusinessID == id)
+                .ToListAsync();
 
-			var employees = await _context.BusinessEmployeeMaps
-		                    .Include(b => b.Employee)
-		                    .Where(m => m.BussinessID == id)
-		                    .ToListAsync();
-
-
-
-			var products = await _context.Catalogs
-							.Where(m => m.BusinessID == id)
-							.ToListAsync();
-
-
-			var attachmentTypeID_LOGO = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.LOGO);
+            var attachmentTypeID_LOGO = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.LOGO);
             var attachmentTypeID_PROOF = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.PROOF);
 
-
-
-             var attachments_logo = from attachment in _context.Attachments
-                              join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
-                              join entity in _context.Entity on link.EntityID equals entity.ID
-                              where entity.Name == EntityConstants.Business && link.RecordID == id && link.AttachmentTypeID == attachmentTypeID_LOGO.ID
-                              select new
-                              {
-                                  ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
-                              };
+            var attachments_logo = from attachment in _context.Attachments
+                join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                join entity in _context.Entity on link.EntityID equals entity.ID
+                where entity.Name == EntityConstants.Business && link.RecordID == id && link.AttachmentTypeID == attachmentTypeID_LOGO.ID
+                select new
+                {
+                    ImagePath = $"{attachment.DocumentFolderPath}{attachment.DocumentFile}"
+                };
 
             var attachments_proof = from attachment in _context.Attachments
                             join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
@@ -176,15 +174,14 @@ namespace EpicMarket.Admin.MVC.Controllers
                                 Name = $"{attachment.DocumentFile}"
 							};
 
-
             ViewBag.AttachmentLogo = attachments_logo.Select(a => a.ImagePath).FirstOrDefault();
             ViewBag.AttachmentProof = attachments_proof.ToList();
             businessDetailModel.Business = business;
-			businessDetailModel.Outlets = braches;
-			businessDetailModel.employees = employees;
-			businessDetailModel.Catalogs = products;
+            businessDetailModel.Outlets = braches;
+            businessDetailModel.employees = employees;
+            businessDetailModel.Catalogs = products;
 
-			if (business == null)
+            if (business == null)
             {
                 return NotFound();
             }
@@ -193,6 +190,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Businesses/Create
+        [SecurableAuthorize(SecurableConstants.BusinessesAdd)]
         public IActionResult Create()
         {
             ViewData["BusinessCategoryID"] = new SelectList(_context.BusinessCategories, "ID", "Name");
@@ -206,6 +204,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.BusinessesAdd)]
         public async Task<IActionResult> Create([Bind("ID,PersonID,BusinessCategoryID,Name,Description,Banner,Logo,ContactNumber,ContactEmail,AddressID,Rating,ReviewCount,IsOpen,Weight,StatusId,CreateDate,CreateBy,ModifiedDate,ModifiedBy,Address")] Business business, IFormFile[] Images, IFormFile[] Proofs)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -270,6 +269,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Businesses/Edit/5
+        [SecurableAuthorize(SecurableConstants.BusinessesEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -292,15 +292,14 @@ namespace EpicMarket.Admin.MVC.Controllers
                 RecordID = business.ID
             });
 
-
             if (business == null)
             {
                 return NotFound();
             }
             ViewData["BusinessCategoryID"] = new SelectList(_context.BusinessCategories, "ID", "Name", business.BusinessCategoryID);
             ViewData["PersonID"] = new SelectList(_context.Users, "Id", "UserName", business.PersonID);
-			ViewData["StatusID"] = new SelectList(_context.StatusOptionSets, "Id", "Status", business.StatusId);
-			return View(business);
+            ViewData["StatusID"] = new SelectList(_context.StatusOptionSets, "Id", "Status", business.StatusId);
+            return View(business);
         }
 
         // POST: Businesses/Edit/5
@@ -308,6 +307,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.BusinessesEdit)]
         public async Task<IActionResult> Edit(int id, [Bind("ID,PersonID,BusinessCategoryID,Name,Description,Banner,Logo,ContactNumber,ContactEmail,AddressID,Rating,ReviewCount,IsOpen,Weight,CreateDate,CreateBy,ModifiedDate,ModifiedBy,StatusId,Address,IsActive")] Business business, IFormFile[] newLogo, string? addedLogos, IFormFile[] newProofs, string? removedProofs, string? addedProofs)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -422,6 +422,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Businesses/Delete/5
+        [SecurableAuthorize(SecurableConstants.BusinessesDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -445,6 +446,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: Businesses/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.BusinessesDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var business = await _context.Businesses.FindAsync(id);
@@ -747,6 +749,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Businesses/DownloadProductSample
+        [SecurableAuthorize(SecurableConstants.BusinessesView)]
         public IActionResult DownloadProductSample()
         {
             // Create a sample CSV content

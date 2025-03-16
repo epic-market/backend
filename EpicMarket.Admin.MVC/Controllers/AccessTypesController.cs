@@ -12,6 +12,9 @@ using EpicMarket.Entities.CustomModels;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
 using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
+
 namespace EpicMarket.Admin.MVC.Controllers
 {
     [Authorize(Roles = $"{ROLES.ROOT}")]
@@ -32,12 +35,14 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: AccessTypes
+        [SecurableAuthorize(SecurableConstants.AccessTypesView)]
         public async Task<IActionResult> Index()
         {
             return View(await _context.AccessTypes.ToListAsync());
         }
 
         // GET: AccessTypes/Details/5
+        [SecurableAuthorize(SecurableConstants.AccessTypesView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -56,6 +61,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: AccessTypes/Create
+        [SecurableAuthorize(SecurableConstants.AccessTypesAdd)]
         public IActionResult Create()
         {
             return View();
@@ -66,6 +72,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.AccessTypesAdd)]
         public async Task<IActionResult> Create([Bind("Id,Name,Priority")] AccessType accessType)
         {
             if (ModelState.IsValid)
@@ -91,6 +98,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: AccessTypes/Edit/5
+        [SecurableAuthorize(SecurableConstants.AccessTypesEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -111,6 +119,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.AccessTypesEdit)]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Priority")] AccessType accessType)
         {
             if (id != accessType.Id)
@@ -162,6 +171,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: AccessTypes/Delete/5
+        [SecurableAuthorize(SecurableConstants.AccessTypesDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -182,6 +192,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: AccessTypes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.AccessTypesDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var accessType = await _context.AccessTypes.FindAsync(id);

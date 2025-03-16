@@ -15,6 +15,8 @@ using EpicMarket.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using System.IO;
+using EpicMarket.Entities.Constants;
+using EpicMarket.Admin.MVC.Attributes;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -42,12 +44,14 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Attachments
+        [SecurableAuthorize(SecurableConstants.AttachmentsView)]
         public async Task<IActionResult> Index()
         {
             return View(await _context.Attachments.ToListAsync());
         }
 
         // GET: Attachments/Details/5
+        [SecurableAuthorize(SecurableConstants.AttachmentsView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -113,6 +117,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Attachments/Create
+        [SecurableAuthorize(SecurableConstants.AttachmentsAdd)]
         public IActionResult Create()
         {
             return View();
@@ -229,6 +234,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Attachments/Edit/5
+        [SecurableAuthorize(SecurableConstants.AttachmentsEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -373,6 +379,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Attachments/Delete/5
+        [SecurableAuthorize(SecurableConstants.AttachmentsDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -393,6 +400,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: Attachments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.AttachmentsDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var attachment = await _context.Attachments.FindAsync(id);

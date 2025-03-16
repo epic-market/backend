@@ -13,6 +13,9 @@ using EpicMarket.Entities.CustomModels;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
 using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
+
 namespace EpicMarket.Admin.MVC.Controllers
 {
     [Authorize(Roles = $"{ROLES.ROOT}")]
@@ -33,12 +36,14 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: ContactMethods
+        [SecurableAuthorize(SecurableConstants.ContactMethodsView)]
         public async Task<IActionResult> Index()
         {
             return View(await _context.ContactMethod.ToListAsync());
         }
 
         // GET: ContactMethods/Details/5
+        [SecurableAuthorize(SecurableConstants.ContactMethodsView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -57,6 +62,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: ContactMethods/Create
+        [SecurableAuthorize(SecurableConstants.ContactMethodsAdd)]
         public IActionResult Create()
         {
             return View();
@@ -67,6 +73,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.ContactMethodsAdd)]
         public async Task<IActionResult> Create([Bind("ID,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] ContactMethod contactMethod)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -95,6 +102,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: ContactMethods/Edit/5
+        [SecurableAuthorize(SecurableConstants.ContactMethodsEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -115,6 +123,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.ContactMethodsEdit)]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] ContactMethod contactMethod)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -169,6 +178,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: ContactMethods/Delete/5
+        [SecurableAuthorize(SecurableConstants.ContactMethodsDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -189,6 +199,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: ContactMethods/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.ContactMethodsDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var contactMethod = await _context.ContactMethod.FindAsync(id);

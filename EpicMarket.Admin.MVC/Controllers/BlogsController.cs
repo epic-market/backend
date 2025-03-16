@@ -12,6 +12,8 @@ using EpicMarket.Data.ApplicationModels;
 using System.Security.Claims;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
 
 
 namespace EpicMarket.Admin.MVC.Controllers
@@ -34,12 +36,14 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Blogs
+        [SecurableAuthorize(SecurableConstants.BlogsView)]
         public async Task<IActionResult> Index()
         {
             return View(await _context.Blogs.ToListAsync());
         }
 
         // GET: Blogs/Details/5
+        [SecurableAuthorize(SecurableConstants.BlogsView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -58,6 +62,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Blogs/Create
+        [SecurableAuthorize(SecurableConstants.BlogsAdd)]
         public IActionResult Create()
         {
             ViewData["BlogCategoryID"] = new SelectList(_context.BlogCategory, "Id", "Name");
@@ -69,6 +74,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.BlogsAdd)]
         public async Task<IActionResult> Create([Bind("Id,Title,Description,ImageUrl,InnerHtml,Authour,BlogCategoryID,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Blog blog)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -97,6 +103,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Blogs/Edit/5
+        [SecurableAuthorize(SecurableConstants.BlogsEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -118,6 +125,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.BlogsEdit)]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,ImageUrl,InnerHtml,Authour,BlogCategoryID,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] Blog blog)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -168,6 +176,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Blogs/Delete/5
+        [SecurableAuthorize(SecurableConstants.BlogsDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -188,6 +197,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: Blogs/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.BlogsDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var blog = await _context.Blogs.FindAsync(id);
