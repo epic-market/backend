@@ -19,6 +19,6 @@ namespace EpicMarket.Data.Models
         public string Description { get; set; }
 
         public virtual ICollection<SupportTicket> SupportTickets { get; set; }
-        public virtual ICollection<SupportQuerys> SupportQuerys { get; set; }
+        public virtual ICollection<SupportQueries> SupportQuerys { get; set; }
     }
 }

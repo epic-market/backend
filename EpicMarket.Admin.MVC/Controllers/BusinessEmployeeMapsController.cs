@@ -7,19 +7,33 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities.CustomModels;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
+using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
+     [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
     public class BusinessEmployeeMapsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public BusinessEmployeeMapsController(ApplicationDbContext context)
+        public BusinessEmployeeMapsController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: BusinessEmployeeMaps
+        [SecurableAuthorize(SecurableConstants.BusinessEmployeeMapsView)]
         public async Task<IActionResult> Index()
         {
             var applicationDbContext = _context.BusinessEmployeeMaps.Include(b => b.Bussiness).Include(b => b.Employee);
@@ -27,6 +41,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: BusinessEmployeeMaps/Details/5
+        [SecurableAuthorize(SecurableConstants.BusinessEmployeeMapsView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -47,6 +62,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: BusinessEmployeeMaps/Create
+        [SecurableAuthorize(SecurableConstants.BusinessEmployeeMapsAdd)]
         public IActionResult Create()
         {
             ViewData["BussinessID"] = new SelectList(_context.Businesses, "ID", "ID");
@@ -59,12 +75,26 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,BussinessID,EmployeeID")] BusinessEmployeeMap businessEmployeeMap)
+        [SecurableAuthorize(SecurableConstants.BusinessEmployeeMapsAdd)]
+        public async Task<IActionResult> Create([Bind("ID,BussinessID,EmployeeID,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] BusinessEmployeeMap businessEmployeeMap)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(businessEmployeeMap);
                 await _context.SaveChangesAsync();
+
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddBusinessEmployeeMap,
+                    EntityName = EntityConstants.BusinessEmployeeMap,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Added business employee map for Business ID: {businessEmployeeMap.BussinessID}, Employee ID: {businessEmployeeMap.EmployeeID}",
+                    Data = System.Text.Json.JsonSerializer.Serialize(businessEmployeeMap),
+                    RecordId = businessEmployeeMap.ID,
+                    BusinessID = businessEmployeeMap.BussinessID,
+                    LoggedInUserName = User.Identity.Name
+                });
+
                 return RedirectToAction(nameof(Index));
             }
             ViewData["BussinessID"] = new SelectList(_context.Businesses, "ID", "ID", businessEmployeeMap.BussinessID);
@@ -73,6 +103,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: BusinessEmployeeMaps/Edit/5
+        [SecurableAuthorize(SecurableConstants.BusinessEmployeeMapsEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -95,7 +126,8 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,BussinessID,EmployeeID")] BusinessEmployeeMap businessEmployeeMap)
+        [SecurableAuthorize(SecurableConstants.BusinessEmployeeMapsEdit)]
+        public async Task<IActionResult> Edit(int id, [Bind("ID,BussinessID,EmployeeID,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] BusinessEmployeeMap businessEmployeeMap)
         {
             if (id != businessEmployeeMap.ID)
             {
@@ -106,8 +138,29 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 try
                 {
+                    var originalEntity = await _context.BusinessEmployeeMaps.AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.ID == id);
+
                     _context.Update(businessEmployeeMap);
                     await _context.SaveChangesAsync();
+
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditBusinessEmployeeMap,
+                        EntityName = EntityConstants.BusinessEmployeeMap,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated business employee map for Business ID: {businessEmployeeMap.BussinessID}, Employee ID: {businessEmployeeMap.EmployeeID}",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = businessEmployeeMap
+                        }),
+                        RecordId = businessEmployeeMap.ID,
+                        BusinessID = businessEmployeeMap.BussinessID,
+                        LoggedInUserName = User.Identity.Name
+                    });
+
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -120,7 +173,6 @@ namespace EpicMarket.Admin.MVC.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
             ViewData["BussinessID"] = new SelectList(_context.Businesses, "ID", "ID", businessEmployeeMap.BussinessID);
             ViewData["EmployeeID"] = new SelectList(_context.Users, "Id", "Id", businessEmployeeMap.EmployeeID);
@@ -128,6 +180,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: BusinessEmployeeMaps/Delete/5
+        [SecurableAuthorize(SecurableConstants.BusinessEmployeeMapsDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -150,15 +203,28 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: BusinessEmployeeMaps/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.BusinessEmployeeMapsDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var businessEmployeeMap = await _context.BusinessEmployeeMaps.FindAsync(id);
             if (businessEmployeeMap != null)
             {
                 _context.BusinessEmployeeMaps.Remove(businessEmployeeMap);
-            }
 
-            await _context.SaveChangesAsync();
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteBusinessEmployeeMap,
+                    EntityName = EntityConstants.BusinessEmployeeMap,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted business employee map for Business ID: {businessEmployeeMap.BussinessID}, Employee ID: {businessEmployeeMap.EmployeeID}",
+                    Data = System.Text.Json.JsonSerializer.Serialize(businessEmployeeMap),
+                    RecordId = businessEmployeeMap.ID,
+                    BusinessID = businessEmployeeMap.BussinessID,
+                    LoggedInUserName = User.Identity.Name
+                });
+
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 

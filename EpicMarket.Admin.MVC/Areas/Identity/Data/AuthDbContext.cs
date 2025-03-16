@@ -63,7 +63,7 @@ public DbSet<EpicMarket.Data.Models.Attachment> Attachment { get; set; } = defau
 
 public DbSet<EpicMarket.Data.Models.PersonType> PersonType { get; set; } = default!;
 
-public DbSet<EpicMarket.Data.Models.SupportQuerys> SupportQuerys { get; set; } = default!;
+public DbSet<EpicMarket.Data.Models.SupportQueries> SupportQuerys { get; set; } = default!;
 
 public DbSet<EpicMarket.Data.Models.Event> Event { get; set; } = default!;
 
@@ -82,6 +82,10 @@ public DbSet<EpicMarket.Data.Models.HelpItem> HelpItem { get; set; } = default!;
 public DbSet<EpicMarket.Data.Models.OnboardingStep> OnboardingStep { get; set; } = default!;
 
 public DbSet<EpicMarket.Data.Models.UserOnboardingProgress> UserOnboardingProgress { get; set; } = default!;
+
+public DbSet<EpicMarket.Data.Models.AttachmentLink> AttachmentLink { get; set; } = default!;
+
+public DbSet<EpicMarket.Data.Models.Inventory> Inventory { get; set; } = default!;
 
 
 }

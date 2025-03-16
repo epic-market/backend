@@ -9,16 +9,31 @@ using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
 using System.Reflection.Metadata;
 using System.Security.Claims;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Admin.MVC.Services;
+using System.Text.Json;
+using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
+
+    [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
     public class PagesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public PagesController(ApplicationDbContext context)
+        public PagesController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: Pages
@@ -60,24 +75,35 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Name,Description,ApplicationId,Url,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] Page page, string returnUrl = null)
+        public async Task<IActionResult> Create([Bind("ID,Name,Description,ApplicationId,Url,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] Page page, string returnUrl = null)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             page.CreateBy = userName;
             page.CreateDate = DateTime.UtcNow;
+            
             if (ModelState.IsValid)
             {
                 _context.Add(page);
                 await _context.SaveChangesAsync();
+                
+                // Log event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.CREATE,
+                    EntityName = EntityConstants.Page,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Created page: {page.Name}",
+                    Data = JsonSerializer.Serialize(page),
+                    RecordId = page.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = userName
+                });
+                
                 if (!string.IsNullOrEmpty(returnUrl))
                 {
                     return Redirect(returnUrl);
                 }
-                else
-                {
-                    return RedirectToAction(nameof(Index));
-                }
-
+                return RedirectToAction(nameof(Index));
             }
             ViewBag.ReturnUrl = returnUrl;
             ViewData["ApplicationId"] = new SelectList(_context.ApplicationsTable, "ID", "Name", page.ApplicationId);
@@ -111,6 +137,12 @@ namespace EpicMarket.Admin.MVC.Controllers
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             page.ModifiedBy = userName;
             page.ModifiedDate = DateTime.UtcNow;
+            
+            // Get original entity for event logging
+            var originalEntity = await _context.Pages
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.ID == id);
+                
             if (id != page.ID)
             {
                 return NotFound();
@@ -122,6 +154,23 @@ namespace EpicMarket.Admin.MVC.Controllers
                 {
                     _context.Update(page);
                     await _context.SaveChangesAsync();
+                    
+                    // Log event
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.UPDATE,
+                        EntityName = EntityConstants.Page,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated page: {page.Name}",
+                        Data = JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = page
+                        }),
+                        RecordId = page.ID,
+                        BusinessID = 0,
+                        LoggedInUserName = userName
+                    });
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -168,6 +217,19 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (page != null)
             {
                 _context.Pages.Remove(page);
+                
+                // Log event before saving changes
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DELETE,
+                    EntityName = EntityConstants.Page,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted page: {page.Name}",
+                    Data = JsonSerializer.Serialize(page),
+                    RecordId = page.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
             }
 
             await _context.SaveChangesAsync();

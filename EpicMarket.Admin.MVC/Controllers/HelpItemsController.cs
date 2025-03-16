@@ -9,16 +9,27 @@ using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
 using System.Reflection.Metadata;
 using System.Security.Claims;
-
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
+using Microsoft.AspNetCore.Authorization;
 namespace EpicMarket.Admin.MVC.Controllers
 {
+    [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
     public class HelpItemsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public HelpItemsController(ApplicationDbContext context)
+        public HelpItemsController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: HelpItems
@@ -59,18 +70,32 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Name,Title,Description,PageID,IsShownOnPage,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] HelpItem helpItem)
+        public async Task<IActionResult> Create([Bind("ID,Title,Description,PageID,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] HelpItem helpItem)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             helpItem.CreateBy = userName;
             helpItem.CreateDate = DateTime.UtcNow;
+            
             if (ModelState.IsValid)
             {
                 _context.Add(helpItem);
                 await _context.SaveChangesAsync();
+                
+                // Log event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.CreateHelpItem,
+                    EntityName = EntityConstants.HelpItem,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Created help item: {helpItem.Title}",
+                    Data = System.Text.Json.JsonSerializer.Serialize(helpItem),
+                    RecordId = helpItem.ID,
+                    LoggedInUserName = User.Identity.Name
+                });
+                
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PageID"] = new SelectList(_context.Pages, "ID", "Name", helpItem.PageID);
+            ViewData["PageID"] = new SelectList(_context.Pages, "ID", "ID", helpItem.PageID);
             return View(helpItem);
         }
 
@@ -96,15 +121,21 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Title,Description,PageID,IsShownOnPage,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive,IsActive")] HelpItem helpItem)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Title,Description,PageID,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] HelpItem helpItem)
         {
-            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
-            helpItem.ModifiedBy = userName;
-            helpItem.ModifiedDate = DateTime.UtcNow;
             if (id != helpItem.ID)
             {
                 return NotFound();
             }
+            
+            // Get original entity for event logging
+            var originalEntity = await _context.HelpItems
+                .AsNoTracking()
+                .FirstOrDefaultAsync(h => h.ID == id);
+
+            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
+            helpItem.ModifiedBy = userName;
+            helpItem.ModifiedDate = DateTime.UtcNow;
 
             if (ModelState.IsValid)
             {
@@ -112,6 +143,18 @@ namespace EpicMarket.Admin.MVC.Controllers
                 {
                     _context.Update(helpItem);
                     await _context.SaveChangesAsync();
+                    
+                    // Log event
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditHelpItem,
+                        EntityName = EntityConstants.HelpItem,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated help item: {helpItem.Title}",
+                        Data = System.Text.Json.JsonSerializer.Serialize(helpItem),
+                        RecordId = helpItem.ID,
+                        LoggedInUserName = User.Identity.Name
+                    });
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -126,7 +169,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PageID"] = new SelectList(_context.Pages, "ID", "Name", helpItem.PageID);
+            ViewData["PageID"] = new SelectList(_context.Pages, "ID", "ID", helpItem.PageID);
             return View(helpItem);
         }
 
@@ -158,6 +201,18 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (helpItem != null)
             {
                 _context.HelpItems.Remove(helpItem);
+                
+                // Log event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteHelpItem,
+                    EntityName = EntityConstants.HelpItem,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted help item: {helpItem.Title}",
+                    Data = System.Text.Json.JsonSerializer.Serialize(helpItem),
+                    RecordId = helpItem.ID,
+                    LoggedInUserName = User.Identity.Name
+                });
             }
 
             await _context.SaveChangesAsync();

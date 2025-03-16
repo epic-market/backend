@@ -18,12 +18,14 @@ namespace EpicMarket.Admin.MVC.Services
 		private readonly IAmazonS3 _s3Client;
         private readonly ApplicationDbContext dbContext;
         private readonly string _bucketName;
+		private readonly IEntityService entityService;
 
-		public FileService(IAmazonS3 s3Client, ApplicationDbContext dbContext)
+		public FileService(IAmazonS3 s3Client, ApplicationDbContext dbContext, IEntityService entityService)
         {
 			_s3Client = s3Client;
             this.dbContext = dbContext;
             _bucketName = "epic-market";
+			this.entityService = entityService;
 		}
 
         public async Task<bool> DeleteFileAsync( string key)
@@ -78,9 +80,56 @@ namespace EpicMarket.Admin.MVC.Services
 				InputStream = file.OpenReadStream()
 			};
 			request.Metadata.Add("Content-Type", file.ContentType);
-			 await _s3Client.PutObjectAsync(request);
+			await _s3Client.PutObjectAsync(request);
 			return fileNameKey;
 		}
+
+		public async Task<string> UploadFileWithInsertAttachmentAsync(IFormFile file, string prefix , string fileNameKey, string EntityName, int RecordId)
+		{
+			
+			var request = new PutObjectRequest()
+			{
+				BucketName = _bucketName,
+				Key = string.IsNullOrEmpty(prefix) ? file.FileName : $"{prefix?.TrimEnd('/')}/{fileNameKey}",
+				InputStream = file.OpenReadStream()
+			};
+			request.Metadata.Add("Content-Type", file.ContentType);
+			await _s3Client.PutObjectAsync(request);
+
+			var attachment = await InsertAttachment(new AttachmentDTO
+			{
+				Name = EntityName,
+				DocumentFile = fileNameKey,
+				DocumentType = "file",
+				DocumentFileType = file.ContentType,
+				DocumentFolderPath = prefix,
+				EntityId = await this.entityService.GetEntityId(EntityName),
+				RecordId = RecordId
+			});
+
+			return fileNameKey;
+		}
+
+			public async  Task<int> InsertAttachment(AttachmentDTO attachmentDTO)
+        {
+           var attachment = new Attachment
+            {
+                Name = attachmentDTO.Name,
+                Comment = attachmentDTO.Comment,
+                DocumentType = attachmentDTO.DocumentType,//File
+                DocumentFileType = attachmentDTO.DocumentFileType,
+                DocumentFolderPath = attachmentDTO.DocumentFolderPath,
+                DocumentFile = attachmentDTO.DocumentFile,
+                EntityId = attachmentDTO.EntityId,
+                RecordId = attachmentDTO.RecordId
+            };
+
+            await dbContext.Attachments.AddAsync(attachment);
+        
+            await dbContext.SaveChangesAsync();
+
+			return attachment.ID;
+        }
 
 
         public async Task<bool> DeleteImage(List<string> ImageKeys, string UserName)

@@ -1,0 +1,172 @@
+﻿@model EpicMarket.Data.Models.Inventory
+
+@{
+    ViewData["Title"] = "Edit Inventory";
+}
+
+<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+    <div class="breadcrumb-title pe-3">Inventory</div>
+    <div class="ps-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 p-0">
+                <li class="breadcrumb-item">
+                    <a asp-action="Index"><i class="bx bx-home-alt"></i></a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Edit</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<hr />
+
+<div class="row">
+    <div class="col-xl-9 mx-auto">
+        <div class="card border-top border-0 border-4 border-info">
+            <div class="card-body">
+                <div class="border p-4 rounded">
+                    <div class="card-title d-flex align-items-center">
+                        <div>
+                            <i class="bx bxs-box me-1 font-22 text-info"></i>
+                        </div>
+                        <h5 class="mb-0 text-info">Edit Inventory</h5>
+                    </div>
+                    <hr />
+                    <form asp-action="Edit">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="ID" />
+                        <input type="hidden" asp-for="OutletID" />
+                        <input type="hidden" asp-for="ProductVariantID" />
+                        
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Business</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" value="@ViewBag.BusinessName" readonly />
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Outlet</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" value="@ViewBag.OutletName" readonly />
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Catalog</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" value="@ViewBag.CatalogName" readonly />
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Product Variant (SKU)</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" value="@ViewBag.VariantSKU" readonly />
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <div class="form-check">
+                                    <input class="form-check-input" asp-for="TrackInventory" id="TrackInventory" />
+                                    <label class="form-check-label" for="TrackInventory">@Html.DisplayNameFor(model => model.TrackInventory)</label>
+                                    <span asp-validation-for="TrackInventory" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <div class="form-check">
+                                    <input class="form-check-input" asp-for="IsInStock" id="IsInStock" />
+                                    <label class="form-check-label" for="IsInStock">@Html.DisplayNameFor(model => model.IsInStock)</label>
+                                    <span asp-validation-for="IsInStock" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="inventory-details">
+                            <div class="row mb-3">
+                                <label asp-for="QuantityAvailable" class="col-sm-3 col-form-label"></label>
+                                <div class="col-sm-9">
+                                    <input asp-for="QuantityAvailable" class="form-control" />
+                                    <span asp-validation-for="QuantityAvailable" class="text-danger"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <label asp-for="MinimumStockLevel" class="col-sm-3 col-form-label"></label>
+                                <div class="col-sm-9">
+                                    <input asp-for="MinimumStockLevel" class="form-control" />
+                                    <span asp-validation-for="MinimumStockLevel" class="text-danger"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <label asp-for="MaximumStockLevel" class="col-sm-3 col-form-label"></label>
+                                <div class="col-sm-9">
+                                    <input asp-for="MaximumStockLevel" class="form-control" />
+                                    <span asp-validation-for="MaximumStockLevel" class="text-danger"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <label asp-for="ReorderPoint" class="col-sm-3 col-form-label"></label>
+                                <div class="col-sm-9">
+                                    <input asp-for="ReorderPoint" class="form-control" />
+                                    <span asp-validation-for="ReorderPoint" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <div class="form-check">
+                                    <input class="form-check-input" asp-for="BackOrders" id="BackOrders" />
+                                    <label class="form-check-label" for="BackOrders">@Html.DisplayNameFor(model => model.BackOrders)</label>
+                                    <span asp-validation-for="BackOrders" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <label class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <button type="submit" class="btn btn-info px-5">Save</button>
+                            </div>
+                            <div>
+                                <a href="javascript:history.go(-1)" class="btn btn-secondary">
+                                    <i class="bx bx-arrow-back me-1"></i> Back
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function () {
+            // Toggle inventory details based on TrackInventory checkbox
+            $('#TrackInventory').change(function() {
+                if ($(this).is(':checked')) {
+                    $('.inventory-details').show();
+                } else {
+                    $('.inventory-details').hide();
+                }
+            });
+            
+            // Trigger initial state
+            $('#TrackInventory').trigger('change');
+        });
+    </script>
+}
+

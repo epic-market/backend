@@ -22,22 +22,35 @@ namespace EpicMarket.Admin.MVC.Services
 		}
 
 
-		public async Task InsertAttachment(AttachmentModel attachmentModel)
+
+        public async Task UploadAttachment(AttachmentModel attachmentModel)
+        {
+            if (attachmentModel.Files?.Length > 0)
+            {
+                foreach (var product in attachmentModel.Files)
+                {
+					var insertedKey = await this.SaveFileGlobalAsync(product, attachmentModel.Entity,attachmentModel.RecordID);
+					var attachmentId = await this.GetAttachmentId(insertedKey);
+					await InsertAttachmentLink(new AttachmentLinkDTO()
+					{
+						AttachmentTypeName = attachmentModel.AttachmentType,
+						AttachmentID = attachmentId,	
+						Entity = attachmentModel.Entity,
+						RecordID = attachmentModel.RecordID
+					});
+
+				}
+			}
+		}
+
+		public async Task UploadBusinessAttachment(BusinessAttachmentModel attachmentModel)
 		{
 			if (attachmentModel.Files?.Length > 0)
 			{
 				foreach (var product in attachmentModel.Files)
 				{
-					var filinsertOutput = await this.SaveFileGlobalAsync(product, attachmentModel.FolderPathConstant, attachmentModel.BusinessID);
-					var attachmentId = await InsertOrUpdateAttachment(new AttachmentDTO
-					{
-						Name = attachmentModel.Name,
-						Comment = attachmentModel.Comment,
-						DocumentType = DocumentTypeConstants.FILE,
-						DocumentFileType = product.ContentType,
-					////	DocumentFolderPath = filinsertOutput.FullPathLocation,
-					////	DocumentFile = filinsertOutput.FileName,
-					});
+					var insertedKey = await this.SaveFileBusinessAsync(product, attachmentModel.BusinessID);
+					var attachmentId = await this.GetAttachmentId(insertedKey.Key);
 					await InsertAttachmentLink(new AttachmentLinkDTO()
 					{
 						AttachmentTypeName = attachmentModel.AttachmentType,
@@ -50,28 +63,25 @@ namespace EpicMarket.Admin.MVC.Services
 			}
 		}
 
+		public async Task<int> GetAttachmentId(string key)
+	{
+		var attachment = await _context.Attachments.FirstOrDefaultAsync(a => a.DocumentFile == key);
+		return attachment.ID;
+	}
+	
 
-		private async Task<SaveFileDTO> SaveFileGlobalAsync(IFormFile file, string FolderPathConstant, int RecordID = 0)
+ 		private async Task<SaveFileDTO> SaveFileBusinessAsync(IFormFile file,int BusinessId)
 		{
-			string filePath = " ";
 			if (file != null && file.Length > 0)
 			{
-				string fullPathLocation = null;
-				string subPathLocation = null;
-
-				if (!string.IsNullOrWhiteSpace(FolderPathConstant))
-				{
-					fullPathLocation = applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.BasePath);
-					subPathLocation = _context.ApplicationConfigurations.Where(c => c.Name == FolderPathConstant).FirstOrDefault().Value;
-					if (RecordID != 0)
-					{
-						fullPathLocation = fullPathLocation + "/" + RecordID + "/" + subPathLocation;
-					}
-					if (!fullPathLocation.EndsWith("/"))
-					{
-						fullPathLocation = fullPathLocation + "/";
-					}
+				string fullPathLocation = applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.BasePath);
+				if (BusinessId != 0) {
+					fullPathLocation = fullPathLocation + "/" + BusinessId +"/Images/";
 				}
+				else {
+					throw new Exception("BusinessId is required");
+				}
+		
 				// Made fitting based on AWS
 				var uploadedFile = file;
 
@@ -80,20 +90,41 @@ namespace EpicMarket.Admin.MVC.Services
 				fileName += "_" + DateTime.Now.Ticks.ToString() + type;
 
 				fileName = fileName.Replace('&', '_').Replace('<', '_').Replace('>', '_');
-				filePath = await fileService.UploadFileAsync(uploadedFile, fullPathLocation, fileName);
+				var key =  await fileService.UploadFileWithInsertAttachmentAsync(uploadedFile, fullPathLocation, fileName, EntityConstants.Business, BusinessId);
 
 				return new SaveFileDTO()
 				{
-					//FileName = fileName,
-					//FullPathLocation = fullPathLocation.ToString()
+					Key = key
 				};
 			}
 
 			return null;
 		}
 
+        private async Task<string> SaveFileGlobalAsync(IFormFile file, string EntityName, int RecordId)
+        {
+            if (file != null && file.Length > 0)
+            {
+                string fullPathLocation = applicationConfigurationService.GetApplicationConfigurationValue(ApplicationConfigurationConstants.BasePath);
+                
+		
+				fullPathLocation = fullPathLocation + "/" + "Attachments";
+				
+				var uploadedFile = file;
 
-	
+				var fileName = Path.GetFileNameWithoutExtension(uploadedFile.FileName);
+				string type = Path.GetExtension(uploadedFile.FileName);
+				fileName += "_" + DateTime.Now.Ticks.ToString() + type;
+
+				fileName = fileName.Replace('&', '_').Replace('<', '_').Replace('>', '_');
+				var key =  await fileService.UploadFileWithInsertAttachmentAsync(uploadedFile, fullPathLocation, fileName, EntityName, RecordId);
+
+				return key;
+			}
+
+			return null;
+		}
+
 		public async Task InsertAttachmentLink(AttachmentLinkDTO attachmentLinkDTO)
 		{
 			var attachmentTypeID = _context.AttachmentTypes.FirstOrDefault(a => a.Name == attachmentLinkDTO.AttachmentTypeName).ID;
@@ -145,11 +176,14 @@ namespace EpicMarket.Admin.MVC.Services
 			return attachment.ID;
 		}
 
-        public async  Task<List<string>> GetAttachmentLinks(GetAttachmentLink getAttachmentLink) 
+        public async Task<List<string>> GetAttachmentLinks(GetAttachmentLink getAttachmentLink) 
         {
-
             var attachmentTypeID = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == getAttachmentLink.AttachmentType);
-
+            
+            if (attachmentTypeID == null)
+            {
+                return new List<string>();
+            }
 
             var attachments = from attachment in _context.Attachments
                             join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID

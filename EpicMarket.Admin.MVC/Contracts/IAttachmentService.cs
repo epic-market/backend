@@ -6,8 +6,8 @@ namespace EpicMarket.Admin.MVC.Contracts
 {
 	public interface IAttachmentService
 	{
-		Task InsertAttachment(AttachmentModel attachmentModel);
-
+		Task UploadAttachment(AttachmentModel attachmentModel);
+		Task UploadBusinessAttachment(BusinessAttachmentModel attachmentModel);
 		Task DeleteAttachment(AttachmentDTO attachmentDTO);
 
 		Task<List<string>> GetAttachmentLinks(GetAttachmentLink getAttachmentLink);

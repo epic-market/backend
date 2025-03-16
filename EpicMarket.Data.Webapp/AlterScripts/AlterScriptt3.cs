@@ -61,9 +61,9 @@ namespace EpicMarket.Data.Webapp.AlterScripts
                                        .FirstOrDefault(pt => pt.Type == "Business Owner");
             if (businessOwner != null)
             {
-                if (!context.SupportQuerys.Any(sq => sq.Query == "Issue with the login" && sq.TypeofPersonid == businessOwner.ID))
+                if (!context.SupportQueries.Any(sq => sq.Query == "Issue with the login" && sq.TypeofPersonid == businessOwner.ID))
                 {
-                    var supportQuery = new SupportQuerys
+                    var supportQuery = new SupportQueries
                     {
                         Query = "Issue with the login",
                         TypeofPersonid = businessOwner.ID, 
@@ -72,7 +72,7 @@ namespace EpicMarket.Data.Webapp.AlterScripts
                         TaskTypeID=1
                     };
 
-                    context.SupportQuerys.Add(supportQuery);
+                    context.SupportQueries.Add(supportQuery);
                     context.SaveChanges();
                 }
             }
@@ -81,9 +81,9 @@ namespace EpicMarket.Data.Webapp.AlterScripts
                                        .FirstOrDefault(pt => pt.Type == "Business Employee");
             if (businessOwner != null)
             {
-                if (!context.SupportQuerys.Any(sq => sq.Query == "Issue with the login" && sq.TypeofPersonid== businessOwner2.ID))
+                if (!context.SupportQueries.Any(sq => sq.Query == "Issue with the login" && sq.TypeofPersonid== businessOwner2.ID))
                 {
-                    var supportQuery = new SupportQuerys
+                    var supportQuery = new SupportQueries
                     {
                         Query = "Issue with the login",
                         TypeofPersonid = businessOwner2.ID,
@@ -92,7 +92,7 @@ namespace EpicMarket.Data.Webapp.AlterScripts
                         TaskTypeID = 1
                     };
 
-                    context.SupportQuerys.Add(supportQuery);
+                    context.SupportQueries.Add(supportQuery);
                     context.SaveChanges();
                 }
             }

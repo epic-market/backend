@@ -9,25 +9,40 @@ using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
 using System.Reflection.Metadata;
 using System.Security.Claims;
-
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
+using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
 namespace EpicMarket.Admin.MVC.Controllers
 {
+    [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
     public class BlogCategoriesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public BlogCategoriesController(ApplicationDbContext context)
+        public BlogCategoriesController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: BlogCategories
+        [SecurableAuthorize(SecurableConstants.BlogCategoriesView)]
         public async Task<IActionResult> Index()
         {
             return View(await _context.BlogCategory.ToListAsync());
         }
 
         // GET: BlogCategories/Details/5
+        [SecurableAuthorize(SecurableConstants.BlogCategoriesView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -46,6 +61,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: BlogCategories/Create
+        [SecurableAuthorize(SecurableConstants.BlogCategoriesAdd)]
         public IActionResult Create(string returnUrl = null)
         {
             ViewBag.ReturnUrl = returnUrl;
@@ -57,6 +73,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.BlogCategoriesAdd)]
         public async Task<IActionResult> Create([Bind("Id,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] BlogCategory blogCategory, string returnUrl = null)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -66,20 +83,31 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 _context.Add(blogCategory);
                 await _context.SaveChangesAsync();
+
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddBlogCategory,
+                    EntityName = EntityConstants.BlogCategory,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Added blog category '{blogCategory.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(blogCategory),
+                    RecordId = blogCategory.Id,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
                 if (!string.IsNullOrEmpty(returnUrl))
                 {
                     return Redirect(returnUrl);
                 }
-                else
-                {
-                    return RedirectToAction(nameof(Index));
-                }
+                return RedirectToAction(nameof(Index));
             }
             ViewBag.ReturnUrl = returnUrl;
             return View(blogCategory);
         }
 
         // GET: BlogCategories/Edit/5
+        [SecurableAuthorize(SecurableConstants.BlogCategoriesEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -100,6 +128,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.BlogCategoriesEdit)]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] BlogCategory blogCategory)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -114,8 +143,29 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 try
                 {
+                    var originalEntity = await _context.BlogCategory.AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.Id == id);
+
                     _context.Update(blogCategory);
                     await _context.SaveChangesAsync();
+
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditBlogCategory,
+                        EntityName = EntityConstants.BlogCategory,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated blog category '{blogCategory.Name}'",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = blogCategory
+                        }),
+                        RecordId = blogCategory.Id,
+                        BusinessID = 0,
+                        LoggedInUserName = User.Identity.Name
+                    });
+
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -128,12 +178,12 @@ namespace EpicMarket.Admin.MVC.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
             return View(blogCategory);
         }
 
         // GET: BlogCategories/Delete/5
+        [SecurableAuthorize(SecurableConstants.BlogCategoriesDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -154,15 +204,28 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: BlogCategories/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.BlogCategoriesDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var blogCategory = await _context.BlogCategory.FindAsync(id);
             if (blogCategory != null)
             {
                 _context.BlogCategory.Remove(blogCategory);
-            }
 
-            await _context.SaveChangesAsync();
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteBlogCategory,
+                    EntityName = EntityConstants.BlogCategory,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted blog category '{blogCategory.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(blogCategory),
+                    RecordId = blogCategory.Id,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 

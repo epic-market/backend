@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Amazon.S3;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Admin.MVC.Services;
+using EpicMarket.Admin.MVC.Middleware;
+using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,12 +27,20 @@ builder.Services.AddControllersWithViews()
     {
         options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
     });
+
+// Add browser refresh and hot reload services in development
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddRazorPages();
+    builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+}
+
 builder.Services.AddDbContext<ApplicationDbContext>();
 builder.Services.AddScoped<IAttachmentService,AttachmentService>();
 builder.Services.AddScoped<IApplicationConfigurationService, ApplicationConfigurationService>();
 builder.Services.AddScoped<IFileService, FileService>();
-
-
+builder.Services.AddScoped<IEntityService, EntityService>();
+builder.Services.AddScoped<IEventService, EventService>();
 
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -44,6 +54,18 @@ builder.Services.AddDefaultIdentity<AppUser>().AddDefaultTokenProviders().
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
 
+// Add before builder.Services.AddControllersWithViews()
+builder.Services.AddSingleton<UrlContextService>();
+builder.Services.AddScoped<IUrlContextService>(sp => sp.GetRequiredService<UrlContextService>());
+
+// Add HttpContextAccessor
+builder.Services.AddHttpContextAccessor();
+
+// Register the SecurableService
+builder.Services.AddScoped<ISecurableService, SecurableService>();
+
+// Add this line with your other service registrations
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 var app = builder.Build();
 
@@ -57,6 +79,9 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+// Add after app.UseRouting() and before app.UseAuthentication()
+app.UseUrlContext();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -67,12 +92,13 @@ app.MapControllerRoute(
 app.Use(async (context, next) =>
 {
           
-    // Define public URLs
+    // Define public URLs - updated to include both path formats
     var publicUrls = new List<string>
     {
         "/Identity/Account/Login",
         "/Identity/Account/Logout",
         "/Identity/Account/AccessDenied",
+        "/Account/AccessDenied",  // Added this path format
         "/Identity/Account/LoginWith2fa",
         "/Identity/Account/LoginWithRecoveryCode",
         
@@ -134,5 +160,8 @@ app.Use(async (context, next) =>
 });
 
 app.MapRazorPages();
+
+// Add this line to ensure Identity endpoints are properly mapped
+app.MapControllers();
 
 app.Run();

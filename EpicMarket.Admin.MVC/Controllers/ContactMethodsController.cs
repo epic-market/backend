@@ -9,25 +9,41 @@ using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
 using System.Reflection.Metadata;
 using System.Security.Claims;
+using EpicMarket.Entities.CustomModels;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
+using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
+    [Authorize(Roles = $"{ROLES.ROOT}")]
     public class ContactMethodsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public ContactMethodsController(ApplicationDbContext context)
+        public ContactMethodsController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: ContactMethods
+        [SecurableAuthorize(SecurableConstants.ContactMethodsView)]
         public async Task<IActionResult> Index()
         {
             return View(await _context.ContactMethod.ToListAsync());
         }
 
         // GET: ContactMethods/Details/5
+        [SecurableAuthorize(SecurableConstants.ContactMethodsView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -46,6 +62,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: ContactMethods/Create
+        [SecurableAuthorize(SecurableConstants.ContactMethodsAdd)]
         public IActionResult Create()
         {
             return View();
@@ -56,6 +73,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.ContactMethodsAdd)]
         public async Task<IActionResult> Create([Bind("ID,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] ContactMethod contactMethod)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -65,12 +83,26 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 _context.Add(contactMethod);
                 await _context.SaveChangesAsync();
+
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddContactMethod,
+                    EntityName = EntityConstants.ContactMethod,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Added contact method '{contactMethod.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(contactMethod),
+                    RecordId = contactMethod.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
                 return RedirectToAction(nameof(Index));
             }
             return View(contactMethod);
         }
 
         // GET: ContactMethods/Edit/5
+        [SecurableAuthorize(SecurableConstants.ContactMethodsEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -91,6 +123,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.ContactMethodsEdit)]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] ContactMethod contactMethod)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
@@ -105,8 +138,29 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 try
                 {
+                    var originalEntity = await _context.ContactMethod.AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.ID == id);
+
                     _context.Update(contactMethod);
                     await _context.SaveChangesAsync();
+
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditContactMethod,
+                        EntityName = EntityConstants.ContactMethod,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated contact method '{contactMethod.Name}'",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = contactMethod
+                        }),
+                        RecordId = contactMethod.ID,
+                        BusinessID = 0,
+                        LoggedInUserName = User.Identity.Name
+                    });
+
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -119,12 +173,12 @@ namespace EpicMarket.Admin.MVC.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
             return View(contactMethod);
         }
 
         // GET: ContactMethods/Delete/5
+        [SecurableAuthorize(SecurableConstants.ContactMethodsDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -145,15 +199,28 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: ContactMethods/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.ContactMethodsDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var contactMethod = await _context.ContactMethod.FindAsync(id);
             if (contactMethod != null)
             {
                 _context.ContactMethod.Remove(contactMethod);
-            }
 
-            await _context.SaveChangesAsync();
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteContactMethod,
+                    EntityName = EntityConstants.ContactMethod,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted contact method '{contactMethod.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(contactMethod),
+                    RecordId = contactMethod.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 
