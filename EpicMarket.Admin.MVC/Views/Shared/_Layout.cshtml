@@ -372,7 +372,7 @@
 				<li class="menu-label">Business Functionality</li>
 				@if (User.IsInRole(ROLES.ROOT) || User.IsInRole(ROLES.ADMIN))
 				{
-					<li>
+					@* <li>
 						<a class="has-arrow" href="javascript:;">
 							<div class="parent-icon">
 								<i class='bx bxs-business'></i>
@@ -387,8 +387,16 @@
 								<a asp-area="" asp-controller="EventLogs" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Event Logs</a>
 							</li>
 						</ul>
+					</li> *@
+
+					<li>
+						<a asp-area="" asp-controller="Businesses" asp-action="Index">
+							<div class="parent-icon">
+								<i class='bx bxs-business'></i>
+							</div>
+							<div class="menu-title">Businesses</div>
+						</a>
 					</li>
-					
 					<li>
 						<a asp-area="" asp-controller="Catalogs" asp-action="Index">
 							<div class="parent-icon">
@@ -401,12 +409,11 @@
 					<li>
 						<a asp-area="" asp-controller="Inventories" asp-action="Index">
 							<div class="parent-icon">
-								<i class='bx bxs-book'></i>
+								<i class='bx bx-package'></i> <!-- Package/box icon -->
 							</div>
 							<div class="menu-title">Inventories</div>
 						</a>
 					</li>
-
 
 					<li>
 						<a asp-area="" asp-controller="BusinessEmployeeMaps" asp-action="Index">
@@ -416,8 +423,31 @@
 							<div class="menu-title">Employees</div>
 						</a>
 					</li>
+
 					
 					<li>
+						<a asp-area="" asp-controller="Outlets" asp-action="Index">
+							<div class="parent-icon">
+								<i class='bx bxs-store'></i>
+							</div>
+							<div class="menu-title">Outlets</div>
+						</a>
+					</li>
+
+					<li>
+						<a asp-area="" asp-controller="Orders" asp-action="Index">
+							<div class="parent-icon">
+								<i class='bx bxs-receipt'></i>
+							</div>
+							<div class="menu-title">Orders</div>
+						</a>
+					</li>
+
+
+
+					
+					
+					@* <li>
 						<a class="has-arrow" href="javascript:;">
 							<div class="parent-icon">
 								<i class='bx bxs-store'></i>
@@ -438,8 +468,8 @@
 								</li>
 							}
 						</ul>
-					</li>
-					
+					</li> *@
+@* 					
 					<li>
 						<a class="has-arrow" href="javascript:;">
 							<div class="parent-icon">
@@ -455,7 +485,7 @@
 								<a asp-area="" asp-controller="OrderDetails" asp-action="Index"><i class="bx bx-right-arrow-alt"></i>Order Details</a>
 							</li>
 						</ul>
-					</li>
+					</li> *@
 				}
 				
 				<li class="menu-label">Support Functionality</li>

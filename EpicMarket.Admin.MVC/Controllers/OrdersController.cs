@@ -37,10 +37,141 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: Orders
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var applicationDbContext = _context.Orders.Include(o => o.Address).Include(o => o.Outlet).Include(o => o.Person).Include(o=>o.OrderStatusOptions).Include(o => o.OrderTypesOptions);
-            return View(await applicationDbContext.ToListAsync());
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetOrderStatuses()
+        {
+            var statuses = await _context.OrderStatusOptions
+                .Select(s => new { id = s.Id, orderStatus = s.OrderStatus })
+                .ToListAsync();
+            return Json(statuses);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetOrderTypes()
+        {
+            var types = await _context.OrderTypesOptions
+                .Select(t => new { id = t.Id, ordertype = t.Ordertype })
+                .ToListAsync();
+            return Json(types);
+        }
+
+        [HttpPost]
+        [Route("Order/GetFilteredData")]
+        public async Task<IActionResult> GetFilteredData([FromBody] OrderFilterViewModel filter)
+        {
+            try
+            {
+                var query = _context.Orders
+                    .Include(o => o.Person)
+                    .Include(o => o.Outlet)
+                    .Include(o => o.OrderStatusOptions)
+                    .Include(o => o.OrderTypesOptions)
+                    .AsQueryable();
+
+                // Apply filters
+                if (!string.IsNullOrWhiteSpace(filter.OrderId))
+                {
+                    query = query.Where(o => o.ID.ToString().Contains(filter.OrderId));
+                }
+
+                if (!string.IsNullOrWhiteSpace(filter.CustomerName))
+                {
+                    query = query.Where(o => o.Person.UserName.Contains(filter.CustomerName) || 
+                                            o.Person.FirstName.Contains(filter.CustomerName) || 
+                                            o.Person.LastName.Contains(filter.CustomerName));
+                }
+
+                if (!string.IsNullOrWhiteSpace(filter.OutletName))
+                {
+                    query = query.Where(o => o.Outlet.Name.Contains(filter.OutletName));
+                }
+
+                if (!string.IsNullOrWhiteSpace(filter.OrderStatus))
+                {
+                    if (int.TryParse(filter.OrderStatus, out int statusId))
+                    {
+                        query = query.Where(o => o.StatusId == statusId);
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(filter.OrderType))
+                {
+                    if (int.TryParse(filter.OrderType, out int typeId))
+                    {
+                        query = query.Where(o => o.OrderTypeId == typeId);
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(filter.PaymentMode))
+                {
+                    query = query.Where(o => o.PaymentMode.Contains(filter.PaymentMode));
+                }
+
+                if (!string.IsNullOrWhiteSpace(filter.DateFrom))
+                {
+                    if (DateTime.TryParse(filter.DateFrom, out DateTime dateFrom))
+                    {
+                        query = query.Where(o => o.OrderAt >= dateFrom);
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(filter.DateTo))
+                {
+                    if (DateTime.TryParse(filter.DateTo, out DateTime dateTo))
+                    {
+                        // Add one day to include the entire day
+                        dateTo = dateTo.AddDays(1).AddSeconds(-1);
+                        query = query.Where(o => o.OrderAt <= dateTo);
+                    }
+                }
+
+                var totalRecords = await query.CountAsync();
+
+                // Apply sorting
+                query = filter.SortColumn?.ToLower() switch
+                {
+                    "id" => filter.SortDirection == "asc" ? query.OrderBy(o => o.ID) : query.OrderByDescending(o => o.ID),
+                    "customername" => filter.SortDirection == "asc" ? query.OrderBy(o => o.Person.UserName) : query.OrderByDescending(o => o.Person.UserName),
+                    "outletname" => filter.SortDirection == "asc" ? query.OrderBy(o => o.Outlet.Name) : query.OrderByDescending(o => o.Outlet.Name),
+                    "totalprice" => filter.SortDirection == "asc" ? query.OrderBy(o => o.TotalPrice) : query.OrderByDescending(o => o.TotalPrice),
+                    "orderat" => filter.SortDirection == "asc" ? query.OrderBy(o => o.OrderAt) : query.OrderByDescending(o => o.OrderAt),
+                    "status" => filter.SortDirection == "asc" ? query.OrderBy(o => o.OrderStatusOptions.OrderStatus) : query.OrderByDescending(o => o.OrderStatusOptions.OrderStatus),
+                    "ordertype" => filter.SortDirection == "asc" ? query.OrderBy(o => o.OrderTypesOptions.Ordertype) : query.OrderByDescending(o => o.OrderTypesOptions.Ordertype),
+                    _ => query.OrderByDescending(o => o.OrderAt) // Default to newest orders first
+                };
+
+                // Apply pagination and project to DTO
+                var orders = await query
+                    .Skip((filter.PageNumber - 1) * filter.PageSize)
+                    .Take(filter.PageSize)
+                    .Select(o => new OrderDto
+                    {
+                        ID = o.ID,
+                        CustomerName = o.Person.UserName,
+                        OutletName = o.Outlet.Name,
+                        OutletId = o.OutletID,
+                        TotalPrice = o.TotalPrice,
+                        TotalItems = o.TotalItems,
+                        OrderAt = o.OrderAt,
+                        StatusName = o.OrderStatusOptions.OrderStatus,
+                        StatusId = o.StatusId,
+                        OrderTypeName = o.OrderTypesOptions.Ordertype,
+                        OrderTypeId = o.OrderTypeId,
+                        PaymentMode = o.PaymentMode
+                    })
+                    .ToListAsync();
+
+                return Json(new { totalRecords, data = orders });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message });
+            }
         }
 
         // GET: Orders/Details/5
