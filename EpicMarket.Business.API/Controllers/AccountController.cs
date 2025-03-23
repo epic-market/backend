@@ -304,7 +304,7 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
         
-        [HttpGet("info")]
+        [HttpGet("details/business")]
         [Authorize]
         public async Task<ActionResult<OperationResult<LoginResult>>> GetUserInfo()
         {
@@ -364,7 +364,7 @@ namespace EpicMarket.Business.API.Controllers
             }
         }
         
-        [HttpPut("info")]
+        [HttpPut("details/business")]
         [Authorize]
         public async Task<ActionResult<OperationResult<string>>> PutInfo(LoginUserEditDTO loginUserEditDTO)
         {
@@ -403,7 +403,7 @@ namespace EpicMarket.Business.API.Controllers
             }
         }
 
-        [HttpGet("info/customer")]
+        [HttpGet("details/customer")]
         [Authorize]
         public async Task<ActionResult<CustomerBasicDetailsDto>> GetCustomerBasicDetails()
         {
@@ -422,7 +422,7 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(customerDetails);
         }
 
-        [HttpGet("info/customer/{phoneOrUsername}")]
+        [HttpGet("details/customer/{phoneOrUsername}")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<List<CustomerDetails>>>> GetPersonDetails(string phoneOrUsername)
         {
