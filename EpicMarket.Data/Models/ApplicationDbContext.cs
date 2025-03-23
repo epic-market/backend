@@ -240,7 +240,7 @@ namespace EpicMarket.Data.Models
 
         public DbSet<OTPVerification> OTPVerifications { get; set; }
 
-        public DbSet<Category> Categories { get; set; }
+        public DbSet<CatalogCategory> CatalogCategories { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

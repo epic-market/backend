@@ -613,14 +613,14 @@ namespace EpicMarket.Admin.MVC.Controllers
                     var firstProduct = group.First();
                     
                     // Look up category ID if it exists, otherwise create it
-                    var category = await _context.Categories
+                    var category = await _context.CatalogCategories
                         .FirstOrDefaultAsync(c => c.Name.ToLower() == firstProduct.CategoryName.ToLower());
                         
                     int categoryId;
                     if (category == null)
                     {
                         // Create new category
-                        var newCategory = new Category 
+                        var newCategory = new CatalogCategory 
                         { 
                             Name = firstProduct.CategoryName,
                             Description = $"Auto-generated category for {firstProduct.CategoryName}",
@@ -630,7 +630,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                             CreateBy = User.Identity.Name
                         };
                         
-                        _context.Categories.Add(newCategory);
+                        _context.CatalogCategories.Add(newCategory);
                         await _context.SaveChangesAsync();
                         categoryId = newCategory.ID;
                     }
