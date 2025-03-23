@@ -7,7 +7,14 @@ using System.Threading.Tasks;
 namespace EpicMarket.Entities.Constants
 {
 
-
+    public static class CommunicationStatusConstants
+    {
+        public const string Queued = "Queued";
+        public const string Sent = "Sent";
+        public const string Failed = "Failed";
+        public const string Retrying = "Retrying";
+        
+    }
 
 
     public static class OrderType

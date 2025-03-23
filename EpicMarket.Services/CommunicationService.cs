@@ -9,6 +9,8 @@ using System.Net.Mail;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using EpicMarket.Entities.Constants;
+using System.Reflection.Metadata;
 
 namespace EpicMarket.Services
 {
@@ -85,6 +87,7 @@ namespace EpicMarket.Services
                     CommunicationStatusId = context.CommunicationStatus.FirstOrDefault(cs => cs.Name == CommunicationStatusConstants.Queued).ID,
                     CreatedDate = DateTime.UtcNow,
                     RetryCount = 0,
+                    ContactMethod = ContactMethodConstants.EMAIL
                     // Add any other necessary properties
                 };
 

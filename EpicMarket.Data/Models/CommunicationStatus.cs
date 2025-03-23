@@ -19,13 +19,4 @@ namespace EpicMarket.Data.Models
         public string Description { get; set; }
     }
 
-    // Static class for communication status constants
-    public static class CommunicationStatusConstants
-    {
-        public const string Queued = "Queued";
-        public const string Sent = "Sent";
-        public const string Failed = "Failed";
-        public const string Retrying = "Retrying";
-        
-    }
 } 

@@ -5,82 +5,494 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="page-breadcrumb d-flex align-items-center mb-3">
-    <div class="breadcrumb-title pe-3">Communication Queue</div>
-    <div class="ps-3">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0 p-0">
-                <li class="breadcrumb-item">
-                    <a asp-action="Index"><i class="bx bx-home-alt"></i></a>
-                </li>
-                <li class="breadcrumb-item active" aria-current="page">Details</li>
-            </ol>
-        </nav>
-    </div>
-</div>
+<style>
+    .card {
+        box-shadow: 0 2px 15px rgba(0,0,0,.04);
+        border: 1px solid rgba(0,0,0,.05);
+        border-radius: 0.75rem;
+        overflow: hidden;
+    }
+    .card-header {
+        background-color: rgba(0,0,0,.02);
+        border-bottom: 1px solid rgba(0,0,0,.05);
+    }
+    .info-section {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .info-title {
+        font-size: 1rem;
+        color: #666;
+        margin-bottom: 1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+    .info-title i {
+        margin-right: 0.5rem;
+        font-size: 1.1rem;
+    }
+    .key-value-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(0,0,0,.05);
+    }
+    .key-value-item:last-child {
+        border-bottom: none;
+    }
+    .badge {
+        padding: 0.5rem 0.75rem;
+        font-weight: 500;
+        border-radius: 30px;
+    }
+    .communication-header {
+        position: relative;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+        border-radius: 0.75rem;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    .message-container {
+        background-color: #fff;
+        border: 1px solid rgba(0,0,0,.08);
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-top: 1rem;
+    }
+    .message-header {
+        border-bottom: 1px solid rgba(0,0,0,.08);
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+    }
+    .message-body {
+        white-space: pre-wrap;
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+    }
+    .status-badge {
+        transition: all 0.3s ease;
+    }
+    .status-badge:hover {
+        transform: translateY(-2px);
+    }
+    .message-preview-container {
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,.08);
+        margin-bottom: 2rem;
+        background: #fff;
+    }
+    
+    .message-preview-header {
+        background: #f8f9fa;
+        padding: 1.25rem;
+        border-bottom: 1px solid rgba(0,0,0,.08);
+    }
+    
+    .message-preview-tabs {
+        border-bottom: 0;
+        gap: 0.5rem;
+        padding: 0 1.25rem;
+        background: #fff;
+    }
+    
+    .message-preview-tabs .nav-link {
+        border: none;
+        padding: 0.75rem 1.25rem;
+        color: #495057;
+        font-weight: 500;
+        border-radius: 0.5rem 0.5rem 0 0;
+        transition: all 0.2s ease;
+    }
+    
+    .message-preview-tabs .nav-link.active {
+        color: #000;
+        background-color: #f8f9fa;
+        font-weight: 600;
+        box-shadow: 0 -2px 6px rgba(0,0,0,.03);
+    }
+    
+    .message-preview-tabs .nav-link:hover:not(.active) {
+        background-color: rgba(0,0,0,.03);
+    }
+    
+    .message-preview-content {
+        padding: 0;
+        background: #f8f9fa;
+    }
+    
+    .message-preview-iframe {
+        border: none;
+        width: 100%;
+        min-height: 600px;
+        background: #fff;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,.05);
+        margin: 1rem;
+    }
+    
+    .message-source-code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 0.9rem;
+        background: #fff;
+        border-radius: 0.5rem;
+        padding: 1.25rem;
+        margin: 1rem;
+        border: 1px solid rgba(0,0,0,.08);
+        max-height: 600px;
+        overflow: auto;
+        white-space: pre-wrap;
+        color: #333;
+        line-height: 1.5;
+    }
+    
+    .message-meta-item {
+        display: flex;
+        margin-bottom: 0.75rem;
+    }
+    
+    .message-meta-label {
+        width: 80px;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .message-meta-value {
+        font-weight: 500;
+        flex: 1;
+    }
+    
+    .message-subject {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1.25rem;
+        color: #212529;
+    }
+</style>
 
-<div class="card">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <tr>
-                    <th class="bg-light">@Html.DisplayNameFor(model => model.Subject)</th>
-                    <td>@Html.DisplayFor(model => model.Subject)</td>
-                </tr>
-                <tr>
-                    <th class="bg-light" style="width: 30%; height: 100px; overflow-y: auto;">@Html.DisplayNameFor(model => model.MessageData)</th>
-                    <td style="height: 100px; overflow-y: auto;">@Html.DisplayFor(model => model.MessageData)</td>
-                </tr>
-                <tr>
-                    <th class="bg-light" style="width: 30%; height: 100px; overflow-y: auto;">@Html.DisplayNameFor(model => model.MessageText)</th>
-                    <td style="height: 100px; overflow-y: auto;">@Html.DisplayFor(model => model.MessageText)</td>
-                </tr>
-                <tr>
-                    <th class="bg-light">@Html.DisplayNameFor(model => model.Attempts)</th>
-                    <td>@Html.DisplayFor(model => model.Attempts)</td>
-                </tr>
-                <tr>
-                    <th class="bg-light">@Html.DisplayNameFor(model => model.ScheduledDate)</th>
-                    <td>@Html.DisplayFor(model => model.ScheduledDate)</td>
-                </tr>
-                <tr>
-                    <th class="bg-light">@Html.DisplayNameFor(model => model.NotificationRecipient)</th>
-                    <td>@Html.DisplayFor(model => model.NotificationRecipient)</td>
-                </tr>
-                <tr>
-                    <th class="bg-light">@Html.DisplayNameFor(model => model.SysStartTime)</th>
-                    <td>@Html.DisplayFor(model => model.SysStartTime)</td>
-                </tr>
-                <tr>
-                    <th class="bg-light">@Html.DisplayNameFor(model => model.SysEndTime)</th>
-                    <td>@Html.DisplayFor(model => model.SysEndTime)</td>
-                </tr>
-                <tr>
-                    <th class="bg-light">@Html.DisplayNameFor(model => model.ContactMethod)</th>
-                    <td>@Html.DisplayFor(model => model.ContactMethod.ID)</td>
-                </tr>
-                <tr>
-                    <th class="bg-light">@Html.DisplayNameFor(model => model.CreateDate)</th>
-                    <td>@Html.DisplayFor(model => model.CreateDate)</td>
-                </tr>
-                <tr>
-                    <th class="bg-light">@Html.DisplayNameFor(model => model.CreateBy)</th>
-                    <td>@Html.DisplayFor(model => model.CreateBy)</td>
-                </tr>
-                <tr>
-                    <th class="bg-light">@Html.DisplayNameFor(model => model.ModifiedDate)</th>
-                    <td>@Html.DisplayFor(model => model.ModifiedDate)</td>
-                </tr>
-                <tr>
-                    <th class="bg-light">@Html.DisplayNameFor(model => model.ModifiedBy)</th>
-                    <td>@Html.DisplayFor(model => model.ModifiedBy)</td>
-                </tr>
-            </table>
+<div class="container-fluid px-4 py-3">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Home</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "CommunicationQueues")">Communication Queues</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Details</li>
+        </ol>
+    </nav>
+
+    <!-- Communication Header -->
+    <div class="communication-header mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+            <h3 class="mb-0 text-dark">Communication Queue Item #@Model.ID</h3>
+            <a asp-action="Delete" asp-route-id="@Model.ID" class="btn btn-danger px-4">
+                <i class="bx bx-trash me-2"></i> Delete
+            </a>
+        </div>
+
+        <!-- Status Pills -->
+        <div class="d-flex flex-wrap gap-2 mt-3">
+            @if (Model.CommunicationStatus != null)
+            {
+                <span class="status-badge badge bg-@GetStatusBadgeColor(Model.CommunicationStatus.Name) text-white">
+                    <i class="bx bx-check-circle me-1"></i>
+                    @Model.CommunicationStatus.Name
+                </span>
+            }
+            else
+            {
+                <span class="status-badge badge bg-secondary text-white">
+                    <i class="bx bx-time-five me-1"></i>
+                    Pending
+                </span>
+            }
+            
+            @if (Model.RetryCount > 0)
+            {
+                <span class="status-badge badge bg-warning text-dark">
+                    <i class="bx bx-refresh me-1"></i>
+                    Retry Count: @Model.RetryCount
+                </span>
+            }
+            
+            @if (Model.ContactMethod != null)
+            {
+                <span class="status-badge badge bg-info text-white">
+                    <i class="bx bx-@GetContactMethodIcon(Model.ContactMethod.Name) me-1"></i>
+                    @Model.ContactMethod.Name
+                </span>
+            }
+            
+            @if (Model.SentDate.HasValue)
+            {
+                <span class="status-badge badge bg-success text-white">
+                    <i class="bx bx-check-double me-1"></i>
+                    Sent: @Model.SentDate.Value.ToString("dd MMM yyyy HH:mm")
+                </span>
+            }
         </div>
     </div>
-    <div class="card-footer">
-       <a href="javascript:history.go(-1)" class="btn btn-secondary">
-           <i class="bx bx-arrow-back me-1"></i> Back
+
+    <div class="row g-4">
+        <!-- Message Details -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header py-3">
+                    <h5 class="mb-0"><i class="bx bx-envelope me-1"></i> Message Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="message-container">
+                        <div class="message-preview-header">
+                            <div class="message-meta-item">
+                                <div class="message-meta-label">To:</div>
+                                <div class="message-meta-value">@Model.NotificationRecipient</div>
+                            </div>
+                            <div class="message-meta-item">
+                                <div class="message-meta-label">Subject:</div>
+                                <div class="message-meta-value message-subject">@Model.Subject</div>
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.TemplateName))
+                            {
+                                <div class="message-meta-item">
+                                    <div class="message-meta-label">Template:</div>
+                                    <div class="message-meta-value">
+                                        <span class="badge bg-light text-dark border">@Model.TemplateName</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        
+                        <div class="message-preview-container">
+                            @if (!string.IsNullOrEmpty(Model.MessageData))
+                            {
+                                <ul class="nav nav-tabs message-preview-tabs" id="messageViewTabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="html-tab" data-bs-toggle="tab" data-bs-target="#html-view" type="button" role="tab" aria-controls="html-view" aria-selected="true">
+                                            <i class="bx bx-envelope me-1"></i> Email Preview
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="text-tab" data-bs-toggle="tab" data-bs-target="#text-view" type="button" role="tab" aria-controls="text-view" aria-selected="false">
+                                            <i class="bx bx-code me-1"></i> Source Code
+                                        </button>
+                                    </li>
+                                </ul>
+                                <div class="tab-content message-preview-content" id="messageViewTabContent">
+                                    <div class="tab-pane fade show active" id="html-view" role="tabpanel" aria-labelledby="html-tab">
+                                        <iframe id="htmlMessageFrame" class="message-preview-iframe" sandbox="allow-same-origin"></iframe>
+                                    </div>
+                                    <div class="tab-pane fade" id="text-view" role="tabpanel" aria-labelledby="text-tab">
+                                        <pre class="message-source-code">@Model.MessageData</pre>
+                                    </div>
+                                </div>
+
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        // Get the iframe element
+                                        const iframe = document.getElementById('htmlMessageFrame');
+                                        
+                                        // Write the HTML content to the iframe
+                                        const htmlContent = @Html.Raw(Json.Serialize(Model.MessageData));
+                                        
+                                        if (iframe.contentWindow) {
+                                            iframe.contentWindow.document.open();
+                                            iframe.contentWindow.document.write(htmlContent);
+                                            iframe.contentWindow.document.close();
+                                        }
+                                        
+                                        // Adjust iframe height after content loads
+                                        iframe.onload = function() {
+                                            const height = Math.max(600, iframe.contentWindow.document.body.scrollHeight + 50);
+                                            iframe.style.height = height + 'px';
+                                        };
+                                    });
+                                </script>
+                            }
+                            else if (!string.IsNullOrEmpty(Model.MessageText))
+                            {
+                                @Model.MessageText
+                            }
+                            else
+                            {
+                                <p class="text-muted">No message content available</p>
+                            }
+                        </div>
+                        
+                        @if (!string.IsNullOrEmpty(Model.MessageData) && !string.IsNullOrEmpty(Model.MessageText))
+                        {
+                            <div class="mt-3">
+                                <h6 class="mb-2">Additional Message Text</h6>
+                                <div class="message-body">
+                                    @Model.MessageText
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="card mb-4">
+                    <div class="card-header py-3 bg-danger text-white">
+                        <h5 class="mb-0"><i class="bx bx-error-circle me-1"></i> Error Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-danger mb-0">
+                            @Model.ErrorMessage
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Communication Details -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header py-3">
+                    <h5 class="mb-0"><i class="bx bx-info-circle me-1"></i> Communication Details</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="info-section">
+                        <h6 class="info-title">
+                            <i class="bx bx-detail"></i> General Information
+                        </h6>
+                        <div class="key-value-item">
+                            <span class="text-muted">ID</span>
+                            <span class="fw-medium">@Model.ID</span>
+                        </div>
+                        <div class="key-value-item">
+                            <span class="text-muted">Contact Method</span>
+                            <span class="fw-medium">
+                                @if (Model.ContactMethod != null)
+                                {
+                                    @Model.ContactMethod.Name
+                                }
+                                else
+                                {
+                                    <span class="text-muted">N/A</span>
+                                }
+                            </span>
+                        </div>
+                        <div class="key-value-item">
+                            <span class="text-muted">Status</span>
+                            <span class="fw-medium">
+                                @if (Model.CommunicationStatus != null)
+                                {
+                                    <span class="badge bg-@GetStatusBadgeColor(Model.CommunicationStatus.Name)">
+                                        @Model.CommunicationStatus.Name
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Pending</span>
+                                }
+                            </span>
+                        </div>
+                        <div class="key-value-item">
+                            <span class="text-muted">Retry Count</span>
+                            <span class="fw-medium">@Model.RetryCount</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section border-top">
+                        <h6 class="info-title">
+                            <i class="bx bx-calendar"></i> Timing Information
+                        </h6>
+                        <div class="key-value-item">
+                            <span class="text-muted">Created</span>
+                            <span class="fw-medium">@Model.CreateDate.ToString("dd MMM yyyy HH:mm")</span>
+                        </div>
+                        <div class="key-value-item">
+                            <span class="text-muted">Scheduled</span>
+                            <span class="fw-medium">
+                                @(Model.ScheduledDate.HasValue ? Model.ScheduledDate.Value.ToString("dd MMM yyyy HH:mm") : "N/A")
+                            </span>
+                        </div>
+                        <div class="key-value-item">
+                            <span class="text-muted">Sent</span>
+                            <span class="fw-medium">
+                                @(Model.SentDate.HasValue ? Model.SentDate.Value.ToString("dd MMM yyyy HH:mm") : "N/A")
+                            </span>
+                        </div>
+                        <div class="key-value-item">
+                            <span class="text-muted">System Start</span>
+                            <span class="fw-medium">
+                                @(Model.SysStartTime.HasValue ? Model.SysStartTime.Value.ToString("dd MMM yyyy HH:mm") : "N/A")
+                            </span>
+                        </div>
+                        <div class="key-value-item">
+                            <span class="text-muted">System End</span>
+                            <span class="fw-medium">
+                                @(Model.SysEndTime.HasValue ? Model.SysEndTime.Value.ToString("dd MMM yyyy HH:mm") : "N/A")
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section border-top">
+                        <h6 class="info-title">
+                            <i class="bx bx-user"></i> User Information
+                        </h6>
+                        <div class="key-value-item">
+                            <span class="text-muted">Created By</span>
+                            <span class="fw-medium">@Model.CreateBy</span>
+                        </div>
+                        <div class="key-value-item">
+                            <span class="text-muted">Last Modified</span>
+                            <span class="fw-medium">@Model.ModifiedDate</span>
+                        </div>
+                        <div class="key-value-item">
+                            <span class="text-muted">Modified By</span>
+                            <span class="fw-medium">@Model.ModifiedBy</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="javascript:history.go(-1)" class="btn btn-secondary">
+            <i class="bx bx-arrow-back me-1"></i> Back
         </a>
     </div>
 </div>
+
+@functions {
+    public string GetStatusBadgeColor(string status)
+    {
+        if (string.IsNullOrEmpty(status))
+            return "secondary";
+            
+        return status.ToLower() switch
+        {
+            "sent" => "success",
+            "delivered" => "success",
+            "failed" => "danger",
+            "pending" => "warning",
+            "processing" => "info",
+            "retry" => "primary",
+            "cancelled" => "dark",
+            _ => "secondary"
+        };
+    }
+    
+    public string GetContactMethodIcon(string contactMethod)
+    {
+        if (string.IsNullOrEmpty(contactMethod))
+            return "message-detail";
+            
+        return contactMethod.ToLower() switch
+        {
+            "email" => "envelope",
+            "sms" => "message",
+            "phone" => "phone",
+            "push" => "bell",
+            "whatsapp" => "message-rounded",
+            _ => "message-detail"
+        };
+    }
+}
