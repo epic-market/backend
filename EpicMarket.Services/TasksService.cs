@@ -2,6 +2,7 @@
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using EpicMarket.Entities.Constants;
 using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

@@ -1,7 +1,7 @@
 ﻿using Amazon.Runtime.Internal.Util;
 using EpicMarket.Business.API.Extension;
 using EpicMarket.Contracts;
-using EpicMarket.Entities.CustomModels;
+using EpicMarket.Entities.Constants;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace EpicMarket.Business.API.Helpers

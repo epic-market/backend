@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
-using EpicMarket.Entities.CustomModels;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
 using EpicMarket.Admin.MVC.Attributes;

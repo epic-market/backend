@@ -11,7 +11,6 @@ using System.Reflection.Metadata;
 using System.Security.Claims;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
-using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Authorization;
 using EpicMarket.Admin.MVC.Attributes;
 using EpicMarket.Entities.Constants;

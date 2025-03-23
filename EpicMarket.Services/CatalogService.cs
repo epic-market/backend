@@ -2,6 +2,7 @@
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using EpicMarket.Entities.Constants;
 using EpicMarket.Entities.CustomModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
@@ -149,16 +150,7 @@ namespace EpicMarket.Services
                 Source = PageSource 
             });
 
-            // Add communication queue entry
-            await communicationQueueService.InsertCommunicationQueue(
-                new CommunicationQueueDTO()
-                {
-                    MessageData = null,
-                    Subject = MessageDataConstants.AddCatelog,
-                    NotificationRecipient = UserName,
-                    ContactMethod = ContactMethodConstants.EMAIL,
-                    CreateBy = UserName
-                });
+
 
             return product.ID;
         }
@@ -307,15 +299,6 @@ namespace EpicMarket.Services
             });
 
             // Add communication queue entry
-            await communicationQueueService.InsertCommunicationQueue(
-                new CommunicationQueueDTO()
-                {
-                    MessageData = null,
-                    Subject = MessageDataConstants.EditCatelog,
-                    NotificationRecipient = UserName,
-                    ContactMethod = ContactMethodConstants.EMAIL,
-                    CreateBy = UserName
-                });
 
             return product.ID;
 		}

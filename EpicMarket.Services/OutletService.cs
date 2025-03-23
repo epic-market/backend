@@ -3,6 +3,7 @@ using AutoMapper;
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using EpicMarket.Entities.Constants;
 using EpicMarket.Entities.CustomModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -88,16 +89,6 @@ namespace EpicMarket.Services
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore
                 });
                 await this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = outletModel.ID, Data = outletModelJson, Description = null, EventName = events, EntityName = EntityConstants.Branch, Source = PageSource });
-                await this.communicationQueueService.InsertCommunicationQueue(
-                        new Entities.CommunicationQueueDTO()
-                        {
-                            MessageData = null,//TODO
-                            Subject = mailevent,
-                            NotificationRecipient = UserName,
-                            ContactMethod = ContactMethodConstants.EMAIL,
-                            CreateBy = UserName
-                        });
-
                 return outletModel.ID;
         
         }
@@ -147,15 +138,6 @@ namespace EpicMarket.Services
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             });
             await this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = outletModel.ID, Data = outletModelJson, Description = null, EventName = events, EntityName = EntityConstants.Branch, Source = PageSource });
-            await this.communicationQueueService.InsertCommunicationQueue(
-                    new Entities.CommunicationQueueDTO()
-                    {
-                        MessageData = null,//TODO
-                        Subject = mailevent,
-                        NotificationRecipient = UserName,
-                        ContactMethod = ContactMethodConstants.EMAIL,
-                        CreateBy = UserName
-                    });
             return outletModel.ID;
         }
 

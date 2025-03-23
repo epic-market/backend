@@ -3,6 +3,7 @@ using Amazon.S3.Model;
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using EpicMarket.Entities.Constants;
 using EpicMarket.Entities.CustomModels;
 using EpicMarket.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +15,7 @@ using System.Security.Claims;
 
 namespace EpicMarket.Business.API.Controllers
 {
-	[Route("api/files")]
+    [Route("api/files")]
 	public class FilesController : BaseApiController
 	{
 

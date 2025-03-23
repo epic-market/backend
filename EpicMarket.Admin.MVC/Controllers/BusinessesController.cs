@@ -11,7 +11,6 @@ using System.Runtime.Loader;
 using Microsoft.CodeAnalysis.Elfie.Model;
 using System.Security.Claims;
 using EpicMarket.Admin.MVC.Models;
-using EpicMarket.Entities.CustomModels;
 using System.Net.Mail;
 using EpicMarket.Admin.MVC.Contracts;
 using Microsoft.IdentityModel.Tokens;

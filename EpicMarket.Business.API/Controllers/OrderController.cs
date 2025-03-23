@@ -1,6 +1,7 @@
 ﻿using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using EpicMarket.Entities.Constants;
 using EpicMarket.Entities.CustomModels;
 using EpicMarket.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -12,7 +13,7 @@ using System;
 using System.Security.Claims;
 
 namespace EpicMarket.Business.API.Controllers
-{   
+{
     [Route("api/order")]
     public class OrderController : BaseApiController
     {

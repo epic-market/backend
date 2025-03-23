@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.Models;
-using EpicMarket.Entities.CustomModels;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -15,7 +14,7 @@ using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-     [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
+    [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
     public class BusinessEmployeeMapsController : Controller
     {
         private readonly ApplicationDbContext _context;

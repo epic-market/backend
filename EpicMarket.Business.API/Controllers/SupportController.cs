@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Security.Claims;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Business.API.Controllers
 {
