@@ -14,12 +14,12 @@ namespace EpicMarket.Business.API.Controllers
 {
 
     [Authorize]
-    [Route("api/branches")]
-    public class branchesController : BaseApiController
+    [Route("api/outlet")]
+    public class OutletController : BaseApiController
     {
 
-        private readonly ILogger<branchesController> logger;
-        private readonly IBranchService branchService;
+        private readonly ILogger<OutletController> logger;
+        private readonly IOutletService branchService;
         private readonly IRatingService ratingService;
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly IAttachmentService attachmentService;
@@ -27,9 +27,9 @@ namespace EpicMarket.Business.API.Controllers
         private readonly IApplicationConfigurationService applicationConfigurationService;
         private readonly IUnitOfWork unitOfWork;
 
-        public branchesController(
-                                    ILogger<branchesController> logger,
-                                    IBranchService branchService,
+        public OutletController(
+                                    ILogger<OutletController> logger,
+                                    IOutletService branchService,
                                     ApplicationDbContext dbContext,
                                     IRatingService ratingService,
                                     IHttpContextAccessor httpContextAccessor,

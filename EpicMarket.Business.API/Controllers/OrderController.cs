@@ -13,14 +13,14 @@ using System.Security.Claims;
 
 namespace EpicMarket.Business.API.Controllers
 {   
-    [Route("api/orders")]
-    public class OrdersController : BaseApiController
+    [Route("api/order")]
+    public class OrderController : BaseApiController
     {
-        private readonly ILogger<OrdersController> logger;
+        private readonly ILogger<OrderController> logger;
         private readonly IOrderService orderService;
         private readonly ApplicationDbContext dbContext;
 
-        public OrdersController(ILogger<OrdersController> logger, IOrderService orderService, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
+        public OrderController(ILogger<OrderController> logger, IOrderService orderService, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
         {
             this.logger = logger;
             this.orderService = orderService;

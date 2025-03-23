@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace EpicMarket.Services
 {
-    public class BranchService : IBranchService
+    public class OutletService : IOutletService
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper mapper;
@@ -26,7 +26,7 @@ namespace EpicMarket.Services
         private readonly ICommunicationQueueService communicationQueueService;
 		private readonly IUnitOfWork unitOfWork;
         private const double EarthRadiusKm = 6371;
-        public BranchService(
+        public OutletService(
                                 ApplicationDbContext context,
                                 IMapper mapper,
                                 IAddressService addressService,

@@ -39,8 +39,8 @@ namespace EpicMarket.Business.API.Extension
             services.AddScoped<IBusinessService, BusinessService>();
             services.AddScoped<IStaticService, StaticService>();
             services.AddScoped<IAddressService, AddressService>();
-            services.AddScoped<IBranchService, BranchService>();
-            services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IOutletService, OutletService>();
+            services.AddScoped<ICatalogService, CatalogService>();
             services.AddScoped<IEmployeeService, EmployeeService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IHomeService, HomeService>();
@@ -53,7 +53,7 @@ namespace EpicMarket.Business.API.Extension
             services.AddScoped<IRatingService, RatingService>();
             services.AddScoped<IDashboardService, DashboardService>();
             services.AddScoped<IOTPService, OTPService>();
-            services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<ICatalogCategoryService, ICatalogCategoryService>();
             services.AddScoped<IEntityService, EntityService>();
             services.AddScoped<LogUserActivity>();
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EpicMarket.Contracts
 {
-    public interface IProductService
+    public interface ICatalogService
     {
         Task<int> AddProduct(AddProductsDto productsDto,string UserName, int businessID,string PageSource);
         Task AddOrUpdateProductInventoryDetails(InventoryResult productAdvanced);

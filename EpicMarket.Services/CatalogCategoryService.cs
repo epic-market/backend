@@ -15,7 +15,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EpicMarket.Services
 {
-    public class CategoryService :  ICategoryService
+    public class CatalogCategoryService :  ICatalogCategoryService
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper mapper;
@@ -24,7 +24,7 @@ namespace EpicMarket.Services
         private readonly ICommunicationQueueService communicationQueueService;
         private readonly ITasksService tasksService;
         private readonly IUnitOfWork unitOfWork;
-		public CategoryService(
+		public CatalogCategoryService(
                                 ApplicationDbContext context,
                                 IMapper mapper ,
                                 IAddressService addressService,

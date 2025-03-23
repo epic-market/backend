@@ -14,21 +14,22 @@ using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext
 namespace EpicMarket.Business.API.Controllers
 {
 
-    [Route("api/products")]
-    public class ProductsController : BaseApiController
+    [Route("api/catalog")]
+    public partial class CatalogController : BaseApiController
 	{
-		private readonly ILogger<ProductsController> logger;
-		private readonly IProductService productService;
+		private readonly ILogger<CatalogController> logger;
+		private readonly ICatalogService productService;
 		private readonly IApplicationConfigurationService applicationConfigurationService;
         private readonly IRatingService ratingService;
         private readonly IAttachmentService attachmentService;
 		private readonly IFileService fileStoreService;
-		private readonly ApplicationDbContext dbContext;
+        private readonly ICatalogCategoryService catalogCategoryService;
+        private readonly ApplicationDbContext dbContext;
 		private readonly IHttpContextAccessor httpContextAccessor;
-		private readonly IBranchService branchService;
+		private readonly IOutletService branchService;
 
-		public ProductsController(ILogger<ProductsController> logger, IProductService productService, IApplicationConfigurationService applicationConfigurationService,IRatingService ratingService,
-			IAttachmentService attachmentService, IFileService fileStoreService, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
+		public CatalogController(ILogger<CatalogController> logger, ICatalogService productService, IApplicationConfigurationService applicationConfigurationService,IRatingService ratingService,
+			IAttachmentService attachmentService, IFileService fileStoreService,ICatalogCategoryService catalogCategoryService , ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
 		{
 			this.logger = logger;
 			this.productService = productService;
@@ -36,8 +37,10 @@ namespace EpicMarket.Business.API.Controllers
             this.ratingService = ratingService;
             this.attachmentService = attachmentService;
 			this.fileStoreService = fileStoreService;
-			this.dbContext = dbContext;
+            this.catalogCategoryService = catalogCategoryService;
+            this.dbContext = dbContext;
 			this.httpContextAccessor = httpContextAccessor;
+
 		}
 
 

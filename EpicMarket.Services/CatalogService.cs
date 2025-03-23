@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace EpicMarket.Services
 {
-    public class ProductService : IProductService
+    public class CatalogService : ICatalogService
     {
 
         private readonly ApplicationDbContext _context;
@@ -30,7 +30,7 @@ namespace EpicMarket.Services
         private readonly IAttachmentService attachmentService;
 		private readonly IUnitOfWork unitOfWork;
 
-		public ProductService(
+		public CatalogService(
                                 ApplicationDbContext context,
                                 IMapper mapper, 
                                 IAddressService addressService,
