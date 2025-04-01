@@ -117,9 +117,9 @@ namespace EpicMarket.Business.API.Controllers
             reponse.Data = options;
             return Ok(reponse);
         }
-        [HttpPost("subscribeforOffers")]
+        [HttpPost("subscribe")]
         [AllowAnonymous]
-        public async Task<ActionResult<OperationResult<int>>> SubscribeforOffers( string gmail)
+        public async Task<ActionResult<OperationResult<int>>> SubscribeforOffers(string gmail)
         {
             var response = new OperationResult<int>();
 
@@ -208,6 +208,8 @@ namespace EpicMarket.Business.API.Controllers
             response.Data = options;
             return Ok(response);
         }
+
+        
 
         
 

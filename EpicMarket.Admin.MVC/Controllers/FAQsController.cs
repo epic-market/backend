@@ -69,7 +69,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Question,Answer,CategoryId,RoleType")] FAQ fAQ)
+        public async Task<IActionResult> Create([Bind("Id,Title,Description,CategoryId")] FAQ fAQ)
         {
             if (ModelState.IsValid)
             {
@@ -117,7 +117,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Question,Answer,CategoryId,RoleType")] FAQ fAQ)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,CategoryId")] FAQ fAQ)
         {
             if (id != fAQ.Id)
             {
