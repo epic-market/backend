@@ -1,6 +1,7 @@
 ﻿using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using EpicMarket.Entities.Constants;
 using EpicMarket.Entities.CustomModels;
 using EpicMarket.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -14,21 +15,22 @@ using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext
 namespace EpicMarket.Business.API.Controllers
 {
 
-    [Route("api/products")]
-    public class ProductsController : BaseApiController
+    [Route("api/catalog")]
+    public partial class CatalogController : BaseApiController
 	{
-		private readonly ILogger<ProductsController> logger;
-		private readonly IProductService productService;
+		private readonly ILogger<CatalogController> logger;
+		private readonly ICatalogService productService;
 		private readonly IApplicationConfigurationService applicationConfigurationService;
         private readonly IRatingService ratingService;
         private readonly IAttachmentService attachmentService;
 		private readonly IFileService fileStoreService;
-		private readonly ApplicationDbContext dbContext;
+        private readonly ICatalogCategoryService catalogCategoryService;
+        private readonly ApplicationDbContext dbContext;
 		private readonly IHttpContextAccessor httpContextAccessor;
-		private readonly IBranchService branchService;
+		private readonly IOutletService branchService;
 
-		public ProductsController(ILogger<ProductsController> logger, IProductService productService, IApplicationConfigurationService applicationConfigurationService,IRatingService ratingService,
-			IAttachmentService attachmentService, IFileService fileStoreService, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
+		public CatalogController(ILogger<CatalogController> logger, ICatalogService productService, IApplicationConfigurationService applicationConfigurationService,IRatingService ratingService,
+			IAttachmentService attachmentService, IFileService fileStoreService,ICatalogCategoryService catalogCategoryService , ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
 		{
 			this.logger = logger;
 			this.productService = productService;
@@ -36,14 +38,16 @@ namespace EpicMarket.Business.API.Controllers
             this.ratingService = ratingService;
             this.attachmentService = attachmentService;
 			this.fileStoreService = fileStoreService;
-			this.dbContext = dbContext;
+            this.catalogCategoryService = catalogCategoryService;
+            this.dbContext = dbContext;
 			this.httpContextAccessor = httpContextAccessor;
+
 		}
 
 
         [HttpPost]
         [Authorize(Roles = ROLES.BUSINESS_OWNER)]
-        public async Task<ActionResult<OperationResult<int>>> AddProduct([FromBody] AddProductsDto productsDto)
+        public async Task<ActionResult<OperationResult<int>>> AddProduct([FromBody] AddProductsParams productsDto)
         {
 
             var response = new OperationResult<int>();
@@ -72,7 +76,7 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = ROLES.BUSINESS_OWNER)]
-        public async Task<ActionResult<OperationResult<int>>> UpdateProduct([FromRoute] int id, [FromBody] AddProductsDto productsDto)
+        public async Task<ActionResult<OperationResult<int>>> UpdateProduct([FromRoute] int id, [FromBody] AddProductsParams productsDto)
         {
 
             var response = new OperationResult<int>();
@@ -111,24 +115,6 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         [HttpGet("Map/{outletID}")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<List<ProductsMapOptionResult>>>> GetAllProductForMap(int outletID)
@@ -140,9 +126,6 @@ namespace EpicMarket.Business.API.Controllers
 			response.Data = results;
 			return Ok(response);
 		}
-
-
-
 
 
         [HttpGet("Inventory")]
@@ -157,13 +140,9 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
-
-
-
-
         [HttpGet]
         [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
-        public async Task<ActionResult<OperationResult<GetDataResult<List<ProductResult>>>>> GetAllProducts([FromQuery] ProductParams productResult)
+        public async Task<ActionResult<OperationResult<GetDataResult<List<ProductResult>>>>> GetAllProducts([FromQuery] ProductListParams productResult)
 		{
 			var response = new OperationResult<GetDataResult<List<ProductResult>>>();
 			this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = productResult }));
@@ -177,9 +156,9 @@ namespace EpicMarket.Business.API.Controllers
 
 		[HttpGet("{id}")]
         [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
-        public async Task<ActionResult<OperationResult<ProductsDto>>> GetProductDetails(int id)
+        public async Task<ActionResult<OperationResult<ProductDetailsResult>>> GetProductDetails(int id)
         {
-            var response = new OperationResult<ProductsDto>();
+            var response = new OperationResult<ProductDetailsResult>();
             this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = id }));
             var results = await productService.GetProductDetails(id);
             this.logger.LogInformation("Products Controller -> GetAllProducts()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
@@ -296,10 +275,10 @@ namespace EpicMarket.Business.API.Controllers
         
         [HttpGet("{productId}/variants")]
         [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
-        public async Task<ActionResult<OperationResult<List<ProductVariantResponse>>>> GetProductVariants(
+        public async Task<ActionResult<OperationResult<List<SingleProductVariantsResult>>>> GetProductVariants(
             [FromRoute] int productId)
         {
-            var response = new OperationResult<List<ProductVariantResponse>>();
+            var response = new OperationResult<List<SingleProductVariantsResult>>();
             this.logger.LogInformation("Products Controller -> GetProductVariants()-> productId: {0}", productId);
             
             response.Data = await productService.GetProductVariants(productId);

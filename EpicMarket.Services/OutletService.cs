@@ -3,6 +3,7 @@ using AutoMapper;
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using EpicMarket.Entities.Constants;
 using EpicMarket.Entities.CustomModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -17,7 +18,7 @@ using System.Threading.Tasks;
 
 namespace EpicMarket.Services
 {
-    public class BranchService : IBranchService
+    public class OutletService : IOutletService
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper mapper;
@@ -26,7 +27,7 @@ namespace EpicMarket.Services
         private readonly ICommunicationQueueService communicationQueueService;
 		private readonly IUnitOfWork unitOfWork;
         private const double EarthRadiusKm = 6371;
-        public BranchService(
+        public OutletService(
                                 ApplicationDbContext context,
                                 IMapper mapper,
                                 IAddressService addressService,
@@ -88,16 +89,6 @@ namespace EpicMarket.Services
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore
                 });
                 await this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = outletModel.ID, Data = outletModelJson, Description = null, EventName = events, EntityName = EntityConstants.Branch, Source = PageSource });
-                await this.communicationQueueService.InsertCommunicationQueue(
-                        new Entities.CommunicationQueueDTO()
-                        {
-                            MessageData = null,//TODO
-                            Subject = mailevent,
-                            NotificationRecipient = UserName,
-                            ContactMethod = ContactMethodConstants.EMAIL,
-                            CreateBy = UserName
-                        });
-
                 return outletModel.ID;
         
         }
@@ -106,13 +97,14 @@ namespace EpicMarket.Services
             var addressModel = new AddressDto();
             var events = "";
             var mailevent = "";
+
+            addressModel.ID = _context.Outlets.Include(o => o.Address).AsNoTracking().FirstOrDefault(o => o.ID == id).AddressID;
             addressModel.Address1 = branchDto.Address;
             addressModel.City = branchDto.City;
             addressModel.State = branchDto.State;
             addressModel.Pincode = branchDto.Pincode;
             addressModel.Latitude = branchDto.Latitude;
             addressModel.Longitude = branchDto.Longitude;
-            addressModel.ID = _context.Outlets.Include(o => o.Address).AsNoTracking().FirstOrDefault(o => o.ID == id).AddressID;
 
             // Assuming AddAddress method updates the existing address if ID is provided, or adds a new one if ID is 0
             int addressId = await addressService.AddUpdateAddress(addressModel);
@@ -147,15 +139,6 @@ namespace EpicMarket.Services
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             });
             await this.eventLogService.LogEvent(new EVENT_LOG_SAVE_PARAMS { RecordId = outletModel.ID, Data = outletModelJson, Description = null, EventName = events, EntityName = EntityConstants.Branch, Source = PageSource });
-            await this.communicationQueueService.InsertCommunicationQueue(
-                    new Entities.CommunicationQueueDTO()
-                    {
-                        MessageData = null,//TODO
-                        Subject = mailevent,
-                        NotificationRecipient = UserName,
-                        ContactMethod = ContactMethodConstants.EMAIL,
-                        CreateBy = UserName
-                    });
             return outletModel.ID;
         }
 

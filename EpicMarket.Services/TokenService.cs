@@ -15,6 +15,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Services
 {
@@ -24,20 +25,20 @@ namespace EpicMarket.Services
         private readonly UserManager<AppUser> _userManager;
         private readonly ApplicationDbContext dbContext;
         private readonly IApplicationConfigurationService applicationConfiguration;
-        private readonly ICommunicationQueueService communicationQueueService;
+        private readonly ICommunicationService communicationService;
         private readonly IConfiguration _configuration; // Added IConfiguration field
 
         public TokenService(IConfiguration config,
                             UserManager<AppUser> userManager,
                             ApplicationDbContext dbContext, 
                             IApplicationConfigurationService applicationConfiguration,
-                            ICommunicationQueueService communicationQueueService)
+                            ICommunicationService communicationService)
         {
             _userManager = userManager;
             this.dbContext = dbContext;
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
             this.applicationConfiguration = applicationConfiguration;
-            this.communicationQueueService = communicationQueueService;
+            this.communicationService = communicationService;
             _configuration = config; // Initialize IConfiguration
         }
 
@@ -108,9 +109,14 @@ namespace EpicMarket.Services
                 //    });
 
                 var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "..", "EmailTemplates");
-                var emailService = new EmailService(templatePath, _configuration); // Pass IConfiguration to EmailService
-                var model = new { Reset_Password_URL = queryToken };
-                await emailService.SendEmailAsync("ResetPasswordLink", model,resetPassword.Email, "Reset Password Link");
+                var emailModel = EmailModel.GetResetPasswordModel(queryToken);
+
+                await communicationService.SendTemplatedEmailAsync(
+                    resetPassword.Email,
+                    EmailSubjectConstants.ResetPasswordLink,
+                    EmailTemplateConstants.ResetPasswordLink,
+                    emailModel
+                );
 
                 return "Reset Link sent to registered Email";
             }

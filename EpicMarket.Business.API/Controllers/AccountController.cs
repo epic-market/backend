@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using System.Security.Claims;
 using System.Collections.Generic;
 using EpicMarket.Services;
+using EpicMarket.Entities.Constants;
 
 //verified in postman
 namespace EpicMarket.Business.API.Controllers
@@ -30,17 +31,17 @@ namespace EpicMarket.Business.API.Controllers
         private readonly IConfiguration _configuration;
         private readonly IOTPService _otpService;
         public UserController(
-                                    UserManager<AppUser> userManager,
-                                    SignInManager<AppUser> signInManager,
-                                    ITokenService tokenService,
-                                    IMapper mapper,
-                                    ILogger<UserController> logger,
-                                    ICommunicationService communication,
-                                    ApplicationDbContext dbContext,
-                                    IHttpContextAccessor httpContextAccessor,
-                                    IProfileService profileService,
-                                    IConfiguration configuration,
-                                    IOTPService otpService
+                                UserManager<AppUser> userManager,
+                                SignInManager<AppUser> signInManager,
+                                ITokenService tokenService,
+                                IMapper mapper,
+                                ILogger<UserController> logger,
+                                ICommunicationService communication,
+                                ApplicationDbContext dbContext,
+                                IHttpContextAccessor httpContextAccessor,
+                                IProfileService profileService,
+                                IConfiguration configuration,
+                                IOTPService otpService
                                     ) : base(dbContext, httpContextAccessor)
 		{
             _signInManager = signInManager;
@@ -106,17 +107,14 @@ namespace EpicMarket.Business.API.Controllers
                     return BadRequest(result.Errors);
                 }
 
-                var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "..", "EmailTemplates");
-                var emailService = new EmailService(templatePath, _configuration); // Pass IConfiguration to EmailService
-                var model = new 
-                {
-                    Document_Upload_URL = "owner.epicmarket.in", // Replace with actual URL
-                    Support_Email = "support@epicmarket.in", // Replace with actual support email
-                    Support_Phone = "123-456-7890", // Replace with actual support phone number
-                    Current_Year = DateTime.Now.Year.ToString(),
-                    Company_Address = "123 Epic Market St, Business City, BC 12345" // Replace with actual address
-                };
-                await emailService.SendEmailAsync("BusinessRegisterSuccussfullyAskingToCompleteDetetials", model, registerDto.Email, "Business Registration Successful - Complete Your Details");
+                var emailModel = EmailModel.GetBusinessRegistrationCompleteModel();
+
+                await communication.SendTemplatedEmailAsync(
+                    registerDto.Email,
+                    EmailSubjectConstants.BusinessRegistrationComplete,
+                    EmailTemplateConstants.BusinessRegistrationComplete,
+                    emailModel
+                );
 
                 response.Data = new TokenDto
                 {

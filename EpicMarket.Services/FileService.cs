@@ -99,7 +99,7 @@ namespace EpicMarket.Services
 				RecordId = RecordId
 			});
 
-			return fileNameKey;
+			return prefix  + fileNameKey;
 		}
 
 

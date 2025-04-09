@@ -4,6 +4,7 @@ using EpicMarket.Contracts;
 using EpicMarket.Data.ApplicationModels;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using EpicMarket.Entities.Constants;
 using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -98,16 +99,6 @@ namespace EpicMarket.Services
             StringWriter writer = new StringWriter();
             v.Evaluate(context, writer, string.Empty, EmailTemplete);
             var message = writer.ToString();
-
-			await this.communicationQueueService.InsertCommunicationQueue(
-				  new Entities.CommunicationQueueDTO()
-				  {
-					  MessageData = message,
-					  Subject = "Welcome to Epic Market",
-					  NotificationRecipient = addEmployeeParam.EmailID,
-					  ContactMethod = ContactMethodConstants.EMAIL,
-					  CreateBy = addEmployeeParam.EmailID
-				  });
 
 			//communicationService.SendEmailAsync(addEmployeeParam.EmailID, "Welcome to Epic Market", message);
 
