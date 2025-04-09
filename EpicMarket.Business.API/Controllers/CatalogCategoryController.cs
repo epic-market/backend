@@ -14,54 +14,44 @@ using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext
 namespace EpicMarket.Business.API.Controllers
 {
 
-    [Route("api/category")]
-    public class CategoryController : BaseApiController
+    public partial class CatalogController : BaseApiController
 	{
-		private readonly ILogger<CategoryController> logger;
-		private readonly ICategoryService categoryService;
-
-		public CategoryController(ILogger<CategoryController> logger, ICategoryService categoryService, IApplicationConfigurationService applicationConfigurationService,IRatingService ratingService,
-			IAttachmentService attachmentService, IFileService fileStoreService, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
-		{
-			this.logger = logger;
-			this.categoryService= categoryService;
-		}
-
-		[HttpGet]
+	
+		[HttpGet("categories")]
 		public async Task<IActionResult> GetCategories()
 		{
 
-			var categories = await categoryService.GetCategories(this.BusinessId);
+			var categories = await catalogCategoryService.GetCategories(this.BusinessId);
 			return Ok(categories);
 		}	
 
-		[HttpGet("{id}")]
+		[HttpGet("category/{id}")]
 		public async Task<IActionResult> GetCategory(int id)
 		{
-			var category = await categoryService.GetCategory(id);
+			var category = await catalogCategoryService.GetCategory(id);
 			return Ok(category);
 		}
 		
-		[HttpPost]
+		[HttpPost("category")]
 		public async Task<IActionResult> CreateCategory([FromBody]CategoriesDto categoryDto)
 		{
 
 		 	 categoryDto.BusinessID = this.BusinessId;
-			var category = await categoryService.CreateCategory(categoryDto);
+			var category = await catalogCategoryService.CreateCategory(categoryDto);
 			return Ok(category);
 		}	
 
-		[HttpPut("{id}")]
+		[HttpPut("category/{id}")]
 		public async Task<IActionResult> UpdateCategory(int id,UpdateCategoryDto categoryDto)
 		{
-			var category = await categoryService.UpdateCategory(id,categoryDto);
+			var category = await catalogCategoryService.UpdateCategory(id,categoryDto);
 			return Ok(category);
 		}			
 
-		[HttpDelete]
+		[HttpDelete("category/{id}")]
 		public async Task<IActionResult> DeleteCategory(int id)
 		{
-			var category = await categoryService.DeleteCategory(id);
+			var category = await catalogCategoryService.DeleteCategory(id);
 			return Ok(category);
 		}
 

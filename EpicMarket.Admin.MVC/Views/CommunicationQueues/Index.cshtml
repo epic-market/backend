@@ -1,81 +1,313 @@
 ﻿@model IEnumerable<EpicMarket.Data.Models.CommunicationQueue>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Communication Queues";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-    <div class="breadcrumb-title pe-3">Communication Queue</div>
-    <div class="ps-3">
+<style>
+    .card {
+        box-shadow: 0 2px 15px rgba(0,0,0,.04);
+        border: 1px solid rgba(0,0,0,.05);
+        border-radius: 0.75rem;
+        overflow: hidden;
+    }
+    .card-header {
+        background-color: rgba(0,0,0,.02);
+        border-bottom: 1px solid rgba(0,0,0,.05);
+    }
+    .status-badge {
+        padding: 0.4rem 0.65rem;
+        font-weight: 500;
+        border-radius: 30px;
+    }
+    .custom-filter-card {
+        border-radius: 0.75rem;
+        border: 1px solid rgba(0,0,0,.08);
+        background-color: #f9f9f9;
+    }
+    .table tr {
+        vertical-align: middle;
+    }
+    .action-buttons .btn {
+        padding: 0.25rem 0.5rem;
+        margin-right: 0.25rem;
+    }
+    .action-buttons .btn i {
+        font-size: 1.0rem;
+    }
+    .filter-section {
+        transition: all 0.3s ease;
+    }
+</style>
+
+<div class="page-breadcrumb d-flex align-items-center mb-3">
+    <div class="breadcrumb-title pe-3">Communication Queues</div>
+    <div class="ps-3 ms-auto">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0 p-0">
                 <li class="breadcrumb-item">
-                    <a asp-action="Index"><i class="bx bx-home-alt"></i></a>
+                    <a asp-controller="Home" asp-action="Index"><i class="bx bx-home-alt"></i></a>
                 </li>
+                <li class="breadcrumb-item active" aria-current="page">Communication Queues</li>
             </ol>
         </nav>
     </div>
 </div>
 
-<div class="card">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table id="example" class="table table-striped table-bordered" style="width:100%">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Subject)
-            </th>
-          
-            <th>
-                @Html.DisplayNameFor(model => model.Attempts)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ScheduledDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NotificationRecipient)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ContactMethod)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Subject)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Attempts)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ScheduledDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NotificationRecipient)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ContactMethod.Name)
-            </td>
-            <td>
-                <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="card mb-4 filter-section">
+    <div class="card-header py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bx bx-filter-alt me-1"></i> Filter Communication Queues</h5>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="toggleFilters">
+                <i class="bx bx-chevron-down me-1"></i> Toggle Filters
+            </button>
+        </div>
+    </div>
+    <div class="card-body" id="filtersSection">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="filterSubject" class="form-label">Subject</label>
+                    <input type="text" class="form-control" id="filterSubject" placeholder="Filter by subject">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="filterRecipient" class="form-label">Recipient</label>
+                    <input type="text" class="form-control" id="filterRecipient" placeholder="Filter by recipient">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="filterContactMethod" class="form-label">Contact Method</label>
+                    <select class="form-select" id="filterContactMethod">
+                        <option value="">All Contact Methods</option>
+                        @foreach (var item in ViewBag.ContactMethods)
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="filterStatus" class="form-label">Status</label>
+                    <select class="form-select" id="filterStatus">
+                        <option value="">All Statuses</option>
+                        @foreach (var item in ViewBag.CommunicationStatuses)
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="filterDateFrom" class="form-label">Scheduled From</label>
+                    <input type="date" class="form-control" id="filterDateFrom">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="filterDateTo" class="form-label">Scheduled To</label>
+                    <input type="date" class="form-control" id="filterDateTo">
+                </div>
+            </div>
+            <div class="col-12 text-end mt-3">
+                <button type="button" class="btn btn-light me-2" id="clearFilters">
+                    <i class="bx bx-reset me-1"></i> Clear Filters
+                </button>
+                <button type="button" class="btn btn-primary" id="applyFilters">
+                    <i class="bx bx-filter me-1"></i> Apply Filters
+                </button>
+            </div>
         </div>
     </div>
 </div>
+
+<div class="card">
+    <div class="card-header py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bx bx-list-ul me-1"></i> Communication Queues</h5>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="communicationQueueTable" class="table table-striped table-bordered" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Recipient</th>
+                        <th>Contact Method</th>
+                        <th>Status</th>
+                        <th>Retry Count</th>
+                        <th>Scheduled Date</th>
+                        <th>Sent Date</th>
+                        <th>Created Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be loaded via DataTables -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         $(document).ready(function () {
-            $('#example').DataTable();
+            // Initialize DataTable with server-side processing
+            const table = $('#communicationQueueTable').DataTable({
+                processing: true,
+                serverSide: true,
+                searching: false, // Disable built-in search as we handle it with custom filters
+                ajax: {
+                    url: '@Url.Action("GetFilteredData", "CommunicationQueues")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: function (d) {
+                        // Add custom filters
+                        return JSON.stringify({
+                            draw: d.draw,
+                            start: d.start,
+                            length: d.length,
+                            sortColumn: d.columns[d.order[0].column].data,
+                            sortDirection: d.order[0].dir,
+                            subject: $('#filterSubject').val(),
+                            recipient: $('#filterRecipient').val(),
+                            contactMethodId: $('#filterContactMethod').val() || null,
+                            communicationStatusId: $('#filterStatus').val() || null,
+                            scheduledDateFrom: $('#filterDateFrom').val() || null,
+                            scheduledDateTo: $('#filterDateTo').val() || null
+                        });
+                    }
+                },
+                columns: [
+                    { data: 'subject' },
+                    { data: 'recipient' },
+                    { data: 'contactMethod' },
+                    { 
+                        data: 'status',
+                        render: function(data, type, row) {
+                            return `<span class="status-badge badge bg-${row.statusClass}">${data}</span>`;
+                        }
+                    },
+                    { data: 'retryCount' },
+                    { data: 'scheduledDate' },
+                    { data: 'sentDate' },
+                    { data: 'createDate' },
+                    {
+                        data: 'id',
+                        orderable: false,
+                        render: function(data) {
+                            return `<div class="action-buttons">
+                                        <a href="@Url.Action("Details", "CommunicationQueues")/${data}" class="btn btn-sm btn-outline-info">
+                                            <i class="bx bx-detail"></i>
+                                        </a>
+                                        <a href="@Url.Action("Delete", "CommunicationQueues")/${data}" class="btn btn-sm btn-outline-danger">
+                                            <i class="bx bx-trash"></i>
+                                        </a>
+                                    </div>`;
+                        }
+                    }
+                ],
+                order: [[5, 'desc']], // Default sort by scheduled date
+                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                pageLength: 25,
+                dom: '<"row mb-3"<"col-md-6"l><"col-md-6 text-end"f>><"row"<"col-md-12"t>><"row"<"col-md-5"i><"col-md-7"p>>',
+                language: {
+                    processing: '<i class="bx bx-loader bx-spin font-size-24"></i>',
+                    paginate: {
+                        previous: '<i class="bx bx-chevron-left"></i>',
+                        next: '<i class="bx bx-chevron-right"></i>'
+                    }
+                }
+            });
+            
+            // Toggle filters
+            $('#toggleFilters').click(function() {
+                $('#filtersSection').slideToggle();
+                
+                // Change icon
+                const icon = $(this).find('i');
+                if (icon.hasClass('bx-chevron-down')) {
+                    icon.removeClass('bx-chevron-down').addClass('bx-chevron-up');
+                } else {
+                    icon.removeClass('bx-chevron-up').addClass('bx-chevron-down');
+                }
+            });
+            
+            // Apply filters
+            $('#applyFilters').click(function() {
+                table.ajax.reload();
+            });
+            
+            // Clear filters
+            $('#clearFilters').click(function() {
+                $('#filterSubject, #filterRecipient').val('');
+                $('#filterContactMethod, #filterStatus').val('');
+                $('#filterDateFrom, #filterDateTo').val('');
+                table.ajax.reload();
+            });
+            
+            // Add enter key handling for text inputs
+            $('#filterSubject, #filterRecipient').keypress(function(e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    table.ajax.reload();
+                }
+            });
+            
+            // Initialize tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            // Add date range validation
+            $('#filterDateTo').change(function() {
+                const fromDate = $('#filterDateFrom').val();
+                const toDate = $(this).val();
+                
+                if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+                    alert('End date must be greater than or equal to start date');
+                    $(this).val('');
+                }
+            });
+            
+            // Also validate when from date changes
+            $('#filterDateFrom').change(function() {
+                const fromDate = $(this).val();
+                const toDate = $('#filterDateTo').val();
+                
+                if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+                    alert('End date must be greater than or equal to start date');
+                    $('#filterDateTo').val('');
+                }
+            });
         });
     </script>
+}
+
+@functions {
+    public string GetStatusBadgeColor(string status)
+    {
+        if (string.IsNullOrEmpty(status))
+            return "secondary";
+            
+        return status.ToLower() switch
+        {
+            "sent" => "success",
+            "delivered" => "success",
+            "failed" => "danger",
+            "pending" => "warning",
+            "processing" => "info",
+            "retry" => "primary",
+            "cancelled" => "dark",
+            _ => "secondary"
+        };
+    }
 }

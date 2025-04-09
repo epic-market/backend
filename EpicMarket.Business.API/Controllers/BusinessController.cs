@@ -2,6 +2,7 @@
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using EpicMarket.Entities.Constants;
 using EpicMarket.Entities.CustomModels;
 using EpicMarket.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -23,8 +24,11 @@ namespace EpicMarket.Business.API.Controllers
         private readonly ILogger<BusinessController> logger;
 		private readonly UserManager<AppUser> userManager;
 		private readonly IBusinessService businessService;
+        private readonly ApplicationDbContext dbContext;
+        private readonly IHttpContextAccessor httpContextAccessor;
         private readonly IAttachmentService attachmentService;
         private readonly IFileService fileStoreService;
+        private readonly ICommunicationService communicationService;
         private readonly IApplicationConfigurationService applicationConfigurationService;
         private readonly IConfiguration _configuration;
 
@@ -36,6 +40,7 @@ namespace EpicMarket.Business.API.Controllers
                                     IHttpContextAccessor httpContextAccessor,
                                     IAttachmentService attachmentService,
                                     IFileService fileStoreService,
+                                    ICommunicationService communicationService,
                                     IApplicationConfigurationService applicationConfigurationService,
                                     IConfiguration configuration
                                   ) : base(dbContext, httpContextAccessor)
@@ -43,8 +48,11 @@ namespace EpicMarket.Business.API.Controllers
             this.logger = logger;
 			userManager = _userManager;
 			this.businessService = businessService;
+            this.dbContext = dbContext;
+            this.httpContextAccessor = httpContextAccessor;
             this.attachmentService = attachmentService;
             this.fileStoreService = fileStoreService;
+            this.communicationService = communicationService;
             this.applicationConfigurationService = applicationConfigurationService;
             _configuration = configuration;
         }
@@ -127,19 +135,14 @@ namespace EpicMarket.Business.API.Controllers
                     }, result.BusinessId);
                 }
             }
-            var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "..", "EmailTemplates");
-            var emailService = new EmailService(templatePath, _configuration); // Pass IConfiguration to EmailService
-           var emailModel = new 
-            {
-                 Business_Name = businessRegisterDto.BusinessName, // Assuming UserName is the business name
-               Processing_Days = "5", // Example processing days
-               Support_Email = "support@epicmarket.com", // Replace with actual support email
-               Support_Phone = "123-456-7890", // Replace with actual support phone
-               Current_Year = DateTime.Now.Year.ToString(),
-               Company_Address = "123 Epic Market St, Epic City, EC 12345", // Replace with actual address
-            };
+            var emailModel = EmailModel.GetUnderReviewForBusinessModel(businessRegisterDto.BusinessName);
 
-            await emailService.SendEmailAsync("UnderReviewForBusiness", emailModel,this.LoggedInUserName , "we are reviewing your business details");
+            await communicationService.SendTemplatedEmailAsync(
+                this.LoggedInUserName,
+                EmailSubjectConstants.UnderReviewForBusiness,
+                EmailTemplateConstants.UnderReviewForBusiness,
+                emailModel
+            );
 
             response.Data = new BusinessDTO_Result
             {

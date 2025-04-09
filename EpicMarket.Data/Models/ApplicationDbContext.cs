@@ -239,8 +239,8 @@ namespace EpicMarket.Data.Models
         public DbSet<ProofType> ProofTypes { get; set; }
 
         public DbSet<OTPVerification> OTPVerifications { get; set; }
-
-        public DbSet<Category> Categories { get; set; }
+        public DbSet<CommunicationStatus> CommunicationStatus { get; set; }
+        public DbSet<CatalogCategory> CatalogCategories { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

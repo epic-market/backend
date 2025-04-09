@@ -4,10 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EpicMarket.Entities.CustomModels
+namespace EpicMarket.Entities.Constants
 {
 
-
+    public static class CommunicationStatusConstants
+    {
+        public const string Queued = "Queued";
+        public const string Sent = "Sent";
+        public const string Failed = "Failed";
+        public const string Retrying = "Retrying";
+        
+    }
 
 
     public static class OrderType
@@ -21,19 +28,22 @@ namespace EpicMarket.Entities.CustomModels
 
         public const string ADMIN_USERID = "admin@epicmarket.in";
         public const string ACCESSTYPE_READWRITE = "ReadWrite";
-	}
+        public const string SUPPORT_EMAIL = "support@epicmarket.in";
+        public const string SUPPORT_PHONE = "123-456-7890";
+        public const string COMPANY_ADDRESS = "123 Epic Market St, Epic City, EC 12345";
+    }
 
-	public static class StatusConstants
-	{
-		public const string UNVERIFIED = "Unverified";
+    public static class StatusConstants
+    {
+        public const string UNVERIFIED = "Unverified";
         public const string SENDTOVERIFICATION = "SendToVerification";
-		public const string PENDING = "Pending";
-		public const string VERIFIED = "Verified";
-		public const string REJECTED = "Rejected";
-	}
+        public const string PENDING = "Pending";
+        public const string VERIFIED = "Verified";
+        public const string REJECTED = "Rejected";
+    }
 
 
-	public static class ROLES
+    public static class ROLES
     {
         public const string BUSINESS_OWNER = "businessOwner";
         public const string BUSINESS_EMPLOYEE = "businessEmployee";
@@ -45,15 +55,15 @@ namespace EpicMarket.Entities.CustomModels
 
     }
 
-	public static class ApplicationConfigurationConstants
-	{
-		public const string Products = "Products";
-		public const string LOGO = "LOGO";
+    public static class ApplicationConfigurationConstants
+    {
+        public const string Products = "Products";
+        public const string LOGO = "LOGO";
         public const string BasePath = "BASEPATH";
         public const string Business = "BUSINESS";
         public const string APIROUTE = "APIROUTE";
-		public const string FILEURL = "FILEURL";
-		public const string THUMBNAIL = "THUMBNAIL";
+        public const string FILEURL = "FILEURL";
+        public const string THUMBNAIL = "THUMBNAIL";
         public const string branches = "branches";
         public const string BranchesPhotos = "BranchesPhotos";
         public const string BranchThumbnail = "BranchThumbnail";
@@ -65,8 +75,8 @@ namespace EpicMarket.Entities.CustomModels
         public const string Business = "BUSINESSPATH";
         public const string LOGOPATH = "LOGOPATH";
         public const string ProofPATH = "ProofPATH";
-		public const string PRODUCTPATH = "ProductPath";
-		public const string THUMBNAILPATH = "THUMBNAILPATH";
+        public const string PRODUCTPATH = "ProductPath";
+        public const string THUMBNAILPATH = "THUMBNAILPATH";
         public const string ProductInternal = "PRODUCTINTERNAL";//
 
         public const string branches = "branches";
@@ -85,7 +95,7 @@ namespace EpicMarket.Entities.CustomModels
         public const string Support = "Support";
     }
 
-        public static class TaskDescriptions
+    public static class TaskDescriptions
     {
         public const string Business = "Verification For the Business";
 
@@ -94,11 +104,11 @@ namespace EpicMarket.Entities.CustomModels
     {
         public const string Catelog = "Catelog";
         public const string CatelogVariant = "CatelogVariant";
-		public const string Branch = "Branch";
+        public const string Branch = "Branch";
         public const string Employees = "Employees";
         public const string Order = "Order";
         public const string Business = "Business";
-		public const string Tasks = "Tasks";
+        public const string Tasks = "Tasks";
         public const string ProductInternal = "ProductInternal";//
         public const string Profile = "Profile";//
         public const string Proof = "Proof";
@@ -147,8 +157,8 @@ namespace EpicMarket.Entities.CustomModels
         public const string BUSINESS_CATEGORY = "BusinessCategory";
         public const string LOGO = "Logo";
         public const string PROOF = "Proof";
-		public const string PRODUCTIMAGES = "Products";
-		public const string THUMBNAIL = "Thumbnail";
+        public const string PRODUCTIMAGES = "Products";
+        public const string THUMBNAIL = "Thumbnail";
         public const string BRANCH_PHOTOS = "BranchPhotos";
         public const string BRANCH_THUMBNAIL = "BranchThumbnail";
         public const string TASK = "Task";
@@ -168,7 +178,7 @@ namespace EpicMarket.Entities.CustomModels
         public const string AddEmployees = "AddEmployees";
         public const string EditEmployees = "EditEmployees";
         public const string AddOrder = "AddOrder";
-        public const string EditOrder = "EditOrder"; 
+        public const string EditOrder = "EditOrder";
         public const string AddBusiness = "AddBusiness";
         public const string EditBusiness = "EditBusiness";
         public const string AddAccessControlList = "AddAccessControlList";

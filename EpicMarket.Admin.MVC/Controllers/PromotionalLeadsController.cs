@@ -10,16 +10,16 @@ using EpicMarket.Data.Models;
 using System.Reflection.Metadata;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
-using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using System.IO;
 using OfficeOpenXml;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
 
-   [Authorize(Roles = $"{ROLES.SUPPORT},{ROLES.ROOT},{ROLES.ADMIN}")]
+    [Authorize(Roles = $"{ROLES.SUPPORT},{ROLES.ROOT},{ROLES.ADMIN}")]
     public class PromotionalLeadsController : Controller
     {
         private readonly ApplicationDbContext _context;

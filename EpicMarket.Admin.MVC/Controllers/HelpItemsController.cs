@@ -11,8 +11,10 @@ using System.Reflection.Metadata;
 using System.Security.Claims;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
-using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Entities.Constants;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 namespace EpicMarket.Admin.MVC.Controllers
 {
     [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
@@ -70,7 +72,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Title,Description,PageID,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] HelpItem helpItem)
+        public async Task<IActionResult> Create([Bind("ID,Name,Title,Description,PageID,IsShownOnPage,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] HelpItem helpItem)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             helpItem.CreateBy = userName;

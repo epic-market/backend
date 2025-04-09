@@ -8,6 +8,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Amazon.S3;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +20,23 @@ builder.Configuration
 	.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
 	.AddEnvironmentVariables();
 
+// Configure request size limits
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.MaxRequestBodySize = int.MaxValue;
+});
+
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = int.MaxValue;
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = int.MaxValue;
+    options.ValueLengthLimit = int.MaxValue;
+    options.MemoryBufferThreshold = int.MaxValue;
+});
 
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddControllers();

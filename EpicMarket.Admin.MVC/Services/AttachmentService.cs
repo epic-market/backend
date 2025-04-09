@@ -3,13 +3,13 @@ using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Admin.MVC.Models;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
-using EpicMarket.Entities.CustomModels;
+using EpicMarket.Entities.Constants;
 using Microsoft.EntityFrameworkCore;
 using System.Drawing.Text;
 
 namespace EpicMarket.Admin.MVC.Services
 {
-	public class AttachmentService : IAttachmentService
+    public class AttachmentService : IAttachmentService
 	{
 		private readonly ApplicationDbContext _context;
 		private readonly IFileService fileService;

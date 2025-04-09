@@ -1,7 +1,7 @@
 ﻿using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
-using EpicMarket.Entities.CustomModels;
+using EpicMarket.Entities.Constants;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -26,13 +26,13 @@ namespace EpicMarket.Services
 		}
 
         public async Task<int> GetAttachmentId(string key)
+       {
+         var attachment = await _context.Attachments.FirstOrDefaultAsync(a => a.DocumentFolderPath + a.DocumentFile == key);
+        if (attachment != null)
         {
-            var attachment = await _context.Attachments.FirstOrDefaultAsync(a => a.DocumentFile == key) ;
-            if(attachment != null)
-            {
-                return attachment.ID;
-            }
-            return 0;
+            return attachment.ID;
+        }
+        return 0;
         }
 
         public async  Task<int> InsertAttachment(AttachmentDTO attachmentDTO)

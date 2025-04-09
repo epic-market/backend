@@ -9,7 +9,6 @@ using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
-using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Authorization;
 using EpicMarket.Admin.MVC.Attributes;
 using EpicMarket.Entities.Constants;

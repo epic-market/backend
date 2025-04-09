@@ -10,8 +10,7 @@ namespace EpicMarket.Entities
     {
         public int Id { get; set; }
 
-        public string CategoryTitle { get; set; }
+        public string Name { get; set; }
 
-        public string TypeOfFAQ { get; set; }
     }
 }
