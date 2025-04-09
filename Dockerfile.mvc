@@ -18,5 +18,6 @@ RUN dotnet publish "./EpicMarket.Admin.MVC/EpicMarket.Admin.MVC.csproj" -c Relea
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /mvc
 COPY --from=build-env /src/out .
+COPY --from=build-env /src/EmailTemplates /mvc/EmailTemplates
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "EpicMarket.Admin.MVC.dll"]

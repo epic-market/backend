@@ -24,5 +24,6 @@ RUN dotnet publish "./EpicMarket.Business.API/EpicMarket.Business.API.csproj" -c
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /api
 COPY --from=build-env /src/out .
+COPY --from=build-env /src/EmailTemplates /api/EmailTemplates
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "EpicMarket.Business.API.dll"]
