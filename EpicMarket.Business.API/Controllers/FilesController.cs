@@ -42,13 +42,6 @@ namespace EpicMarket.Business.API.Controllers
 				Data = key
 			};
 		}
- 
-		[HttpGet]
-		public async Task<IActionResult> GetAllFilesAsync(string? prefix)
-		{
-			var allfiles =  await this.fileService.GetAllFilesAsync(prefix);
-			return Ok(allfiles);
-		}
 
 		[HttpGet("preview")]
         [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Client, NoStore = false)]
@@ -58,17 +51,11 @@ namespace EpicMarket.Business.API.Controllers
 			return File(fileObject.fileStream, fileObject.contentType);
 		}
 
-		[HttpDelete]
-		public async Task<IActionResult> DeleteFileAsync(string key)
-		{
-		    await this.fileService.DeleteFileAsync(key);
-			return NoContent();
-		}
 
 
-        [HttpDelete("images")]
+        [HttpDelete("multiple")]
         [Authorize(Roles = ROLES.BUSINESS_OWNER)]
-        public async Task<ActionResult<OperationResult<bool>>> DeleteImage(ListOfImages Keys)
+        public async Task<ActionResult<OperationResult<bool>>> DeleteFile(ListOfImages Keys)
         {
             var response = new OperationResult<bool>();
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;

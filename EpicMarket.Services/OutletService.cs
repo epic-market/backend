@@ -97,13 +97,14 @@ namespace EpicMarket.Services
             var addressModel = new AddressDto();
             var events = "";
             var mailevent = "";
+
+            addressModel.ID = _context.Outlets.Include(o => o.Address).AsNoTracking().FirstOrDefault(o => o.ID == id).AddressID;
             addressModel.Address1 = branchDto.Address;
             addressModel.City = branchDto.City;
             addressModel.State = branchDto.State;
             addressModel.Pincode = branchDto.Pincode;
             addressModel.Latitude = branchDto.Latitude;
             addressModel.Longitude = branchDto.Longitude;
-            addressModel.ID = _context.Outlets.Include(o => o.Address).AsNoTracking().FirstOrDefault(o => o.ID == id).AddressID;
 
             // Assuming AddAddress method updates the existing address if ID is provided, or adds a new one if ID is 0
             int addressId = await addressService.AddUpdateAddress(addressModel);

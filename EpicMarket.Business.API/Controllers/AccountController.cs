@@ -31,17 +31,17 @@ namespace EpicMarket.Business.API.Controllers
         private readonly IConfiguration _configuration;
         private readonly IOTPService _otpService;
         public UserController(
-                                    UserManager<AppUser> userManager,
-                                    SignInManager<AppUser> signInManager,
-                                    ITokenService tokenService,
-                                    IMapper mapper,
-                                    ILogger<UserController> logger,
-                                    ICommunicationService communication,
-                                    ApplicationDbContext dbContext,
-                                    IHttpContextAccessor httpContextAccessor,
-                                    IProfileService profileService,
-                                    IConfiguration configuration,
-                                    IOTPService otpService
+                                UserManager<AppUser> userManager,
+                                SignInManager<AppUser> signInManager,
+                                ITokenService tokenService,
+                                IMapper mapper,
+                                ILogger<UserController> logger,
+                                ICommunicationService communication,
+                                ApplicationDbContext dbContext,
+                                IHttpContextAccessor httpContextAccessor,
+                                IProfileService profileService,
+                                IConfiguration configuration,
+                                IOTPService otpService
                                     ) : base(dbContext, httpContextAccessor)
 		{
             _signInManager = signInManager;

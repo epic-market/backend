@@ -47,7 +47,7 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpPost]
         [Authorize(Roles = ROLES.BUSINESS_OWNER)]
-        public async Task<ActionResult<OperationResult<int>>> AddProduct([FromBody] AddProductsDto productsDto)
+        public async Task<ActionResult<OperationResult<int>>> AddProduct([FromBody] AddProductsParams productsDto)
         {
 
             var response = new OperationResult<int>();
@@ -76,7 +76,7 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = ROLES.BUSINESS_OWNER)]
-        public async Task<ActionResult<OperationResult<int>>> UpdateProduct([FromRoute] int id, [FromBody] AddProductsDto productsDto)
+        public async Task<ActionResult<OperationResult<int>>> UpdateProduct([FromRoute] int id, [FromBody] AddProductsParams productsDto)
         {
 
             var response = new OperationResult<int>();
@@ -115,24 +115,6 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         [HttpGet("Map/{outletID}")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<List<ProductsMapOptionResult>>>> GetAllProductForMap(int outletID)
@@ -144,9 +126,6 @@ namespace EpicMarket.Business.API.Controllers
 			response.Data = results;
 			return Ok(response);
 		}
-
-
-
 
 
         [HttpGet("Inventory")]
@@ -161,13 +140,9 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
-
-
-
-
         [HttpGet]
         [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
-        public async Task<ActionResult<OperationResult<GetDataResult<List<ProductResult>>>>> GetAllProducts([FromQuery] ProductParams productResult)
+        public async Task<ActionResult<OperationResult<GetDataResult<List<ProductResult>>>>> GetAllProducts([FromQuery] ProductListParams productResult)
 		{
 			var response = new OperationResult<GetDataResult<List<ProductResult>>>();
 			this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = productResult }));
@@ -181,9 +156,9 @@ namespace EpicMarket.Business.API.Controllers
 
 		[HttpGet("{id}")]
         [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
-        public async Task<ActionResult<OperationResult<ProductsDto>>> GetProductDetails(int id)
+        public async Task<ActionResult<OperationResult<ProductDetailsResult>>> GetProductDetails(int id)
         {
-            var response = new OperationResult<ProductsDto>();
+            var response = new OperationResult<ProductDetailsResult>();
             this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = id }));
             var results = await productService.GetProductDetails(id);
             this.logger.LogInformation("Products Controller -> GetAllProducts()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
@@ -300,10 +275,10 @@ namespace EpicMarket.Business.API.Controllers
         
         [HttpGet("{productId}/variants")]
         [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
-        public async Task<ActionResult<OperationResult<List<ProductVariantResponse>>>> GetProductVariants(
+        public async Task<ActionResult<OperationResult<List<SingleProductVariantsResult>>>> GetProductVariants(
             [FromRoute] int productId)
         {
-            var response = new OperationResult<List<ProductVariantResponse>>();
+            var response = new OperationResult<List<SingleProductVariantsResult>>();
             this.logger.LogInformation("Products Controller -> GetProductVariants()-> productId: {0}", productId);
             
             response.Data = await productService.GetProductVariants(productId);
