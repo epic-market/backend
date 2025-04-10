@@ -226,26 +226,42 @@
                 const roleFilter = $('#roleFilter').val();
                 const accessTypeFilter = $('#accessTypeFilter').val();
                 
+                const table = $('#accessControlMatrix').DataTable();
+                
                 // Show loading indicator
                 $('#loading-indicator').removeClass('d-none');
-                $('#accessControlMatrix tbody tr').addClass('d-none');
                 
                 setTimeout(function() {
                     // Hide loading indicator
                     $('#loading-indicator').addClass('d-none');
                     
-                    // Filter rows based on securable
-                    let visibleRows = $('#accessControlMatrix tbody tr');
+                    // Custom search function for DataTable
+                    $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+                        const row = $(table.row(dataIndex).node());
+                        let showRow = true;
+                        
+                        // Filter by securable name
+                        if (securableFilter) {
+                            const securableName = data[0].toLowerCase();
+                            showRow = showRow && securableName.includes(securableFilter);
+                        }
+                        
+                        // Filter by access type if specified
+                        if (accessTypeFilter && showRow) {
+                            const hasMatchingAccessType = row.find('select:visible').toArray().some(select => 
+                                $(select).val() === accessTypeFilter
+                            );
+                            showRow = showRow && hasMatchingAccessType;
+                        }
+                        
+                        return showRow;
+                    });
                     
-                    if (securableFilter) {
-                        visibleRows = visibleRows.filter(function() {
-                            const securableName = $(this).data('securable').toLowerCase();
-                            return securableName.includes(securableFilter);
-                        });
-                    }
+                    // Clear previous search function
+                    table.draw();
                     
-                    // Show filtered rows
-                    visibleRows.removeClass('d-none');
+                    // Remove the custom search function after drawing
+                    $.fn.dataTable.ext.search.pop();
                     
                     // Filter columns based on role
                     if (roleFilter) {
@@ -253,39 +269,26 @@
                         $('#accessControlMatrix th').each(function(index) {
                             if (index > 0 && $(this).text() !== roleFilter) {
                                 const columnIndex = $(this).index();
-                                $('#accessControlMatrix tr').find(`td:nth-child(${columnIndex + 1})`).addClass('d-none');
-                                $(this).addClass('d-none');
+                                table.column(columnIndex).visible(false);
+                            } else {
+                                table.column(index).visible(true);
                             }
                         });
                     } else {
                         // Show all columns
-                        $('#accessControlMatrix th, #accessControlMatrix td').removeClass('d-none');
-                    }
-                    
-                    // Filter by access type if specified
-                    if (accessTypeFilter) {
-                        // Hide rows where no cell has the selected access type
-                        $('#accessControlMatrix tbody tr:visible').each(function() {
-                            const row = $(this);
-                            const hasMatchingAccessType = row.find('select:visible').toArray().some(select => 
-                                $(select).val() === accessTypeFilter
-                            );
-                            
-                            if (!hasMatchingAccessType) {
-                                row.addClass('d-none');
-                            }
-                        });
+                        table.columns().visible(true);
                     }
                     
                     // Show empty state if no visible rows
-                    if ($('#accessControlMatrix tbody tr:visible').length === 0) {
+                    if (table.page.info().recordsDisplay === 0) {
                         $('#empty-state').removeClass('d-none');
                     } else {
                         $('#empty-state').addClass('d-none');
                     }
                     
                     // Update record count
-                    $('#tableRecordsCount').text($('#accessControlMatrix tbody tr:visible').length);
+                    $('#tableRecordsCount').text(table.page.info().recordsDisplay);
+                    
                 }, 300); // Simulate loading delay
             }
 
@@ -422,7 +425,7 @@
             // Initialize DataTable for better sorting and pagination
             $('#accessControlMatrix').DataTable({
                 paging: true,
-                searching: false, // We have our own filters
+                searching: true, // Enable built-in searching
                 info: true,
                 ordering: true,
                 lengthChange: true,

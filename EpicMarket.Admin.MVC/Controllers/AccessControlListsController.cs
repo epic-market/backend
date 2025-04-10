@@ -178,9 +178,6 @@ namespace EpicMarket.Admin.MVC.Controllers
 
                 await _context.SaveChangesAsync();
 
-                // Clear the permissions cache to ensure changes take effect immediately
-                SecurableService.ClearAllCache();
-
                 return Json(new { success = true });
             }
             catch (Exception ex)
