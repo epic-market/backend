@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Authorization;
-using EpicMarket.Entities.CustomModels;
 using System.Security.Claims;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -69,7 +69,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Question,Answer,CategoryId,RoleType")] FAQ fAQ)
+        public async Task<IActionResult> Create([Bind("Id,Title,Description,CategoryId")] FAQ fAQ)
         {
             if (ModelState.IsValid)
             {
@@ -117,7 +117,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Question,Answer,CategoryId,RoleType")] FAQ fAQ)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,CategoryId")] FAQ fAQ)
         {
             if (id != fAQ.Id)
             {

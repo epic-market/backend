@@ -9,7 +9,8 @@ using System.Threading.Tasks;
 
 namespace EpicMarket.Data.Models
 {
-    public class Category : BaseModel
+    [Table("CatalogCategories")]
+    public class CatalogCategory : BaseModel
     {
         public int ID { get; set; }
 

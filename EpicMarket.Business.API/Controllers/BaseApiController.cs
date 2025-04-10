@@ -2,7 +2,7 @@
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
-using EpicMarket.Entities.CustomModels;
+using EpicMarket.Entities.Constants;
 using EpicMarket.Services.Extentions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +14,7 @@ using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext
 
 namespace EpicMarket.Business.API.Controllers
 {
-	//[ServiceFilter(typeof(LogUserActivity))]
+    //[ServiceFilter(typeof(LogUserActivity))]
     [ApiController]
     public class BaseApiController : ControllerBase
     {

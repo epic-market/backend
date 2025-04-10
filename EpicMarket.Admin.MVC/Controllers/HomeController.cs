@@ -2,10 +2,10 @@ using EpicMarket.Admin.MVC.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using EpicMarket.Entities.CustomModels;
 using EpicMarket.Data.Models;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {

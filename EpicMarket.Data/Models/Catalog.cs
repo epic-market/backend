@@ -34,7 +34,7 @@ namespace EpicMarket.Data.Models
 
         public virtual StatusOptionSet StatusOptionSets { get; set; }
 
-        public virtual Category? Category { get; set; }
+        public virtual CatalogCategory? Category { get; set; }
 
         public virtual ICollection<Rating> Ratings { get; set; }
 

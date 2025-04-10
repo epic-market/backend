@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EpicMarket.Contracts
 {
-    public interface IBranchService
+    public interface IOutletService
     {
         Task<GetDataResult<List<BranchResult>>> GetAllBranches(BranchParams branchParams, int BusinessID);
 

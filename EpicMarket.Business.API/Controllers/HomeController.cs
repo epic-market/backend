@@ -11,7 +11,7 @@ namespace EpicMarket.Business.API.Controllers
 {
 
     [AllowAnonymous]
-    [Route("api/home")]
+    [Route("api/[controller]")]
     public class HomeController : BaseApiController
     {
         private readonly ILogger<HomeController> logger;
@@ -25,14 +25,14 @@ namespace EpicMarket.Business.API.Controllers
             this.homeService = homeService;
         }
 
-        [HttpGet("GetAllFaqCategory/{typeOfCategory}")]
-        public async Task<ActionResult<OperationResult<List<FaqCategoryDto>>>> GetAllFaqCategory(string typeOfCategory)
+        [HttpGet("faq/categories")]
+        public async Task<ActionResult<OperationResult<List<FaqCategoryDto>>>> GetAllFaqCategory()
         {
             var reponse = new OperationResult<List<FaqCategoryDto>>();
 
             this.logger.LogInformation("Home Controller -> GetAllFaqCategory()");
 
-            var list = await homeService.GetAllFaqCategoryAsync(typeOfCategory);
+            var list = await homeService.GetAllFaqCategoryAsync();
 
             this.logger.LogInformation("Home Controller-> GetAllFaqCategory()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = list }));
 
@@ -41,28 +41,49 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(list);
         }
 
-
-        [HttpGet("GetAllFAQ/{CateoryID}")]
-        public async Task<ActionResult<OperationResult<List<FaqDto>>>> GetAllFaqByCategoryID(int CateoryID)
+        [HttpGet("faq")]
+        public async Task<ActionResult<OperationResult<List<FaqDto>>>> GetFaqs([FromQuery] string category, [FromQuery] string search)
         {
-            var reponse = new OperationResult<List<FaqDto>>();
+            var response = new OperationResult<List<FaqDto>>();
+            this.logger.LogInformation("Home Controller -> GetFaqs()");
 
-            this.logger.LogInformation("Home Controller -> GetAllFaqByCategoryID()");
+            List<FaqDto> list;
+            if (!string.IsNullOrEmpty(category) && category != "all")
+            {
+                // Try parse category to int since our existing method expects an integer
+                if (int.TryParse(category, out int categoryId))
+                {
+                    list = await homeService.GetAllFaqByCategoryAsync(categoryId, search);
+                }
+                else
+                {
+                    return BadRequest("Invalid category format");
+                }
+            }
+            else
+            {
+                // Handle the "all" category case or when category is not specified
+                // Assuming we need to get FAQs from all categories
+                var categories = await homeService.GetAllFaqCategoryAsync();
+                list = new List<FaqDto>();
+                
+                foreach (var cat in categories)
+                {
+                    var faqs = await homeService.GetAllFaqByCategoryAsync(cat.Id, search);
+                    list.AddRange(faqs);
+                }
+            }
 
-            var list = await homeService.GetAllFaqByCategoryAsync(CateoryID);
+            this.logger.LogInformation("Home Controller-> GetFaqs()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = list }));
 
-            this.logger.LogInformation("Home Controller-> GetAllFaqByCategoryID()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = list }));
-
-            reponse.Data = list;
-
-            return Ok(list);
+            response.Data = list;
+            return Ok(response);
         }
 
-
-        [HttpGet("GetAllBlogs")]
+        [HttpGet("blogs")]
         public async Task<ActionResult<OperationResult<List<BlogDto>>>> GetAllBlogs([FromQuery]BlogParams blogs)
         {
-            var reponse = new OperationResult<List<BlogDto>>();
+            var response = new OperationResult<List<BlogDto>>();
 
             this.logger.LogInformation("Home Controller -> GetAllBlogs()");
 
@@ -70,57 +91,47 @@ namespace EpicMarket.Business.API.Controllers
 
             this.logger.LogInformation("Home Controller-> GetAllBlogs()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = list }));
 
-            reponse.Data = list;
+            response.Data = list;
 
-            return Ok(list);
+            return Ok(response);
         }
 
-        [HttpGet("GetAllBlogsByCategory")]
-        public async Task<ActionResult<OperationResult<List<BlogDto>>>> GetAllBlogsByCategory([FromQuery] BlogsByCategoryParams blogs)
+        [HttpGet("blogs/categories")]
+        public async Task<ActionResult<OperationResult<List<BlogCategoryDto>>>> GetAllBlogCategories()
         {
-            var reponse = new OperationResult<List<BlogDto>>();
+            var response = new OperationResult<List<BlogCategoryDto>>();
 
-            this.logger.LogInformation("Home Controller -> GetAllBlogsByCategory()");
+            this.logger.LogInformation("Home Controller -> GetAllBlogCategories()");
 
-            var list = await homeService.GetAllBlogsByCategory(blogs);
+            var categories = await homeService.GetAllBlogCategories();
 
-            this.logger.LogInformation("Home Controller-> GetAllBlogsByCategory()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = list }));
+            this.logger.LogInformation("Home Controller-> GetAllBlogCategories()-> return {0}", JsonConvert.SerializeObject(new { Categories = categories }));
 
-            reponse.Data = list;
+            response.Data = categories;
 
-            return Ok(list);
+            return Ok(response);
         }
 
-        [HttpGet("GetBlogDetails/{blogId}")]
+        [HttpGet("blogs/{blogId}")]
         public async Task<ActionResult<OperationResult<BlogDto>>> GetBlogDetails(int blogId)
         {
-            var reponse = new OperationResult<BlogDto>();
+            var response = new OperationResult<BlogDto>();
 
-            this.logger.LogInformation("Home Controller -> GetAllBlogs()");
+            this.logger.LogInformation("Home Controller -> GetBlogDetails({0})", blogId);
 
-            var list = await homeService.GetBlogDetails(blogId);
+            var blog = await homeService.GetBlogDetails(blogId);
 
-            this.logger.LogInformation("Home Controller-> GetAllBlogs()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = list }));
+            if (blog == null)
+            {
+                response.Message = "Blog not found";
+                return NotFound(response);
+            }
 
-            reponse.Data = list;
+            this.logger.LogInformation("Home Controller-> GetBlogDetails()-> return {0}", JsonConvert.SerializeObject(new { Blog = blog }));
 
-            return Ok(list);
-        }
+            response.Data = blog;
 
-        [HttpGet("FAQ/Customer")]
-        public async Task<ActionResult<OperationResult<List<FaqDto>>>> GetAllFaqsCustomerAsync()
-        {
-            var reponse = new OperationResult<List<FaqDto>>();
-
-            this.logger.LogInformation("Home Controller -> GetAllFaqsCustomerAsync()");
-
-            var list = await homeService.GetAllFaqsCustomerAsync();
-
-            this.logger.LogInformation("Home Controller-> GetAllFaqsCustomerAsync()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = list }));
-
-            reponse.Data = list;
-
-            return Ok(list);
+            return Ok(response);
         }
     }
 }

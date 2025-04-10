@@ -10,8 +10,8 @@ using EpicMarket.Data.Models;
 using System.Security.Claims;
 using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Entities;
-using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {

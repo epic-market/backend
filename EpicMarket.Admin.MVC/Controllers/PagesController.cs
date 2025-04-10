@@ -13,8 +13,8 @@ using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Admin.MVC.Services;
 using System.Text.Json;
 using EpicMarket.Entities;
-using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {

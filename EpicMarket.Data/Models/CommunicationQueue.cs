@@ -9,7 +9,7 @@ using EpicMarket.Data.Common;
 
 namespace EpicMarket.Data.Models
 {
-    public class CommunicationQueue:BaseModel
+    public class CommunicationQueue : BaseModel
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -24,12 +24,19 @@ namespace EpicMarket.Data.Models
 
         public string MessageText { get; set; } //phone 
 
-        public int? Attempts { get; set; }
+        public int RetryCount { get; set; } = 0; // Tracking retries
 
         public DateTime? ScheduledDate { get; set; } //optional
 
-        public string NotificationRecipient { get; set; } //to emaill
+        public string NotificationRecipient { get; set; } //to email
 
+        public int? CommunicationStatusId { get; set; } // Reference to status
+        
+        public string TemplateName { get; set; } // Name of the template used
+        
+        public DateTime? SentDate { get; set; } // When the communication was successfully sent
+        
+        public string ErrorMessage { get; set; } // Store any error messages
 
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime? SysStartTime { get; set; }
@@ -37,7 +44,9 @@ namespace EpicMarket.Data.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime? SysEndTime { get; set; }
 
-
         public ContactMethod ContactMethod { get; set; }
+        
+        [ForeignKey("CommunicationStatusId")]
+        public virtual CommunicationStatus CommunicationStatus { get; set; }
     }
 }

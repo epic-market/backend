@@ -61,6 +61,6 @@ namespace EpicMarket.Data.Models
         [JsonIgnore]
         public virtual ICollection<BusinessEmployeeMap> BusinessEmployees { get; set; }
         [JsonIgnore]
-        public virtual ICollection<Category> Categories { get; set; }
+        public virtual ICollection<CatalogCategory> Categories { get; set; }
     }
 }

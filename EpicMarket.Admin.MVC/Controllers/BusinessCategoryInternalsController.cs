@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Authorization;
-using EpicMarket.Entities.CustomModels;
 using EpicMarket.Data.ApplicationModels;
 using System.Security.Claims;
 using EpicMarket.Admin.MVC.Contracts;
