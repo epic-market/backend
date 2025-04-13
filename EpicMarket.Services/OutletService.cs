@@ -676,5 +676,89 @@ namespace EpicMarket.Services
             return degree * Math.PI / 180;
         }
 
+        public async Task<CustomerOutletDetailResult> GetCustomerOutletDetailAsync(int outletId, string customerUserName)
+        {
+            var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.BRANCH_THUMBNAIL);
+            var attachmentTypeID_Photos = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.BRANCH_PHOTOS);
+            
+            var outlet = await _context.Outlets
+                .Include(o => o.Address)
+                .Include(o => o.Bussiness)
+                .ThenInclude(b => b.BusinessCategory)
+                .FirstOrDefaultAsync(o => o.ID == outletId && o.IsActive);
+                
+            if (outlet == null)
+            {
+                throw new Exception("Outlet not found or inactive");
+            }
+            
+            // Check if user is subscribed to this outlet
+            var isSubscribed = false;
+            var subscribedStatusID = _context.SubscriptionStatus
+                .FirstOrDefault(c => c.Name == SubscriptionStatusConstants.Subscribed)?.ID;
+                
+            if (!string.IsNullOrEmpty(customerUserName) && subscribedStatusID.HasValue)
+            {
+                var customer = await _context.Users.FirstOrDefaultAsync(u => u.UserName == customerUserName);
+                if (customer != null)
+                {
+                    isSubscribed = await _context.Subscriptions
+                        .AnyAsync(s => s.OutletId == outletId && 
+                                     s.CustomerId == customer.Id &&
+                                     s.StatusID == subscribedStatusID.Value);
+                }
+            }
+            
+            // Get thumbnail and photos
+            var thumbnailPath = await _context.AttachmentLinks
+                .Where(link => link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID &&
+                             link.RecordID == outletId &&
+                             link.Entity.Name == EntityConstants.Branch)
+                .Join(_context.Attachments,
+                    link => link.AttachmentID,
+                    attachment => attachment.ID,
+                    (link, attachment) => $"{attachment.DocumentFolderPath}{attachment.DocumentFile}")
+                .FirstOrDefaultAsync();
+                
+            var photos = await _context.AttachmentLinks
+                .Where(link => link.AttachmentTypeID == attachmentTypeID_Photos.ID &&
+                             link.RecordID == outletId &&
+                             link.Entity.Name == EntityConstants.Branch)
+                .Join(_context.Attachments,
+                    link => link.AttachmentID,
+                    attachment => attachment.ID,
+                    (link, attachment) => $"{attachment.DocumentFolderPath}{attachment.DocumentFile}")
+                .ToListAsync();
+                
+            return new CustomerOutletDetailResult
+            {
+                OutletId = outlet.ID,
+                Name = outlet.Name,
+                Description = outlet.Description,
+                ContactNumber = outlet.ContactNumber,
+                ContactEmail = outlet.ContactEmail,
+                Address = outlet.Address.Address1,
+                City = outlet.Address.City,
+                State = outlet.Address.State,
+                Pincode = outlet.Address.Pincode,
+                Latitude = outlet.Address.Latitude,
+                Longitude = outlet.Address.Longitude,
+                Rating = outlet.Rating,
+                ReviewCount = outlet.ReviewCount,
+                IsOpen = outlet.IsOpen,
+                Thumbnail = thumbnailPath,
+                Photos = photos,
+                TimingList = !string.IsNullOrEmpty(outlet.TimingList) 
+                    ? JsonConvert.DeserializeObject<List<TimingDto>>(outlet.TimingList) 
+                    : new List<TimingDto>(),
+                SocialMediaLinkFacebook = outlet.SocialMediaLinkFacebook,
+                SocialMediaLinkInstagram = outlet.SocialMediaLinkInstagram,
+                SocialMediaLinkTwitter = outlet.SocialMediaLinkTwitter,
+                SocialMediaLinkYoutube = outlet.SocialMediaLinkYoutube,
+                SpecialNoteOfTheDay = outlet.SpecialNoteOfTheDay,
+                BusinessCategory = outlet.Bussiness.BusinessCategory.Name,
+                IsSubscribed = isSubscribed
+            };
+        }
     }
 }

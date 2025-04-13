@@ -15,12 +15,16 @@ namespace EpicMarket.Data.Models
         public int ID { get; set; }
         public int BussinessID { get; set; }
         public int AddressID { get; set; }
-
-
         [DisplayName("Outlet Name")]
         [MaxLength(255)]
         public string Name { get; set; }
         public string Description { get; set; }
+        public string TimingList { get; set; } //the example will be [{"day":"Monday","openTime":"09:00","closeTime":"18:00"},{"day":"Tuesday","openTime":"09:00","closeTime":"18:00"},{"day":"Wednesday","openTime":"09:00","closeTime":"18:00"},{"day":"Thursday","openTime":"09:00","closeTime":"18:00"},{"day":"Friday","openTime":"09:00","closeTime":"18:00"},{"day":"Saturday","openTime":"09:00","closeTime":"18:00"},{"day":"Sunday","openTime":"09:00","closeTime":"18:00"}]
+        public string SocialMediaLinkFacebook { get; set; }
+        public string SocialMediaLinkInstagram { get; set; }
+        public string SocialMediaLinkTwitter { get; set; }
+        public string SocialMediaLinkYoutube { get; set; }
+        public string SpecialNoteOfTheDay { get; set; }
         public long ContactNumber { get; set; }
         public string ContactEmail { get; set; }
         public double? Rating { get; set; }

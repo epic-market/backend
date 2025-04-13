@@ -48,6 +48,23 @@ namespace EpicMarket.Services
             return mapper.Map<List<CategoriesDto>>(categories);
         }     
 
+        public async Task<List<CategoriesDto>> GetCategoriesByOutletId(int outletId)
+        {
+            // Get business ID from outlet
+            var outlet = await _context.Outlets.FirstOrDefaultAsync(o => o.ID == outletId);
+            if (outlet == null)
+            {
+                throw new Exception("Outlet not found");
+            }
+
+            // Get categories for the business
+            var categories = await _context.CatalogCategories
+                .Where(c => c.BusinessID == outlet.BussinessID && c.IsActive)
+                .ToListAsync();
+                
+            return mapper.Map<List<CategoriesDto>>(categories);
+        }
+
         public async Task<CategoriesDto> GetCategory(int id)
         {
             var category = await _context.CatalogCategories.FindAsync(id);

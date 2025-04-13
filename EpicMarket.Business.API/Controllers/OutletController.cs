@@ -342,6 +342,38 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(result);
         }
 
+        // [HttpGet("customer/outlet")]
+        // public async Task<ActionResult<GetDataResult<SubscribedOutletDto>>> GetSubscribedOutlets([FromQuery] int page = 1,[FromQuery] int pageSize = 10)
+        // {
+        //     var customerUserName = this.LoggedInUserName;
+        //     var result = await branchService.GetSubscribedOutletsAsync(customerUserName, page, pageSize);
+        //     return Ok(result);
+        // }
 
+        [HttpGet("customer/{outletId}")]
+        [AllowAnonymous]
+        public async Task<ActionResult<CustomerOutletDetailResult>> GetCustomerOutletDetail(int outletId)
+        {
+            string customerUserName = null;
+            
+            // Check if user is authenticated before getting username
+            if (User.Identity.IsAuthenticated)
+            {
+                customerUserName = this.LoggedInUserName;
+            }
+            
+            var response = new OperationResult<CustomerOutletDetailResult>();
+            
+            this.logger.LogInformation("Outlet Controller -> GetCustomerOutletDetail()-> params {0}", 
+                JsonConvert.SerializeObject(new { OutletId = outletId, CustomerUserName = customerUserName }));
+            
+            var result = await branchService.GetCustomerOutletDetailAsync(outletId, customerUserName);
+            
+            this.logger.LogInformation("Outlet Controller -> GetCustomerOutletDetail()-> return {0}", 
+                JsonConvert.SerializeObject(new { Result = result }));
+            
+            response.Data = result;
+            return Ok(response);
+        }
     }
 }

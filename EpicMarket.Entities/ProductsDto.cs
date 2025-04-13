@@ -23,7 +23,7 @@ namespace EpicMarket.Entities
         public int CategoryId { get; set; }
 		public bool IsRecommended { get; set; }= false;
         public bool RequiresRefrigeration { get; set; } = false;
-        public List<HighlightDto> BaseHightlights { get; set; } //key value pairs
+        public List<HighlightDto> BaseHightlights { get; set; }
         public List<ProductVariantParams> Variants { get; set; }
 	}
 

@@ -33,5 +33,7 @@ namespace EpicMarket.Contracts
         Task<GetDataResult<List<SubscribedOutletDto>>> GetSubscribedOutletsAsync(string customerUserName, int page = 1, int pageSize = 10);
 
         Task<bool> SubscribeOutletAsync(int outletId, string customerUserName);
+
+        Task<CustomerOutletDetailResult> GetCustomerOutletDetailAsync(int outletId, string customerUserName);
     }
 }

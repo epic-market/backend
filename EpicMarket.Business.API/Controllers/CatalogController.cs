@@ -226,6 +226,43 @@ namespace EpicMarket.Business.API.Controllers
 			return Ok(response);
 		}
 
+        /// <summary>
+        /// Get all categories for a specific outlet (customer endpoint)
+        /// </summary>
+        /// <param name="outletId">ID of the outlet</param>
+        /// <returns>List of categories</returns>
+        [HttpGet("customer/categories/{outletId}")]
+        [AllowAnonymous]
+        public async Task<ActionResult<OperationResult<List<CategoriesDto>>>> GetCategoriesByOutlet(int outletId)
+        {
+            var response = new OperationResult<List<CategoriesDto>>();
+            this.logger.LogInformation("Products Controller -> GetCategoriesByOutlet()-> outletId: {0}", outletId);
+            var categories = await catalogCategoryService.GetCategoriesByOutletId(outletId);
+            response.Data = categories;
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Get products filtered by outlet, category, and search term (customer endpoint)
+        /// </summary>
+        /// <param name="parameters">Filter parameters including outlet ID, category, and search term</param>
+        /// <returns>List of products grouped by category</returns>
+        [HttpGet("customer/products")]
+        [AllowAnonymous]
+        public async Task<ActionResult<OperationResult<GetDataResult<List<CustomerResultBaseOnCategory>>>>> GetCustomerProducts([FromQuery] ProductMobileParams parameters)
+        {
+            if (parameters.OutletId <= 0)
+            {
+                return BadRequest("Valid outlet ID is required");
+            }
+
+            var response = new OperationResult<GetDataResult<List<CustomerResultBaseOnCategory>>>();
+            this.logger.LogInformation("Products Controller -> GetCustomerProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = parameters }));
+            var results = await productService.GetAllProductsForMobile(parameters);
+            this.logger.LogInformation("Products Controller -> GetCustomerProducts()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
+            response.Data = results;
+            return Ok(response);
+        }
 
         // [HttpPost("{id}/variants")]
         // [Authorize(Roles = ROLES.BUSINESS_OWNER)]
