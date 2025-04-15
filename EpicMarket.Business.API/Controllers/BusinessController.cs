@@ -222,5 +222,69 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Gets all available business categories with their details and image.
+        /// </summary>
+        [HttpGet("categories")]
+        public async Task<ActionResult<OperationResult<List<BusinessCategoryDto>>>> GetBusinessCategories()
+        {
+            var response = new OperationResult<List<BusinessCategoryDto>>();
+            
+            this.logger.LogInformation("Business Controller -> GetBusinessCategories() -> Retrieving categories");
+            
+            try
+            {
+                var categories = await businessService.GetBusinessCategories();
+                
+                if (categories == null || !categories.Any())
+                {
+                    this.logger.LogWarning("No business categories found");
+                    return NotFound("No business categories available");
+                }
+                
+                this.logger.LogInformation("Business Controller -> GetBusinessCategories() -> Found {0} categories", categories.Count);
+                
+                response.Data = categories;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "Error retrieving business categories");
+                return StatusCode(500, "An error occurred while retrieving business categories");
+            }
+        }
+
+        /// <summary>
+        /// Gets business listings grouped by type (Trending, New, Featured)
+        /// </summary>
+        /// <param name="category">Optional category filter</param>
+        [HttpGet("listings")]
+        public async Task<ActionResult<OperationResult<BusinessGroupsResponseDto>>> GetBusinessListings([FromQuery] string category = null)
+        {
+            var response = new OperationResult<BusinessGroupsResponseDto>();
+            
+            this.logger.LogInformation("Business Controller -> GetBusinessListings() -> Retrieving business listings, Category Filter: {0}", category ?? "None");
+            
+            try
+            {
+                var listings = await businessService.GetBusinessListings(category);
+                
+                if (listings == null || listings.BusinessGroups == null || !listings.BusinessGroups.Any())
+                {
+                    this.logger.LogWarning("No business listings found for category: {0}", category ?? "None");
+                    return NotFound("No business listings available");
+                }
+                
+                this.logger.LogInformation("Business Controller -> GetBusinessListings() -> Found {0} business groups", listings.BusinessGroups.Count);
+                
+                response.Data = listings;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "Error retrieving business listings for category: {0}", category ?? "None");
+                return StatusCode(500, "An error occurred while retrieving business listings");
+            }
+        }
     }
 }

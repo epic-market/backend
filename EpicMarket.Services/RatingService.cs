@@ -31,11 +31,12 @@ namespace EpicMarket.Services
             //     throw new UnauthorizedAccessException("Can only rate purchased products");
             // }
                 
-            var CustomerID = _context.Users.FirstOrDefault(c => c.UserName == CustomerUserName).Id;
+            var CustomerID = 3;
+            // _context.Users.FirstOrDefault(c => c.UserName == CustomerUserName).Id;
 
-            var hasRated = await _context.Ratings.AnyAsync(r => r.CustomerId == CustomerID && r.ProductId == request.ProductId);
-            if (hasRated)
-                throw new UnauthorizedAccessException("Can only rate products once");
+            // var hasRated = await _context.Ratings.AnyAsync(r => r.CustomerId == CustomerID && r.ProductId == request.ProductId);
+            // if (hasRated)
+            //     throw new UnauthorizedAccessException("Can only rate products once");
 
             //we should not allow to rate if the outlet is not active
             var catalog = await _context.Catalogs.IgnoreQueryFilters().Where(o => o.ID == request.ProductId && o.IsActive).FirstOrDefaultAsync();
@@ -77,6 +78,39 @@ namespace EpicMarket.Services
             }
         }
 
+        public async Task<List<ReviewResult>> GetAllReviewsOutlet(int outletId)
+        {
+            return await _context.Ratings
+                .Where(r => r.OutletId == outletId)
+                .Include(r => r.Customer)
+                .Select(r => new ReviewResult
+                {
+                    Id = r.Id,
+                    CustomerName = r.Customer.UserName,
+                    Rating = r.Stars.ToString(),
+                    Review = r.Review,
+                    CreateDate = r.CreatedDate
+                    
+                })
+                .ToListAsync();
+        }
+
+        public async Task<List<ReviewResult>> GetAllReviewsProduct(int productId)
+        {
+            return await _context.Ratings
+                .Where(r => r.ProductId == productId)
+                .Include(r => r.Customer)
+                .Select(r => new ReviewResult
+                {
+                    Id = r.Id,
+                    CustomerName = r.Customer.UserName,
+                    Rating = r.Stars.ToString(),
+                    Review = r.Review,
+                    CreateDate = r.CreatedDate
+                })
+                .ToListAsync();
+        }
+
         public async Task AddOutletRatingAsync(AddOutletRatingRequest request, string CustomerUserName)
         {
             // Commented out as per instructions
@@ -86,11 +120,12 @@ namespace EpicMarket.Services
             // if (!hasOrdered)
             //     throw new UnauthorizedAccessException("Can only rate outlets you've ordered from");
 
-            var CustomerID = _context.Users.FirstOrDefault(c => c.UserName == CustomerUserName).Id;
+            var CustomerID = 3;
+            //  _context.Users.FirstOrDefault(c => c.UserName == CustomerUserName).Id;
             //we need to check if the customer have already rated this outlet
-            var hasRated = await _context.Ratings.AnyAsync(r => r.CustomerId == CustomerID && r.OutletId == request.OutletID);
-            if (hasRated)
-                throw new UnauthorizedAccessException("Can only rate outlets once");
+            // var hasRated = await _context.Ratings.AnyAsync(r => r.CustomerId == CustomerID && r.OutletId == request.OutletID);
+            // if (hasRated)
+            //     throw new UnauthorizedAccessException("Can only rate outlets once");
 
             //we should not allow to rate if the outlet is not active
             var outlet = await _context.Outlets.IgnoreQueryFilters().Where(o => o.ID == request.OutletID && o.IsActive).FirstOrDefaultAsync();

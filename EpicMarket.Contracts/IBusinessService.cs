@@ -15,5 +15,9 @@ namespace EpicMarket.Contracts
         Task<BusinessDetailResult> GetBusinessByID(int businessId);
 
         Task<int> UpdateBusiness(int id, UpdateBusinessRegisterDto businessRegisterDto, string UserName,int AdminPersonId, string PageSource);
+        
+        Task<List<BusinessCategoryDto>> GetBusinessCategories();
+
+        Task<BusinessGroupsResponseDto> GetBusinessListings(string categoryFilter = null);
     }
 }

@@ -317,16 +317,7 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(result);
         }
 
-        [HttpPost("rating")]
-        [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
-        public async Task<ActionResult<bool>> AddRatingToOutlet([FromBody] AddOutletRatingRequest request)
-        {
-            var response = new OperationResult<bool>();
-            this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = request }));
-            await ratingService.AddOutletRatingAsync(request, this.LoggedInUserName);
-            response.Data = true;
-            return Ok(response);
-        }
+      
 
         [HttpPost("subscribe/{outletId}")]
         public async Task<ActionResult<bool>> SubscribeOutlet(int outletId)

@@ -167,6 +167,19 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
+        [HttpGet("customer/{id}")]
+        [AllowAnonymous]
+        public async Task<ActionResult<OperationResult<ProductDetailsV2Result>>> GetProductDetailsV2(int id)
+        {
+            var response = new OperationResult<ProductDetailsV2Result>();
+            this.logger.LogInformation("Products Controller -> GetProductDetailsV2()-> params {0}", JsonConvert.SerializeObject(new { Params = id }));
+            var results = await productService.GetProductDetailsV2(id);
+            this.logger.LogInformation("Products Controller -> GetProductDetailsV2()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
+            response.Data = results;
+
+            return Ok(response);
+        }
+
 
 
         [HttpPost("verify")]
@@ -216,9 +229,9 @@ namespace EpicMarket.Business.API.Controllers
 
 		[HttpGet("customer-mobile")]
 		[Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
-		public async Task<ActionResult<OperationResult<GetDataResult<List<CustomerResultBaseOnCategory>>>>> GetAllProductsForMobile([FromQuery] ProductMobileParams productResult)
+		public async Task<ActionResult<OperationResult<GetDataResult<List<CustomerProductResult>>>>> GetAllProductsForMobile([FromQuery] ProductMobileParams productResult)
 		{
-			var response = new OperationResult<GetDataResult<List<CustomerResultBaseOnCategory>>> ();
+			var response = new OperationResult<GetDataResult<List<CustomerProductResult>>>();
 			this.logger.LogInformation("Products Controller -> GetAllProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = productResult }));
 			var results = await productService.GetAllProductsForMobile(productResult);
 			this.logger.LogInformation("Products Controller -> GetAllProducts()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
@@ -249,19 +262,44 @@ namespace EpicMarket.Business.API.Controllers
         /// <returns>List of products grouped by category</returns>
         [HttpGet("customer/products")]
         [AllowAnonymous]
-        public async Task<ActionResult<OperationResult<GetDataResult<List<CustomerResultBaseOnCategory>>>>> GetCustomerProducts([FromQuery] ProductMobileParams parameters)
+        public async Task<ActionResult<OperationResult<GetDataResult<List<CustomerProductResult>>>>> GetCustomerProducts([FromQuery] ProductMobileParams parameters)
         {
             if (parameters.OutletId <= 0)
             {
                 return BadRequest("Valid outlet ID is required");
             }
 
-            var response = new OperationResult<GetDataResult<List<CustomerResultBaseOnCategory>>>();
+            var response = new OperationResult<GetDataResult<List<CustomerProductResult>>>();
             this.logger.LogInformation("Products Controller -> GetCustomerProducts()-> params {0}", JsonConvert.SerializeObject(new { Params = parameters }));
             var results = await productService.GetAllProductsForMobile(parameters);
             this.logger.LogInformation("Products Controller -> GetCustomerProducts()-> return {0}", JsonConvert.SerializeObject(new { Results = results }));
             response.Data = results;
             return Ok(response);
+        }
+
+        /// <summary>
+        /// Get detailed product information for customers (customer endpoint)
+        /// </summary>
+        /// <param name="productId">ID of the product</param>
+        /// <returns>Detailed product information with available variants</returns>
+        [HttpGet("customer/products/{productId}")]
+        [AllowAnonymous]
+        public async Task<ActionResult<OperationResult<CustomerProductDetailsResult>>> GetCustomerProductDetails(int productId)
+        {
+            var response = new OperationResult<CustomerProductDetailsResult>();
+            this.logger.LogInformation("Products Controller -> GetCustomerProductDetails()-> productId: {0}", productId);
+            
+            try
+            {
+                var result = await productService.GetCustomerProductDetails(productId);
+                response.Data = result;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "Error getting customer product details for product {0}", productId);
+                return NotFound(new { message = ex.Message });
+            }
         }
 
         // [HttpPost("{id}/variants")]

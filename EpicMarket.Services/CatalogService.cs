@@ -504,7 +504,7 @@ namespace EpicMarket.Services
             };
         }
 
-        public async Task<GetDataResult<List<CustomerResultBaseOnCategory>>> GetAllProductsForMobile(ProductMobileParams parameters)
+        public async Task<GetDataResult<List<CustomerProductResult>>> GetAllProductsForMobile(ProductMobileParams parameters)
         {  
             var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
             var VerifiedStatusID = _context.StatusOptionSets.FirstOrDefault(c => c.Status == StatusConstants.VERIFIED).Id;
@@ -520,9 +520,9 @@ namespace EpicMarket.Services
                 .AsQueryable();
 
             // Apply Category Filter
-            if (!string.IsNullOrEmpty(parameters.Category))
+            if (parameters.CategoryId > 0)
             {
-                query = query.Where(p => p.CatalogVariants.Catalog.Category.Name == parameters.Category);
+                query = query.Where(p => p.CatalogVariants.Catalog.Category.ID == parameters.CategoryId);
             }
 
             // Apply Search
@@ -545,36 +545,31 @@ namespace EpicMarket.Services
                 .Skip((parameters.Page - 1) * parameters.PageSize)
                 .Take(parameters.PageSize);
 
-            // Group and map to result with updated variant information
+            // Map to result directly without category grouping
             var results = await pagedQuery
-                .GroupBy(p => p.CatalogVariants.Catalog.Category.Name)
-                .Select(g => new CustomerResultBaseOnCategory
+                .GroupBy(p => p.CatalogVariants.CatalogID)
+                .Select(p => new CustomerProductResult
                 {
-                    Category = g.Key,
-                    CustomerProductResults = g.GroupBy(p => p.CatalogVariants.CatalogID)
-                        .Select(p => new CustomerProductResult
-                        {
-                            ProductId = p.Key,
-                            Name = p.First().CatalogVariants.Catalog.Name,
-                            Description = p.First().CatalogVariants.Catalog.Description,
-                            Rating = p.First().CatalogVariants.Catalog.Rating,
-                            RatingCount = p.First().CatalogVariants.Catalog.ReviewCount,
-                            IsRecommended = p.First().CatalogVariants.Catalog.IsRecommended,
-                            Variants = p.Select(v => new VarientResultForCustomer
-                            {
-                                VariantID = v.CatalogVariants.ID,
-                                Attributes = JsonConvert.DeserializeObject<List<AttributeDto>>(v.CatalogVariants.Attributes),
-                                SalePrice = v.CatalogVariants.SalePrice,
-                                CompareAtPrice = v.CatalogVariants.CompareAtPrice,
-                                AdditionalHightlights = JsonConvert.DeserializeObject<List<HighlightDto>>(v.CatalogVariants.AdditionalHightlights),
-                                MaximumOrderQuantity = v.CatalogVariants.MaximumOrderQuantity,
-                                MinimumOrderQuantity = v.CatalogVariants.MinimumOrderQuantity
-                            }).ToList()
-                        }).ToList()
+                    ProductId = p.Key,
+                    Name = p.First().CatalogVariants.Catalog.Name,
+                    Description = p.First().CatalogVariants.Catalog.Description,
+                    Rating = p.First().CatalogVariants.Catalog.Rating,
+                    RatingCount = p.First().CatalogVariants.Catalog.ReviewCount,
+                    IsRecommended = p.First().CatalogVariants.Catalog.IsRecommended,
+                    Variants = p.Select(v => new VarientResultForCustomer
+                    {
+                        VariantID = v.CatalogVariants.ID,
+                        Attributes = string.IsNullOrEmpty(v.CatalogVariants.Attributes) ? null : JsonConvert.DeserializeObject<List<AttributeDto>>(v.CatalogVariants.Attributes),
+                        SalePrice = v.CatalogVariants.SalePrice,
+                        CompareAtPrice = v.CatalogVariants.CompareAtPrice,
+                        AdditionalHightlights = string.IsNullOrEmpty(v.CatalogVariants.AdditionalHightlights) ? null : JsonConvert.DeserializeObject<List<HighlightDto>>(v.CatalogVariants.AdditionalHightlights),
+                        MaximumOrderQuantity = v.CatalogVariants.MaximumOrderQuantity,
+                        MinimumOrderQuantity = v.CatalogVariants.MinimumOrderQuantity
+                    }).ToList()
                 })
                 .ToListAsync();
 
-            return new GetDataResult<List<CustomerResultBaseOnCategory>>
+            return new GetDataResult<List<CustomerProductResult>>
             {
                 items = results,
                 Count = totalItems
@@ -677,6 +672,77 @@ namespace EpicMarket.Services
                     }).ToList()
                 })
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<CustomerProductDetailsResult> GetCustomerProductDetails(int productId)
+        {
+            var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
+            var attachmentTypeID_Product = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.PRODUCTIMAGES);
+            var verifiedStatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == StatusConstants.VERIFIED).Id;
+
+            var product = await _context.Catalogs
+                .Include(c => c.CatalogVariants)
+                .Include(c => c.Category)
+                .Where(c => c.ID == productId && c.IsActive == true && c.StatusId == verifiedStatusId)
+                .Select(c => new CustomerProductDetailsResult
+                {
+                    ProductId = c.ID,
+                    Name = c.Name,
+                    Description = c.Description,
+                    Category = new CategoryDto { CategoryId = c.Category.ID, CategoryName = c.Category.Name },
+                    Rating = c.Rating,
+                    RatingCount = c.ReviewCount,
+                    IsRecommended = c.IsRecommended,
+                    BaseHightlights = string.IsNullOrEmpty(c.BaseHightlights) ? 
+                        new List<HighlightDto>() : 
+                        JsonConvert.DeserializeObject<List<HighlightDto>>(c.BaseHightlights) ?? new List<HighlightDto>(),
+                    Variants = c.CatalogVariants
+                        .Where(v => v.IsActive)
+                        .Select(v => new CustomerProductVariantResult
+                        {
+                            VariantId = v.ID,
+                            SKU = v.SKU,
+                            Attributes = string.IsNullOrEmpty(v.Attributes) ? 
+                                new List<AttributeDto>() : 
+                                JsonConvert.DeserializeObject<List<AttributeDto>>(v.Attributes) ?? new List<AttributeDto>(),
+                            SalePrice = v.SalePrice,
+                            CompareAtPrice = v.CompareAtPrice,
+                            AdditionalHightlights = string.IsNullOrEmpty(v.AdditionalHightlights) ? 
+                                new List<HighlightDto>() : 
+                                JsonConvert.DeserializeObject<List<HighlightDto>>(v.AdditionalHightlights) ?? new List<HighlightDto>(),
+                            MaximumOrderQuantity = v.MaximumOrderQuantity,
+                            MinimumOrderQuantity = v.MinimumOrderQuantity,
+                            Images = (from attachment in _context.Attachments
+                                    join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                                    join entity in _context.Entity on link.EntityID equals entity.ID
+                                    where entity.Name == EntityConstants.CatelogVariant && 
+                                        link.RecordID == v.ID && 
+                                        link.AttachmentTypeID == attachmentTypeID_Product.ID
+                                    select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}")
+                                    .ToList(),
+                            Thumbnail = (from attachment in _context.Attachments
+                                    join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                                    join entity in _context.Entity on link.EntityID equals entity.ID
+                                    where entity.Name == EntityConstants.CatelogVariant && 
+                                            link.RecordID == v.ID && 
+                                            link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
+                                    select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}")
+                                    .FirstOrDefault()
+                        }).ToList()
+                })
+                .FirstOrDefaultAsync();
+            
+            if (product == null)
+            {
+                throw new Exception($"Product not found or not verified: {productId}");
+            }
+
+            if (product.Variants == null || !product.Variants.Any())
+            {
+                throw new Exception($"No available variants found for product {productId}");
+            }
+
+            return product;
         }
 
         public async Task<int> VerifyCatalog(VerifyCatalogDto verifyCatalogDto, string UserName, int AdminPersonID, string PageSource)
@@ -953,6 +1019,105 @@ namespace EpicMarket.Services
         //     _context.CatalogVariants.Update(variant);
         //     await unitOfWork.Complete();
         // }
+
+        public async Task<ProductDetailsV2Result> GetProductDetailsV2(int productId)
+        {
+            var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
+            var attachmentTypeID_Product = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.PRODUCTIMAGES);
+
+            var product = await _context.Catalogs
+                .Include(c => c.CatalogVariants)
+                .Include(c => c.Category)
+                .Where(c => c.ID == productId && c.IsActive == true)
+                .Select(c => new ProductDetailsV2Result
+                {
+                    ProductId = c.ID,
+                    Name = c.Name,
+                    Description = c.Description,
+                    Category = new CategoryDto { CategoryId = c.Category.ID, CategoryName = c.Category.Name },
+                    RequiresRefrigeration = c.RequiresRefrigeration,
+                    IsRecommended = c.IsRecommended,
+                    VariantOptions = string.IsNullOrEmpty(c.VariantOptions) 
+                        ? new List<VarientOptionDto>() 
+                        : JsonConvert.DeserializeObject<List<VarientOptionDto>>(c.VariantOptions) ?? new List<VarientOptionDto>(),
+                    BaseHightlights = string.IsNullOrEmpty(c.BaseHightlights) 
+                        ? new List<HighlightDto>() 
+                        : JsonConvert.DeserializeObject<List<HighlightDto>>(c.BaseHightlights) ?? new List<HighlightDto>(),
+                    Variants = c.CatalogVariants.Where(v => v.IsActive).Select(v => new ProductVariantV2Result
+                    {
+                        VariantId = v.ID,
+                        Attributes = string.IsNullOrEmpty(v.Attributes) 
+                            ? new List<AttributeDto>() 
+                            : JsonConvert.DeserializeObject<List<AttributeDto>>(v.Attributes) ?? new List<AttributeDto>(),
+                        SKU = v.SKU,
+                        SalePrice = v.SalePrice,
+                        CompareAtPrice = v.CompareAtPrice,
+                        AdditionalHightlights = string.IsNullOrEmpty(v.AdditionalHightlights) 
+                            ? new List<HighlightDto>() 
+                            : JsonConvert.DeserializeObject<List<HighlightDto>>(v.AdditionalHightlights) ?? new List<HighlightDto>(),
+                        MaximumOrderQuantity = v.MaximumOrderQuantity,
+                        MinimumOrderQuantity = v.MinimumOrderQuantity,
+                        PackedHeight = v.PackedHeight,
+                        PackedWidth = v.PackedWidth,
+                        PackedDepth = v.PackedDepth,
+                        WeightUnit = v.WeightUnit,
+                        Weight = v.Weight,
+                        Images = (from attachment in _context.Attachments
+                                join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                                join entity in _context.Entity on link.EntityID equals entity.ID
+                                where entity.Name == EntityConstants.CatelogVariant && 
+                                    link.RecordID == v.ID && 
+                                    link.AttachmentTypeID == attachmentTypeID_Product.ID
+                                select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}")
+                                .ToList(),
+                        Thumbnail = (from attachment in _context.Attachments
+                                join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                                join entity in _context.Entity on link.EntityID equals entity.ID
+                                where entity.Name == EntityConstants.CatelogVariant && 
+                                    link.RecordID == v.ID && 
+                                    link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
+                                select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}")
+                                .FirstOrDefault(),
+                        IsDefaultVariant = v.IsDefaultVariant
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync();
+
+            if (product != null)
+            {
+                // Get similar products from the same category
+                var categoryId = product.Category.CategoryId;
+                var similarProducts = await _context.Catalogs
+                    .Where(c => c.CategoryID == categoryId && c.ID != productId && c.IsActive == true)
+                    .OrderBy(c => Guid.NewGuid()) // Random ordering
+                    .Take(5) // Limit to 5 similar products
+                    .Select(c => new SimilarProductResult
+                    {
+                        ProductId = c.ID,
+                        Name = c.Name,
+                        Description = c.Description,
+                        SalePrice = c.CatalogVariants
+                            .Where(v => v.IsActive && v.IsDefaultVariant)
+                            .Select(v => v.SalePrice)
+                            .FirstOrDefault(),
+                        Thumbnail = (from attachment in _context.Attachments
+                                    join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
+                                    join entity in _context.Entity on link.EntityID equals entity.ID
+                                    join variant in c.CatalogVariants on link.RecordID equals variant.ID
+                                    where entity.Name == EntityConstants.CatelogVariant && 
+                                        variant.IsActive &&
+                                        variant.IsDefaultVariant &&
+                                        link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
+                                    select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}")
+                                    .FirstOrDefault()
+                    })
+                    .ToListAsync();
+
+                product.SimilarProducts = similarProducts;
+            }
+
+            return product;
+        }
 
     }
 
