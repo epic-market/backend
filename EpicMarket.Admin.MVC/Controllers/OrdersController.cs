@@ -197,8 +197,8 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             var orderDetails = await _context.OrderDetails
                 .Where(o => o.OrderID == id)
-                .Include(o => o.CatalogVariants)
-                .ThenInclude(cv => cv.Catalog)
+                .Include(o => o.ProductVariants)
+                .ThenInclude(cv => cv.Product)
                 .ToListAsync();
 
             orderModel.Order = order;
@@ -235,14 +235,14 @@ namespace EpicMarket.Admin.MVC.Controllers
         {
             var products = _context.Inventory
                 .Where(p => p.OutletID == branchId)
-                .Include(p => p.CatalogVariants)
-                .ThenInclude(cv => cv.Catalog)
+                .Include(p => p.ProductVariants)
+                .ThenInclude(cv => cv.Product)
                 .Select(p => new {
-                    Id = p.CatalogVariants.Catalog.ID,
-                    Name = p.CatalogVariants.Catalog.Name,
-                    Price = (decimal)p.CatalogVariants.SalePrice,
-                    VariantId = p.CatalogVariants.ID,
-                    Attributes = p.CatalogVariants.Attributes
+                    Id = p.ProductVariants.Product.ID,
+                    Name = p.ProductVariants.Product.Name,
+                    Price = (decimal)p.ProductVariants.SalePrice,
+                    VariantId = p.ProductVariants.ID,
+                    Attributes = p.ProductVariants.Attributes
                 })
                 .ToList();
             return Json(products);
@@ -322,7 +322,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 // foreach (var item in model.OrderDetails)
                 // {
                 //     var inventory = await _context.Inventory
-                //         .FirstOrDefaultAsync(i => i.CatalogVariants.ID == item.VariantId && i.OutletID == model.OutletId);
+                //         .FirstOrDefaultAsync(i => i.ProductVariants.ID == item.VariantId && i.OutletID == model.OutletId);
                     
                 //     if (inventory != null)
                 //     {
@@ -499,8 +499,8 @@ namespace EpicMarket.Admin.MVC.Controllers
         [HttpGet]
         public IActionResult GetProductVariants(int productId)
         {
-            var variants = _context.CatalogVariants
-                .Where(v => v.CatalogID == productId)
+            var variants = _context.ProductVariants
+                .Where(v => v.ProductID == productId)
                 .Select(v => new {
                     id = v.ID,
                     salePrice = v.SalePrice,

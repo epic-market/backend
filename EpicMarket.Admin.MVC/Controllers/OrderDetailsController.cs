@@ -35,7 +35,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         [SecurableAuthorize(SecurableConstants.OrderDetailsView)]
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.OrderDetails.Include(o => o.CatalogVariants).Include(o => o.Order);
+            var applicationDbContext = _context.OrderDetails.Include(o => o.ProductVariants).Include(o => o.Order);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -49,7 +49,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
 
             var orderDetail = await _context.OrderDetails
-                .Include(o => o.CatalogVariants)
+                .Include(o => o.ProductVariants)
                 .Include(o => o.Order)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (orderDetail == null)
@@ -64,7 +64,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         [SecurableAuthorize(SecurableConstants.OrderDetailsAdd)]
         public IActionResult Create()
         {
-            ViewData["CatalogID"] = new SelectList(_context.Catalogs, "ID", "ID");
+            ViewData["ProductID"] = new SelectList(_context.Products, "ID", "ID");
             ViewData["OrderID"] = new SelectList(_context.Orders, "ID", "ID");
             return View();
         }
@@ -73,7 +73,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [SecurableAuthorize(SecurableConstants.OrderDetailsAdd)]
-        public async Task<IActionResult> Create([Bind("ID,OrderID,CatalogID,Quantity,Rate,TotalPrice,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] OrderDetail orderDetail)
+        public async Task<IActionResult> Create([Bind("ID,OrderID,ProductID,Quantity,Rate,TotalPrice,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] OrderDetail orderDetail)
         {
             if (ModelState.IsValid)
             {
@@ -94,7 +94,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CatalogID"] = new SelectList(_context.Catalogs, "ID", "ID", orderDetail.CatalogVariants.CatalogID);
+            ViewData["ProductID"] = new SelectList(_context.Products, "ID", "ID", orderDetail.ProductVariants.ProductID);
             ViewData["OrderID"] = new SelectList(_context.Orders, "ID", "ID", orderDetail.OrderID);
             return View(orderDetail);
         }
@@ -113,7 +113,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 return NotFound();
             }
-            ViewData["CatalogID"] = new SelectList(_context.Catalogs, "ID", "ID", orderDetail.CatalogVariants.CatalogID);
+            ViewData["ProductID"] = new SelectList(_context.Products, "ID", "ID", orderDetail.ProductVariants.ProductID);
             ViewData["OrderID"] = new SelectList(_context.Orders, "ID", "ID", orderDetail.OrderID);
             return View(orderDetail);
         }
@@ -122,7 +122,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [SecurableAuthorize(SecurableConstants.OrderDetailsEdit)]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,OrderID,CatalogID,Quantity,Rate,TotalPrice,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] OrderDetail orderDetail)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,OrderID,ProductID,Quantity,Rate,TotalPrice,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] OrderDetail orderDetail)
         {
             if (id != orderDetail.ID)
             {
@@ -166,7 +166,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CatalogID"] = new SelectList(_context.Catalogs, "ID", "ID", orderDetail.CatalogVariants.CatalogID);
+            ViewData["ProductID"] = new SelectList(_context.Products, "ID", "ID", orderDetail.ProductVariants.ProductID);
             ViewData["OrderID"] = new SelectList(_context.Orders, "ID", "ID", orderDetail.OrderID);
             return View(orderDetail);
         }
@@ -181,7 +181,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
 
             var orderDetail = await _context.OrderDetails
-                .Include(o => o.CatalogVariants)
+                .Include(o => o.ProductVariants)
                 .Include(o => o.Order)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (orderDetail == null)

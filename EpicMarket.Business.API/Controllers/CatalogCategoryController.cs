@@ -14,7 +14,7 @@ using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext
 namespace EpicMarket.Business.API.Controllers
 {
 
-    public partial class CatalogController : BaseApiController
+    public partial class ProductController : BaseApiController
 	{
 	
 		[HttpGet("categories")]

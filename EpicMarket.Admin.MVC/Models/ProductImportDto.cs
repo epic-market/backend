@@ -9,9 +9,9 @@ namespace EpicMarket.Admin.MVC.Models
 {
     public class ProductImportDto
     {
-         // Catalog properties
-        public string CatalogName { get; set; }
-        public string CatalogDescription { get; set; }
+         // Product properties
+        public string ProductName { get; set; }
+        public string ProductDescription { get; set; }
         public string CategoryName { get; set; }
         public bool IsRecommended { get; set; }
         public bool RequiresRefrigeration { get; set; }
@@ -59,13 +59,13 @@ namespace EpicMarket.Admin.MVC.Models
         }
         
         // Helper methods to convert to domain model objects
-        public Catalog ToCatalog(int businessId, int statusId)
+        public EpicMarket.Data.Models.Catalog ToProduct(int businessId, int statusId)
         {
-            return new Catalog
+            return new EpicMarket.Data.Models.Catalog
             {
                 BusinessID = businessId,
-                Name = CatalogName,
-                Description = CatalogDescription,
+                Name = ProductName,
+                Description = ProductDescription,
                 // CategoryID will need to be looked up separately
                 IsRecommended = IsRecommended,
                 RequiresRefrigeration = RequiresRefrigeration,
@@ -74,11 +74,11 @@ namespace EpicMarket.Admin.MVC.Models
         }
 
         
-        public CatalogVariants ToCatalogVariant(int catalogId, string createdBy)
+        public CatalogVariants ToProductVariant(int catalogId, string createdBy)
         {
             return new CatalogVariants
             {
-                CatalogID = catalogId,
+                ProductID = catalogId,
                 SKU = SKU,
                 Barcode = Barcode,
                 Attributes = GetAttributesJson(),

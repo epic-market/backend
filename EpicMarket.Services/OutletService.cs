@@ -187,7 +187,7 @@ namespace EpicMarket.Services
                 .Where(op => op.OutletID == branchProductVariantMap.OutletId)
                 .ToListAsync();
 
-            var inactiveProductVariants = await _context.CatalogVariants
+            var inactiveProductVariants = await _context.ProductVariants
                 .Where(c => addProductVariants.Contains(c.ID) && !c.IsActive)
                 .Select(c => c.ID)
                 .ToListAsync();

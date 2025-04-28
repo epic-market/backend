@@ -28,7 +28,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         {
             ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "Name");
             ViewData["OutletID"] = new SelectList(_context.Outlets, "ID", "Name");
-            ViewData["CatalogID"] = new SelectList(_context.Catalogs, "ID", "Name");
+            ViewData["ProductID"] = new SelectList(_context.Products, "ID", "Name");
             return View();
         }
 
@@ -41,8 +41,8 @@ namespace EpicMarket.Admin.MVC.Controllers
                 var query = _context.Inventory
                     .Include(i => i.Outlet)
                     .Include(i => i.Outlet.Bussiness)
-                    .Include(i => i.CatalogVariants)
-                    .Include(i => i.CatalogVariants.Catalog)
+                    .Include(i => i.ProductVariants)
+                    .Include(i => i.ProductVariants.Product)
                     .AsQueryable();
 
                 // Apply filters
@@ -56,9 +56,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                     query = query.Where(i => i.Outlet.BussinessID == filter.BusinessID);
                 }
 
-                if (filter.CatalogID.HasValue && filter.CatalogID > 0)
+                if (filter.ProductID.HasValue && filter.ProductID > 0)
                 {
-                    query = query.Where(i => i.CatalogVariants.CatalogID == filter.CatalogID);
+                    query = query.Where(i => i.ProductVariants.ProductID == filter.ProductID);
                 }
 
                 if (filter.ProductVariantID.HasValue && filter.ProductVariantID > 0)
@@ -66,9 +66,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                     query = query.Where(i => i.ProductVariantID == filter.ProductVariantID);
                 }
 
-                if (!string.IsNullOrWhiteSpace(filter.CatalogName))
+                if (!string.IsNullOrWhiteSpace(filter.ProductName))
                 {
-                    query = query.Where(i => i.CatalogVariants.Catalog.Name.Contains(filter.CatalogName));
+                    query = query.Where(i => i.ProductVariants.Product.Name.Contains(filter.ProductName));
                 }
 
                 var totalRecords = await query.CountAsync();
@@ -79,7 +79,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                     "id" => filter.SortDirection == "asc" ? query.OrderBy(i => i.ID) : query.OrderByDescending(i => i.ID),
                     "outletname" => filter.SortDirection == "asc" ? query.OrderBy(i => i.Outlet.Name) : query.OrderByDescending(i => i.Outlet.Name),
                     "businessname" => filter.SortDirection == "asc" ? query.OrderBy(i => i.Outlet.Bussiness.Name) : query.OrderByDescending(i => i.Outlet.Bussiness.Name),
-                    "catalogname" => filter.SortDirection == "asc" ? query.OrderBy(i => i.CatalogVariants.Catalog.Name) : query.OrderByDescending(i => i.CatalogVariants.Catalog.Name),
+                    "catalogname" => filter.SortDirection == "asc" ? query.OrderBy(i => i.ProductVariants.Product.Name) : query.OrderByDescending(i => i.ProductVariants.Product.Name),
                     "quantityavailable" => filter.SortDirection == "asc" ? query.OrderBy(i => i.QuantityAvailable) : query.OrderByDescending(i => i.QuantityAvailable),
                     _ => query.OrderBy(i => i.ID)
                 };
@@ -96,9 +96,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                         BusinessID = i.Outlet.BussinessID,
                         BusinessName = i.Outlet.Bussiness.Name,
                         ProductVariantID = i.ProductVariantID,
-                        CatalogID = i.CatalogVariants.CatalogID,
-                        CatalogName = i.CatalogVariants.Catalog.Name,
-                        SKU = i.CatalogVariants.SKU,
+                        ProductID = i.ProductVariants.ProductID,
+                        ProductName = i.ProductVariants.Product.Name,
+                        SKU = i.ProductVariants.SKU,
                         TrackInventory = i.TrackInventory,
                         IsInStock = i.IsInStock,
                         QuantityAvailable = i.QuantityAvailable,
@@ -128,8 +128,8 @@ namespace EpicMarket.Admin.MVC.Controllers
             var inventory = await _context.Inventory
                 .Include(i => i.Outlet)
                 .Include(i => i.Outlet.Bussiness)
-                .Include(i => i.CatalogVariants)
-                .Include(i => i.CatalogVariants.Catalog)
+                .Include(i => i.ProductVariants)
+                .Include(i => i.ProductVariants.Product)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (inventory == null)
             {
@@ -169,11 +169,11 @@ namespace EpicMarket.Admin.MVC.Controllers
                 ViewData["OutletID"] = new SelectList(_context.Outlets.Where(o => o.BussinessID == businessId), "ID", "Name", inventory.OutletID);
                 
                 // Get catalog ID for the selected variant
-                var variant = await _context.CatalogVariants.FindAsync(inventory.ProductVariantID);
-                int catalogId = variant?.CatalogID ?? 0;
+                var variant = await _context.ProductVariants.FindAsync(inventory.ProductVariantID);
+                int catalogId = variant?.ProductID ?? 0;
                 
-                ViewData["CatalogID"] = new SelectList(_context.Catalogs.Where(c => c.BusinessID == businessId), "ID", "Name", catalogId);
-                ViewData["ProductVariantID"] = new SelectList(_context.CatalogVariants.Where(v => v.CatalogID == catalogId), "ID", "SKU", inventory.ProductVariantID);
+                ViewData["ProductID"] = new SelectList(_context.Products.Where(c => c.BusinessID == businessId), "ID", "Name", catalogId);
+                ViewData["ProductVariantID"] = new SelectList(_context.ProductVariants.Where(v => v.ProductID == catalogId), "ID", "SKU", inventory.ProductVariantID);
                 
                 return View(inventory);
             }
@@ -192,12 +192,12 @@ namespace EpicMarket.Admin.MVC.Controllers
             ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "Name", businessIdForOutlet);
             ViewData["OutletID"] = new SelectList(_context.Outlets.Where(o => o.BussinessID == businessIdForOutlet), "ID", "Name", inventory.OutletID);
             
-            var variantForCatalog = await _context.CatalogVariants.FindAsync(inventory.ProductVariantID);
-            int catalogIdForVariant = variantForCatalog?.CatalogID ?? 0;
-            var catalogForBusiness = await _context.Catalogs.FindAsync(catalogIdForVariant);
+            var variantForProduct = await _context.ProductVariants.FindAsync(inventory.ProductVariantID);
+            int catalogIdForVariant = variantForProduct?.ProductID ?? 0;
+            var catalogForBusiness = await _context.Products.FindAsync(catalogIdForVariant);
             
-            ViewData["CatalogID"] = new SelectList(_context.Catalogs.Where(c => c.BusinessID == businessIdForOutlet), "ID", "Name", catalogIdForVariant);
-            ViewData["ProductVariantID"] = new SelectList(_context.CatalogVariants.Where(v => v.CatalogID == catalogIdForVariant), "ID", "SKU", inventory.ProductVariantID);
+            ViewData["ProductID"] = new SelectList(_context.Products.Where(c => c.BusinessID == businessIdForOutlet), "ID", "Name", catalogIdForVariant);
+            ViewData["ProductVariantID"] = new SelectList(_context.ProductVariants.Where(v => v.ProductID == catalogIdForVariant), "ID", "SKU", inventory.ProductVariantID);
             
             return View(inventory);
         }
@@ -212,7 +212,7 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             var inventory = await _context.Inventory
                 .Include(i => i.Outlet)
-                .Include(i => i.CatalogVariants)
+                .Include(i => i.ProductVariants)
                 .FirstOrDefaultAsync(m => m.ID == id);
                 
             if (inventory == null)
@@ -225,13 +225,13 @@ namespace EpicMarket.Admin.MVC.Controllers
             int businessId = outlet?.BussinessID ?? 0;
             
             // Get catalog ID for the selected variant
-            var variant = await _context.CatalogVariants.FindAsync(inventory.ProductVariantID);
-            int catalogId = variant?.CatalogID ?? 0;
+            var variant = await _context.ProductVariants.FindAsync(inventory.ProductVariantID);
+            int catalogId = variant?.ProductID ?? 0;
             
             ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "Name", businessId);
             ViewData["BusinessName"] = _context.Businesses.FirstOrDefault(b => b.ID == businessId)?.Name;
             ViewData["OutletName"] = outlet?.Name;
-            ViewData["CatalogName"] = _context.Catalogs.FirstOrDefault(c => c.ID == catalogId)?.Name;
+            ViewData["ProductName"] = _context.Products.FirstOrDefault(c => c.ID == catalogId)?.Name;
             ViewData["VariantSKU"] = variant?.SKU;
             
             return View(inventory);
@@ -272,13 +272,13 @@ namespace EpicMarket.Admin.MVC.Controllers
             var outlet = await _context.Outlets.FindAsync(inventory.OutletID);
             int businessId = outlet?.BussinessID ?? 0;
             
-            var variant = await _context.CatalogVariants.FindAsync(inventory.ProductVariantID);
-            int catalogId = variant?.CatalogID ?? 0;
+            var variant = await _context.ProductVariants.FindAsync(inventory.ProductVariantID);
+            int catalogId = variant?.ProductID ?? 0;
             
             ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "Name", businessId);
             ViewData["BusinessName"] = _context.Businesses.FirstOrDefault(b => b.ID == businessId)?.Name;
             ViewData["OutletName"] = outlet?.Name;
-            ViewData["CatalogName"] = _context.Catalogs.FirstOrDefault(c => c.ID == catalogId)?.Name;
+            ViewData["ProductName"] = _context.Products.FirstOrDefault(c => c.ID == catalogId)?.Name;
             ViewData["VariantSKU"] = variant?.SKU;
             
             return View(inventory);
@@ -295,8 +295,8 @@ namespace EpicMarket.Admin.MVC.Controllers
             var inventory = await _context.Inventory
                 .Include(i => i.Outlet)
                 .Include(i => i.Outlet.Bussiness)
-                .Include(i => i.CatalogVariants)
-                .Include(i => i.CatalogVariants.Catalog)
+                .Include(i => i.ProductVariants)
+                .Include(i => i.ProductVariants.Product)
                 .FirstOrDefaultAsync(m => m.ID == id);
                 
             if (inventory == null)
@@ -340,9 +340,9 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
         
         [HttpGet]
-        public async Task<IActionResult> GetCatalogsByBusiness(int businessId)
+        public async Task<IActionResult> GetProductsByBusiness(int businessId)
         {
-            var catalogs = await _context.Catalogs
+            var catalogs = await _context.Products
                 .Where(c => c.BusinessID == businessId)
                 .Select(c => new { c.ID, c.Name })
                 .ToListAsync();
@@ -351,10 +351,10 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
         
         [HttpGet]
-        public async Task<IActionResult> GetVariantsByCatalog(int catalogId)
+        public async Task<IActionResult> GetVariantsByProduct(int catalogId)
         {
-            var variants = await _context.CatalogVariants
-                .Where(v => v.CatalogID == catalogId)
+            var variants = await _context.ProductVariants
+                .Where(v => v.ProductID == catalogId)
                 .Select(v => new { v.ID, Name = v.SKU })
                 .ToListAsync();
                 

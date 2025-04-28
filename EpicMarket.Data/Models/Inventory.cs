@@ -32,7 +32,7 @@ namespace EpicMarket.Data.Models
         [Required]
         public bool BackOrders { get; set; } // if true this will allow user to order if it is outofstock also
 
-        public virtual CatalogVariants CatalogVariants { get; set; }
+        public virtual CatalogVariants ProductVariants { get; set; }
 
         public virtual Outlet Outlet { get; set; } 
     }

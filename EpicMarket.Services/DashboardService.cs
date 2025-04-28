@@ -215,7 +215,7 @@ namespace EpicMarket.Services
 
             var topProducts = await _dbContext.OrderDetails
                 .Where(od => od.Order.OutletID == outletId)
-                .GroupBy(od => od.CatalogVariants.Catalog.ID)
+                .GroupBy(od => od.ProductVariants.Product.ID)
                 .Select(g => new
                 {
                     ProductId = g.Key,
@@ -227,7 +227,7 @@ namespace EpicMarket.Services
 
             var productIds = topProducts.Select(p => p.ProductId).ToList();
 
-            var products = await _dbContext.Catalogs
+            var products = await _dbContext.Products
                 .Where(p => productIds.Contains(p.ID))
                 .Select(p => new
                 {

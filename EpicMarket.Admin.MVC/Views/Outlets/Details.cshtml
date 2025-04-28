@@ -431,7 +431,7 @@
                                         <th>ID</th>
                                         <th>Product Name</th>
                                         <th>Category</th>
-                                        <th>Catalog</th>
+                                        <th>Product</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -441,10 +441,10 @@
                                         <tr>
                                             <td>@Html.DisplayFor(modelItem => item.ID)</td>
                                             <td>
-                                                <span class="fw-medium text-primary">@Html.DisplayFor(modelItem => item.CatalogVariants.Catalog.Name)</span>
+                                                <span class="fw-medium text-primary">@Html.DisplayFor(modelItem => item.ProductVariants.Product.Name)</span>
                                             </td>
-                                            <td>@Html.DisplayFor(modelItem => item.CatalogVariants.Catalog.Category)</td>
-                                            <td>@Html.DisplayFor(modelItem => item.CatalogVariants.Catalog)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.ProductVariants.Product.Category)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.ProductVariants.Product)</td>
                                             <td>
                                                 <div class="d-flex gap-2">
                                                     <a asp-controller="OutletProducts" asp-action="Edit" asp-route-id="@item.ID" 

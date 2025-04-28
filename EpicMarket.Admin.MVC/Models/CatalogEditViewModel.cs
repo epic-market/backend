@@ -8,18 +8,18 @@ using System.Threading.Tasks;
 namespace EpicMarket.Admin.MVC.Models
 {
     /// <summary>
-    /// Comprehensive view model for editing Catalog entities including variants and attachments
+    /// Comprehensive view model for editing Product entities including variants and attachments
     /// </summary>
-    public class CatalogEditViewModel
+    public class ProductEditViewModel
     {
-        // Main Catalog entity
-        public Catalog Catalog { get; set; }
+        // Main Product entity
+        public EpicMarket.Data.Models.Catalog Product { get; set; }
 
         // Variants information
         public List<CatalogVariants> Variants { get; set; } = new List<CatalogVariants>();
-        // Catalog-level attachments
-        public List<AttachmentModel> CatalogThumbnails { get; set; } = new List<AttachmentModel>();
-        public List<AttachmentModel> CatalogProductImages { get; set; } = new List<AttachmentModel>();
+        // Product-level attachments
+        public List<AttachmentModel> ProductThumbnails { get; set; } = new List<AttachmentModel>();
+        public List<AttachmentModel> ProductProductImages { get; set; } = new List<AttachmentModel>();
         
         // Variant-level attachments organized by variant ID
         public Dictionary<int, VariantAttachmentsModel> VariantAttachments { get; set; } = new Dictionary<int, VariantAttachmentsModel>();
@@ -45,7 +45,7 @@ namespace EpicMarket.Admin.MVC.Models
     /// <summary>
     /// Model for individual variant editing
     /// </summary>
-    public class CatalogVariantEditModel
+    public class ProductVariantEditModel
     {
         public int ID { get; set; }
         public string SKU { get; set; }

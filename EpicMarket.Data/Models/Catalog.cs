@@ -10,6 +10,8 @@ using System.Text.Json;
 
 namespace EpicMarket.Data.Models
 {
+
+    [Table("Product")]
     public class Catalog : BaseModel
     {
         public int ID { get; set; }
@@ -38,7 +40,7 @@ namespace EpicMarket.Data.Models
 
         public virtual ICollection<Rating> Ratings { get; set; }
 
-        public virtual ICollection<CatalogVariants> CatalogVariants { get; set; }
+        public virtual ICollection<CatalogVariants> ProductVariants { get; set; }
 
     }
 }

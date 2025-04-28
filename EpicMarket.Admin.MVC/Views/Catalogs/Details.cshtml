@@ -1,7 +1,7 @@
 ﻿@model EpicMarket.Admin.MVC.Models.CatelogModel
 
 @{
-    ViewData["Title"] = $"{Model.Catalog.Name} - Product Details";
+    ViewData["Title"] = $"{Model.Product.Name} - Product Details";
 }
 
 <style>
@@ -129,27 +129,27 @@
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Home</a></li>
-            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Catalogs")">Products</a></li>
-            <li class="breadcrumb-item active" aria-current="page">@Model.Catalog.Name</li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Products")">Products</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.Product.Name</li>
         </ol>
     </nav>
 
     <!-- Product Header -->
     <div class="product-header mb-4">
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
-            <h3 class="mb-0 text-dark">@Model.Catalog.Name</h3>
-            <a asp-action="Edit" asp-route-id="@Model.Catalog.ID" class="btn btn-primary px-4">
+            <h3 class="mb-0 text-dark">@Model.Product.Name</h3>
+            <a asp-action="Edit" asp-route-id="@Model.Product.ID" class="btn btn-primary px-4">
                 <i class="bx bx-edit me-2"></i> Edit Product
             </a>
         </div>
 
         <!-- Status Pills -->
         <div class="d-flex flex-wrap gap-2 mt-3">
-            <span class="status-badge badge bg-@(Model.Catalog.IsActive ? "success" : "secondary") text-white">
+            <span class="status-badge badge bg-@(Model.Product.IsActive ? "success" : "secondary") text-white">
                 <i class="bx bx-check-circle me-1"></i>
-                @(Model.Catalog.IsActive ? "Active" : "Inactive")
+                @(Model.Product.IsActive ? "Active" : "Inactive")
             </span>
-            @if (Model.Catalog.IsRecommended)
+            @if (Model.Product.IsRecommended)
             {
                 <span class="status-badge badge bg-info text-white">
                     <i class="bx bx-badge-check me-1"></i>
@@ -158,17 +158,17 @@
             }
             <span class="status-badge badge bg-warning text-dark">
                 <i class="bx bx-star me-1"></i>
-                Rating: @Model.Catalog.Rating
+                Rating: @Model.Product.Rating
             </span>
             <span class="status-badge badge bg-primary text-white">
                 <i class="bx bx-shopping-bag me-1"></i>
-                Orders: @Model.Catalog.OrderCount
+                Orders: @Model.Product.OrderCount
             </span>
             <span class="status-badge badge bg-danger text-white">
                 <i class="bx bx-check-shield me-1"></i>
                 Verified
             </span>
-            @if (Model.Catalog.RequiresRefrigeration)
+            @if (Model.Product.RequiresRefrigeration)
             {
                 <span class="status-badge badge bg-info text-white">
                     <i class="bx bx-cool me-1"></i>
@@ -185,8 +185,8 @@
                 <div class="card-body p-3">
                     @{
                         // Find the default variant
-                        var defaultVariant = Model.Catalog.CatalogVariants?.FirstOrDefault(v => v.IsDefaultVariant) ?? 
-                                            Model.Catalog.CatalogVariants?.FirstOrDefault();
+                        var defaultVariant = Model.Product.ProductVariants?.FirstOrDefault(v => v.IsDefaultVariant) ?? 
+                                            Model.Product.ProductVariants?.FirstOrDefault();
                         
                         // Get thumbnail for default variant
                         string thumbnailImage = null;
@@ -208,7 +208,7 @@
                             <a href="@Url.Action("DisplayImage", "File", new { key = thumbnailImage })" target="_blank" 
                                class="d-block" data-lightbox="product-image">
                                 <img src="@Url.Action("DisplayImage", "File", new { key = thumbnailImage })" 
-                                     alt="@Model.Catalog.Name"
+                                     alt="@Model.Product.Name"
                                      class="product-image img-fluid shadow-sm mb-3" 
                                      style="width: 100%;">
                             </a>
@@ -297,35 +297,35 @@
                             </h5>
                             <div class="key-value-item">
                                 <span class="text-muted">ID</span>
-                                <span class="fw-medium">@Model.Catalog.ID</span>
+                                <span class="fw-medium">@Model.Product.ID</span>
                             </div>
                             <div class="key-value-item">
                                 <span class="text-muted">Business ID</span>
-                                <span class="fw-medium">@Model.Catalog.BusinessID</span>
+                                <span class="fw-medium">@Model.Product.BusinessID</span>
                             </div>
                             <div class="key-value-item">
                                 <span class="text-muted">Business Name</span>
-                                <span class="fw-medium">@Model.Catalog.Business.Name</span>
+                                <span class="fw-medium">@Model.Product.Business.Name</span>
                             </div>
                             <div class="key-value-item">
                                 <span class="text-muted">Category ID</span>
-                                <span class="fw-medium">@Model.Catalog.CategoryID</span>
+                                <span class="fw-medium">@Model.Product.CategoryID</span>
                             </div>
                             <div class="key-value-item">
                                 <span class="text-muted">Review Count</span>
-                                <span class="fw-medium">@Model.Catalog.ReviewCount</span>
+                                <span class="fw-medium">@Model.Product.ReviewCount</span>
                             </div>
                             <div class="key-value-item">
                                 <span class="text-muted">Order Count</span>
-                                <span class="fw-medium">@Model.Catalog.OrderCount</span>
+                                <span class="fw-medium">@Model.Product.OrderCount</span>
                             </div>
                             <div class="key-value-item">
                                 <span class="text-muted">Created By</span>
-                                <span class="fw-medium">@Model.Catalog.CreateBy</span>
+                                <span class="fw-medium">@Model.Product.CreateBy</span>
                             </div>
                             <div class="key-value-item">
                                 <span class="text-muted">Created Date</span>
-                                <span class="fw-medium">@Model.Catalog.CreateDate.ToString("dd MMM yyyy HH:mm")</span>
+                                <span class="fw-medium">@Model.Product.CreateDate.ToString("dd MMM yyyy HH:mm")</span>
                             </div>
                         </div>
 
@@ -336,7 +336,7 @@
                             </h5>
                             <div class="mb-3">
                                 <h6 class="text-muted mb-2">Description</h6>
-                                <p class="mb-0">@Model.Catalog.Description</p>
+                                <p class="mb-0">@Model.Product.Description</p>
                             </div>
                             
                             <div class="mb-3">
@@ -344,13 +344,13 @@
                                 <div class="mb-0">
                                     @{
                                         // Check if the highlights exist
-                                        if (!string.IsNullOrEmpty(Model.Catalog.BaseHightlights))
+                                        if (!string.IsNullOrEmpty(Model.Product.BaseHightlights))
                                         {
                                             try
                                             {
                                                 // Deserialize the JSON string to dictionary
                                                 var highlights = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(
-                                                    Model.Catalog.BaseHightlights
+                                                    Model.Product.BaseHightlights
                                                 );
 
                                                 // Loop through each key-value pair
@@ -365,7 +365,7 @@
                                             catch
                                             {
                                                 // Fallback if JSON is invalid
-                                                @Model.Catalog.BaseHightlights
+                                                @Model.Product.BaseHightlights
                                             }
                                         }
                                         else
@@ -379,8 +379,8 @@
                             <div class="key-value-item">
                                 <span class="text-muted">Requires Refrigeration</span>
                                 <span class="fw-medium">
-                                    <span class="badge bg-@(Model.Catalog.RequiresRefrigeration ? "info" : "secondary")">
-                                        @(Model.Catalog.RequiresRefrigeration ? "Yes" : "No")
+                                    <span class="badge bg-@(Model.Product.RequiresRefrigeration ? "info" : "secondary")">
+                                        @(Model.Product.RequiresRefrigeration ? "Yes" : "No")
                                     </span>
                                 </span>
                             </div>
@@ -394,11 +394,11 @@
                 <div class="card-header py-3">
                     <h5 class="mb-0">
                         <i class="bx bx-package me-2"></i>
-                        Product Variants (@Model.Catalog.CatalogVariants?.Count ?? 0)
+                        Product Variants (@Model.Product.ProductVariants?.Count ?? 0)
                     </h5>
                 </div>
                 <div class="card-body p-0">
-                    @if (Model.Catalog.CatalogVariants?.Any() == true)
+                    @if (Model.Product.ProductVariants?.Any() == true)
                     {
                         <div class="table-responsive">
                             <table class="table table-hover mb-0" id="variantsTable">
@@ -414,7 +414,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var variant in Model.Catalog.CatalogVariants)
+                                    @foreach (var variant in Model.Product.ProductVariants)
                                     {
                                         <tr class="variant-row">
                                             <td>

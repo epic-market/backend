@@ -163,7 +163,7 @@ namespace EpicMarket.Data.Models
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Business> Businesses { get; set; }
         public DbSet<BusinessCategoryInternal> BusinessCategories { get; set; }
-        public DbSet<Catalog> Catalogs { get; set; }
+        public DbSet<Catalog> Products { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<ApplicationConfiguration> ApplicationConfigurations { get; set; }
@@ -175,7 +175,7 @@ namespace EpicMarket.Data.Models
 
         public DbSet<Inventory> Inventory { get; set; }    
 
-        public DbSet<CatalogVariants> CatalogVariants { get; set; }
+        public DbSet<CatalogVariants> ProductVariants { get; set; }
 
         public DbSet<ProductInternal> ProductInternals { get; set; }
 
@@ -240,7 +240,7 @@ namespace EpicMarket.Data.Models
 
         public DbSet<OTPVerification> OTPVerifications { get; set; }
         public DbSet<CommunicationStatus> CommunicationStatus { get; set; }
-        public DbSet<CatalogCategory> CatalogCategories { get; set; }
+        public DbSet<CatalogCategory> ProductCategories { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -338,7 +338,7 @@ namespace EpicMarket.Data.Models
                       .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Inventory>()
-                 .HasOne(op => op.CatalogVariants)
+                 .HasOne(op => op.ProductVariants)
                  .WithMany(u => u.Inventory)
                  .HasForeignKey(op => op.ProductVariantID)
                  .OnDelete(DeleteBehavior.Restrict);
@@ -430,7 +430,7 @@ namespace EpicMarket.Data.Models
 
             modelBuilder.Entity<Catalog>()
                         .HasOne(c => c.Category)
-                        .WithMany(c => c.Catalog)
+                        .WithMany(c => c.Product)
                         .HasForeignKey(c => c.CategoryID)
                         .OnDelete(DeleteBehavior.Restrict);
                         //

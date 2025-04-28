@@ -19,7 +19,7 @@ using EpicMarket.Admin.MVC.Attributes;
 namespace EpicMarket.Admin.MVC.Controllers
 {
     [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
-    public class CatalogsController : Controller
+    public class ProductsController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly IAttachmentService attachmentService;
@@ -27,7 +27,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         private readonly IEventService _eventService;
         private readonly IUrlContextService _urlContextService;
 
-        public CatalogsController(
+        public ProductsController(
             ApplicationDbContext context, 
             IAttachmentService attachmentService, 
             IFileService fileService,
@@ -41,33 +41,33 @@ namespace EpicMarket.Admin.MVC.Controllers
             _urlContextService = urlContextService;
         }
 
-        // GET: Catalogs
+        // GET: Products
         public IActionResult Index()
         {
             return View();
         }
 
         [HttpPost]
-        [Route("Catalog/GetFilteredData")]
-        public async Task<IActionResult> GetFilteredData([FromBody] CatalogFilterViewModel filter)
+        [Route("Product/GetFilteredData")]
+        public async Task<IActionResult> GetFilteredData([FromBody] ProductFilterViewModel filter)
         {
             try
             {
-                var query = _context.Catalogs
+                var query = _context.Products
                     .Include(c => c.Business)
                     .Include(c => c.Category)
                     .Include(c => c.StatusOptionSets)
                     .AsQueryable();
 
                 // Apply filters
-                if (!string.IsNullOrWhiteSpace(filter.CatalogId))
+                if (!string.IsNullOrWhiteSpace(filter.ProductId))
                 {
-                    query = query.Where(c => c.ID.ToString().Contains(filter.CatalogId));
+                    query = query.Where(c => c.ID.ToString().Contains(filter.ProductId));
                 }
 
-                if (!string.IsNullOrWhiteSpace(filter.CatalogName))
+                if (!string.IsNullOrWhiteSpace(filter.ProductName))
                 {
-                    query = query.Where(c => c.Name.Contains(filter.CatalogName));
+                    query = query.Where(c => c.Name.Contains(filter.ProductName));
                 }
 
                 if (!string.IsNullOrWhiteSpace(filter.BusinessName))
@@ -101,7 +101,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 var catalogs = await query
                     .Skip((filter.PageNumber - 1) * filter.PageSize)
                     .Take(filter.PageSize)
-                    .Select(c => new CatalogDto
+                    .Select(c => new ProductDto
                     {
                         ID = c.ID,
                         Name = c.Name,
@@ -122,8 +122,8 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
         }
 
-        // GET: Catalogs/Details/5
-        [SecurableAuthorize(SecurableConstants.CatalogsView)]
+        // GET: Products/Details/5
+        [SecurableAuthorize(SecurableConstants.ProductsView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -131,10 +131,10 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var catalog = await _context.Catalogs
+            var catalog = await _context.Products
                 .Include(c => c.Business)
                 .Include(c => c.StatusOptionSets)
-                .Include(c => c.CatalogVariants)
+                .Include(c => c.ProductVariants)
                     .ThenInclude(v => v.Inventory)
                         .ThenInclude(i => i.Outlet)
                 .AsNoTracking()
@@ -147,12 +147,12 @@ namespace EpicMarket.Admin.MVC.Controllers
 
             var OutletProductsList = await _context.Inventory
                 .Include(c => c.Outlet)
-                .Where(c => c.CatalogVariants.Catalog.ID == id)
+                .Where(c => c.ProductVariants.Product.ID == id)
                 .ToListAsync();
 
-            var CatalogModel = new CatelogModel()
+            var ProductModel = new CatelogModel()
             {
-                Catalog = catalog,
+                Product = catalog,
                 Inventorys = OutletProductsList
             };
 
@@ -170,14 +170,14 @@ namespace EpicMarket.Admin.MVC.Controllers
             // Get variant images for each variant
             var variantImages = new Dictionary<int, List<string>>();
             
-            if (catalog?.CatalogVariants != null)
+            if (catalog?.ProductVariants != null)
             {
                 // Find default variant
-                var defaultVariant = catalog.CatalogVariants.FirstOrDefault(v => v.IsDefaultVariant) ?? 
-                                     catalog.CatalogVariants.FirstOrDefault();
+                var defaultVariant = catalog.ProductVariants.FirstOrDefault(v => v.IsDefaultVariant) ?? 
+                                     catalog.ProductVariants.FirstOrDefault();
                 
                 // Fetch images for each variant
-                foreach (var variant in catalog.CatalogVariants)
+                foreach (var variant in catalog.ProductVariants)
                 {
                     // Thumbnail images query
                     var variantThumbnailQuery = from attachment in _context.Attachments
@@ -273,11 +273,11 @@ namespace EpicMarket.Admin.MVC.Controllers
             ViewBag.productImages = productImages;
             ViewBag.variantImages = variantImages;
 
-            return View(CatalogModel);
+            return View(ProductModel);
         }
 
-        // GET: Catalogs/Create
-        [SecurableAuthorize(SecurableConstants.CatalogsAdd)]
+        // GET: Products/Create
+        [SecurableAuthorize(SecurableConstants.ProductsAdd)]
         public IActionResult Create()
         {
             ViewData["BusinessID"] = new SelectList(_context.Businesses, "ID", "ID");
@@ -285,10 +285,10 @@ namespace EpicMarket.Admin.MVC.Controllers
             return View();
         }
 
-        // POST: Catalogs/Create
+        // POST: Products/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Catalog catalog)
+        public async Task<IActionResult> Create(EpicMarket.Data.Models.Catalog catalog)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
 
@@ -358,7 +358,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                                 var variantData = variantsData[i];
                                 var variant = new CatalogVariants
                                 {
-                                    CatalogID = catalog.ID,
+                                    ProductID = catalog.ID,
                                     SKU = variantData.GetProperty("SKU").GetString(),
                                     Barcode = variantData.TryGetProperty("Barcode", out System.Text.Json.JsonElement barcode) ? barcode.GetString() : null,
                                     CostPrice = variantData.GetProperty("CostPrice").GetDouble(),
@@ -397,7 +397,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                                 if (variantData.TryGetProperty("AdditionalHighlights", out System.Text.Json.JsonElement highlights))
                                     variant.AdditionalHightlights = highlights.GetString();
 
-                                _context.CatalogVariants.Add(variant);
+                                _context.ProductVariants.Add(variant);
                                 await _context.SaveChangesAsync();
 
                                 // Handle attachments for this variant
@@ -447,8 +447,8 @@ namespace EpicMarket.Admin.MVC.Controllers
                             // Log the event
                             await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
                             {
-                                EventName = EventConstants.AddCatalog,
-                                EntityName = EntityConstants.Catalog,
+                                EventName = EventConstants.AddProduct,
+                                EntityName = EntityConstants.Product,
                                 Source = _urlContextService.CurrentPageUrl,
                                 Description = $"Added catalog '{catalog.Name}' with {variantsData.Count} variants",
                                 Data = System.Text.Json.JsonSerializer.Serialize(catalog),
@@ -495,8 +495,8 @@ namespace EpicMarket.Admin.MVC.Controllers
             return View(catalog);
         }
 
-        // GET: Catalogs/Edit/5
-        [SecurableAuthorize(SecurableConstants.CatalogsEdit)]
+        // GET: Products/Edit/5
+        [SecurableAuthorize(SecurableConstants.ProductsEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -504,9 +504,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            // Update to include CatalogVariants
-            var catalog = await _context.Catalogs
-                .Include(c => c.CatalogVariants)
+            // Update to include ProductVariants
+            var catalog = await _context.Products
+                .Include(c => c.ProductVariants)
                 .FirstOrDefaultAsync(m => m.ID == id);
 
             if (catalog == null)
@@ -540,9 +540,9 @@ namespace EpicMarket.Admin.MVC.Controllers
             var variantAttachments = new Dictionary<int, Dictionary<string, object>>();
 
             // Process each variant to get its attachments
-            if (catalog.CatalogVariants != null && catalog.CatalogVariants.Any())
+            if (catalog.ProductVariants != null && catalog.ProductVariants.Any())
             {
-                foreach (var variant in catalog.CatalogVariants)
+                foreach (var variant in catalog.ProductVariants)
                 {
                     // Get variant thumbnails
                     var variantThumbnails = await attachmentService.GetAttachmentLinks(new GetAttachmentLink()
@@ -574,12 +574,12 @@ namespace EpicMarket.Admin.MVC.Controllers
             return View(catalog);
         }
 
-        // POST: Catalogs/Edit/5
+        // POST: Products/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Catalog catalog, string? removedVariantIds)
+        public async Task<IActionResult> Edit(int id, EpicMarket.Data.Models.Catalog catalog, string? removedVariantIds)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
 
@@ -595,7 +595,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 try
                 {
-                    var originalEntity = await _context.Catalogs.AsNoTracking()
+                    var originalEntity = await _context.Products.AsNoTracking()
                         .FirstOrDefaultAsync(x => x.ID == id);
 
                     // Process highlights
@@ -613,7 +613,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                         var idsToRemove = removedVariantIds.Split(',').Select(int.Parse).ToList();
                         foreach (var variantId in idsToRemove)
                         {
-                            var variantToRemove = await _context.CatalogVariants.FindAsync(variantId);
+                            var variantToRemove = await _context.ProductVariants.FindAsync(variantId);
                             if (variantToRemove != null)
                             {
                                 // Get and delete all attachments for this variant
@@ -641,7 +641,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                                     await fileService.DeleteImage(productImageAttachments, userName);
                                 }
                                 
-                                _context.CatalogVariants.Remove(variantToRemove);
+                                _context.ProductVariants.Remove(variantToRemove);
                             }
                         }
                         await _context.SaveChangesAsync();
@@ -687,7 +687,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                                 // Create new variant
                                 variant = new CatalogVariants
                                 {
-                                    CatalogID = catalog.ID,
+                                    ProductID = catalog.ID,
                                     CreateBy = userName,
                                     CreateDate = DateTime.UtcNow
                                 };
@@ -695,7 +695,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                             else
                             {
                                 // Update existing variant
-                                variant = await _context.CatalogVariants.FindAsync(variantId.Value);
+                                variant = await _context.ProductVariants.FindAsync(variantId.Value);
                                 if (variant == null) continue;
                                 
                                 variant.ModifiedBy = userName;
@@ -740,11 +740,11 @@ namespace EpicMarket.Admin.MVC.Controllers
 
                             if (isNewVariant)
                             {
-                                _context.CatalogVariants.Add(variant);
+                                _context.ProductVariants.Add(variant);
                             }
                             else
                             {
-                                _context.CatalogVariants.Update(variant);
+                                _context.ProductVariants.Update(variant);
                             }
                             
                             await _context.SaveChangesAsync();
@@ -792,8 +792,8 @@ namespace EpicMarket.Admin.MVC.Controllers
                     else if (Request.Form.ContainsKey("defaultVariant_SKU"))
                     {
                         // Handle default variant update
-                        var variants = await _context.CatalogVariants
-                            .Where(v => v.CatalogID == catalog.ID)
+                        var variants = await _context.ProductVariants
+                            .Where(v => v.ProductID == catalog.ID)
                             .ToListAsync();
                         
                         if (variants.Count == 0)
@@ -801,7 +801,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                             // Create new default variant
                             var defaultVariant = new CatalogVariants
                             {
-                                CatalogID = catalog.ID,
+                                ProductID = catalog.ID,
                                 SKU = Request.Form["defaultVariant_SKU"],
                                 Barcode = Request.Form["defaultVariant_Barcode"],
                                 CostPrice = double.Parse(Request.Form["defaultVariant_CostPrice"]),
@@ -836,7 +836,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                             if (!string.IsNullOrEmpty(Request.Form["defaultVariant_Weight"]))
                                 defaultVariant.Weight = double.Parse(Request.Form["defaultVariant_Weight"]);
 
-                            _context.CatalogVariants.Add(defaultVariant);
+                            _context.ProductVariants.Add(defaultVariant);
                             await _context.SaveChangesAsync();
 
                             // Handle default variant attachments
@@ -932,7 +932,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                             else
                                 defaultVariant.Weight = null;
 
-                            _context.CatalogVariants.Update(defaultVariant);
+                            _context.ProductVariants.Update(defaultVariant);
                             await _context.SaveChangesAsync();
 
                             // Handle default variant thumbnail update
@@ -1003,8 +1003,8 @@ namespace EpicMarket.Admin.MVC.Controllers
                     // Log the event
                     await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
                     {
-                        EventName = EventConstants.EditCatalog,
-                        EntityName = EntityConstants.Catalog,
+                        EventName = EventConstants.EditProduct,
+                        EntityName = EntityConstants.Product,
                         Source = _urlContextService.CurrentPageUrl,
                         Description = $"Updated catalog '{catalog.Name}'",
                         Data = System.Text.Json.JsonSerializer.Serialize(new
@@ -1021,7 +1021,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CatalogExists(catalog.ID))
+                    if (!ProductExists(catalog.ID))
                     {
                         return NotFound();
                     }
@@ -1041,8 +1041,8 @@ namespace EpicMarket.Admin.MVC.Controllers
             return View(catalog);
         }
 
-        // GET: Catalogs/Delete/5
-        [SecurableAuthorize(SecurableConstants.CatalogsDelete)]
+        // GET: Products/Delete/5
+        [SecurableAuthorize(SecurableConstants.ProductsDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -1050,7 +1050,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
-            var catalog = await _context.Catalogs
+            var catalog = await _context.Products
                 .Include(c => c.Business)
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (catalog == null)
@@ -1061,14 +1061,14 @@ namespace EpicMarket.Admin.MVC.Controllers
             return View(catalog);
         }
 
-        // POST: Catalogs/Delete/5
+        // POST: Products/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [SecurableAuthorize(SecurableConstants.CatalogsDelete)]
+        [SecurableAuthorize(SecurableConstants.ProductsDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var catalog = await _context.Catalogs
-                .Include(c => c.CatalogVariants)
+            var catalog = await _context.Products
+                .Include(c => c.ProductVariants)
                 .FirstOrDefaultAsync(c => c.ID == id);
         
             if (catalog != null)
@@ -1076,9 +1076,9 @@ namespace EpicMarket.Admin.MVC.Controllers
                 var userName = this.User.FindFirst(ClaimTypes.Name).Value;
                 
                 // Delete all variants and their attachments
-                if (catalog.CatalogVariants != null && catalog.CatalogVariants.Any())
+                if (catalog.ProductVariants != null && catalog.ProductVariants.Any())
                 {
-                    foreach (var variant in catalog.CatalogVariants)
+                    foreach (var variant in catalog.ProductVariants)
                     {
                         // Delete variant thumbnails
                         var thumbnailAttachments = await attachmentService.GetAttachmentLinks(new GetAttachmentLink()
@@ -1107,7 +1107,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                         }
                         
                         // Remove the variant
-                        _context.CatalogVariants.Remove(variant);
+                        _context.ProductVariants.Remove(variant);
                     }
                 }
                 
@@ -1139,10 +1139,10 @@ namespace EpicMarket.Admin.MVC.Controllers
                 // Log the event
                 await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
                 {
-                    EventName = EventConstants.DeleteCatalog,
-                    EntityName = EntityConstants.Catalog,
+                    EventName = EventConstants.DeleteProduct,
+                    EntityName = EntityConstants.Product,
                     Source = _urlContextService.CurrentPageUrl,
-                    Description = $"Deleted catalog '{catalog.Name}' with {catalog.CatalogVariants?.Count ?? 0} variants",
+                    Description = $"Deleted catalog '{catalog.Name}' with {catalog.ProductVariants?.Count ?? 0} variants",
                     Data = System.Text.Json.JsonSerializer.Serialize(catalog),
                     RecordId = catalog.ID,
                     BusinessID = catalog.BusinessID,
@@ -1150,16 +1150,16 @@ namespace EpicMarket.Admin.MVC.Controllers
                 });
                 
                 // Remove the catalog (this would automatically remove variants if cascade delete is set up)
-                _context.Catalogs.Remove(catalog);
+                _context.Products.Remove(catalog);
                 await _context.SaveChangesAsync();
             }
             
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CatalogExists(int id)
+        private bool ProductExists(int id)
         {
-            return _context.Catalogs.Any(e => e.ID == id);
+            return _context.Products.Any(e => e.ID == id);
         }
         
         /// <summary>
@@ -1203,12 +1203,12 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         [HttpPost]
-        [Route("Catalogs/MapToOutlet")]
+        [Route("Products/MapToOutlet")]
         public async Task<IActionResult> MapToOutlet([FromBody] MapToOutletViewModel model)
         {
             try
             {
-                if (model == null || model.OutletId <= 0 || model.CatalogIds == null || !model.CatalogIds.Any())
+                if (model == null || model.OutletId <= 0 || model.ProductIds == null || !model.ProductIds.Any())
                 {
                     return Json(new { success = false, message = "Invalid outlet or no catalogs selected" });
                 }
@@ -1221,8 +1221,8 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
 
                 // Get all catalog variants for the selected catalogs
-                var variants = await _context.CatalogVariants
-                    .Where(v => model.CatalogIds.Contains(v.CatalogID))
+                var variants = await _context.ProductVariants
+                    .Where(v => model.ProductIds.Contains(v.ProductID))
                     .ToListAsync();
 
                 if (!variants.Any())
@@ -1267,13 +1267,13 @@ namespace EpicMarket.Admin.MVC.Controllers
                 // Log the event
                 // await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
                 // {
-                //     EventName = EventConstants.MapCatalogsToOutlet,
+                //     EventName = EventConstants.MapProductsToOutlet,
                 //     EntityName = EntityConstants.Inventory,
                 //     Source = _urlContextService.CurrentPageUrl,
-                //     Description = $"Mapped {model.CatalogIds.Count} catalogs to outlet ID {model.OutletId}",
+                //     Description = $"Mapped {model.ProductIds.Count} catalogs to outlet ID {model.OutletId}",
                 //     Data = System.Text.Json.JsonSerializer.Serialize(new { 
                 //         OutletId = model.OutletId, 
-                //         CatalogIds = model.CatalogIds,
+                //         ProductIds = model.ProductIds,
                 //         NewInventoryCount = newInventories.Count
                 //     }),
                 //     RecordId = model.OutletId,
@@ -1296,7 +1296,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         [HttpGet]
-        [Route("Catalogs/GetOutletsByBusiness/{businessId}")]
+        [Route("Products/GetOutletsByBusiness/{businessId}")]
         public async Task<IActionResult> GetOutletsByBusiness(int businessId)
         {
             try
@@ -1323,6 +1323,6 @@ namespace EpicMarket.Admin.MVC.Controllers
     public class MapToOutletViewModel
     {
         public int OutletId { get; set; }
-        public List<int> CatalogIds { get; set; } = new List<int>();
+        public List<int> ProductIds { get; set; } = new List<int>();
     }
 }

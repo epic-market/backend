@@ -16,21 +16,21 @@ namespace EpicMarket.Business.API.Controllers
 {
 
     [Route("api/catalog")]
-    public partial class CatalogController : BaseApiController
+    public partial class ProductController : BaseApiController
 	{
-		private readonly ILogger<CatalogController> logger;
-		private readonly ICatalogService productService;
+		private readonly ILogger<ProductController> logger;
+		private readonly IProductService productService;
 		private readonly IApplicationConfigurationService applicationConfigurationService;
         private readonly IRatingService ratingService;
         private readonly IAttachmentService attachmentService;
 		private readonly IFileService fileStoreService;
-        private readonly ICatalogCategoryService catalogCategoryService;
+        private readonly IProductCategoryService catalogCategoryService;
         private readonly ApplicationDbContext dbContext;
 		private readonly IHttpContextAccessor httpContextAccessor;
 		private readonly IOutletService branchService;
 
-		public CatalogController(ILogger<CatalogController> logger, ICatalogService productService, IApplicationConfigurationService applicationConfigurationService,IRatingService ratingService,
-			IAttachmentService attachmentService, IFileService fileStoreService,ICatalogCategoryService catalogCategoryService , ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
+		public ProductController(ILogger<ProductController> logger, IProductService productService, IApplicationConfigurationService applicationConfigurationService,IRatingService ratingService,
+			IAttachmentService attachmentService, IFileService fileStoreService,IProductCategoryService catalogCategoryService , ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
 		{
 			this.logger = logger;
 			this.productService = productService;
@@ -184,13 +184,13 @@ namespace EpicMarket.Business.API.Controllers
 
         [HttpPost("verify")]
         [Authorize(Roles = ROLES.BUSINESS_OWNER)]	
-        public async Task<ActionResult<OperationResult<int>>> VerifyCatalog(VerifyCatalogDto verifyCatalogDto)
+        public async Task<ActionResult<OperationResult<int>>> VerifyProduct(VerifyProductDto verifyProductDto)
         {
             var response = new OperationResult<int>();
-            this.logger.LogInformation("Products Controller -> VerifyCatalog()-> params {0}", JsonConvert.SerializeObject(new { Params = verifyCatalogDto }));
+            this.logger.LogInformation("Products Controller -> VerifyProduct()-> params {0}", JsonConvert.SerializeObject(new { Params = verifyProductDto }));
             var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
-            var id = await productService.VerifyCatalog(verifyCatalogDto, UserName, this.AdminPersonID, this.PageSource);
-            this.logger.LogInformation("Products Controller -> VerifyCatalog()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
+            var id = await productService.VerifyProduct(verifyProductDto, UserName, this.AdminPersonID, this.PageSource);
+            this.logger.LogInformation("Products Controller -> VerifyProduct()-> return {0}", JsonConvert.SerializeObject(new { Value = id }));
             response.Data = id;
             return Ok(response);
         }

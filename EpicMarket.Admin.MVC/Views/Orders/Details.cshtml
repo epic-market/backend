@@ -330,17 +330,17 @@
                                                     </div>
                                                     <div>
                                                         <h6 class="mb-0">
-                                                            <a asp-controller="Catalogs" asp-action="Details" asp-route-id="@item.CatalogVariants.CatalogID" 
+                                                            <a asp-controller="Products" asp-action="Details" asp-route-id="@item.ProductVariants.ProductID" 
                                                                class="text-decoration-none text-dark">
-                                                                @(item.CatalogVariants.Catalog?.Name ?? $"Product #{item.CatalogVariants.CatalogID}")
+                                                                @(item.ProductVariants.Product?.Name ?? $"Product #{item.ProductVariants.ProductID}")
                                                             </a>
                                                         </h6>
                                                         <div class="d-flex flex-wrap gap-2 mt-1">
-                                                            @if (!string.IsNullOrEmpty(item.CatalogVariants.Attributes))
+                                                            @if (!string.IsNullOrEmpty(item.ProductVariants.Attributes))
                                                             {
-                                                                <span class="badge bg-light text-dark">@item.CatalogVariants.Attributes</span>
+                                                                <span class="badge bg-light text-dark">@item.ProductVariants.Attributes</span>
                                                             }
-                                                            <span class="badge bg-light text-dark">SKU: @item.CatalogVariants.SKU</span>
+                                                            <span class="badge bg-light text-dark">SKU: @item.ProductVariants.SKU</span>
                                                         </div>
                                                     </div>
                                                 </div>

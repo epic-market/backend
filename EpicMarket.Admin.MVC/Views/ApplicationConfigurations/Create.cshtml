@@ -29,7 +29,7 @@
                         <div>
                             <i class="bx bxs-user me-1 font-22 text-info"></i>
                         </div>
-                        <h5 class="mb-0 text-info">Applciation Configurations</h5>
+                        <h5 class="mb-0 text-info">Application Configurations</h5>
                     </div>
                     <hr />
                     <form asp-action="Create">
@@ -59,10 +59,8 @@
             <div class="row">
                 <label class="col-sm-3 col-form-label"></label>
                 <div class="col-sm-9">
-                    <button type="submit" class="btn btn-info px-5"> Save</button>
-                </div>
-                <div>
-                    <a asp-action="Index">Back to List</a>
+                     <a asp-action="Index" class="btn btn-secondary px-5" id="cancelButton">Cancel</a>
+                    <button type="submit" class="btn btn-info px-5">Save</button>
                 </div>
             </div>
         </form>
@@ -73,4 +71,57 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Track if form has been modified
+            let formModified = false;
+            
+            // Mark form as modified when any input changes
+            $('form input, form textarea').on('change keyup', function() {
+                formModified = true;
+            });
+            
+            // Add confirmation popup to cancel button
+            $('#cancelButton').on('click', function(e) {
+                if (formModified) {
+                    e.preventDefault();
+                    
+                    // Create confirmation popup
+                    const popup = $('<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">' +
+                        '<div class="modal-dialog modal-dialog-centered">' +
+                            '<div class="modal-content">' +
+                                '<div class="modal-header bg-warning">' +
+                                    '<h5 class="modal-title">Unsaved Changes</h5>' +
+                                    '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>' +
+                                '</div>' +
+                                '<div class="modal-body">' +
+                                    '<p>You have unsaved changes that will be lost. Are you sure you want to cancel?</p>' +
+                                '</div>' +
+                                '<div class="modal-footer">' +
+                                    '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Stay on Page</button>' +
+                                    '<button type="button" class="btn btn-danger" id="confirmCancel">Discard Changes</button>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>');
+                    
+                    // Append to body and show
+                    $('body').append(popup);
+                    const modal = new bootstrap.Modal(popup);
+                    modal.show();
+                    
+                    // Handle confirmation
+                    $('#confirmCancel').on('click', function() {
+                        window.location.href = $('#cancelButton').attr('href');
+                    });
+                    
+                    // Remove modal when hidden
+                    popup.on('hidden.bs.modal', function() {
+                        popup.remove();
+                    });
+                }
+            });
+        });
+    </script>
 }

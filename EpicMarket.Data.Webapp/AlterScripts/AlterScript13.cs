@@ -129,11 +129,11 @@ namespace EpicMarket.Data.Webapp.AlterScripts
                 new ApplicationSecurables { Name = "UserOnboardingProgressesEdit", Description = "Editing User Onboarding Progresses" },
                 new ApplicationSecurables { Name = "UserOnboardingProgressesDelete", Description = "Deleting User Onboarding Progresses" },
                 
-                // Catalogs
-                new ApplicationSecurables { Name = "CatalogsView", Description = "Viewing Catalogs" },
-                new ApplicationSecurables { Name = "CatalogsAdd", Description = "Adding Catalogs" },
-                new ApplicationSecurables { Name = "CatalogsEdit", Description = "Editing Catalogs" },
-                new ApplicationSecurables { Name = "CatalogsDelete", Description = "Deleting Catalogs" },
+                // Products
+                new ApplicationSecurables { Name = "ProductsView", Description = "Viewing Products" },
+                new ApplicationSecurables { Name = "ProductsAdd", Description = "Adding Products" },
+                new ApplicationSecurables { Name = "ProductsEdit", Description = "Editing Products" },
+                new ApplicationSecurables { Name = "ProductsDelete", Description = "Deleting Products" },
                 
                 // Outlets
                 new ApplicationSecurables { Name = "OutletsView", Description = "Viewing Outlets" },

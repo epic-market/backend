@@ -167,13 +167,13 @@ namespace EpicMarket.Data.Webapp.AlterScripts
                     dbContext.Entity.Add(entity);
                 }
 
-                // Add Catalog
-                if (!dbContext.Entity.Any(cm => cm.Name == "Catalog"))
+                // Add Product
+                if (!dbContext.Entity.Any(cm => cm.Name == "Product"))
                 {
                     var entity = new Entity
                     {
-                        Name = "Catalog",
-                        Description = "Catalog Entity"
+                        Name = "Product",
+                        Description = "Product Entity"
                     };
                     dbContext.Entity.Add(entity);
                 }
@@ -897,35 +897,35 @@ namespace EpicMarket.Data.Webapp.AlterScripts
                     dbContext.Event.Add(event39);
                 }
 
-                // Catalog Events
-                if (!dbContext.Event.Any(cm => cm.Name == "AddCatalog"))
+                // Product Events
+                if (!dbContext.Event.Any(cm => cm.Name == "AddProduct"))
                 {
                     var event40 = new Event
                     {
-                        Name = "AddCatalog",
-                        Description = "Add Catalog",
+                        Name = "AddProduct",
+                        Description = "Add Product",
                         EventCategoryID = 1
                     };
                     dbContext.Event.Add(event40);
                 }
 
-                if (!dbContext.Event.Any(cm => cm.Name == "EditCatalog"))
+                if (!dbContext.Event.Any(cm => cm.Name == "EditProduct"))
                 {
                     var event41 = new Event
                     {
-                        Name = "EditCatalog",
-                        Description = "Edit Catalog",
+                        Name = "EditProduct",
+                        Description = "Edit Product",
                         EventCategoryID = 1
                     };
                     dbContext.Event.Add(event41);
                 }
 
-                if (!dbContext.Event.Any(cm => cm.Name == "DeleteCatalog"))
+                if (!dbContext.Event.Any(cm => cm.Name == "DeleteProduct"))
                 {
                     var event42 = new Event
                     {
-                        Name = "DeleteCatalog",
-                        Description = "Delete Catalog",
+                        Name = "DeleteProduct",
+                        Description = "Delete Product",
                         EventCategoryID = 1
                     };
                     dbContext.Event.Add(event42);

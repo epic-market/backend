@@ -110,11 +110,11 @@ namespace EpicMarket.Entities.Constants
         public const string UserOnboardingProgressesEdit = "UserOnboardingProgressesEdit";
         public const string UserOnboardingProgressesDelete = "UserOnboardingProgressesDelete";
         
-        // Constants for CatalogsController
-        public const string CatalogsView = "CatalogsView";
-        public const string CatalogsAdd = "CatalogsAdd";
-        public const string CatalogsEdit = "CatalogsEdit";
-        public const string CatalogsDelete = "CatalogsDelete";
+        // Constants for ProductsController
+        public const string ProductsView = "ProductsView";
+        public const string ProductsAdd = "ProductsAdd";
+        public const string ProductsEdit = "ProductsEdit";
+        public const string ProductsDelete = "ProductsDelete";
         
         // Constants for OutletsController
         public const string OutletsView = "OutletsView";

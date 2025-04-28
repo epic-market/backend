@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EpicMarket.Contracts
 {
-    public interface ICatalogCategoryService
+    public interface IProductCategoryService
     {
         Task<List<CategoriesDto>> GetCategories(int businessId);
         Task<List<CategoriesDto>> GetCategoriesByOutletId(int outletId);

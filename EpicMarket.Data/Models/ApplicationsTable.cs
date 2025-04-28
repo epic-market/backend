@@ -10,7 +10,7 @@ namespace EpicMarket.Data.Models
 {//this will be used for both events and tasks
     public class ApplicationsTable : BaseModel //this table is to know which application is assced like bussinessowner, admin , customer app 
     {
-        [Key]
+        [Key] 
         public int ID { get; set; }
 
         [Required]

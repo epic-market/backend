@@ -15,7 +15,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EpicMarket.Services
 {
-    public class CatalogCategoryService :  ICatalogCategoryService
+    public class ProductCategoryService :  IProductCategoryService
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper mapper;
@@ -24,7 +24,7 @@ namespace EpicMarket.Services
         private readonly ICommunicationQueueService communicationQueueService;
         private readonly ITasksService tasksService;
         private readonly IUnitOfWork unitOfWork;
-		public CatalogCategoryService(
+		public ProductCategoryService(
                                 ApplicationDbContext context,
                                 IMapper mapper ,
                                 IAddressService addressService,
@@ -44,7 +44,7 @@ namespace EpicMarket.Services
 
         public async Task<List<CategoriesDto>> GetCategories(int businessId)
         {
-            var categories = await _context.CatalogCategories.Where(c => c.BusinessID == businessId).ToListAsync();
+            var categories = await _context.ProductCategories.Where(c => c.BusinessID == businessId).ToListAsync();
             return mapper.Map<List<CategoriesDto>>(categories);
         }     
 
@@ -58,7 +58,7 @@ namespace EpicMarket.Services
             }
 
             // Get categories for the business
-            var categories = await _context.CatalogCategories
+            var categories = await _context.ProductCategories
                 .Where(c => c.BusinessID == outlet.BussinessID && c.IsActive)
                 .ToListAsync();
                 
@@ -67,7 +67,7 @@ namespace EpicMarket.Services
 
         public async Task<CategoriesDto> GetCategory(int id)
         {
-            var category = await _context.CatalogCategories.FindAsync(id);
+            var category = await _context.ProductCategories.FindAsync(id);
             return mapper.Map<CategoriesDto>(category);
         }
 
@@ -76,7 +76,7 @@ namespace EpicMarket.Services
             try
             {
                 var newCategory = mapper.Map<CatalogCategory>(category);
-                _context.CatalogCategories.Add(newCategory);
+                _context.ProductCategories.Add(newCategory);
                 await _context.SaveChangesAsync();
                 return mapper.Map<CategoriesDto>(newCategory);
             }
@@ -88,26 +88,26 @@ namespace EpicMarket.Services
 
         public async Task<CategoriesDto> UpdateCategory(int id, UpdateCategoryDto category)
         {
-            var updatedCategory = await _context.CatalogCategories.FindAsync(id);
+            var updatedCategory = await _context.ProductCategories.FindAsync(id);
             if (updatedCategory == null)
             {
                 throw new Exception("Category not found");
             }
             updatedCategory.Name = category.Name;
             updatedCategory.Description = category.Description;
-            _context.CatalogCategories.Update(updatedCategory);
+            _context.ProductCategories.Update(updatedCategory);
             await _context.SaveChangesAsync();
             return mapper.Map<CategoriesDto>(updatedCategory);
         }
 
         public async Task<CategoriesDto> DeleteCategory(int id)
         {
-            var category = await _context.CatalogCategories.FindAsync(id);
+            var category = await _context.ProductCategories.FindAsync(id);
             if (category == null)
             {
                 throw new Exception("Category not found");
             }
-            _context.CatalogCategories.Remove(category);
+            _context.ProductCategories.Remove(category);
             await _context.SaveChangesAsync();
             return mapper.Map<CategoriesDto>(category);
         }

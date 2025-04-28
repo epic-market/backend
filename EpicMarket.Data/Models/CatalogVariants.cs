@@ -11,13 +11,15 @@ using System.Text.Json.Serialization;
 
 namespace EpicMarket.Data.Models
 {
+
+    [Table("ProductVariants")]
     public class CatalogVariants : BaseModel
     {
         [Key]
         public int ID { get; set; }
         [Required]
-        [ForeignKey("Catalog")]
-        public int CatalogID { get; set; }
+        [ForeignKey("Product")]
+        public int ProductID { get; set; }
         [Required]
         [StringLength(50)]
         public string SKU { get; set; }
@@ -39,7 +41,7 @@ namespace EpicMarket.Data.Models
         public bool IsDefaultVariant { get; set; }
 
         [JsonIgnore]
-        public virtual Catalog Catalog { get; set; }
+        public virtual Catalog Product { get; set; }
         public virtual ICollection<Inventory> Inventory { get; set; }
 
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }

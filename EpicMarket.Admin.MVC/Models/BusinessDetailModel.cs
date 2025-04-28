@@ -15,9 +15,9 @@ namespace EpicMarket.Admin.MVC.Models
 
 		public BusinessEmployeeMap employee { get; set; }
 
-		public List<Catalog> Catalogs { get; set; }
+		public List<EpicMarket.Data.Models.Catalog> Products { get; set; }
 
-		public Catalog Catalog { get; set; }
+		public EpicMarket.Data.Models.Catalog Product { get; set; }
 
 
 		public List<EventLog> EventLogs { get; set; }
