@@ -125,7 +125,7 @@ namespace EpicMarket.Services
 
                 foreach(var orderDetail in orderdto.orderDetailsDtos)
                 {
-                    var catelogVariant = await _context.CatalogVariants.Include(c => c.Catalog)
+                    var catelogVariant = await _context.ProductVariants.Include(c => c.Product)
                         .FirstOrDefaultAsync(c => c.ID == orderDetail.VariantID && c.IsActive == true);
 
                     if (catelogVariant == null)
@@ -135,7 +135,7 @@ namespace EpicMarket.Services
 
                     if (orderDetail.Quantity <= 0)
                     {
-                        throw new ArgumentException($"Invalid quantity for product {catelogVariant.Catalog.Name}");
+                        throw new ArgumentException($"Invalid quantity for product {catelogVariant.Product.Name}");
                     }
 
                     var singleOrderDetail = new OrderDetail
@@ -219,13 +219,13 @@ namespace EpicMarket.Services
             }
 
             List<OrderDetails> orderDetails = await _context.OrderDetails
-                .Include(c => c.CatalogVariants)
-                .ThenInclude(cv => cv.Catalog)
+                .Include(c => c.ProductVariants)
+                .ThenInclude(cv => cv.Product)
                 .Where(c => c.OrderID == OrderId)
                 .Select(c => new OrderDetails()
                 {
-                    VariantID = c.CatalogVariants.ID,
-                    ProductName = c.CatalogVariants.Catalog.Name,
+                    VariantID = c.ProductVariants.ID,
+                    ProductName = c.ProductVariants.Product.Name,
                     Quantity = c.Quantity,
                     Rate = c.Rate,
                     TotalPrice = c.TotalPrice,
@@ -239,7 +239,7 @@ namespace EpicMarket.Services
                             e => e.ID,
                             (j, e) => new { j.Attachment, j.Link, Entity = e })
                         .Where(x => x.Entity.Name == EntityConstants.CatelogVariant &&
-                                  x.Link.RecordID == c.CatalogVariants.ID &&
+                                  x.Link.RecordID == c.ProductVariants.ID &&
                                   x.Link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID)
                         .Select(x => $"{x.Attachment.DocumentFolderPath}{x.Attachment.DocumentFile}")
                         .FirstOrDefault() ?? string.Empty
@@ -414,8 +414,8 @@ namespace EpicMarket.Services
                 {
                     ID =c.OrderDetails.FirstOrDefault().ID,
                     Quantity= c.OrderDetails.FirstOrDefault().Quantity,
-                    Name= c.OrderDetails.FirstOrDefault().CatalogVariants.Catalog.Name,
-                    Price=c.OrderDetails.FirstOrDefault().CatalogVariants.SalePrice,
+                    Name= c.OrderDetails.FirstOrDefault().ProductVariants.Product.Name,
+                    Price=c.OrderDetails.FirstOrDefault().ProductVariants.SalePrice,
                     Total_price=c.OrderDetails.FirstOrDefault().TotalPrice
                 },
 
@@ -458,8 +458,8 @@ namespace EpicMarket.Services
                     {
                         ID = od.ID,
                         Quantity = od.Quantity,
-                        Name = od.CatalogVariants.Catalog.Name,
-                        Price = od.CatalogVariants.SalePrice,
+                        Name = od.ProductVariants.Product.Name,
+                        Price = od.ProductVariants.SalePrice,
                         Total_price = od.TotalPrice
                     }).ToList(),
 
@@ -575,7 +575,7 @@ namespace EpicMarket.Services
                 // Process order details
                 foreach(var orderDetail in order.OrderDetailsDtos)
                 {
-                    var catalogVariant = await _context.CatalogVariants.Include(c => c.Catalog)
+                    var catalogVariant = await _context.ProductVariants.Include(c => c.Product)
                         .FirstOrDefaultAsync(c => c.ID == orderDetail.VariantID && c.IsActive == true);
 
                     if (catalogVariant == null)
@@ -585,7 +585,7 @@ namespace EpicMarket.Services
 
                     if (orderDetail.Quantity <= 0)
                     {
-                        throw new ArgumentException($"Invalid quantity for product {catalogVariant.Catalog.Name}");
+                        throw new ArgumentException($"Invalid quantity for product {catalogVariant.Product.Name}");
                     }
 
                     var singleOrderDetail = new OrderDetail

@@ -1,7 +1,7 @@
 ﻿@model EpicMarket.Data.Models.Inventory
 
 @{
-    ViewData["Title"] = $"{Model.CatalogVariants.Catalog.Name} - Inventory Details";
+    ViewData["Title"] = $"{Model.ProductVariants.Product.Name} - Inventory Details";
 }
 
 <style>
@@ -97,7 +97,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Home</a></li>
             <li class="breadcrumb-item"><a href="@Url.Action("Index", "Inventories")">Inventory</a></li>
-            <li class="breadcrumb-item active" aria-current="page">@Model.CatalogVariants.Catalog.Name</li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.ProductVariants.Product.Name</li>
         </ol>
     </nav>
 
@@ -111,7 +111,7 @@
                         <i class="bx bx-package text-primary" style="font-size: 20px;"></i>
                     </div>
                 </div>
-                Inventory for @Model.CatalogVariants.Catalog.Name
+                Inventory for @Model.ProductVariants.Product.Name
             </h3>
             <div>
                 <a asp-action="Edit" asp-route-id="@Model.ID" class="btn btn-primary">
@@ -208,8 +208,8 @@
                             </div>
                             <div>
                                 <p class="text-muted mb-0">Product</p>
-                                <h5 class="mb-0">@Model.CatalogVariants.Catalog.Name</h5>
-                                <p class="text-muted small mb-0">Catalog ID: @Model.CatalogVariants.CatalogID</p>
+                                <h5 class="mb-0">@Model.ProductVariants.Product.Name</h5>
+                                <p class="text-muted small mb-0">Product ID: @Model.ProductVariants.ProductID</p>
                             </div>
                         </div>
                     </div>
@@ -221,11 +221,11 @@
                             </div>
                             <div>
                                 <p class="text-muted mb-0">Variant</p>
-                                <h5 class="mb-0">@Model.CatalogVariants.SKU</h5>
+                                <h5 class="mb-0">@Model.ProductVariants.SKU</h5>
                                 <p class="text-muted small mb-0">Variant ID: @Model.ProductVariantID</p>
-                                @if (!string.IsNullOrEmpty(Model.CatalogVariants.Barcode))
+                                @if (!string.IsNullOrEmpty(Model.ProductVariants.Barcode))
                                 {
-                                    <p class="text-muted small mb-0">Barcode: @Model.CatalogVariants.Barcode</p>
+                                    <p class="text-muted small mb-0">Barcode: @Model.ProductVariants.Barcode</p>
                                 }
                             </div>
                         </div>
@@ -422,23 +422,23 @@
                         <div class="col-md-3">
                             <div class="info-box text-center">
                                 <p class="text-muted mb-1 small">Cost Price</p>
-                                <h4 class="mb-0">@Model.CatalogVariants.CostPrice.ToString("C")</h4>
+                                <h4 class="mb-0">@Model.ProductVariants.CostPrice.ToString("C")</h4>
                                 <p class="text-muted small mb-0">Purchase cost</p>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="info-box text-center">
                                 <p class="text-muted mb-1 small">Sale Price</p>
-                                <h4 class="mb-0">@Model.CatalogVariants.SalePrice.ToString("C")</h4>
+                                <h4 class="mb-0">@Model.ProductVariants.SalePrice.ToString("C")</h4>
                                 <p class="text-muted small mb-0">Regular price</p>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="info-box text-center">
                                 <p class="text-muted mb-1 small">Compare At Price</p>
-                                @if (Model.CatalogVariants.CompareAtPrice.HasValue)
+                                @if (Model.ProductVariants.CompareAtPrice.HasValue)
                                 {
-                                    <h4 class="mb-0">@Model.CatalogVariants.CompareAtPrice.Value.ToString("C")</h4>
+                                    <h4 class="mb-0">@Model.ProductVariants.CompareAtPrice.Value.ToString("C")</h4>
                                     <p class="text-muted small mb-0">Original price</p>
                                 }
                                 else
@@ -451,9 +451,9 @@
                             <div class="info-box text-center">
                                 <p class="text-muted mb-1 small">Profit Margin</p>
                                 @{
-                                    var margin = Model.CatalogVariants.SalePrice - Model.CatalogVariants.CostPrice;
-                                    var marginPercent = Model.CatalogVariants.CostPrice > 0 
-                                        ? (margin / Model.CatalogVariants.CostPrice) * 100 
+                                    var margin = Model.ProductVariants.SalePrice - Model.ProductVariants.CostPrice;
+                                    var marginPercent = Model.ProductVariants.CostPrice > 0 
+                                        ? (margin / Model.ProductVariants.CostPrice) * 100 
                                         : 0;
                                 }
                                 <h4 class="mb-0">@marginPercent.ToString("F1")%</h4>

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace EpicMarket.Data.Models
 {
-    [Table("CatalogCategories")]
+    [Table("ProductCategory")]
     public class CatalogCategory : BaseModel
     {
         public int ID { get; set; }
@@ -23,7 +23,7 @@ namespace EpicMarket.Data.Models
         public string Description { get; set; }
         public int? ParentID { get; set; }
 
-        public ICollection<Catalog> Catalog { get; set; }
+        public ICollection<Catalog> Product { get; set; }
 
         public Business Business { get; set; }
     }

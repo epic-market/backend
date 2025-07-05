@@ -146,7 +146,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                 .Where(m => m.BussinessID == id)
                 .ToListAsync();
 
-            var products = await _context.Catalogs
+            var products = await _context.Products
                 .Where(m => m.BusinessID == id)
                 .ToListAsync();
 
@@ -178,7 +178,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             businessDetailModel.Business = business;
             businessDetailModel.Outlets = braches;
             businessDetailModel.employees = employees;
-            businessDetailModel.Catalogs = products;
+            businessDetailModel.Products = products;
 
             if (business == null)
             {
@@ -521,7 +521,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             try
             {
                 var productImports = new List<ProductImportDto>();
-                var catalogs = new List<Catalog>();
+                var catalogs = new List<EpicMarket.Data.Models.Catalog>();
                 var catalogVariants = new List<CatalogVariants>();
                 
                 // Get default status ID for active products
@@ -552,8 +552,8 @@ namespace EpicMarket.Admin.MVC.Controllers
                         {
                             var productImport = new ProductImportDto
                             {
-                                CatalogName = values[0].Trim().Replace("\"", ""),
-                                CatalogDescription = values[1].Trim().Replace("\"", ""),
+                                ProductName = values[0].Trim().Replace("\"", ""),
+                                ProductDescription = values[1].Trim().Replace("\"", ""),
                                 CategoryName = values[2].Trim().Replace("\"", ""),
                                 IsRecommended = bool.TryParse(values[3].Trim(), out bool isRecommended) ? isRecommended : false,
                                 RequiresRefrigeration = bool.TryParse(values[4].Trim(), out bool requiresRefrigeration) ? requiresRefrigeration : false,
@@ -605,14 +605,14 @@ namespace EpicMarket.Admin.MVC.Controllers
                 }
                 
                 // Group products by catalog name to create unique catalogs
-                var groupedProducts = productImports.GroupBy(p => p.CatalogName);
+                var groupedProducts = productImports.GroupBy(p => p.ProductName);
                 
                 foreach (var group in groupedProducts)
                 {
                     var firstProduct = group.First();
                     
                     // Look up category ID if it exists, otherwise create it
-                    var category = await _context.CatalogCategories
+                    var category = await _context.ProductCategories
                         .FirstOrDefaultAsync(c => c.Name.ToLower() == firstProduct.CategoryName.ToLower());
                         
                     int categoryId;
@@ -629,7 +629,7 @@ namespace EpicMarket.Admin.MVC.Controllers
                             CreateBy = User.Identity.Name
                         };
                         
-                        _context.CatalogCategories.Add(newCategory);
+                        _context.ProductCategories.Add(newCategory);
                         await _context.SaveChangesAsync();
                         categoryId = newCategory.ID;
                     }
@@ -639,20 +639,20 @@ namespace EpicMarket.Admin.MVC.Controllers
                     }
                     
                     // Create catalog
-                    var catalog = firstProduct.ToCatalog(id, activeStatusId);
+                    var catalog = firstProduct.ToProduct(id, activeStatusId);
                     catalog.CategoryID = categoryId;
                     catalog.BusinessID = id;
                     catalog.CreateBy = User.Identity.Name;
                     catalog.VariantOptions = GetVarientOptionsJson(group);
                     
-                    _context.Catalogs.Add(catalog);
+                    _context.Products.Add(catalog);
                     await _context.SaveChangesAsync();
                     
                     // Create variants for this catalog
                     foreach (var product in group)
                     {
-                        var variant = product.ToCatalogVariant(catalog.ID, User.Identity.Name);
-                        _context.CatalogVariants.Add(variant);
+                        var variant = product.ToProductVariant(catalog.ID, User.Identity.Name);
+                        _context.ProductVariants.Add(variant);
                     }
                     
                     await _context.SaveChangesAsync();
@@ -665,13 +665,13 @@ namespace EpicMarket.Admin.MVC.Controllers
                     // Log the event
                     await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
                     {
-                        EventName = EventConstants.AddCatalog,
-                        EntityName = EntityConstants.Catalog,
+                        EventName = EventConstants.AddProduct,
+                        EntityName = EntityConstants.Product,
                         Source = _urlContextService.CurrentPageUrl,
                         Description = $"Uploaded {catalogs.Count} catalogs with {productImports.Count} variants for business ID {id}",
                         Data = System.Text.Json.JsonSerializer.Serialize(new { 
-                            FileName = file.FileName, 
-                            CatalogCount = catalogs.Count,
+                            FileName = file.FileName,
+                            ProductCount = catalogs.Count,
                             VariantCount = productImports.Count,
                             BusinessId = id
                         }),
@@ -752,7 +752,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         public IActionResult DownloadProductSample()
         {
             // Create a sample CSV content
-            var csvContent = "CatalogName,CatalogDescription,CategoryName,IsRecommended,RequiresRefrigeration,SKU,Barcode,AttributeName1,AttributeValue1,AttributeName2,AttributeValue2,AttributeName3,AttributeValue3,CostPrice,SalePrice,CompareAtPrice,MaximumOrderQuantity,MinimumOrderQuantity,PackedHeight,PackedWidhth,PackedDepth,Weight\n" +
+            var csvContent = "ProductName,ProductDescription,CategoryName,IsRecommended,RequiresRefrigeration,SKU,Barcode,AttributeName1,AttributeValue1,AttributeName2,AttributeValue2,AttributeName3,AttributeValue3,CostPrice,SalePrice,CompareAtPrice,MaximumOrderQuantity,MinimumOrderQuantity,PackedHeight,PackedWidhth,PackedDepth,Weight\n" +
                              "Men's T-Shirt,\"Premium cotton t-shirt for everyday wear\",Men's Clothing,TRUE,FALSE,TS-BLK-S,8901234567890,Size,S,Color,Black,,,8.50,19.99,24.99,10,1,2,20,15,150\n" +
                              "Men's T-Shirt,\"Premium cotton t-shirt for everyday wear\",Men's Clothing,TRUE,FALSE,TS-BLK-M,8901234567891,Size,M,Color,Black,,,8.50,19.99,24.99,10,1,2,22,16,170\n" +
                              "Men's T-Shirt,\"Premium cotton t-shirt for everyday wear\",Men's Clothing,TRUE,FALSE,TS-BLK-L,8901234567892,Size,L,Color,Black,,,9.00,19.99,24.99,10,1,2,24,17,190\n" +

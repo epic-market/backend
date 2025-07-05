@@ -5,7 +5,7 @@
 }
 
 <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-    <div class="breadcrumb-title pe-3">Catalog</div>
+    <div class="breadcrumb-title pe-3">Product</div>
     <div class="ps-3">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0 p-0">
@@ -885,12 +885,12 @@
             });
 
             // Load existing variants if any
-            @if (Model.CatalogVariants != null && Model.CatalogVariants.Any())
+            @if (Model.ProductVariants != null && Model.ProductVariants.Any())
             {
                 <text>
                 // Check if we should force variant view (multiple variants or single non-default variant)
-                const variantCount = @Model.CatalogVariants.Count();
-                    const hasDefaultVariant = @(Model.CatalogVariants.Any(v => v.IsDefaultVariant) ? "true" : "false");
+                const variantCount = @Model.ProductVariants.Count();
+                    const hasDefaultVariant = @(Model.ProductVariants.Any(v => v.IsDefaultVariant) ? "true" : "false");
                 const forceVariantView = variantCount > 1 || !hasDefaultVariant;
                 
                 // Set has variants toggle to true if multiple variants or the single one is not default
@@ -908,7 +908,7 @@
                 }
                 
                 // Load variant options from the first variant's attributes
-                const firstVariant = @Html.Raw(Json.Serialize(Model.CatalogVariants.First().Attributes));
+                const firstVariant = @Html.Raw(Json.Serialize(Model.ProductVariants.First().Attributes));
                 if (firstVariant) {
                     Object.entries(firstVariant).forEach(([name, value]) => {
                         const optionId = Date.now();
@@ -1004,7 +1004,7 @@
                 updateVariants();
                 
                 // Set default variant
-                const defaultVariant = @Html.Raw(Json.Serialize(Model.CatalogVariants.FirstOrDefault(v => v.IsDefaultVariant)));
+                const defaultVariant = @Html.Raw(Json.Serialize(Model.ProductVariants.FirstOrDefault(v => v.IsDefaultVariant)));
                 if (defaultVariant) {
                     $(`.variant-combination[data-combo='${JSON.stringify(defaultVariant.Attributes)}']`)
                         .find('.set-as-default')

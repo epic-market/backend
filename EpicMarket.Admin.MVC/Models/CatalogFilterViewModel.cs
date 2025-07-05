@@ -2,10 +2,10 @@ using EpicMarket.Data.Models;
 
 namespace EpicMarket.Admin.MVC.Models
 {
-    public class CatalogFilterViewModel
+    public class ProductFilterViewModel
     {
-        public string CatalogId { get; set; }
-        public string CatalogName { get; set; }
+        public string ProductId { get; set; }
+        public string ProductName { get; set; }
         public string BusinessName { get; set; }
         public string BusinessId { get; set; }
         public int PageNumber { get; set; } = 1;
@@ -14,7 +14,7 @@ namespace EpicMarket.Admin.MVC.Models
         public string SortDirection { get; set; }
     }
 
-    public class CatalogDto
+    public class ProductDto
     {
         public int ID { get; set; }
         public string Name { get; set; }

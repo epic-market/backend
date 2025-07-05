@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EpicMarket.Contracts
 {
-    public interface ICatalogService
+    public interface IProductService
     {
         Task<int> AddProduct(AddProductsParams productsDto,string UserName, int businessID,string PageSource);
         Task AddOrUpdateProductInventoryDetails(InventoryResult productAdvanced);
@@ -21,7 +21,7 @@ namespace EpicMarket.Contracts
         Task<ProductDetailsV2Result> GetProductDetailsV2(int productId);
         Task<CustomerProductDetailsResult> GetCustomerProductDetails(int productId);
         Task<InventoryResult> GetProductInventoryDetails(int productId, int branchId);
-        Task<int> VerifyCatalog(VerifyCatalogDto verifyCatalogDto, string UserName, int AdminPersonID, string PageSource);
+        Task<int> VerifyProduct(VerifyProductDto verifyProductDto, string UserName, int AdminPersonID, string PageSource);
         Task<int> QuickActions(QuickActionsParams quickActionsParams ,string UserName);
         Task deleteCatelog(int id,string UserName);
         // Task<int> AddProductVariant(int productId, ProductVariantDto variantDto, string userName);

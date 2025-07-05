@@ -25,7 +25,7 @@ namespace EpicMarket.Services
         public async Task AddProductRatingAsync(AddProductRatingRequest request,string CustomerUserName)
         {
             // Validate if customer has purchased the product
-            // var hasPurchased = await _context.OrderDetails.Include(c=>c.Order.Person).AnyAsync(oi => oi.Order.Person.UserName == CustomerUserName && oi.CatalogID == request.ProductId);
+            // var hasPurchased = await _context.OrderDetails.Include(c=>c.Order.Person).AnyAsync(oi => oi.Order.Person.UserName == CustomerUserName && oi.ProductID == request.ProductId);
 
             // if (!hasPurchased) {
             //     throw new UnauthorizedAccessException("Can only rate purchased products");
@@ -39,7 +39,7 @@ namespace EpicMarket.Services
             //     throw new UnauthorizedAccessException("Can only rate products once");
 
             //we should not allow to rate if the outlet is not active
-            var catalog = await _context.Catalogs.IgnoreQueryFilters().Where(o => o.ID == request.ProductId && o.IsActive).FirstOrDefaultAsync();
+            var catalog = await _context.Products.IgnoreQueryFilters().Where(o => o.ID == request.ProductId && o.IsActive).FirstOrDefaultAsync();
             if(catalog == null){
                 throw new UnauthorizedAccessException("products not found");
             }

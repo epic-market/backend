@@ -125,7 +125,7 @@ namespace EpicMarket.Entities.Constants
         public const string Blog = "Blog";
         public const string BlogCategory = "BlogCategory";
         public const string BusinessEmployeeMap = "BusinessEmployeeMap";
-        public const string Catalog = "Catalog";
+        public const string Product = "Product";
         public const string CommunicationQueue = "CommunicationQueue";
         public const string ContactMethod = "ContactMethod";
         public const string Entity = "Entity";
@@ -220,9 +220,9 @@ namespace EpicMarket.Entities.Constants
         public const string AddBusinessEmployeeMap = "AddBusinessEmployeeMap";
         public const string EditBusinessEmployeeMap = "EditBusinessEmployeeMap";
         public const string DeleteBusinessEmployeeMap = "DeleteBusinessEmployeeMap";
-        public const string AddCatalog = "AddCatalog";
-        public const string EditCatalog = "EditCatalog";
-        public const string DeleteCatalog = "DeleteCatalog";
+        public const string AddProduct = "AddProduct";
+        public const string EditProduct = "EditProduct";
+        public const string DeleteProduct = "DeleteProduct";
         public const string AddCommunicationQueue = "AddCommunicationQueue";
         public const string EditCommunicationQueue = "EditCommunicationQueue";
         public const string DeleteCommunicationQueue = "DeleteCommunicationQueue";

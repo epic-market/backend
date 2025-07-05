@@ -19,7 +19,7 @@ namespace EpicMarket.Data.Models
         public int OrderID { get; set; }
         
         [Required]
-        [ForeignKey("CatalogVariants")]
+        [ForeignKey("ProductVariants")]
         public int VariantID { get; set; }
         
         [Required]
@@ -33,6 +33,6 @@ namespace EpicMarket.Data.Models
 
         // Navigation properties
         public virtual Order? Order { get; set; }
-        public virtual CatalogVariants? CatalogVariants { get; set; }
+        public virtual CatalogVariants? ProductVariants { get; set; }
     }
 }

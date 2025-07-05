@@ -44,9 +44,9 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label small fw-semibold">Catalog</label>
+                    <label class="form-label small fw-semibold">Product</label>
                     <select id="catalogFilter" class="form-control select2">
-                        <option value="">-- Select Catalog --</option>
+                        <option value="">-- Select Product --</option>
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -56,7 +56,7 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label small fw-semibold">Catalog Name</label>
+                    <label class="form-label small fw-semibold">Product Name</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light border-end-0"><i class="bx bx-search"></i></span>
                         <input type="text" id="catalogNameFilter" class="form-control border-start-0 ps-0" placeholder="Search by catalog name">
@@ -429,10 +429,10 @@
                 var businessId = $(this).val();
                 if (businessId) {
                     loadOutlets(businessId);
-                    loadCatalogs(businessId);
+                    loadProducts(businessId);
                 } else {
                     $('#outletFilter').empty().append('<option value="">-- Select Outlet --</option>').trigger('change');
-                    $('#catalogFilter').empty().append('<option value="">-- Select Catalog --</option>').trigger('change');
+                    $('#catalogFilter').empty().append('<option value="">-- Select Product --</option>').trigger('change');
                     $('#variantFilter').empty().append('<option value="">-- Select Variant --</option>').trigger('change');
                 }
             });
@@ -469,13 +469,13 @@
                 });
             }
             
-            function loadCatalogs(businessId) {
+            function loadProducts(businessId) {
                 $.ajax({
-                    url: '/Inventories/GetCatalogsByBusiness',
+                    url: '/Inventories/GetProductsByBusiness',
                     type: 'GET',
                     data: { businessId: businessId },
                     success: function (data) {
-                        var options = '<option value="">-- Select Catalog --</option>';
+                        var options = '<option value="">-- Select Product --</option>';
                         $.each(data, function (i, item) {
                             options += `<option value="${item.id}">${item.name}</option>`;
                         });
@@ -494,7 +494,7 @@
             
             function loadVariants(catalogId) {
                 $.ajax({
-                    url: '/Inventories/GetVariantsByCatalog',
+                    url: '/Inventories/GetVariantsByProduct',
                     type: 'GET',
                     data: { catalogId: catalogId },
                     success: function (data) {

@@ -150,9 +150,9 @@ namespace EpicMarket.Entities
 
     }
 
-    public class VerifyCatalogDto
+    public class VerifyProductDto
     {
-        public List<int> ListOfCatalogIDs { get; set; }
+        public List<int> ListOfProductIDs { get; set; }
 
     }
     public class QuickActionsParams

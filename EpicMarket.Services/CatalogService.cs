@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 
 namespace EpicMarket.Services
 {
-    public class CatalogService : ICatalogService
+    public class ProductService : IProductService
     {
 
         private readonly ApplicationDbContext _context;
@@ -31,7 +31,7 @@ namespace EpicMarket.Services
         private readonly IAttachmentService attachmentService;
 		private readonly IUnitOfWork unitOfWork;
 
-		public CatalogService(
+		public ProductService(
                                 ApplicationDbContext context,
                                 IMapper mapper, 
                                 IAddressService addressService,
@@ -77,7 +77,7 @@ namespace EpicMarket.Services
                 StatusId =  _context.StatusOptionSets.FirstOrDefaultAsync(c => c.Status == StatusConstants.UNVERIFIED).GetAwaiter().GetResult().Id
             };
             
-            await _context.Catalogs.AddAsync(product);
+            await _context.Products.AddAsync(product);
             await unitOfWork.Complete();
 
             // Add variants
@@ -91,7 +91,7 @@ namespace EpicMarket.Services
 
                     var variant = new CatalogVariants
                     {
-                        CatalogID = product.ID,
+                        ProductID = product.ID,
                         SKU = variantDto.SKU,
                         Barcode = variantDto.Barcode,
                         Attributes = attributesString,
@@ -111,7 +111,7 @@ namespace EpicMarket.Services
                         IsDefaultVariant = variantDto.IsDefaultVariant
                     };
 
-                    await _context.CatalogVariants.AddAsync(variant);
+                    await _context.ProductVariants.AddAsync(variant);
                     await unitOfWork.Complete();
 
                     // Handle variant images
@@ -147,7 +147,7 @@ namespace EpicMarket.Services
 
             // Log the event
             var events = EventConstants.AddCatelog;
-            var saved = await _context.Catalogs.FirstOrDefaultAsync(o => o.ID == product.ID);
+            var saved = await _context.Products.FirstOrDefaultAsync(o => o.ID == product.ID);
             string savedJson = JsonConvert.SerializeObject(saved, new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
@@ -172,8 +172,8 @@ namespace EpicMarket.Services
                 throw new Exception("At least one product variant is required.");
             }
 
-            var product = await _context.Catalogs
-                .Include(c => c.CatalogVariants)
+            var product = await _context.Products
+                .Include(c => c.ProductVariants)
                 .FirstOrDefaultAsync(c => c.ID == id && c.IsActive);
 
             if (product == null)
@@ -192,7 +192,7 @@ namespace EpicMarket.Services
             {
                 // Deactivate existing variants that are not in the update
                 var updatedVariantIds = productsDto.Variants.Where(v => v.VariantId.HasValue).Select(v => v.VariantId.Value).ToList();
-                var variantsToDeactivate = product.CatalogVariants
+                var variantsToDeactivate = product.ProductVariants
                     .Where(v => !updatedVariantIds.Contains(v.ID));
                 
                 foreach (var variant in variantsToDeactivate)
@@ -205,7 +205,7 @@ namespace EpicMarket.Services
                 // Update or add variants
                 foreach (var variantDto in productsDto.Variants)
                 {
-                    var existingVariant = product.CatalogVariants
+                    var existingVariant = product.ProductVariants
                         .FirstOrDefault(v => v.ID == variantDto.VariantId && v.IsActive);
 
                     if (existingVariant != null)
@@ -229,7 +229,7 @@ namespace EpicMarket.Services
                         existingVariant.Weight = variantDto.Weight;
                         existingVariant.ModifiedBy = UserName;
                         existingVariant.ModifiedDate = DateTime.Now;
-                        _context.CatalogVariants.Update(existingVariant);
+                        _context.ProductVariants.Update(existingVariant);
                     }
                     else
                     {
@@ -238,7 +238,7 @@ namespace EpicMarket.Services
                         var additionalHightlightsString = JsonConvert.SerializeObject(variantDto.AdditionalHightlights);
                         var newVariant = new CatalogVariants
                         {
-                            CatalogID = product.ID,
+                            ProductID = product.ID,
                             SKU = variantDto.SKU,
                             Barcode = variantDto.Barcode,
                             Attributes = attributesString,
@@ -257,7 +257,7 @@ namespace EpicMarket.Services
                             CreateDate = DateTime.Now,
                             IsActive = true
                         };
-                        await _context.CatalogVariants.AddAsync(newVariant);
+                        await _context.ProductVariants.AddAsync(newVariant);
                         await unitOfWork.Complete();
 
                         // Handle variant images for new variant
@@ -296,7 +296,7 @@ namespace EpicMarket.Services
 
             // Log the event
             var events = EventConstants.EditCatelog;
-            var saved = await _context.Catalogs.FirstOrDefaultAsync(o => o.ID == product.ID);
+            var saved = await _context.Products.FirstOrDefaultAsync(o => o.ID == product.ID);
             string savedJson = JsonConvert.SerializeObject(saved, new JsonSerializerSettings
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
@@ -322,8 +322,8 @@ namespace EpicMarket.Services
             var getResult = new GetDataResult<List<ProductResult>>();
 
             // 1. Filter with BusinessID
-            var Products = _context.Catalogs
-                .Include(c => c.CatalogVariants)
+            var Products = _context.Products
+                .Include(c => c.ProductVariants)
                 .Include(c => c.Category)
                 .Where(c => c.BusinessID == businessID && c.IsActive == true);
 
@@ -368,12 +368,12 @@ namespace EpicMarket.Services
                 Name = c.Name,
                 Status = _context.StatusOptionSets.FirstOrDefault(s => s.Id == c.StatusId).Status,
                 Category = c.Category.Name,
-                NoOfVariants = c.CatalogVariants.Count.ToString(),
-                Price = c.CatalogVariants.Any() ? c.CatalogVariants.Min(v => v.SalePrice) : 0,
+                NoOfVariants = c.ProductVariants.Count.ToString(),
+                Price = c.ProductVariants.Any() ? c.ProductVariants.Min(v => v.SalePrice) : 0,
                 Thumbnail = ((from attachment in _context.Attachments
                             join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
                             join entity in _context.Entity on link.EntityID equals entity.ID
-                            join variant in c.CatalogVariants on link.RecordID equals variant.ID
+                            join variant in c.ProductVariants on link.RecordID equals variant.ID
                             where entity.Name == EntityConstants.CatelogVariant && 
                                   link.AttachmentTypeID == attachmentTypeID.ID
                             orderby variant.ID
@@ -391,15 +391,15 @@ namespace EpicMarket.Services
         {
             var attachmentTypeID = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
 
-            var returnedProducts = await (from catalogItem in _context.Catalogs
+            var returnedProducts = await (from catalogItem in _context.Products
                                     where catalogItem.BusinessID == BusinessID && catalogItem.IsActive == true
                                     select new ProductsMapOptionResult
                                     {
                                         ProductId = catalogItem.ID,
                                         Name = catalogItem.Name,
                                         Description = catalogItem.Description,
-                                        Variants = (from v in _context.CatalogVariants
-                                                where v.CatalogID == catalogItem.ID
+                                        Variants = (from v in _context.ProductVariants
+                                                where v.ProductID == catalogItem.ID
                                                 select new VariantResultTemp
                                                 {
                                                     VariantId = v.ID,
@@ -441,11 +441,11 @@ namespace EpicMarket.Services
 
             // 1. Filter with OutletID and active products
             var products = _context.Inventory
-                .Include(c => c.CatalogVariants)
-                    .ThenInclude(v => v.Catalog)
+                .Include(c => c.ProductVariants)
+                    .ThenInclude(v => v.Product)
                         .ThenInclude(c => c.Category)
                 .Where(c => c.OutletID == outletId && 
-                            c.CatalogVariants.Catalog.IsActive)
+                            c.ProductVariants.Product.IsActive)
                 .AsQueryable();
 
             // 2. Apply Searching
@@ -453,8 +453,8 @@ namespace EpicMarket.Services
             {
                 var searchTerm = productParams.searchTerm.Trim();
                 products = products.Where(row => 
-                    row.CatalogVariants.Catalog.Name.Contains(searchTerm) || 
-                    row.CatalogVariants.Catalog.Description.Contains(searchTerm));
+                    row.ProductVariants.Product.Name.Contains(searchTerm) || 
+                    row.ProductVariants.Product.Description.Contains(searchTerm));
             }
 
             // Get total count
@@ -467,28 +467,28 @@ namespace EpicMarket.Services
 
             // 4. Group by category and map to result
             var results = await pagedProducts
-                .GroupBy(p => p.CatalogVariants.Catalog.Category.Name)
+                .GroupBy(p => p.ProductVariants.Product.Category.Name)
                 .Select(g => new ProductForPOSResult
                 {
                     Category = g.Key,
-                    Products = g.GroupBy(p => p.CatalogVariants.CatalogID)
+                    Products = g.GroupBy(p => p.ProductVariants.ProductID)
                         .Select(p => new ProductsForCategory
                         {
                             ProductId = p.Key,
-                            Name = p.First().CatalogVariants.Catalog.Name,
+                            Name = p.First().ProductVariants.Product.Name,
                             VarientResulForPos = p.Select(v => new VarientResulForPos
                             {
-                                VariantId = v.CatalogVariants.ID,
-                                SKU = v.CatalogVariants.SKU,
-                                Attributes = v.CatalogVariants.Attributes,
-                                SalePrice = v.CatalogVariants.SalePrice,
+                                VariantId = v.ProductVariants.ID,
+                                SKU = v.ProductVariants.SKU,
+                                Attributes = v.ProductVariants.Attributes,
+                                SalePrice = v.ProductVariants.SalePrice,
                                 QuantityAvailable = v.TrackInventory ? v.QuantityAvailable ?? 0 : (v.IsInStock ? 999999 : 0),
-                                Barcode = v.CatalogVariants.Barcode,
+                                Barcode = v.ProductVariants.Barcode,
                                 Thumbnail = (from attachment in _context.Attachments
                                            join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
                                            join entity in _context.Entity on link.EntityID equals entity.ID
                                            where entity.Name == EntityConstants.CatelogVariant && 
-                                                 link.RecordID == v.CatalogVariants.ID && 
+                                                 link.RecordID == v.ProductVariants.ID && 
                                                  link.AttachmentTypeID == attachmentTypeID.ID
                                            select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}")
                                            .FirstOrDefault()
@@ -511,18 +511,18 @@ namespace EpicMarket.Services
             
             // Base query
             var query = _context.Inventory
-                .Include(p => p.CatalogVariants)
-                .Include(p => p.CatalogVariants.Catalog)
-                .Include(p => p.CatalogVariants.Catalog.Category)
+                .Include(p => p.ProductVariants)
+                .Include(p => p.ProductVariants.Product)
+                .Include(p => p.ProductVariants.Product.Category)
                 .Where(p => p.OutletID == parameters.OutletId && 
-                            p.CatalogVariants.Catalog.StatusId == VerifiedStatusID &&
-                            p.CatalogVariants.Catalog.IsActive)
+                            p.ProductVariants.Product.StatusId == VerifiedStatusID &&
+                            p.ProductVariants.Product.IsActive)
                 .AsQueryable();
 
             // Apply Category Filter
             if (parameters.CategoryId > 0)
             {
-                query = query.Where(p => p.CatalogVariants.Catalog.Category.ID == parameters.CategoryId);
+                query = query.Where(p => p.ProductVariants.Product.Category.ID == parameters.CategoryId);
             }
 
             // Apply Search
@@ -530,8 +530,8 @@ namespace EpicMarket.Services
             {
                 var searchTerm = parameters.SearchTerm.Trim().ToLower();
                 query = query.Where(p =>
-                    p.CatalogVariants.Catalog.Name.ToLower().Contains(searchTerm) ||
-                    p.CatalogVariants.Catalog.Description.ToLower().Contains(searchTerm));
+                    p.ProductVariants.Product.Name.ToLower().Contains(searchTerm) ||
+                    p.ProductVariants.Product.Description.ToLower().Contains(searchTerm));
             }
 
             // Apply Sorting
@@ -547,24 +547,24 @@ namespace EpicMarket.Services
 
             // Map to result directly without category grouping
             var results = await pagedQuery
-                .GroupBy(p => p.CatalogVariants.CatalogID)
+                .GroupBy(p => p.ProductVariants.ProductID)
                 .Select(p => new CustomerProductResult
                 {
                     ProductId = p.Key,
-                    Name = p.First().CatalogVariants.Catalog.Name,
-                    Description = p.First().CatalogVariants.Catalog.Description,
-                    Rating = p.First().CatalogVariants.Catalog.Rating,
-                    RatingCount = p.First().CatalogVariants.Catalog.ReviewCount,
-                    IsRecommended = p.First().CatalogVariants.Catalog.IsRecommended,
+                    Name = p.First().ProductVariants.Product.Name,
+                    Description = p.First().ProductVariants.Product.Description,
+                    Rating = p.First().ProductVariants.Product.Rating,
+                    RatingCount = p.First().ProductVariants.Product.ReviewCount,
+                    IsRecommended = p.First().ProductVariants.Product.IsRecommended,
                     Variants = p.Select(v => new VarientResultForCustomer
                     {
-                        VariantID = v.CatalogVariants.ID,
-                        Attributes = string.IsNullOrEmpty(v.CatalogVariants.Attributes) ? null : JsonConvert.DeserializeObject<List<AttributeDto>>(v.CatalogVariants.Attributes),
-                        SalePrice = v.CatalogVariants.SalePrice,
-                        CompareAtPrice = v.CatalogVariants.CompareAtPrice,
-                        AdditionalHightlights = string.IsNullOrEmpty(v.CatalogVariants.AdditionalHightlights) ? null : JsonConvert.DeserializeObject<List<HighlightDto>>(v.CatalogVariants.AdditionalHightlights),
-                        MaximumOrderQuantity = v.CatalogVariants.MaximumOrderQuantity,
-                        MinimumOrderQuantity = v.CatalogVariants.MinimumOrderQuantity
+                        VariantID = v.ProductVariants.ID,
+                        Attributes = string.IsNullOrEmpty(v.ProductVariants.Attributes) ? null : JsonConvert.DeserializeObject<List<AttributeDto>>(v.ProductVariants.Attributes),
+                        SalePrice = v.ProductVariants.SalePrice,
+                        CompareAtPrice = v.ProductVariants.CompareAtPrice,
+                        AdditionalHightlights = string.IsNullOrEmpty(v.ProductVariants.AdditionalHightlights) ? null : JsonConvert.DeserializeObject<List<HighlightDto>>(v.ProductVariants.AdditionalHightlights),
+                        MaximumOrderQuantity = v.ProductVariants.MaximumOrderQuantity,
+                        MinimumOrderQuantity = v.ProductVariants.MinimumOrderQuantity
                     }).ToList()
                 })
                 .ToListAsync();
@@ -583,37 +583,37 @@ namespace EpicMarket.Services
             return (sortBy?.ToLower(), sortOrder?.ToLower()) switch
             {
                 ("name", "ascending") =>
-                    query.OrderBy(p => p.CatalogVariants.Catalog.Name),
+                    query.OrderBy(p => p.ProductVariants.Product.Name),
 
                 ("name", "descending") =>
-                    query.OrderByDescending(p => p.CatalogVariants.Catalog.Name),
+                    query.OrderByDescending(p => p.ProductVariants.Product.Name),
 
                 ("price", "ascending") =>
-                    query.OrderBy(p => p.CatalogVariants.SalePrice),
+                    query.OrderBy(p => p.ProductVariants.SalePrice),
 
                 ("price", "descending") =>
-                    query.OrderByDescending(p => p.CatalogVariants.SalePrice),
+                    query.OrderByDescending(p => p.ProductVariants.SalePrice),
 
                 ("rating", "ascending") =>
-                    query.OrderBy(p => p.CatalogVariants.Catalog.Rating),
+                    query.OrderBy(p => p.ProductVariants.Product.Rating),
 
                 ("rating", "descending") =>
-                    query.OrderByDescending(p => p.CatalogVariants.Catalog.Rating),
+                    query.OrderByDescending(p => p.ProductVariants.Product.Rating),
 
                 ("newest", "ascending") =>
-                    query.OrderBy(p => p.CatalogVariants.Catalog.CreateDate),
+                    query.OrderBy(p => p.ProductVariants.Product.CreateDate),
 
                 ("newest", "descending") =>
-                    query.OrderByDescending(p => p.CatalogVariants.Catalog.CreateDate),
+                    query.OrderByDescending(p => p.ProductVariants.Product.CreateDate),
 
                 ("popular", "ascending") =>
-                    query.OrderBy(p => p.CatalogVariants.Catalog.ReviewCount),
+                    query.OrderBy(p => p.ProductVariants.Product.ReviewCount),
 
                 ("popular", "descending") =>
-                    query.OrderByDescending(p => p.CatalogVariants.Catalog.ReviewCount),
+                    query.OrderByDescending(p => p.ProductVariants.Product.ReviewCount),
 
                 // Default sorting by name ascending
-                _ => query.OrderBy(p => p.CatalogVariants.Catalog.Name)
+                _ => query.OrderBy(p => p.ProductVariants.Product.Name)
             };
         }
 
@@ -622,8 +622,8 @@ namespace EpicMarket.Services
             var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
             var attachmentTypeID_Product = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.PRODUCTIMAGES);
 
-            return await _context.Catalogs
-                .Include(c => c.CatalogVariants)
+            return await _context.Products
+                .Include(c => c.ProductVariants)
                 .Include(c => c.Category)
                 .Where(c => c.ID == productId && c.IsActive == true)
                 .Select(c => new ProductDetailsResult
@@ -636,7 +636,7 @@ namespace EpicMarket.Services
                     BaseHightlights = JsonConvert.DeserializeObject<List<HighlightDto>>(c.BaseHightlights),
                     IsRecommended = c.IsRecommended,
                     VariantOptions = JsonConvert.DeserializeObject<List<VarientOptionDto>>(c.VariantOptions),
-                    Variants = c.CatalogVariants.Where(v => v.IsActive).Select(v => new ProductVariantResult
+                    Variants = c.ProductVariants.Where(v => v.IsActive).Select(v => new ProductVariantResult
                     {
                         VariantId = v.ID,
                         SKU = v.SKU,
@@ -680,8 +680,8 @@ namespace EpicMarket.Services
             var attachmentTypeID_Product = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.PRODUCTIMAGES);
             var verifiedStatusId = _context.StatusOptionSets.FirstOrDefault(c => c.Status == StatusConstants.VERIFIED).Id;
 
-            var product = await _context.Catalogs
-                .Include(c => c.CatalogVariants)
+            var product = await _context.Products
+                .Include(c => c.ProductVariants)
                 .Include(c => c.Category)
                 .Where(c => c.ID == productId && c.IsActive == true && c.StatusId == verifiedStatusId)
                 .Select(c => new CustomerProductDetailsResult
@@ -696,7 +696,7 @@ namespace EpicMarket.Services
                     BaseHightlights = string.IsNullOrEmpty(c.BaseHightlights) ? 
                         new List<HighlightDto>() : 
                         JsonConvert.DeserializeObject<List<HighlightDto>>(c.BaseHightlights) ?? new List<HighlightDto>(),
-                    Variants = c.CatalogVariants
+                    Variants = c.ProductVariants
                         .Where(v => v.IsActive)
                         .Select(v => new CustomerProductVariantResult
                         {
@@ -745,37 +745,37 @@ namespace EpicMarket.Services
             return product;
         }
 
-        public async Task<int> VerifyCatalog(VerifyCatalogDto verifyCatalogDto, string UserName, int AdminPersonID, string PageSource)
+        public async Task<int> VerifyProduct(VerifyProductDto verifyProductDto, string UserName, int AdminPersonID, string PageSource)
         {
             // Check if all catalogs exist and are active
-            var allCatalogsExist = verifyCatalogDto.ListOfCatalogIDs.All(id => _context.Catalogs.Any(c => c.ID == id && c.IsActive));
-            if (!allCatalogsExist)
+            var allProductsExist = verifyProductDto.ListOfProductIDs.All(id => _context.Products.Any(c => c.ID == id && c.IsActive));
+            if (!allProductsExist)
             {
                 throw new Exception("One or more catalogs do not exist or are deleted.");
             }
 
             // Check if all catalogs are in not verified state
-            var allCatalogsNotVerifiedOrPending = verifyCatalogDto.ListOfCatalogIDs.All(id => !_context.Catalogs.Any(c => c.ID == id && (c.StatusId == _context.StatusOptionSets.Where(s => s.Status == StatusConstants.VERIFIED).FirstOrDefault().Id || c.StatusId == _context.StatusOptionSets.Where(s => s.Status == StatusConstants.PENDING).FirstOrDefault().Id)));
-            if (!allCatalogsNotVerifiedOrPending)
+            var allProductsNotVerifiedOrPending = verifyProductDto.ListOfProductIDs.All(id => !_context.Products.Any(c => c.ID == id && (c.StatusId == _context.StatusOptionSets.Where(s => s.Status == StatusConstants.VERIFIED).FirstOrDefault().Id || c.StatusId == _context.StatusOptionSets.Where(s => s.Status == StatusConstants.PENDING).FirstOrDefault().Id)));
+            if (!allProductsNotVerifiedOrPending)
             {
                 throw new Exception("One or more catalogs are already in the 'Verified' or 'Pending' state.");
             }
 
             //Check if any are already in send to verification state
-            var anyCatalogInSendToVerification = verifyCatalogDto.ListOfCatalogIDs.Any(id => _context.Catalogs.Any(c => c.ID == id && c.StatusId == _context.StatusOptionSets.Where(s => s.Status == StatusConstants.SENDTOVERIFICATION).FirstOrDefault().Id));
-            if (anyCatalogInSendToVerification)
+            var anyProductInSendToVerification = verifyProductDto.ListOfProductIDs.Any(id => _context.Products.Any(c => c.ID == id && c.StatusId == _context.StatusOptionSets.Where(s => s.Status == StatusConstants.SENDTOVERIFICATION).FirstOrDefault().Id));
+            if (anyProductInSendToVerification)
             {
                 throw new Exception("One or more catalogs are already in the 'Send To Verification' state.");
             }
 
             //Update all catalogs status to send for verification state
-            foreach(var id in verifyCatalogDto.ListOfCatalogIDs)
+            foreach(var id in verifyProductDto.ListOfProductIDs)
             {
-                var catalog = await _context.Catalogs.FindAsync(id);
+                var catalog = await _context.Products.FindAsync(id);
                 catalog.StatusId = _context.StatusOptionSets.FirstOrDefault(s => s.Status == StatusConstants.SENDTOVERIFICATION).Id;
                 catalog.ModifiedBy = UserName;
                 catalog.ModifiedDate = DateTime.Now;
-                _context.Catalogs.Update(catalog);
+                _context.Products.Update(catalog);
             }
 
             await unitOfWork.Complete();
@@ -797,7 +797,7 @@ namespace EpicMarket.Services
                 TaskEntityID = taskEntity.ID,
                 DateAssigned = DateTime.Now,
                 SubmittedByPersonID = userName.Id,
-                TaskData = string.Join(",", verifyCatalogDto.ListOfCatalogIDs),
+                TaskData = string.Join(",", verifyProductDto.ListOfProductIDs),
                 ReceivedDate = DateTime.Now,
                 CreateDate = DateTime.Now,
                 CreateBy = userName.Email
@@ -836,12 +836,12 @@ namespace EpicMarket.Services
 
         public async Task deleteCatelog(int id, string UserName)
         {
-            var catalog = await _context.Catalogs.FindAsync(id);
+            var catalog = await _context.Products.FindAsync(id);
 			if (catalog != null)
 			{
 				catalog.IsActive = false;
-				_context.Catalogs.Update(catalog);
-                _context.CatalogVariants.Where(v => v.CatalogID == id).ToList().ForEach(v => v.IsActive = false);
+				_context.Products.Update(catalog);
+                _context.ProductVariants.Where(v => v.ProductID == id).ToList().ForEach(v => v.IsActive = false);
 				await unitOfWork.Complete();
 			}
 			else
@@ -852,14 +852,14 @@ namespace EpicMarket.Services
 
         public async Task<int> QuickActions(QuickActionsParams quickActionsParams, string UserName)
         {
-            var catalog = await _context.Catalogs.Where(c=> c.ID == quickActionsParams.ProductId && c.IsActive).FirstOrDefaultAsync();
+            var catalog = await _context.Products.Where(c=> c.ID == quickActionsParams.ProductId && c.IsActive).FirstOrDefaultAsync();
 			if (catalog != null)
 			{
 				//catalog.InStock= quickActionsParams.InStock == null ? catalog.InStock : quickActionsParams.InStock.Value;
                 catalog.IsRecommended = quickActionsParams.IsRecommended == null ? catalog.IsRecommended : quickActionsParams.IsRecommended.Value;
                 catalog.ModifiedDate = DateTime.Now;
                 catalog.ModifiedBy = UserName;
-                _context.Catalogs.Update(catalog);
+                _context.Products.Update(catalog);
 				await unitOfWork.Complete();
                 return catalog.ID;
 			}
@@ -872,16 +872,16 @@ namespace EpicMarket.Services
         public async Task AddOrUpdateProductInventoryDetails(InventoryResult productAdvanced)
         {
             // First, validate that the product variant belongs to the business that owns the branch
-            var isValidProduct = await _context.CatalogVariants
-                .Include(cv => cv.Catalog)
+            var isValidProduct = await _context.ProductVariants
+                .Include(cv => cv.Product)
                 .Where(cv => cv.ID == productAdvanced.ProductVariantId)
                 .AnyAsync(cv => 
-                    cv.Catalog.BusinessID == _context.Outlets
+                    cv.Product.BusinessID == _context.Outlets
                         .Where(o => o.ID == productAdvanced.BranchId)
                         .Select(o => o.BussinessID)
                         .FirstOrDefault() &&
                     cv.IsActive && 
-                    cv.Catalog.IsActive);
+                    cv.Product.IsActive);
 
             if (!isValidProduct)
             {
@@ -934,19 +934,19 @@ namespace EpicMarket.Services
          //all varients
         // public async Task<int> AddProductVariant(int productId, ProductVariantDto variantDto, string userName)
         // {
-        //     var product = await _context.Catalogs
+        //     var product = await _context.Products
         //         .FirstOrDefaultAsync(c => c.ID == productId && c.IsActive);
             
         //     if (product == null)
         //         throw new Exception("Product not found");
 
-        //     var existingVariant = await _context.CatalogVariants.FirstOrDefaultAsync(v => v.CatalogID == productId && v.SKU == variantDto.SKU);
+        //     var existingVariant = await _context.ProductVariants.FirstOrDefaultAsync(v => v.ProductID == productId && v.SKU == variantDto.SKU);
         //     if (existingVariant != null)
         //         throw new Exception("Variant already exists");
 
-        //     var variant = new CatalogVariants
+        //     var variant = new ProductVariants
         //     {
-        //         CatalogID = productId,
+        //         ProductID = productId,
         //         SKU = variantDto.SKU,
         //         SalePrice = variantDto.SalePrice,
         //         CostPrice = variantDto.CostPrice,
@@ -956,19 +956,19 @@ namespace EpicMarket.Services
         //         IsActive = true
         //     };
 
-        //     await _context.CatalogVariants.AddAsync(variant);
+        //     await _context.ProductVariants.AddAsync(variant);
         //     await unitOfWork.Complete();
             
         //     return variant.ID;
         // }
         public async Task<List<SingleProductVariantsResult>> GetProductVariants(int productId)
         {
-            var variants = await _context.CatalogVariants
-                .Where(v => v.CatalogID == productId && v.IsActive)
+            var variants = await _context.ProductVariants
+                .Where(v => v.ProductID == productId && v.IsActive)
                 .Select(v => new SingleProductVariantsResult
                 {
                     VariantID = v.ID,
-                    ProductID = v.CatalogID,
+                    ProductID = v.ProductID,
                     Attributes = JsonConvert.DeserializeObject<List<AttributeDto>>(v.Attributes),
                     SKU = v.SKU,
                     SalePrice = v.SalePrice,
@@ -982,12 +982,12 @@ namespace EpicMarket.Services
 
         // public async Task<ProductVariantResponse> GetProductVariant(int variantId)
         // {
-        //     var variant = await _context.CatalogVariants
+        //     var variant = await _context.ProductVariants
         //         .Where(v => v.ID == variantId && v.IsActive)
         //         .Select(v => new ProductVariantResponse
         //         {
         //             VariantID = v.ID,
-        //             ProductID = v.CatalogID,
+        //             ProductID = v.ProductID,
         //             SKU = v.SKU,
         //             SalePrice = v.SalePrice,
         //             CostPrice = v.CostPrice,
@@ -1003,7 +1003,7 @@ namespace EpicMarket.Services
 
         // public async Task UpdateProductVariant(int variantId, ProductVariantDto variantDto, string userName)
         // {
-        //     var variant = await _context.CatalogVariants
+        //     var variant = await _context.ProductVariants
         //         .FirstOrDefaultAsync(v => v.ID == variantId && v.IsActive);
 
         //     if (variant == null)
@@ -1016,7 +1016,7 @@ namespace EpicMarket.Services
         //     variant.ModifiedBy = userName;
         //     variant.ModifiedDate = DateTime.Now;
 
-        //     _context.CatalogVariants.Update(variant);
+        //     _context.ProductVariants.Update(variant);
         //     await unitOfWork.Complete();
         // }
 
@@ -1025,8 +1025,8 @@ namespace EpicMarket.Services
             var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
             var attachmentTypeID_Product = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.PRODUCTIMAGES);
 
-            var product = await _context.Catalogs
-                .Include(c => c.CatalogVariants)
+            var product = await _context.Products
+                .Include(c => c.ProductVariants)
                 .Include(c => c.Category)
                 .Where(c => c.ID == productId && c.IsActive == true)
                 .Select(c => new ProductDetailsV2Result
@@ -1043,7 +1043,7 @@ namespace EpicMarket.Services
                     BaseHightlights = string.IsNullOrEmpty(c.BaseHightlights) 
                         ? new List<HighlightDto>() 
                         : JsonConvert.DeserializeObject<List<HighlightDto>>(c.BaseHightlights) ?? new List<HighlightDto>(),
-                    Variants = c.CatalogVariants.Where(v => v.IsActive).Select(v => new ProductVariantV2Result
+                    Variants = c.ProductVariants.Where(v => v.IsActive).Select(v => new ProductVariantV2Result
                     {
                         VariantId = v.ID,
                         Attributes = string.IsNullOrEmpty(v.Attributes) 
@@ -1087,7 +1087,7 @@ namespace EpicMarket.Services
             {
                 // Get similar products from the same category
                 var categoryId = product.Category.CategoryId;
-                var similarProducts = await _context.Catalogs
+                var similarProducts = await _context.Products
                     .Where(c => c.CategoryID == categoryId && c.ID != productId && c.IsActive == true)
                     .OrderBy(c => Guid.NewGuid()) // Random ordering
                     .Take(5) // Limit to 5 similar products
@@ -1096,14 +1096,14 @@ namespace EpicMarket.Services
                         ProductId = c.ID,
                         Name = c.Name,
                         Description = c.Description,
-                        SalePrice = c.CatalogVariants
+                        SalePrice = c.ProductVariants
                             .Where(v => v.IsActive && v.IsDefaultVariant)
                             .Select(v => v.SalePrice)
                             .FirstOrDefault(),
                         Thumbnail = (from attachment in _context.Attachments
                                     join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
                                     join entity in _context.Entity on link.EntityID equals entity.ID
-                                    join variant in c.CatalogVariants on link.RecordID equals variant.ID
+                                    join variant in c.ProductVariants on link.RecordID equals variant.ID
                                     where entity.Name == EntityConstants.CatelogVariant && 
                                         variant.IsActive &&
                                         variant.IsDefaultVariant &&

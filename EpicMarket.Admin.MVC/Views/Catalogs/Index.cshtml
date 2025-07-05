@@ -1,10 +1,10 @@
 ﻿@{
-    ViewData["Title"] = "Catalogs";
+    ViewData["Title"] = "Products";
 }
 
 <!-- Page Header -->
 <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-    <div class="breadcrumb-title pe-3">Catalogs</div>
+    <div class="breadcrumb-title pe-3">Products</div>
     <div class="ps-3">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0 p-0">
@@ -30,14 +30,14 @@
         <div class="collapse show" id="filterCollapse">
             <div class="row g-3">
                 <div class="col-md-3">
-                    <label class="form-label small fw-semibold">Catalog ID</label>
+                    <label class="form-label small fw-semibold">Product ID</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light border-end-0"><i class="bx bx-hash"></i></span>
                         <input type="text" class="form-control border-start-0 ps-0" id="catalogIdFilter" placeholder="Search by ID">
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label small fw-semibold">Catalog Name</label>
+                    <label class="form-label small fw-semibold">Product Name</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light border-end-0"><i class="bx bx-package"></i></span>
                         <input type="text" class="form-control border-start-0 ps-0" id="catalogNameFilter" placeholder="Search by name">
@@ -76,12 +76,12 @@
         <!-- Action Bar -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div class="d-flex align-items-center">
-                <h5 class="mb-0 me-2">Catalog List</h5>
+                <h5 class="mb-0 me-2">Product List</h5>
                 <span class="badge bg-primary rounded-pill" id="tableRecordsCount">0</span>
             </div>
             <div class="d-flex">
                 <a asp-action="Create" class="btn btn-primary d-flex align-items-center me-2">
-                <i class='bx bx-plus me-1'></i>Add Catalog
+                <i class='bx bx-plus me-1'></i>Add Product
             </a>
                 <button id="mapToOutletBtn" class="btn btn-secondary d-flex align-items-center" disabled data-bs-toggle="tooltip" title="Select products from the same business">
                     <i class='bx bx-map-pin me-1'></i>Map to Outlet
@@ -106,7 +106,7 @@
                         </th>
                         <th data-sort="name" class="cursor-pointer">
                             <div class="d-flex align-items-center">
-                                Catalog Name <i class="bx bx-sort-alt-2 ms-1 text-muted"></i>
+                                Product Name <i class="bx bx-sort-alt-2 ms-1 text-muted"></i>
                             </div>
                         </th>
                         <th data-sort="businessname" class="cursor-pointer">
@@ -144,7 +144,7 @@
                 <h5 class="mt-3">No catalogs found</h5>
                 <p class="text-muted">Try adjusting your search criteria or add a new catalog</p>
                 <a asp-action="Create" class="btn btn-primary mt-2">
-                    <i class='bx bx-plus me-1'></i>Add Catalog
+                    <i class='bx bx-plus me-1'></i>Add Product
                 </a>
             </div>
         </div>
@@ -226,7 +226,7 @@
             let sortColumn = 'id';
             let sortDirection = 'asc';
             let isLoading = false;
-            let selectedCatalogs = [];
+            let selectedProducts = [];
             let selectedBusinessId = null;
             let tooltipList = [];
 
@@ -286,7 +286,7 @@
                 isLoading = true;
                 
                 $.ajax({
-                    url: '/Catalog/GetFilteredData',
+                    url: '/Product/GetFilteredData',
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify({
@@ -390,13 +390,13 @@
                         </td>
                         <td>
                             <div class="d-flex justify-content-end">
-                                <a href="/Catalogs/Details/${item.id}" class="action-btn text-primary" title="View Details">
+                                <a href="/Products/Details/${item.id}" class="action-btn text-primary" title="View Details">
                                     <i class="bx bx-show"></i>
                                 </a>
-                                <a href="/Catalogs/Edit/${item.id}" class="action-btn text-warning" title="Edit">
+                                <a href="/Products/Edit/${item.id}" class="action-btn text-warning" title="Edit">
                                     <i class="bx bx-edit"></i>
                                 </a>
-                                <a href="/Catalogs/Delete/${item.id}" class="action-btn text-danger" title="Delete">
+                                <a href="/Products/Delete/${item.id}" class="action-btn text-danger" title="Delete">
                                     <i class="bx bx-trash"></i>
                                 </a>
                             </div>
@@ -613,8 +613,8 @@
                 
                 if ($(this).is(':checked')) {
                     // Add to selected catalogs
-                    if (!selectedCatalogs.includes(catalogId)) {
-                        selectedCatalogs.push(catalogId);
+                    if (!selectedProducts.includes(catalogId)) {
+                        selectedProducts.push(catalogId);
                     }
                     
                     // If this is the first selection, set the business ID
@@ -623,10 +623,10 @@
                     }
                 } else {
                     // Remove from selected catalogs
-                    selectedCatalogs = selectedCatalogs.filter(id => id !== catalogId);
+                    selectedProducts = selectedProducts.filter(id => id !== catalogId);
                     
                     // If no catalogs are selected, reset the business ID
-                    if (selectedCatalogs.length === 0) {
+                    if (selectedProducts.length === 0) {
                         selectedBusinessId = null;
                     }
                 }
@@ -661,7 +661,7 @@
                         visibleCheckboxes.prop('checked', true);
                         
                         // Update selected catalogs and business ID
-                        selectedCatalogs = visibleCheckboxes.map(function() {
+                        selectedProducts = visibleCheckboxes.map(function() {
                             return parseInt($(this).val());
                         }).get();
                         
@@ -676,7 +676,7 @@
                     $('.catalog-checkbox').prop('checked', false);
                     
                     // Clear selected catalogs and business ID
-                    selectedCatalogs = [];
+                    selectedProducts = [];
                     selectedBusinessId = null;
                 }
                 
@@ -688,7 +688,7 @@
                 const mapBtn = $('#mapToOutletBtn');
                 
                 // Update tooltip and button state based on selection
-                if (selectedCatalogs.length === 0) {
+                if (selectedProducts.length === 0) {
                     mapBtn.attr('title', 'Select products to map to an outlet');
                     mapBtn.prop('disabled', true);
                     updateTooltip(mapBtn, 'Select products to map to an outlet');
@@ -699,9 +699,9 @@
                     );
                     
                     if (allSameBusiness) {
-                        mapBtn.attr('title', `Map ${selectedCatalogs.length} selected product(s) to outlet`);
+                        mapBtn.attr('title', `Map ${selectedProducts.length} selected product(s) to outlet`);
                         mapBtn.prop('disabled', false);
-                        updateTooltip(mapBtn, `Map ${selectedCatalogs.length} selected product(s) to outlet`);
+                        updateTooltip(mapBtn, `Map ${selectedProducts.length} selected product(s) to outlet`);
                     } else {
                         mapBtn.attr('title', 'Select products from the same business only');
                         mapBtn.prop('disabled', true);
@@ -723,8 +723,8 @@
             
             // Restore selected checkboxes after page reload or pagination
             function restoreSelectedCheckboxes() {
-                if (selectedCatalogs.length > 0) {
-                    selectedCatalogs.forEach(catalogId => {
+                if (selectedProducts.length > 0) {
+                    selectedProducts.forEach(catalogId => {
                         $(`.catalog-checkbox[value="${catalogId}"]`).prop('checked', true);
                     });
                     
@@ -739,7 +739,7 @@
             
             // Handle "Map to Outlet" button click
             $('#mapToOutletBtn').click(function() {
-                if (selectedCatalogs.length === 0 || selectedBusinessId === null) {
+                if (selectedProducts.length === 0 || selectedBusinessId === null) {
                     return;
                 }
                 
@@ -747,7 +747,7 @@
                 loadOutletsForBusiness(selectedBusinessId);
                 
                 // Update selected products count in modal
-                $('#selectedProductsCount').text(selectedCatalogs.length);
+                $('#selectedProductsCount').text(selectedProducts.length);
                 
                 // Show the modal
                 const modal = new bootstrap.Modal(document.getElementById('mapToOutletModal'));
@@ -759,7 +759,7 @@
                 $('#outletSelect').html('<option value="">Loading outlets...</option>');
                 
                 $.ajax({
-                    url: `/Catalogs/GetOutletsByBusiness/${businessId}`,
+                    url: `/Products/GetOutletsByBusiness/${businessId}`,
                     type: 'GET',
                     success: function(response) {
                         if (response.success && response.data) {
@@ -808,7 +808,7 @@
             $('#saveMapToOutletBtn').click(function() {
                 const outletId = $('#outletSelect').val();
                 
-                if (!outletId || selectedCatalogs.length === 0) {
+                if (!outletId || selectedProducts.length === 0) {
                     showToast('Please select an outlet', 'error');
                     return;
                 }
@@ -820,12 +820,12 @@
                 
                 // Send request to map catalogs to outlet
                 $.ajax({
-                    url: '/Catalogs/MapToOutlet',
+                    url: '/Products/MapToOutlet',
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify({
                         outletId: parseInt(outletId),
-                        catalogIds: selectedCatalogs
+                        catalogIds: selectedProducts
                     }),
                     success: function(response) {
                         // Reset button state
@@ -839,7 +839,7 @@
                             showToast(response.message, 'success');
                             
                             // Clear selections
-                            selectedCatalogs = [];
+                            selectedProducts = [];
                             selectedBusinessId = null;
                             $('.catalog-checkbox, #selectAllCheckbox').prop('checked', false);
                             updateMapToOutletButton();

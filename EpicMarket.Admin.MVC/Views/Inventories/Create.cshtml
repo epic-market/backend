@@ -54,10 +54,10 @@
                         </div>
                         
                         <div class="row mb-3">
-                            <label class="col-sm-3 col-form-label">Catalog</label>
+                            <label class="col-sm-3 col-form-label">Product</label>
                             <div class="col-sm-9">
-                                <select id="CatalogID" class="single-select form-control" required>
-                                    <option value="">-- Select Catalog --</option>
+                                <select id="ProductID" class="single-select form-control" required>
+                                    <option value="">-- Select Product --</option>
                                 </select>
                             </div>
                         </div>
@@ -187,15 +187,15 @@
                 var businessId = $(this).val();
                 if (businessId) {
                     loadOutlets(businessId);
-                    loadCatalogs(businessId);
+                    loadProducts(businessId);
                 } else {
                     $('#OutletID').empty().append('<option value="">-- Select Outlet --</option>');
-                    $('#CatalogID').empty().append('<option value="">-- Select Catalog --</option>');
+                    $('#ProductID').empty().append('<option value="">-- Select Product --</option>');
                     $('#ProductVariantID').empty().append('<option value="">-- Select Product Variant --</option>');
                 }
             });
             
-            $('#CatalogID').change(function() {
+            $('#ProductID').change(function() {
                 var catalogId = $(this).val();
                 if (catalogId) {
                     loadVariants(catalogId);
@@ -224,24 +224,24 @@
                 });
             }
             
-            function loadCatalogs(businessId) {
+            function loadProducts(businessId) {
                 $.ajax({
-                    url: '/Inventories/GetCatalogsByBusiness',
+                    url: '/Inventories/GetProductsByBusiness',
                     type: 'GET',
                     data: { businessId: businessId },
                     success: function (data) {
-                        var options = '<option value="">-- Select Catalog --</option>';
+                        var options = '<option value="">-- Select Product --</option>';
                         $.each(data, function (i, item) {
                             options += `<option value="${item.id}">${item.name}</option>`;
                         });
-                        $('#CatalogID').html(options);
+                        $('#ProductID').html(options);
                     }
                 });
             }
             
             function loadVariants(catalogId) {
                 $.ajax({
-                    url: '/Inventories/GetVariantsByCatalog',
+                    url: '/Inventories/GetVariantsByProduct',
                     type: 'GET',
                     data: { catalogId: catalogId },
                     success: function (data) {

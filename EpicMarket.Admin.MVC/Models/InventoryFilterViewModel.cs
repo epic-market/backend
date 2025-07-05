@@ -7,9 +7,9 @@ namespace EpicMarket.Admin.MVC.Models
     {
         public int? BusinessID { get; set; }
         public int? OutletID { get; set; }
-        public int? CatalogID { get; set; }
+        public int? ProductID { get; set; }
         public int? ProductVariantID { get; set; }
-        public string CatalogName { get; set; }
+        public string ProductName { get; set; }
         
         // Pagination properties
         public int PageNumber { get; set; } = 1;
@@ -28,8 +28,8 @@ namespace EpicMarket.Admin.MVC.Models
         public int BusinessID { get; set; }
         public string BusinessName { get; set; }
         public int ProductVariantID { get; set; }
-        public int CatalogID { get; set; }
-        public string CatalogName { get; set; }
+        public int ProductID { get; set; }
+        public string ProductName { get; set; }
         public string SKU { get; set; }
         public bool TrackInventory { get; set; }
         public bool IsInStock { get; set; }
