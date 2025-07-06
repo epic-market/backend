@@ -1,5 +1,4 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34511.84
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -16,6 +15,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EpicMarket.Admin.MVC", "EpicMarket.Admin.MVC\EpicMarket.Admin.MVC.csproj", "{475BBC69-8942-4803-AD16-529B79890969}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EpicMarket.Data.Webapp", "EpicMarket.Data.Webapp\EpicMarket.Data.Webapp.csproj", "{3970A066-1878-4C68-92F1-AE30B5E24851}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EpicMarket.Business.API.Tests", "EpicMarket.Business.API.Tests\EpicMarket.Business.API.Tests.csproj", "{A8F7E8C6-0123-4567-89AB-CDEF01234567}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +52,10 @@ Global
 		{3970A066-1878-4C68-92F1-AE30B5E24851}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3970A066-1878-4C68-92F1-AE30B5E24851}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3970A066-1878-4C68-92F1-AE30B5E24851}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8F7E8C6-0123-4567-89AB-CDEF01234567}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8F7E8C6-0123-4567-89AB-CDEF01234567}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8F7E8C6-0123-4567-89AB-CDEF01234567}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8F7E8C6-0123-4567-89AB-CDEF01234567}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
