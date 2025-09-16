@@ -1,4 +1,4 @@
-﻿using Amazon.Runtime.Documents;
+using Amazon.Runtime.Documents;
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
@@ -17,6 +17,12 @@ using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext
 
 namespace EpicMarket.Business.API.Controllers
 {
+    /// <summary>
+    /// Manages business registration and onboarding operations
+    /// </summary>
+    [ApiController]
+    [Route("api/[controller]")]
+    [Produces("application/json")]
     public class BusinessController : BaseApiController
     {
         private readonly ILogger<BusinessController> logger;
@@ -46,8 +52,50 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
+        /// <summary>
+        /// Registers a new business with logo and proof documents
+        /// </summary>
+        /// <param name="businessRegisterDto">Business registration information including company details and documents</param>
+        /// <returns>Business ID and registration status</returns>
+        /// <response code="200">Business successfully registered</response>
+        /// <response code="401">User is not authenticated</response>
+        /// <response code="400">Invalid registration data or documents</response>
+        /// <remarks>
+        /// This endpoint:
+        /// - Creates a new business entity
+        /// - Assigns the current user as business owner
+        /// - Uploads logo and proof documents
+        /// - Assigns BUSINESS_OWNER role to the user
+        /// 
+        /// Required files:
+        /// - LogoFile: Business logo image
+        /// - ProofFile: Business registration/license document
+        /// 
+        /// Sample form data:
+        /// 
+        ///     POST /api/business/RegisterDetails
+        ///     Content-Type: multipart/form-data
+        ///     
+        ///     businessName: "ABC Company"
+        ///     businessType: "Retail"
+        ///     businessCategory: "Electronics"
+        ///     taxId: "123456789"
+        ///     address: "123 Business St"
+        ///     city: "New York"
+        ///     state: "NY"
+        ///     zipCode: "10001"
+        ///     phone: "+1234567890"
+        ///     email: "business@example.com"
+        ///     website: "www.example.com"
+        ///     description: "Electronics retail store"
+        ///     logoFile: [binary data]
+        ///     proofFile: [binary data]
+        /// </remarks>
         [HttpPost("RegisterDetails")]
         [Authorize]
+        [ProducesResponseType(typeof(OperationResult<BusinessDTO_Result>), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
         public async Task<ActionResult<OperationResult<BusinessDTO_Result>>> Register([FromForm] BusinessRegisterDto businessRegisterDto)
         {
             var response = new OperationResult<BusinessDTO_Result>();

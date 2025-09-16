@@ -1,4 +1,4 @@
-﻿using EpicMarket.Business.API.Helpers;
+using EpicMarket.Business.API.Helpers;
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
@@ -14,6 +14,16 @@ using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext
 
 namespace EpicMarket.Business.API.Controllers
 {
+    /// <summary>
+    /// Base controller class providing common functionality for all API controllers
+    /// </summary>
+    /// <remarks>
+    /// This base controller provides:
+    /// - Business context access
+    /// - User authentication information
+    /// - File management utilities
+    /// - Common properties for derived controllers
+    /// </remarks>
     //[ServiceFilter(typeof(LogUserActivity))]
     [Route("api/[controller]")]
     [ApiController]
@@ -29,7 +39,12 @@ namespace EpicMarket.Business.API.Controllers
 			this.dbContext = dbContext;
         }
 
-		public int BusinessId
+		/// <summary>
+        /// Gets the business ID associated with the current authenticated user
+        /// </summary>
+        /// <value>Business ID for business owner or employee</value>
+        /// <exception cref="Exception">Thrown when no business is found for the user</exception>
+        public int BusinessId
         {
             get {
                 var usernameid = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
@@ -46,14 +61,22 @@ namespace EpicMarket.Business.API.Controllers
                 }
 			}
 		}
-		public string LoggedInUserName
+		/// <summary>
+        /// Gets the username of the currently logged-in user
+        /// </summary>
+        /// <value>The username from the authentication claims</value>
+        public string LoggedInUserName
         {
 			get
 			{
 				return this.User.FindFirst(ClaimTypes.Name).Value;
 			}
 		}
-		protected string PageSource
+		/// <summary>
+        /// Gets the complete URL of the current request
+        /// </summary>
+        /// <value>Full URL including scheme, host, path, and query string</value>
+        protected string PageSource
 		{
 			get
 			{
@@ -72,6 +95,10 @@ namespace EpicMarket.Business.API.Controllers
 			}
 		}
 
+        /// <summary>
+        /// Gets the ID of the system administrator
+        /// </summary>
+        /// <value>The person ID of the admin user</value>
         protected int AdminPersonID
         {
             get
@@ -82,6 +109,19 @@ namespace EpicMarket.Business.API.Controllers
 
 
 
+        /// <summary>
+        /// Saves a file to the configured storage location
+        /// </summary>
+        /// <param name="file">The file to be uploaded</param>
+        /// <param name="entityName">Entity name to determine storage path</param>
+        /// <param name="fileStoreService">File storage service instance</param>
+        /// <param name="applicationConfigurationService">Configuration service for path resolution</param>
+        /// <param name="RecordID">Optional record ID for organizing files</param>
+        /// <returns>SaveFileDTO containing file name and storage location, or null if file is empty</returns>
+        /// <remarks>
+        /// Files are saved with timestamp-based naming to prevent conflicts.
+        /// Special characters are sanitized from filenames.
+        /// </remarks>
         protected async Task<SaveFileDTO> SaveFileGlobalAsync(IFormFile file, string entityName, IFileService fileStoreService, IApplicationConfigurationService applicationConfigurationService,int RecordID = 0)
 		{
 			string filePath = " ";
@@ -124,7 +164,15 @@ namespace EpicMarket.Business.API.Controllers
 		}
 
 
-		protected async Task<FileDto> GetFile(string filekey, string entityName, IFileService fileStoreService, IApplicationConfigurationService applicationConfigurationService)
+		/// <summary>
+        /// Retrieves a file from storage by its key
+        /// </summary>
+        /// <param name="filekey">Unique identifier of the file</param>
+        /// <param name="entityName">Entity name to determine storage path</param>
+        /// <param name="fileStoreService">File storage service instance</param>
+        /// <param name="applicationConfigurationService">Configuration service for path resolution</param>
+        /// <returns>FileDto containing file data and metadata, or null if not found</returns>
+        protected async Task<FileDto> GetFile(string filekey, string entityName, IFileService fileStoreService, IApplicationConfigurationService applicationConfigurationService)
 		{
 			string filePath = " ";
 			if (!string.IsNullOrEmpty(filekey))
@@ -151,7 +199,15 @@ namespace EpicMarket.Business.API.Controllers
 		}
 
 
-		protected async Task<string> DeleteFile(string filekey, string entityName, IFileService fileStoreService, IApplicationConfigurationService applicationConfigurationService)
+		/// <summary>
+        /// Deletes a file from storage
+        /// </summary>
+        /// <param name="filekey">Unique identifier of the file to delete</param>
+        /// <param name="entityName">Entity name to determine storage path</param>
+        /// <param name="fileStoreService">File storage service instance</param>
+        /// <param name="applicationConfigurationService">Configuration service for path resolution</param>
+        /// <returns>The filekey if successful, null if file doesn't exist</returns>
+        protected async Task<string> DeleteFile(string filekey, string entityName, IFileService fileStoreService, IApplicationConfigurationService applicationConfigurationService)
 		{
 
 			if (!string.IsNullOrWhiteSpace(filekey))
@@ -175,7 +231,16 @@ namespace EpicMarket.Business.API.Controllers
 
 
 
-		protected string GetFolderPathFromConfiguration(string entityNameOrAppConfig, IApplicationConfigurationService applicationConfigurationService = null)
+		/// <summary>
+        /// Retrieves the storage folder path based on entity type or configuration key
+        /// </summary>
+        /// <param name="entityNameOrAppConfig">Entity name or application configuration constant</param>
+        /// <param name="applicationConfigurationService">Configuration service for path resolution</param>
+        /// <returns>Configured storage path for the specified entity type</returns>
+        /// <remarks>
+        /// Supports paths for: Logo, Proof, Business, Products, and Thumbnail files
+        /// </remarks>
+        protected string GetFolderPathFromConfiguration(string entityNameOrAppConfig, IApplicationConfigurationService applicationConfigurationService = null)
 		{
 			var path = string.Empty;
             if (FilePathConstants.LOGOPATH.Equals(entityNameOrAppConfig))
