@@ -31,28 +31,9 @@ namespace EpicMarket.Admin.MVC.Attributes
                 return;
             }
 
-            // Get the securable service from DI
-            var securableService = context.HttpContext.RequestServices.GetRequiredService<ISecurableService>();
-            
-            // Check if the user has access to the securable
-            if (!securableService.HasAccess(Securable))
-            {
-                // Set ViewData for the access denied view
-                context.HttpContext.Items["AccessDeniedSecurable"] = Securable;
-                
-                // Redirect to access denied view
-                context.Result = new ViewResult
-                {
-                    ViewName = "~/Views/Shared/_AccessDeniedPartial.cshtml",
-                    ViewData = new Microsoft.AspNetCore.Mvc.ViewFeatures.ViewDataDictionary(
-                        new Microsoft.AspNetCore.Mvc.ModelBinding.EmptyModelMetadataProvider(),
-                        new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary())
-                    {
-                        Model = Securable,
-                        ["AccessDeniedMessage"] = $"You do not have permission to access this feature ({Securable})."
-                    }
-                };
-            }
+            // TEMPORARY: Skip securable checks - Remove in production!
+            // Note: Basic authentication is still required, but all authenticated users can access any securable
+            return;
         }
     }
-} 
+}
