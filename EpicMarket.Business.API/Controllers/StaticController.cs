@@ -13,6 +13,10 @@ using System.Security.Claims;
 
 namespace EpicMarket.Business.API.Controllers
 {
+    /// <summary>
+    /// Supplies static reference data used across the application such as dropdown options and metadata.
+    /// Includes endpoints for public and secured lookup values.
+    /// </summary>
     [Route("api/static")]
     public class StaticController : BaseApiController
     {
@@ -27,6 +31,12 @@ namespace EpicMarket.Business.API.Controllers
             this.staticService = staticService;
         }
 
+        /// <summary>
+        /// Retrieves available business categories for dropdown selections.
+        /// Route: GET api/static/business-categories-options
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <returns>List of business category options.</returns>
         [HttpGet("business-categories-options")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetBusinessCategoriesOptions()
@@ -40,9 +50,15 @@ namespace EpicMarket.Business.API.Controllers
 
             reponse.Data = options;
 
-			return Ok(reponse);
+            return Ok(reponse);
         }
 
+        /// <summary>
+        /// Retrieves status options secured by the STATUS_OPTIONS permission.
+        /// Route: GET api/static/GetStatusOptions
+        /// Auth: CustomAuthorize
+        /// </summary>
+        /// <returns>List of status dropdown options.</returns>
         [HttpGet("GetStatusOptions")]
         [CustomAuthorize(Securable = Securables.STATUS_OPTIONS)]
         public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetStatusOptions()
@@ -58,6 +74,12 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(reponse);
         }
 
+        /// <summary>
+        /// Provides the available order status options for public consumers.
+        /// Route: GET api/static/GetOderStatusOptions
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <returns>List of order status options.</returns>
         [HttpGet("GetOderStatusOptions")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetOderStatusOptions()
@@ -73,6 +95,12 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(reponse);
         }
 
+        /// <summary>
+        /// Provides the available order type options for public consumers.
+        /// Route: GET api/static/GetOderTypeOptions
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <returns>List of order type options.</returns>
         [HttpGet("GetOderTypeOptions")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetOderTypeOptions()
@@ -88,6 +116,12 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(reponse);
         }
 
+        /// <summary>
+        /// Retrieves all blog categories for public-facing pages.
+        /// Route: GET api/static/GetAllblogCategories
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <returns>List of blog categories.</returns>
         [HttpGet("GetAllblogCategories")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetAllblogCategories()
@@ -103,6 +137,12 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(reponse);
         }
 
+        /// <summary>
+        /// Retrieves all support categories for public support forms.
+        /// Route: GET api/static/GetAllSupportCategorys
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <returns>List of support categories.</returns>
         [HttpGet("GetAllSupportCategorys")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetAllSupportCategorys()
@@ -117,6 +157,14 @@ namespace EpicMarket.Business.API.Controllers
             reponse.Data = options;
             return Ok(reponse);
         }
+
+        /// <summary>
+        /// Subscribes a user email to offer notifications.
+        /// Route: POST api/static/subscribe
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <param name="gmail">Email address to subscribe for offers.</param>
+        /// <returns>Identifier of the subscription record.</returns>
         [HttpPost("subscribe")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<int>>> SubscribeforOffers(string gmail)
@@ -134,6 +182,13 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Retrieves help items associated with a specific page link.
+        /// Route: GET api/static/GetHelpItemsforBypage
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <param name="pagelink">Unique identifier for the help page.</param>
+        /// <returns>List of help items for the given page.</returns>
         [HttpGet("GetHelpItemsforBypage")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<List<HelpItemDTO>>>> GetHelpItemsforBypage(string pagelink)
@@ -148,6 +203,14 @@ namespace EpicMarket.Business.API.Controllers
             reponse.Data = options;
             return Ok(reponse);
         }
+
+        /// <summary>
+        /// Retrieves support query options filtered by person type.
+        /// Route: GET api/static/GetAllSupportQuery
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <param name="personTypeId">Person type identifier to filter support queries.</param>
+        /// <returns>List of support query dropdown options.</returns>
         [HttpGet("GetAllSupportQuery")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetAllSupportQuery(int personTypeId)
@@ -162,6 +225,13 @@ namespace EpicMarket.Business.API.Controllers
             reponse.Data = options;
             return Ok(reponse);
         }
+
+        /// <summary>
+        /// Retrieves person type options for selection controls.
+        /// Route: GET api/static/GetAllPersonTypes
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <returns>List of person type dropdown options.</returns>
         [HttpGet("GetAllPersonTypes")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetAllPersonTypes()
@@ -179,6 +249,12 @@ namespace EpicMarket.Business.API.Controllers
 
 
 
+        /// <summary>
+        /// Retrieves order status options for authenticated business users.
+        /// Route: GET api/static/GetOrderStatusOptions
+        /// Auth: Authorize (Business roles)
+        /// </summary>
+        /// <returns>List of order status dropdown options.</returns>
         [HttpGet("GetOrderStatusOptions")]
         [Authorize(Roles = $"{ROLES.BUSINESS_OWNER},{ROLES.BUSINESS_EMPLOYEE}")]
         public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetOrderStatusOptions()
@@ -196,7 +272,12 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
-        //need to create new endpoint to get the proof types with logs 
+        /// <summary>
+        /// Retrieves available proof types for identity or verification flows.
+        /// Route: GET api/static/proof-types
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <returns>List of proof type dropdown options.</returns>
         [HttpGet("proof-types")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<List<DropDownOptions>>>> GetProofTypes()

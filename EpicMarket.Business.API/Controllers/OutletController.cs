@@ -14,9 +14,14 @@ using System.Security.Claims;
 namespace EpicMarket.Business.API.Controllers
 {
 
-    [Authorize]
-    [Route("api/outlet")]
-    public class OutletController : BaseApiController
+	/// <summary>
+	/// Outlet and branch management APIs for business owners and customer discovery.
+	/// Route prefix: api/outlet
+	/// Auth: Business owner for management endpoints; customer endpoints noted individually.
+	/// </summary>
+	[Authorize]
+	[Route("api/outlet")]
+	public class OutletController : BaseApiController
     {
 
         private readonly ILogger<OutletController> logger;
@@ -49,7 +54,14 @@ namespace EpicMarket.Business.API.Controllers
             this.unitOfWork = unitOfWork;
         }
 
-        [HttpGet]
+		/// <summary>
+		/// Lists outlets for the current business with pagination and filters.
+		/// Route: GET api/outlet
+		/// Auth: Business owner.
+		/// </summary>
+		/// <param name="branchParams">Pagination and filter parameters for outlets.</param>
+		/// <returns>Paginated outlet collection.</returns>
+		[HttpGet]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<GetDataResult<List<BranchResult>>>>> GetAllBranches([FromQuery]BranchParams branchParams)
         {
@@ -67,9 +79,15 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
-        [HttpGet("dropdown-options")]
-        [Authorize(Roles = ROLES.BUSINESS_OWNER)]
-        public async Task<ActionResult<List<BranchsDropDownOptions>>> GetAllOutletsForDropDown()
+		/// <summary>
+		/// Provides lightweight outlet data suitable for dropdown selectors.
+		/// Route: GET api/outlet/dropdown-options
+		/// Auth: Business owner.
+		/// </summary>
+		/// <returns>List of dropdown options representing outlets.</returns>
+		[HttpGet("dropdown-options")]
+		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
+		public async Task<ActionResult<List<BranchsDropDownOptions>>> GetAllOutletsForDropDown()
         {
             var response = new OperationResult<List<BranchsDropDownOptions>> ();
 
@@ -89,7 +107,14 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
-        [HttpGet("{branchId}")]
+		/// <summary>
+		/// Retrieves details for a specific outlet.
+		/// Route: GET api/outlet/{branchId}
+		/// Auth: Business owner.
+		/// </summary>
+		/// <param name="branchId">The outlet identifier.</param>
+		/// <returns>Outlet detail result.</returns>
+		[HttpGet("{branchId}")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<BranchDetailResult>>> GetBranchByID(int branchId)
         {
@@ -107,7 +132,14 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
-        [HttpPost]
+		/// <summary>
+		/// Creates a new outlet for the current business and links uploaded media.
+		/// Route: POST api/outlet
+		/// Auth: Business owner.
+		/// </summary>
+		/// <param name="branchDto">Outlet payload including media storage keys.</param>
+		/// <returns>Identifier of the created outlet.</returns>
+		[HttpPost]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<int>>> AddBranch([FromBody]BranchDto branchDto)
         {
@@ -148,9 +180,17 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
-        [HttpPut("{id}")]
-        [Authorize(Roles = ROLES.BUSINESS_OWNER)]
-        public async Task<ActionResult<OperationResult<int>>> UpdateBranch(int id, [FromBody]BranchDto branchDto)
+		/// <summary>
+		/// Updates outlet details and refreshes associated media links.
+		/// Route: PUT api/outlet/{id}
+		/// Auth: Business owner.
+		/// </summary>
+		/// <param name="id">Identifier of the outlet.</param>
+		/// <param name="branchDto">Updated outlet data.</param>
+		/// <returns>Identifier of the updated outlet.</returns>
+		[HttpPut("{id}")]
+		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
+		public async Task<ActionResult<OperationResult<int>>> UpdateBranch(int id, [FromBody]BranchDto branchDto)
         {
             var response = new OperationResult<int>();
             this.logger.LogInformation("Branch Controller -> AddBranch()-> params {0}", JsonConvert.SerializeObject(new { Params = branchDto }));
@@ -196,7 +236,14 @@ namespace EpicMarket.Business.API.Controllers
 
 
 
-        [HttpPost("map/employees")]
+		/// <summary>
+		/// Maps employees to an outlet for staffing and permissions.
+		/// Route: POST api/outlet/map/employees
+		/// Auth: Business owner.
+		/// </summary>
+		/// <param name="branchPeopleMap">Mapping payload linking employees to the outlet.</param>
+		/// <returns>Identifier indicating result of the mapping.</returns>
+		[HttpPost("map/employees")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<int>>> MapBranchToPeople(BranchPeopleMapParams branchPeopleMap)
         {
@@ -212,7 +259,14 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
-        [HttpPost("map/product-variants")]
+		/// <summary>
+		/// Associates product variants with an outlet's catalog.
+		/// Route: POST api/outlet/map/product-variants
+		/// Auth: Business owner.
+		/// </summary>
+		/// <param name="branchProductVariantMap">Mapping payload specifying product variants and outlet.</param>
+		/// <returns>Identifier representing the mapping operation.</returns>
+		[HttpPost("map/product-variants")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<int>>> MapBranchToProductVariant(BranchProductVariantMapParams branchProductVariantMap)
         {
@@ -228,9 +282,16 @@ namespace EpicMarket.Business.API.Controllers
 
 			return Ok(response);
         }
-        [HttpPost("verify")]
-        [Authorize(Roles = ROLES.BUSINESS_OWNER)]
-        public async Task<ActionResult<OperationResult<int>>> VerifyBranchs(VerifyDto verifyBranchDto)
+		/// <summary>
+		/// Updates verification status for one or more outlets.
+		/// Route: POST api/outlet/verify
+		/// Auth: Business owner.
+		/// </summary>
+		/// <param name="verifyBranchDto">Verification parameters including outlet IDs.</param>
+		/// <returns>Identifier corresponding to the verification record.</returns>
+		[HttpPost("verify")]
+		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
+		public async Task<ActionResult<OperationResult<int>>> VerifyBranchs(VerifyDto verifyBranchDto)
         {
             var response = new OperationResult<int>();
             this.logger.LogInformation("Branch Controller -> verifyBranchs()-> params {0}", JsonConvert.SerializeObject(new { Params = verifyBranchDto }));
@@ -242,9 +303,16 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
-        [HttpDelete("{id}")]
-        [Authorize(Roles = ROLES.BUSINESS_OWNER)]
-        public async Task<ActionResult<OperationResult<bool>>> Delete(int id)
+		/// <summary>
+		/// Permanently deletes an outlet.
+		/// Route: DELETE api/outlet/{id}
+		/// Auth: Business owner.
+		/// </summary>
+		/// <param name="id">The outlet identifier.</param>
+		/// <returns>True when deletion succeeds.</returns>
+		[HttpDelete("{id}")]
+		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
+		public async Task<ActionResult<OperationResult<bool>>> Delete(int id)
         {
             var response = new OperationResult<bool>();
             this.logger.LogInformation("Branch Controller -> deleteBranch()-> params {0}", id);
@@ -254,9 +322,16 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
-        [HttpPatch]
-        [Authorize(Roles = ROLES.BUSINESS_OWNER)]
-        public async Task<ActionResult<OperationResult<bool>>> UpdateBrancheStatus( UpdateBrancheStatusParams branchParams)
+		/// <summary>
+		/// Updates the open or closed status flag for an outlet.
+		/// Route: PATCH api/outlet
+		/// Auth: Business owner.
+		/// </summary>
+		/// <param name="branchParams">Payload specifying outlet ID and desired open status.</param>
+		/// <returns>True when the status update is saved.</returns>
+		[HttpPatch]
+		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
+		public async Task<ActionResult<OperationResult<bool>>> UpdateBrancheStatus( UpdateBrancheStatusParams branchParams)
         {
             var response = new OperationResult<bool>();
 
@@ -280,17 +355,32 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
-        [HttpGet("NearBy/Outlets")] 
-         public async Task<ActionResult<GetDataResult<List<OutletSeachDto>>>> GetNearbyOutlets(
-          [FromQuery] double? latitude,
-          [FromQuery] double? longitude,
-          [FromQuery] double radiusKm = 10,
-          [FromQuery] string category = null,
-          [FromQuery] double? minRating = null,
-          [FromQuery] string sortBy = "rating",
-          [FromQuery] SortDirection sortDirection = SortDirection.Desc,
-          [FromQuery] int page = 1,
-          [FromQuery] int pageSize = 10)
+		/// <summary>
+		/// Discovers nearby outlets using optional geolocation and filters.
+		/// Route: GET api/outlet/nearby/outlets
+		/// Auth: AllowAnonymous.
+		/// </summary>
+		/// <param name="latitude">Latitude of the search origin.</param>
+		/// <param name="longitude">Longitude of the search origin.</param>
+		/// <param name="radiusKm">Search radius in kilometers.</param>
+		/// <param name="category">Optional category filter.</param>
+		/// <param name="minRating">Optional minimum rating filter.</param>
+		/// <param name="sortBy">Field to sort by (rating, distance, etc.).</param>
+		/// <param name="sortDirection">Sort direction.</param>
+		/// <param name="page">Page number starting from 1.</param>
+		/// <param name="pageSize">Page size.</param>
+		/// <returns>Paginated list of outlet search results.</returns>
+		[HttpGet("NearBy/Outlets")]
+	 	public async Task<ActionResult<GetDataResult<List<OutletSeachDto>>>> GetNearbyOutlets(
+	 	 [FromQuery] double? latitude,
+	 	 [FromQuery] double? longitude,
+	 	 [FromQuery] double radiusKm = 10,
+	 	 [FromQuery] string category = null,
+	 	 [FromQuery] double? minRating = null,
+	 	 [FromQuery] string sortBy = "rating",
+	 	 [FromQuery] SortDirection sortDirection = SortDirection.Desc,
+	 	 [FromQuery] int page = 1,
+	 	 [FromQuery] int pageSize = 10)
         {
             var request = new OutletSearchRequest
             {
@@ -309,8 +399,16 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(result);
         }
 
-        [HttpGet("subscribed-outlets")]
-        public async Task<ActionResult<GetDataResult<SubscribedOutletDto>>> GetSubscribedOutlets([FromQuery] int page = 1,[FromQuery] int pageSize = 10)
+		/// <summary>
+		/// Returns outlets the current customer has subscribed to.
+		/// Route: GET api/outlet/subscribed-outlets
+		/// Auth: Authenticated customers.
+		/// </summary>
+		/// <param name="page">Page number starting from 1.</param>
+		/// <param name="pageSize">Number of records per page.</param>
+		/// <returns>Paginated list of subscribed outlets.</returns>
+		[HttpGet("subscribed-outlets")]
+		public async Task<ActionResult<GetDataResult<SubscribedOutletDto>>> GetSubscribedOutlets([FromQuery] int page = 1,[FromQuery] int pageSize = 10)
         {
             var customerUserName = this.LoggedInUserName;
             var result = await branchService.GetSubscribedOutletsAsync(customerUserName, page, pageSize);
@@ -319,8 +417,15 @@ namespace EpicMarket.Business.API.Controllers
 
       
 
-        [HttpPost("subscribe/{outletId}")]
-        public async Task<ActionResult<bool>> SubscribeOutlet(int outletId)
+		/// <summary>
+		/// Subscribes the logged-in customer to outlet updates.
+		/// Route: POST api/outlet/subscribe/{outletId}
+		/// Auth: Authenticated customers.
+		/// </summary>
+		/// <param name="outletId">Outlet identifier to subscribe to.</param>
+		/// <returns>True when subscription succeeds.</returns>
+		[HttpPost("subscribe/{outletId}")]
+		public async Task<ActionResult<bool>> SubscribeOutlet(int outletId)
         {
             var customerUserName = this.LoggedInUserName;
             var result = await branchService.SubscribeOutletAsync(outletId, customerUserName);
@@ -341,9 +446,16 @@ namespace EpicMarket.Business.API.Controllers
         //     return Ok(result);
         // }
 
-        [HttpGet("customer/{outletId}")]
-        [AllowAnonymous]
-        public async Task<ActionResult<CustomerOutletDetailResult>> GetCustomerOutletDetail(int outletId)
+		/// <summary>
+		/// Returns customer-facing details for a specific outlet, including personalized state.
+		/// Route: GET api/outlet/customer/{outletId}
+		/// Auth: AllowAnonymous (uses customer context when authenticated).
+		/// </summary>
+		/// <param name="outletId">Outlet identifier.</param>
+		/// <returns>Customer outlet detail response.</returns>
+		[HttpGet("customer/{outletId}")]
+		[AllowAnonymous]
+		public async Task<ActionResult<CustomerOutletDetailResult>> GetCustomerOutletDetail(int outletId)
         {
             string customerUserName = null;
             

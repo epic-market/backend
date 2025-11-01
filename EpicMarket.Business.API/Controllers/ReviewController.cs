@@ -11,6 +11,10 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace EpicMarket.Business.API.Controllers
 {
+    /// <summary>
+    /// Manages customer reviews and ratings for outlets and products.
+    /// Provides endpoints to fetch reviews and add new ratings.
+    /// </summary>
     [Route("api/review")]
     public class ReviewController : BaseApiController
     {
@@ -24,25 +28,39 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
-            [HttpGet("outlet/{outletId}")]
-            [AllowAnonymous]
-            public async Task<IActionResult> GetAllReviewsOutlet(int outletId)
-            {
+        /// <summary>
+        /// Gets all reviews for the specified outlet.
+        /// Route: GET api/review/outlet/{outletId}
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <param name="outletId">Identifier of the outlet whose reviews will be returned.</param>
+        /// <returns>List of outlet reviews.</returns>
+        [HttpGet("outlet/{outletId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAllReviewsOutlet(int outletId)
+        {
 
-                var reponse = new OperationResult<List<ReviewResult>>();
+            var reponse = new OperationResult<List<ReviewResult>>();
 
-                this.logger.LogInformation("Review Controller -> GetAllReviewsOutlet()");
+            this.logger.LogInformation("Review Controller -> GetAllReviewsOutlet()");
 
-                var steps = await this.ratingService.GetAllReviewsOutlet(outletId);
+            var steps = await this.ratingService.GetAllReviewsOutlet(outletId);
 
-                this.logger.LogInformation("Review Controller-> GetAllReviewsOutlet()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = steps }));
+            this.logger.LogInformation("Review Controller-> GetAllReviewsOutlet()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = steps }));
 
-                reponse.Data = steps;
+            reponse.Data = steps;
 
-                return Ok(reponse);
+            return Ok(reponse);
 
-            }
+        }
 
+        /// <summary>
+        /// Gets all reviews for the specified product.
+        /// Route: GET api/review/product/{productId}
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <param name="productId">Identifier of the product whose reviews will be returned.</param>
+        /// <returns>List of product reviews.</returns>
         [HttpGet("product/{productId}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetAllReviewsProduct(int productId)
@@ -60,6 +78,13 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Adds a rating and optional review for the specified outlet.
+        /// Route: POST api/review/outlet
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <param name="request">Rating details for the outlet.</param>
+        /// <returns>Status of the rating operation.</returns>
         [HttpPost("outlet")]
         [AllowAnonymous]
         public async Task<ActionResult<bool>> AddRatingToOutlet([FromBody] AddOutletRatingRequest request)
@@ -70,7 +95,14 @@ namespace EpicMarket.Business.API.Controllers
             response.Data = true;
             return Ok(response);
         }
-            
+        
+        /// <summary>
+        /// Adds a rating and optional review for the specified product.
+        /// Route: POST api/review/product
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <param name="request">Rating details for the product.</param>
+        /// <returns>Status of the rating operation.</returns>
         [HttpPost("product")]
         [AllowAnonymous]
         public async Task<ActionResult<bool>> AddRatingToProduct([FromBody] AddProductRatingRequest request)

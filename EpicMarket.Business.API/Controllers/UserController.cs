@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
@@ -18,6 +18,10 @@ using EpicMarket.Entities.Constants;
 namespace EpicMarket.Business.API.Controllers
 {
 
+    /// <summary>
+    /// User accounts API. Provides endpoints for registration, login, profile details,
+    /// password management, OTP flows, and basic customer info.
+    /// </summary>
     [Route("api/user")]
     public class UserController : BaseApiController
     {
@@ -54,6 +58,11 @@ namespace EpicMarket.Business.API.Controllers
             _configuration = configuration;
             _otpService = otpService;
         }
+        /// <summary>
+        /// Registers a new user with the MEMBER role.
+        /// </summary>
+        /// <param name="registerDto">Registration details (email, password, phone, etc.).</param>
+        /// <returns>Returns a JWT token on success.</returns>
         [HttpPost("register")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<TokenDto>>> Register(RegisterDto registerDto)
@@ -73,7 +82,7 @@ namespace EpicMarket.Business.API.Controllers
                 if (await UserExists(registerDto.Email))
                 {
                     logger.LogWarning("Username is already taken for email: {email}", registerDto.Email);
-                return BadRequest("Username is taken");
+                    return BadRequest("Username is taken");
                 }
 
                 var user = _mapper.Map<AppUser>(registerDto);
@@ -81,15 +90,6 @@ namespace EpicMarket.Business.API.Controllers
                 user.UserName = registerDto.Email.ToLower();
                 user.Email = registerDto.Email.ToLower();
                 user.PhoneNumber = registerDto.Phone;
-
-                // if(registerDto.OTP != null)
-                // {
-                //     var isVerified = await _otpService.VerifyOTPAsync(registerDto.ReferenceId, registerDto.OTP);
-                //     if(!isVerified)
-                //     {
-                //         return BadRequest("Invalid OTP");
-                //     }
-                // }
 
                 var result = await _userManager.CreateAsync(user, registerDto.Password);
 
@@ -134,6 +134,13 @@ namespace EpicMarket.Business.API.Controllers
 
 
 
+        /// <summary>
+        /// Registers a new user with the BUSINESS_OWNER role.
+        /// Route: POST api/user/business/register
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <param name="registerDto">Registration details (email, password, phone, etc.).</param>
+        /// <returns>Returns a JWT token on success.</returns>
         [HttpPost("business/register")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<TokenDto>>> RegisterBusiness(RegisterDto registerDto)
@@ -206,6 +213,13 @@ namespace EpicMarket.Business.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Logs in or creates a guest user via phone and OTP verification.
+        /// Route: POST api/user/login/phone
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <param name="loginPhoneDto">Phone number, OTP reference ID and OTP.</param>
+        /// <returns>Returns a JWT token on success.</returns>
         [HttpPost("login/phone")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<TokenDto>>> LoginPhone(LoginPhoneDto loginPhoneDto)
@@ -255,6 +269,13 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }   
 
+        /// <summary>
+        /// Logs in a user using email and password.
+        /// Route: POST api/user/login
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <param name="loginDto">Email and password.</param>
+        /// <returns>Returns a JWT token on success.</returns>
         [HttpPost("login")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<TokenDto>>> Login(LoginDto loginDto)
@@ -302,6 +323,12 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
         
+        /// <summary>
+        /// Gets the logged-in user's basic details, roles, business summary, and securables.
+        /// Route: GET api/user/details/business
+        /// Auth: Authorize
+        /// </summary>
+        /// <returns>Returns user profile info and access control list.</returns>
         [HttpGet("details/business")]
         [Authorize]
         public async Task<ActionResult<OperationResult<LoginResult>>> GetUserInfo()
@@ -362,6 +389,13 @@ namespace EpicMarket.Business.API.Controllers
             }
         }
         
+        /// <summary>
+        /// Updates the logged-in user's profile information.
+        /// Route: PUT api/user/details/business
+        /// Auth: Authorize
+        /// </summary>
+        /// <param name="loginUserEditDTO">Editable user fields (first name, last name, email, phone).</param>
+        /// <returns>Success message on update.</returns>
         [HttpPut("details/business")]
         [Authorize]
         public async Task<ActionResult<OperationResult<string>>> PutInfo(LoginUserEditDTO loginUserEditDTO)
@@ -401,6 +435,12 @@ namespace EpicMarket.Business.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets the logged-in customer's basic details.
+        /// Route: GET api/user/details/customer
+        /// Auth: Authorize
+        /// </summary>
+        /// <returns>Customer basic details.</returns>
         [HttpGet("details/customer")]
         [Authorize]
         public async Task<ActionResult<CustomerBasicDetailsDto>> GetCustomerBasicDetails()
@@ -420,6 +460,13 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(customerDetails);
         }
 
+        /// <summary>
+        /// Gets customer/person details by phone number or username.
+        /// Route: GET api/user/details/customer/{phoneOrUsername}
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <param name="phoneOrUsername">Phone number or username to search.</param>
+        /// <returns>List of matching customer details.</returns>
         [HttpGet("details/customer/{phoneOrUsername}")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<List<CustomerDetails>>>> GetPersonDetails(string phoneOrUsername)
@@ -435,6 +482,13 @@ namespace EpicMarket.Business.API.Controllers
             return response;
         }
 
+        /// <summary>
+        /// Changes the logged-in user's password.
+        /// Route: POST api/user/change-password
+        /// Auth: Authorize
+        /// </summary>
+        /// <param name="changePasswordParams">Current password and new password.</param>
+        /// <returns>Success message on password change.</returns>
         [HttpPost("change-password")]
         [Authorize]
         public async Task<ActionResult<OperationResult<string>>> ChangePassword(ChangePasswordParams changePasswordParams)
@@ -472,6 +526,13 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Initiates password reset for the given email (sends reset link/code).
+        /// Route: POST api/user/reset-password
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <param name="resetPassword">Reset password request parameters.</param>
+        /// <returns>Status of reset password initiation.</returns>
         [HttpPost("reset-password")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<string>>> ResetPassword(ResetPasswordParams resetPassword)
@@ -494,6 +555,13 @@ namespace EpicMarket.Business.API.Controllers
             return response;
         }
 
+        /// <summary>
+        /// Validates a reset-password link or token.
+        /// Route: GET api/user/check-reset-password-link
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <param name="queryParam">Opaque query parameter from reset link.</param>
+        /// <returns>Result indicating validity and metadata.</returns>
         [HttpGet("check-reset-password-link")]
         [AllowAnonymous]
         public ActionResult<OperationResult<CheckResetLinkResult>> CheckResetPasswordLink(string queryParam)
@@ -510,6 +578,13 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Sets a new password using a valid reset token.
+        /// Route: POST api/user/set-new-password
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <param name="setNewPasswordParams">New password and reset token payload.</param>
+        /// <returns>Status of password update.</returns>
         [HttpPost("set-new-password")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<string>>> SetNewPassword(SetNewPasswordParams setNewPasswordParams)
@@ -524,7 +599,14 @@ namespace EpicMarket.Business.API.Controllers
 
             return response;
         }
-        
+
+        /// <summary>
+        /// Sends an OTP to the specified username (email/phone) for the given purpose.
+        /// Route: POST api/user/send-otp
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <param name="request">Username and OTP type (purpose).</param>
+        /// <returns>Reference ID and timestamp for the sent OTP.</returns>
         [HttpPost("send-otp")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<OTPResponse>>> SendOTP(OTPRequest request)
@@ -532,14 +614,14 @@ namespace EpicMarket.Business.API.Controllers
             try
             {
                 var response = new OperationResult<OTPResponse>();
-                
+
                 if (string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.Type))
                 {
                     return BadRequest("Username and Type are required");
                 }
 
                 var (referenceId, timestamp) = await _otpService.SendOTPAsync(request.Username, request.Type);
-                
+
                 response.Data = new OTPResponse
                 {
                     ReferenceId = referenceId,
@@ -577,9 +659,14 @@ namespace EpicMarket.Business.API.Controllers
         //        logger.LogError(ex, "Error verifying OTP");
         //        return StatusCode(500, "An error occurred while verifying OTP");
         //    }
-        //}
         
-     
+        
+        /// <summary>
+        /// Checks if a user exists in the system with the specified username.
+        /// Validates that the user is active and performs case-insensitive username comparison.
+        /// </summary>
+        /// <param name="username">The username to check for existence.</param>
+        /// <returns>Returns true if an active user with the specified username exists, otherwise false.</returns>
         private async Task<bool> UserExists(string username)
         {
             return await _userManager.Users.AnyAsync(x => x.UserName == username.ToLower() && x.IsActive == true);

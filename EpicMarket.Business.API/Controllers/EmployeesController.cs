@@ -14,7 +14,12 @@ using System.Security.Claims;
 
 namespace EpicMarket.Business.API.Controllers
 {
-
+    /// <summary>
+    /// Employee management API. Handles onboarding, mapping, and directory operations for business staff.
+    /// </summary>
+    /// <remarks>
+    /// Route prefix: <c>api/employees</c>
+    /// </remarks>
     [Route("api/employees")]
     public class EmployeesController : BaseApiController
     {
@@ -29,6 +34,14 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
+        /// <summary>
+        /// Invites or registers a new employee for the current business.
+        /// </summary>
+        /// <remarks>
+        /// Route: <c>POST api/employees</c>
+        /// Auth: <c>Authorize(Roles = BUSINESS_OWNER)</c>
+        /// Body: JSON <see cref="AddEmployeeParam"/>.
+        /// </remarks>
         [HttpPost]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<AddEmployeeResult>>> Register(AddEmployeeParam addEmployeeParam)
@@ -47,6 +60,14 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
+        /// <summary>
+        /// Validates a pending employee invitation link.
+        /// </summary>
+        /// <remarks>
+        /// Route: <c>GET api/employees/Check</c>
+        /// Auth: <c>AllowAnonymous</c>
+        /// Query: <c>queryParam</c> invitation token.
+        /// </remarks>
         [HttpGet("Check")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<CheckLinkResult>>> CheckEmployeeLink(string queryParam)
@@ -59,6 +80,14 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Completes employee account creation using invitation details.
+        /// </summary>
+        /// <remarks>
+        /// Route: <c>PUT api/employees/{{id}}</c>
+        /// Auth: <c>AllowAnonymous</c> (secured via invitation token validation).
+        /// Body: JSON <see cref="EmployeeDto"/>.
+        /// </remarks>
         [HttpPut("{id}")]
         [AllowAnonymous] // we need to check the 
         public async Task<ActionResult<int>> CreateEmployeeAccount(int id,[FromBody]EmployeeDto employeeDto)
@@ -73,6 +102,13 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
+        /// <summary>
+        /// Gets employable staff options for mapping to the specified outlet.
+        /// </summary>
+        /// <remarks>
+        /// Route: <c>GET api/employees/Map/{{outletID}}</c>
+        /// Auth: <c>Authorize(Roles = BUSINESS_OWNER)</c>
+        /// </remarks>
         [HttpGet("Map/{outletID}")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<List<EmployeeMapOptionResult>>>> GetAllEmployeesForMap(int outletID)
@@ -91,6 +127,14 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
+        /// <summary>
+        /// Retrieves a paged list of employees for the current business.
+        /// </summary>
+        /// <remarks>
+        /// Route: <c>GET api/employees</c>
+        /// Auth: <c>Authorize(Roles = BUSINESS_OWNER)</c>
+        /// Query: <see cref="EmployeeParams"/> filters.
+        /// </remarks>
         [HttpGet]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult<OperationResult<GetDataResult<List<EmployeeResult>>>>> GetAllEmployees([FromQuery]EmployeeParams employeeParams)
@@ -108,6 +152,13 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Gets detailed profile information for an employee.
+        /// </summary>
+        /// <remarks>
+        /// Route: <c>GET api/employees/{{id}}</c>
+        /// Auth: <c>Authorize(Roles = BUSINESS_OWNER)</c>
+        /// </remarks>
         [HttpGet("{id}")]
         [Authorize(Roles = ROLES.BUSINESS_OWNER)]
         public async Task<ActionResult<OperationResult<SingleEmployeeResult>>> GetEmployeeDetails( int id)
@@ -128,6 +179,13 @@ namespace EpicMarket.Business.API.Controllers
 
 
 
+		/// <summary>
+		/// Removes an employee from the business directory.
+		/// </summary>
+		/// <remarks>
+		/// Route: <c>DELETE api/employees/{{id}}</c>
+		/// Auth: <c>Authorize(Roles = BUSINESS_OWNER)</c>
+		/// </remarks>
 		[HttpDelete("{id}")]
 		[Authorize(Roles = ROLES.BUSINESS_OWNER)]
 		public async Task<ActionResult> Delete(int id)

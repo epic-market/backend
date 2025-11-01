@@ -12,8 +12,13 @@ using System.Security.Claims;
 namespace EpicMarket.Business.API.Controllers
 {
 
-    [Route("api/notification")]
-    public class NotificationController : BaseApiController
+	/// <summary>
+	/// Notification APIs for retrieving and updating user-specific alerts.
+	/// Route prefix: api/notification
+	/// Auth: Requires authenticated users.
+	/// </summary>
+	[Route("api/notification")]
+	public class NotificationController : BaseApiController
     {
         private readonly ILogger<NotificationController> logger;
         private readonly ApplicationDbContext dbContext;
@@ -26,10 +31,16 @@ namespace EpicMarket.Business.API.Controllers
             this.notificationService = notificationService;
         }
 
-        [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> GetNotification()
-        {
+		/// <summary>
+		/// Retrieves unread notifications for the logged-in user.
+		/// Route: GET api/notification
+		/// Auth: Any authenticated user.
+		/// </summary>
+		/// <returns>List of unread notifications.</returns>
+		[HttpGet]
+		[Authorize]
+		public async Task<IActionResult> GetNotification()
+		{
             var reponse = new OperationResult<List<NotificationResult>>();
 
             this.logger.LogInformation("Notification Controller -> GetStatusOptions()");
@@ -46,10 +57,17 @@ namespace EpicMarket.Business.API.Controllers
           
         }
 
-        [HttpPut("Read/{id}")]
-        [Authorize]
-        public async Task<IActionResult> ReadNotification(int id)
-        {
+		/// <summary>
+		/// Marks the specified notification as read.
+		/// Route: PUT api/notification/Read/{id}
+		/// Auth: Any authenticated user.
+		/// </summary>
+		/// <param name="id">The notification identifier to mark as read.</param>
+		/// <returns>Boolean response indicating success.</returns>
+		[HttpPut("Read/{id}")]
+		[Authorize]
+		public async Task<IActionResult> ReadNotification(int id)
+		{
 
             var reponse = new OperationResult<bool>();
 

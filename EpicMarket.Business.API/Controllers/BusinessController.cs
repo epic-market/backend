@@ -18,6 +18,13 @@ using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext
 
 namespace EpicMarket.Business.API.Controllers
 {
+    /// <summary>
+    /// Business management API. Handles registration, profile updates, category discovery,
+    /// and public business listings for the business portal.
+    /// </summary>
+    /// <remarks>
+    /// Route prefix: <c>api/business</c>
+    /// </remarks>
     [Route("api/business")]
     public class BusinessController : BaseApiController
     {
@@ -57,6 +64,14 @@ namespace EpicMarket.Business.API.Controllers
             _configuration = configuration;
         }
 
+        /// <summary>
+        /// Registers the current authenticated user as a business owner and creates a business record.
+        /// </summary>
+        /// <remarks>
+        /// Route: <c>POST api/business</c>
+        /// Auth: <c>Authorize</c>
+        /// Body: multipart form-data containing <see cref="BusinessRegisterDto"/>.
+        /// </remarks>
         [HttpPost]
         [Authorize]
         public async Task<ActionResult<OperationResult<BusinessDTO_Result>>> RegisterBusiness([FromForm] BusinessRegisterDto businessRegisterDto)
@@ -153,6 +168,13 @@ namespace EpicMarket.Business.API.Controllers
             return CreatedAtAction(nameof(RegisterBusiness), new { result.BusinessId }, response);
         }
 
+        /// <summary>
+        /// Retrieves the business details associated with the authenticated user.
+        /// </summary>
+        /// <remarks>
+        /// Route: <c>GET api/business</c>
+        /// Auth: <c>Authorize</c>
+        /// </remarks>
         [HttpGet]
         [Authorize]
         public async Task<ActionResult<OperationResult<BusinessDetailResult>>> GetBusinessByID()
@@ -183,6 +205,14 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Updates the business profile information for the authenticated business owner.
+        /// </summary>
+        /// <remarks>
+        /// Route: <c>PUT api/business</c>
+        /// Auth: <c>Authorize</c>
+        /// Body: JSON <see cref="UpdateBusinessRegisterDto"/>.
+        /// </remarks>
         [HttpPut]
         [Authorize]
         public async Task<ActionResult<OperationResult<int>>> UpdateBusiness( [FromBody] UpdateBusinessRegisterDto businessRegisterDto)
@@ -225,6 +255,13 @@ namespace EpicMarket.Business.API.Controllers
         /// <summary>
         /// Gets all available business categories with their details and image.
         /// </summary>
+        /// <summary>
+        /// Gets all available business categories with their details and cover image.
+        /// </summary>
+        /// <remarks>
+        /// Route: <c>GET api/business/categories</c>
+        /// Auth: <c>AllowAnonymous</c>
+        /// </remarks>
         [HttpGet("categories")]
         public async Task<ActionResult<OperationResult<List<BusinessCategoryDto>>>> GetBusinessCategories()
         {
@@ -258,6 +295,14 @@ namespace EpicMarket.Business.API.Controllers
         /// Gets business listings grouped by type (Trending, New, Featured)
         /// </summary>
         /// <param name="category">Optional category filter</param>
+        /// <summary>
+        /// Gets curated business listings grouped by type (Trending, New, Featured).
+        /// </summary>
+        /// <remarks>
+        /// Route: <c>GET api/business/listings</c>
+        /// Query: optional <c>category</c> filter.
+        /// Auth: <c>AllowAnonymous</c>
+        /// </remarks>
         [HttpGet("listings")]
         public async Task<ActionResult<OperationResult<BusinessGroupsResponseDto>>> GetBusinessListings([FromQuery] string category = null)
         {

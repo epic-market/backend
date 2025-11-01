@@ -10,9 +10,14 @@ using EpicMarket.Data.Models;
 namespace EpicMarket.Business.API.Controllers
 {
 
-    [AllowAnonymous]
-    [Route("api/[controller]")]
-    public class HomeController : BaseApiController
+	/// <summary>
+	/// Public-facing content APIs such as FAQs and blogs for the marketing site.
+	/// Route prefix: api/home
+	/// Auth: Anonymous access.
+	/// </summary>
+	[AllowAnonymous]
+	[Route("api/[controller]")]
+	public class HomeController : BaseApiController
     {
         private readonly ILogger<HomeController> logger;
         private readonly IBusinessService businessService;
@@ -25,9 +30,15 @@ namespace EpicMarket.Business.API.Controllers
             this.homeService = homeService;
         }
 
-        [HttpGet("faq/categories")]
-        public async Task<ActionResult<OperationResult<List<FaqCategoryDto>>>> GetAllFaqCategory()
-        {
+		/// <summary>
+		/// Retrieves all FAQ categories for filtering customer support content.
+		/// Route: GET api/home/faq/categories
+		/// Auth: AllowAnonymous.
+		/// </summary>
+		/// <returns>Collection of FAQ categories.</returns>
+		[HttpGet("faq/categories")]
+		public async Task<ActionResult<OperationResult<List<FaqCategoryDto>>>> GetAllFaqCategory()
+		{
             var reponse = new OperationResult<List<FaqCategoryDto>>();
 
             this.logger.LogInformation("Home Controller -> GetAllFaqCategory()");
@@ -41,9 +52,17 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(list);
         }
 
-        [HttpGet("faq")]
-        public async Task<ActionResult<OperationResult<List<FaqDto>>>> GetFaqs([FromQuery] string category, [FromQuery] string search)
-        {
+		/// <summary>
+		/// Retrieves FAQs optionally filtered by category and search term.
+		/// Route: GET api/home/faq
+		/// Auth: AllowAnonymous.
+		/// </summary>
+		/// <param name="category">Category identifier or "all" for every category.</param>
+		/// <param name="search">Optional keyword filter applied to FAQ content.</param>
+		/// <returns>Collection of FAQs matching the criteria.</returns>
+		[HttpGet("faq")]
+		public async Task<ActionResult<OperationResult<List<FaqDto>>>> GetFaqs([FromQuery] string category, [FromQuery] string search)
+		{
             var response = new OperationResult<List<FaqDto>>();
             this.logger.LogInformation("Home Controller -> GetFaqs()");
 
@@ -80,9 +99,16 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
-        [HttpGet("blogs")]
-        public async Task<ActionResult<OperationResult<List<BlogDto>>>> GetAllBlogs([FromQuery]BlogParams blogs)
-        {
+		/// <summary>
+		/// Returns paginated and filterable blog posts for the marketing site.
+		/// Route: GET api/home/blogs
+		/// Auth: AllowAnonymous.
+		/// </summary>
+		/// <param name="blogs">Pagination and filtering parameters for blogs.</param>
+		/// <returns>List of blog posts along with pagination metadata.</returns>
+		[HttpGet("blogs")]
+		public async Task<ActionResult<OperationResult<List<BlogDto>>>> GetAllBlogs([FromQuery]BlogParams blogs)
+		{
             var response = new OperationResult<List<BlogDto>>();
 
             this.logger.LogInformation("Home Controller -> GetAllBlogs()");
@@ -96,9 +122,15 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
-        [HttpGet("blogs/categories")]
-        public async Task<ActionResult<OperationResult<List<BlogCategoryDto>>>> GetAllBlogCategories()
-        {
+		/// <summary>
+		/// Lists all blog categories that can be used to filter content.
+		/// Route: GET api/home/blogs/categories
+		/// Auth: AllowAnonymous.
+		/// </summary>
+		/// <returns>Collection of blog categories.</returns>
+		[HttpGet("blogs/categories")]
+		public async Task<ActionResult<OperationResult<List<BlogCategoryDto>>>> GetAllBlogCategories()
+		{
             var response = new OperationResult<List<BlogCategoryDto>>();
 
             this.logger.LogInformation("Home Controller -> GetAllBlogCategories()");
@@ -112,9 +144,16 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
-        [HttpGet("blogs/{blogId}")]
-        public async Task<ActionResult<OperationResult<BlogDto>>> GetBlogDetails(int blogId)
-        {
+		/// <summary>
+		/// Retrieves the details of a specific blog post.
+		/// Route: GET api/home/blogs/{blogId}
+		/// Auth: AllowAnonymous.
+		/// </summary>
+		/// <param name="blogId">The numeric identifier of the blog post.</param>
+		/// <returns>Blog details including content and metadata.</returns>
+		[HttpGet("blogs/{blogId}")]
+		public async Task<ActionResult<OperationResult<BlogDto>>> GetBlogDetails(int blogId)
+		{
             var response = new OperationResult<BlogDto>();
 
             this.logger.LogInformation("Home Controller -> GetBlogDetails({0})", blogId);

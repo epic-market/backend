@@ -12,6 +12,10 @@ using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Business.API.Controllers
 {
+    /// <summary>
+    /// Handles support task management including ticket creation, retrieval, and commenting.
+    /// Provides secure endpoints for both authenticated users and public support submissions.
+    /// </summary>
     [Route("api/support")]
     public class SupportController : BaseApiController
     {
@@ -40,6 +44,13 @@ namespace EpicMarket.Business.API.Controllers
             this.attachmentService = attachmentService;
         }
 
+        /// <summary>
+        /// Retrieves support tasks for the authenticated user with optional filters.
+        /// Route: GET api/support
+        /// Auth: Authorize
+        /// </summary>
+        /// <param name="tasksListParams">Filtering and paging options for the task list.</param>
+        /// <returns>Paged list of support tasks.</returns>
         [HttpGet]
         [Authorize]
         public async Task<ActionResult<OperationResult<GetDataResult<List<TasksListDTO>>>>> GetSupportByPersonId([FromQuery] TasksListParams tasksListParams)
@@ -58,6 +69,13 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Retrieves detailed information for a specific support task.
+        /// Route: GET api/support/{taskId}
+        /// Auth: Authorize
+        /// </summary>
+        /// <param name="taskId">Identifier of the task to retrieve.</param>
+        /// <returns>Detailed task information including history.</returns>
         [HttpGet("{taskId}")]
         [Authorize]
         public async Task<ActionResult<OperationResult<TaskDeatilDTO>>> GettaskDetails(int taskId)
@@ -75,6 +93,13 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Creates a new support task and optionally links uploaded attachments.
+        /// Route: POST api/support
+        /// Auth: Authorize
+        /// </summary>
+        /// <param name="tasksDTO">Details of the task to create.</param>
+        /// <returns>Identifier of the created task.</returns>
         [HttpPost]
         [Authorize]
         public async Task<ActionResult<OperationResult<int>>> AddTask([FromBody] TasksDTO tasksDTO)
@@ -111,6 +136,13 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Retrieves all comments associated with support tasks for the authenticated user.
+        /// Route: GET api/support/Comments
+        /// Auth: Authorize
+        /// </summary>
+        /// <param name="commentDTO">Filtering and paging options for comments.</param>
+        /// <returns>Paged list of support task comments.</returns>
         [HttpGet("Comments")]
         [Authorize]
         public async Task<ActionResult<OperationResult<GetDataResult<List<CommentListDTO>>>>> GetAllComments([FromQuery] CommentListParams commentDTO)
@@ -128,6 +160,13 @@ namespace EpicMarket.Business.API.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Adds a comment to a support task and associates uploaded attachments.
+        /// Route: POST api/support/CommentsAttachments
+        /// Auth: Authorize
+        /// </summary>
+        /// <param name="commentDTO">Comment details including attachments.</param>
+        /// <returns>Identifier of the created comment.</returns>
         [HttpPost("CommentsAttachments")]
         [Authorize]
         public async Task<ActionResult<OperationResult<int>>> AddTaskCommentAndAttachment([FromBody] CommentDTO commentDTO)
@@ -156,7 +195,13 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
-        //This related to non-login and query screen of advertise URL
+        /// <summary>
+        /// Creates a support task from public channels without requiring authentication.
+        /// Route: POST api/support/AddSupportTask
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <param name="supportDTO">Support request details submitted by a user.</param>
+        /// <returns>Identifier of the newly created support task.</returns>
         [HttpPost("AddSupportTask")]
         [AllowAnonymous]
         public async Task<ActionResult<OperationResult<long>>> AddSupportTask(SupportDTO supportDTO)

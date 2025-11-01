@@ -13,10 +13,22 @@ using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext
 
 namespace EpicMarket.Business.API.Controllers
 {
-
+    /// <summary>
+    /// Product catalog category API. Provides category CRUD operations scoped to the authenticated business.
+    /// </summary>
+    /// <remarks>
+    /// This partial controller shares the <c>api/products</c> route prefix defined in the other partial implementation of <see cref="ProductController"/>.
+    /// </remarks>
     public partial class ProductController : BaseApiController
 	{
 	
+		/// <summary>
+		/// Gets all categories for the current business.
+		/// </summary>
+		/// <remarks>
+		/// Route: <c>GET api/products/categories</c>
+		/// Auth: <c>Authorize</c>. Business context inferred from the current user.
+		/// </remarks>
 		[HttpGet("categories")]
 		public async Task<IActionResult> GetCategories()
 		{
@@ -25,6 +37,13 @@ namespace EpicMarket.Business.API.Controllers
 			return Ok(categories);
 		}	
 
+		/// <summary>
+		/// Gets a single category by its identifier.
+		/// </summary>
+		/// <remarks>
+		/// Route: <c>GET api/products/category/{{id}}</c>
+		/// Auth: <c>Authorize</c>.
+		/// </remarks>
 		[HttpGet("category/{id}")]
 		public async Task<IActionResult> GetCategory(int id)
 		{
@@ -32,6 +51,14 @@ namespace EpicMarket.Business.API.Controllers
 			return Ok(category);
 		}
 		
+		/// <summary>
+		/// Creates a new category for the current business.
+		/// </summary>
+		/// <remarks>
+		/// Route: <c>POST api/products/category</c>
+		/// Auth: <c>Authorize</c>.
+		/// Body: JSON <see cref="CategoriesDto"/>.
+		/// </remarks>
 		[HttpPost("category")]
 		public async Task<IActionResult> CreateCategory([FromBody]CategoriesDto categoryDto)
 		{
@@ -41,6 +68,14 @@ namespace EpicMarket.Business.API.Controllers
 			return Ok(category);
 		}	
 
+		/// <summary>
+		/// Updates an existing category.
+		/// </summary>
+		/// <remarks>
+		/// Route: <c>PUT api/products/category/{{id}}</c>
+		/// Auth: <c>Authorize</c>.
+		/// Body: JSON <see cref="UpdateCategoryDto"/>.
+		/// </remarks>
 		[HttpPut("category/{id}")]
 		public async Task<IActionResult> UpdateCategory(int id,UpdateCategoryDto categoryDto)
 		{
@@ -48,6 +83,13 @@ namespace EpicMarket.Business.API.Controllers
 			return Ok(category);
 		}			
 
+		/// <summary>
+		/// Deletes a category from the catalog.
+		/// </summary>
+		/// <remarks>
+		/// Route: <c>DELETE api/products/category/{{id}}</c>
+		/// Auth: <c>Authorize</c>.
+		/// </remarks>
 		[HttpDelete("category/{id}")]
 		public async Task<IActionResult> DeleteCategory(int id)
 		{
