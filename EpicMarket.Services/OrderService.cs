@@ -2,6 +2,7 @@
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using EpicMarket.Entities.Constants;
 using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
@@ -124,30 +125,30 @@ namespace EpicMarket.Services
 
                 foreach(var orderDetail in orderdto.orderDetailsDtos)
                 {
-                    var catelog = await _context.Catalogs
-                        .FirstOrDefaultAsync(c => c.ID == orderDetail.CatalogID && c.IsActive == true);
+                    var catelogVariant = await _context.ProductVariants.Include(c => c.Product)
+                        .FirstOrDefaultAsync(c => c.ID == orderDetail.VariantID && c.IsActive == true);
 
-                    if (catelog == null)
+                    if (catelogVariant == null)
                     {
-                        throw new Exception($"Product with ID {orderDetail.CatalogID} not found");
+                        throw new Exception($"Product Variant with ID {orderDetail.VariantID} not found");
                     }
 
                     if (orderDetail.Quantity <= 0)
                     {
-                        throw new ArgumentException($"Invalid quantity for product {catelog.Name}");
+                        throw new ArgumentException($"Invalid quantity for product {catelogVariant.Product.Name}");
                     }
 
                     var singleOrderDetail = new OrderDetail
                     {
-                        CatalogID = orderDetail.CatalogID,
+                        VariantID = orderDetail.VariantID,
                         Quantity = orderDetail.Quantity,
-                        Rate = catelog.Rate,
-                        TotalPrice = catelog.Rate * orderDetail.Quantity
+                        Rate = catelogVariant.SalePrice,
+                        TotalPrice = catelogVariant.SalePrice * orderDetail.Quantity
                     };
 
                     listoforderDetails.Add(singleOrderDetail);
                     totalItems += orderDetail.Quantity;
-                    totalPrice += (catelog.Rate * orderDetail.Quantity);
+                    totalPrice += (catelogVariant.SalePrice * orderDetail.Quantity);
                 }
 
                 var newOrder = new Order()
@@ -193,49 +194,75 @@ namespace EpicMarket.Services
             }
         }
 
-    
         public async Task<OrdersDetailsResult> GetSingleOrder(int OrderId)
         {
+            // Check if order exists first
+            var order = await _context.Orders
+                .Include(c => c.Person)
+                .Include(c => c.OrderTypesOptions)
+                .Include(c => c.Outlet)
+                .Include(c => c.OrderStatusOptions)
+                .Include(c => c.Address)
+                .FirstOrDefaultAsync(c => c.ID == OrderId);
 
-            var attachmentTypeID_Thumbnail = await _context.AttachmentTypes.FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
+            if (order == null)
+            {
+                throw new Exception($"Order with ID {OrderId} not found");
+            }
 
-            List<OrderDetails> OrderDetails = await _context.OrderDetails.Include(c => c.Catalog).Where(c => c.OrderID == OrderId)
+            var attachmentTypeID_Thumbnail = await _context.AttachmentTypes
+                .FirstOrDefaultAsync(c => c.Name == AttachmentTypeConstants.THUMBNAIL);
+
+            if (attachmentTypeID_Thumbnail == null)
+            {
+                throw new Exception("Thumbnail attachment type not found");
+            }
+
+            List<OrderDetails> orderDetails = await _context.OrderDetails
+                .Include(c => c.ProductVariants)
+                .ThenInclude(cv => cv.Product)
+                .Where(c => c.OrderID == OrderId)
                 .Select(c => new OrderDetails()
                 {
-                    CatalogID = c.CatalogID,
-                    ProductName = c.Catalog.Name,
+                    VariantID = c.ProductVariants.ID,
+                    ProductName = c.ProductVariants.Product.Name,
                     Quantity = c.Quantity,
                     Rate = c.Rate,
                     TotalPrice = c.TotalPrice,
-                    Thumbnail = ((from attachment in _context.Attachments
-                                  join link in _context.AttachmentLinks on attachment.ID equals link.AttachmentID
-                                  join entity in _context.Entity on link.EntityID equals entity.ID
-                                  where entity.Name == EntityConstants.Catelog && link.RecordID == c.CatalogID && link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID
-                                  select $"{attachment.DocumentFolderPath}{attachment.DocumentFile}").FirstOrDefault())
+                    Thumbnail = _context.Attachments
+                        .Join(_context.AttachmentLinks,
+                            a => a.ID,
+                            al => al.AttachmentID,
+                            (a, al) => new { Attachment = a, Link = al })
+                        .Join(_context.Entity,
+                            j => j.Link.EntityID,
+                            e => e.ID,
+                            (j, e) => new { j.Attachment, j.Link, Entity = e })
+                        .Where(x => x.Entity.Name == EntityConstants.CatelogVariant &&
+                                  x.Link.RecordID == c.ProductVariants.ID &&
+                                  x.Link.AttachmentTypeID == attachmentTypeID_Thumbnail.ID)
+                        .Select(x => $"{x.Attachment.DocumentFolderPath}{x.Attachment.DocumentFile}")
+                        .FirstOrDefault() ?? string.Empty
                 }).ToListAsync();
 
-            string OrderDetailsString = JsonConvert.SerializeObject(OrderDetails);
-            var Order = await _context.Orders.Where(c => c.ID == OrderId).Include(c => c.Person).Include(c=>c.OrderTypesOptions).Include(c=>c.Outlet).Include(c=>c.OrderStatusOptions).Include(c => c.Address).Select(
-                c => new OrdersDetailsResult()
-                {
-                    CustomerName = c.Person.FirstName + " " + c.Person.LastName,
-                    CustomerEmail = c.Person.Email,
-                    CustomerPhone = c.Person.PhoneNumber,
-                    OrderDate = c.OrderAt,
-                    PaymentMode = c.PaymentMode,
-                    OrderMode = c.OrderTypesOptions.Ordertype,
-                    Status = c.OrderStatusOptions.OrderStatus,
-                    TotalItems = c.TotalItems,
-                    TotalPrice = c.TotalPrice,
-                    OrderDetails = OrderDetails,
-                    OutletName = c.Outlet.Name,
-                    OutletId = c.OutletID,
-                }).FirstOrDefaultAsync();
+            var result = new OrdersDetailsResult()
+            {
+                CustomerName = $"{order.Person.FirstName} {order.Person.LastName}",
+                CustomerEmail = order.Person.Email ?? string.Empty,
+                CustomerPhone = order.Person.PhoneNumber ?? string.Empty,
+                OrderDate = order.OrderAt,
+                PaymentMode = order.PaymentMode ?? string.Empty,
+                OrderMode = order.OrderTypesOptions?.Ordertype ?? string.Empty,
+                Status = order.OrderStatusOptions?.OrderStatus ?? string.Empty,
+                TotalItems = order.TotalItems,
+                TotalPrice = order.TotalPrice,
+                OrderDetails = orderDetails,
+                OutletName = order.Outlet?.Name ?? string.Empty,
+                OutletId = order.OutletID
+            };
 
-            return Order;
-
+            return result;
         }
-
         public async Task<int> UpdateStatus(int OrderId, int StatusId)
         {
             var Order = _context.Orders.Find(OrderId);
@@ -387,8 +414,8 @@ namespace EpicMarket.Services
                 {
                     ID =c.OrderDetails.FirstOrDefault().ID,
                     Quantity= c.OrderDetails.FirstOrDefault().Quantity,
-                    Name= c.OrderDetails.FirstOrDefault().Catalog.Name,
-                    Price=c.OrderDetails.FirstOrDefault().Rate,
+                    Name= c.OrderDetails.FirstOrDefault().ProductVariants.Product.Name,
+                    Price=c.OrderDetails.FirstOrDefault().ProductVariants.SalePrice,
                     Total_price=c.OrderDetails.FirstOrDefault().TotalPrice
                 },
 
@@ -431,8 +458,8 @@ namespace EpicMarket.Services
                     {
                         ID = od.ID,
                         Quantity = od.Quantity,
-                        Name = od.Catalog.Name,
-                        Price = od.Rate,
+                        Name = od.ProductVariants.Product.Name,
+                        Price = od.ProductVariants.SalePrice,
                         Total_price = od.TotalPrice
                     }).ToList(),
 
@@ -548,30 +575,30 @@ namespace EpicMarket.Services
                 // Process order details
                 foreach(var orderDetail in order.OrderDetailsDtos)
                 {
-                    var catalog = await _context.Catalogs
-                        .FirstOrDefaultAsync(c => c.ID == orderDetail.CatalogID && c.IsActive == true);
+                    var catalogVariant = await _context.ProductVariants.Include(c => c.Product)
+                        .FirstOrDefaultAsync(c => c.ID == orderDetail.VariantID && c.IsActive == true);
 
-                    if (catalog == null)
+                    if (catalogVariant == null)
                     {
-                        throw new Exception($"Product with ID {orderDetail.CatalogID} not found");
+                        throw new Exception($"Product Variant with ID {orderDetail.VariantID} not found");
                     }
 
                     if (orderDetail.Quantity <= 0)
                     {
-                        throw new ArgumentException($"Invalid quantity for product {catalog.Name}");
+                        throw new ArgumentException($"Invalid quantity for product {catalogVariant.Product.Name}");
                     }
 
                     var singleOrderDetail = new OrderDetail
                     {
-                        CatalogID = orderDetail.CatalogID,
+                        VariantID = orderDetail.VariantID,
                         Quantity = orderDetail.Quantity,
-                        Rate = catalog.Rate,
-                        TotalPrice = catalog.Rate * orderDetail.Quantity
+                        Rate = catalogVariant.SalePrice,
+                        TotalPrice = catalogVariant.SalePrice * orderDetail.Quantity
                     };
 
                     listoforderDetails.Add(singleOrderDetail);
                     totalItems += orderDetail.Quantity;
-                    totalPrice += (catalog.Rate * orderDetail.Quantity);
+                    totalPrice += (catalogVariant.SalePrice * orderDetail.Quantity);
                 }
 
 

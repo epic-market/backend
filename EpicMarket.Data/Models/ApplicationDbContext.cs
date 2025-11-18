@@ -1,5 +1,4 @@
-﻿
-using EpicMarket.Data.ApplicationModels;
+﻿using EpicMarket.Data.ApplicationModels;
 using EpicMarket.Data.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -25,6 +24,8 @@ namespace EpicMarket.Data.Models
             _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
         }
+
+
 
 
         private bool IsUserAdmin => _httpContextAccessor.HttpContext?.User?.IsInRole("admin") ?? false;
@@ -162,7 +163,7 @@ namespace EpicMarket.Data.Models
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Business> Businesses { get; set; }
         public DbSet<BusinessCategoryInternal> BusinessCategories { get; set; }
-        public DbSet<Catalog> Catalogs { get; set; }
+        public DbSet<Catalog> Products { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<ApplicationConfiguration> ApplicationConfigurations { get; set; }
@@ -172,7 +173,9 @@ namespace EpicMarket.Data.Models
         public DbSet<Outlet> Outlets { get; set; }
         public DbSet<OutletPerson> OutletPeople { get; set; }
 
-        public DbSet<OutletProduct> OutletProducts { get; set; }
+        public DbSet<Inventory> Inventory { get; set; }    
+
+        public DbSet<CatalogVariants> ProductVariants { get; set; }
 
         public DbSet<ProductInternal> ProductInternals { get; set; }
 
@@ -211,7 +214,7 @@ namespace EpicMarket.Data.Models
         public DbSet<AttachmentLink> AttachmentLinks { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
         public DbSet<AttachmentType> AttachmentTypes { get; set; }
-        public DbSet<SupportQuerys> SupportQuerys { get; set; }
+        public DbSet<SupportQueries> SupportQueries { get; set; }
 
         public DbSet<DatabaseVersion> DatabaseVersions { get; set; }
 
@@ -222,7 +225,7 @@ namespace EpicMarket.Data.Models
 
         public DbSet<Subscription> Subscriptions { get; set; }
 
-        public DbSet<SusbcriptionStatus> SusbcriptionStatuses{ get; set; }
+        public DbSet<SubscriptionStatus> SubscriptionStatus{ get; set; }
 
 
         public DbSet<Rating> Ratings { get; set; }
@@ -234,6 +237,10 @@ namespace EpicMarket.Data.Models
         public DbSet<MerchantFinance> Finances { get; set; }
         public DbSet<Proof> Proofs { get; set; }
         public DbSet<ProofType> ProofTypes { get; set; }
+
+        public DbSet<OTPVerification> OTPVerifications { get; set; }
+        public DbSet<CommunicationStatus> CommunicationStatus { get; set; }
+        public DbSet<CatalogCategory> ProductCategories { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -271,7 +278,7 @@ namespace EpicMarket.Data.Models
                     AllowedBranchIds.Contains(o.OutletID));
 
             // Branch-level filters
-            modelBuilder.Entity<OutletProduct>()
+            modelBuilder.Entity<Inventory>()
                 .HasQueryFilter(p => IsUserAdmin || !AllowedBranchIds.Any() ||
                     AllowedBranchIds.Contains(p.OutletID));
 
@@ -282,6 +289,7 @@ namespace EpicMarket.Data.Models
             modelBuilder.Entity<Order>()
                 .HasQueryFilter(o => IsUserAdmin || !AllowedBranchIds.Any() ||
                     AllowedBranchIds.Contains(o.OutletID));
+            
 
 
             modelBuilder.Entity<AppUser>()
@@ -329,17 +337,29 @@ namespace EpicMarket.Data.Models
                       .HasForeignKey(op => op.BussinessID)
                       .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<OutletProduct>()
-                 .HasOne(op => op.Product)
-                 .WithMany(u => u.OutletProducts)
-                 .HasForeignKey(op => op.ProductID)
+            modelBuilder.Entity<Inventory>()
+                 .HasOne(op => op.ProductVariants)
+                 .WithMany(u => u.Inventory)
+                 .HasForeignKey(op => op.ProductVariantID)
                  .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<OutletProduct>()
+            modelBuilder.Entity<Inventory>()
                   .HasOne(op => op.Outlet)
-                  .WithMany(u => u.OutletProducts)
+                  .WithMany(u => u.Inventory )
                   .HasForeignKey(op => op.OutletID)
                   .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Tasks>()
+                        .HasOne(op => op.TaskTypes)
+                        .WithMany(u => u.Tasks)
+                        .HasForeignKey(op => op.TaskTypeID)
+                        .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Tasks>()
+                        .HasOne(op => op.TaskStatusType)
+                        .WithMany(u => u.Tasks)
+                        .HasForeignKey(op => op.TaskStatusID)
+                        .OnDelete(DeleteBehavior.Restrict);
 
 
             modelBuilder.Entity<AppUser>()
@@ -408,12 +428,19 @@ namespace EpicMarket.Data.Models
 					.HasForeignKey(fk => fk.AttachmentID)
 					.OnDelete(DeleteBehavior.Cascade);
 
-			modelBuilder.ApplyDefaultValuesToEntities(
+            modelBuilder.Entity<Catalog>()
+                        .HasOne(c => c.Category)
+                        .WithMany(c => c.Product)
+                        .HasForeignKey(c => c.CategoryID)
+                        .OnDelete(DeleteBehavior.Restrict);
+                        //
+
+            modelBuilder.ApplyDefaultValuesToEntities(
 					typeof(TaskType),
 					typeof(TaskStatusType),
 					typeof(Tasks),
 					typeof(SupportTicket),
-					typeof(SupportQuerys),
+					typeof(SupportQueries),
 					typeof(StatusOptionSet),
 					typeof(ProductInternal),
 					typeof(Outlet),
@@ -441,7 +468,8 @@ namespace EpicMarket.Data.Models
 					typeof(Address),
 					typeof(BusinessEmployeeMap),
 					typeof(AppUser),
-                    typeof(Page)
+                    typeof(Page),
+                    typeof(CatalogVariants)
                 );
 
 

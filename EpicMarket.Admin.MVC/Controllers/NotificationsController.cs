@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
-
+using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Entities.Constants;
 namespace EpicMarket.Admin.MVC.Controllers
 {
+    [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
     public class NotificationsController : Controller
     {
         private readonly ApplicationDbContext _context;

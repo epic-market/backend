@@ -2,6 +2,7 @@
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Services;
+using EpicMarket.Services.EmailTemplateServices;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Extensibility.Implementation;
 using Microsoft.AspNetCore.Identity;
@@ -39,7 +40,7 @@ namespace EpicMarket.Business.API.Extension
             services.AddScoped<IBusinessService, BusinessService>();
             services.AddScoped<IStaticService, StaticService>();
             services.AddScoped<IAddressService, AddressService>();
-            services.AddScoped<IBranchService, BranchService>();
+            services.AddScoped<IOutletService, OutletService>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IEmployeeService, EmployeeService>();
             services.AddScoped<IOrderService, OrderService>();
@@ -52,6 +53,13 @@ namespace EpicMarket.Business.API.Extension
             services.AddScoped<ISearchService, SearchService>();
             services.AddScoped<IRatingService, RatingService>();
             services.AddScoped<IDashboardService, DashboardService>();
+            services.AddScoped<IOTPService, OTPService>();
+            services.AddScoped<IProductCategoryService, ProductCategoryService>();
+            services.AddScoped<IEntityService, EntityService>();
+            services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+            services.AddScoped<IEmailService, EmailService>();
+
+
             services.AddScoped<LogUserActivity>();
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
             Serilog.Log.Logger = new LoggerConfiguration()

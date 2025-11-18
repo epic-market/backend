@@ -7,16 +7,28 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
-
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Admin.MVC.Services;
+using EpicMarket.Entities;
+using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Entities.Constants;
 namespace EpicMarket.Admin.MVC.Controllers
 {
+    [Authorize(Roles = $"{ROLES.ROOT}")]
     public class OrderTypesOptionsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public OrderTypesOptionsController(ApplicationDbContext context)
+        public OrderTypesOptionsController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: OrderTypesOptions
@@ -60,6 +72,20 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 _context.Add(orderTypesOptions);
                 await _context.SaveChangesAsync();
+                
+                // Log event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.CREATE,
+                    EntityName = EntityConstants.OrderTypesOption,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Created order type option: {orderTypesOptions.Ordertype}",
+                    Data = System.Text.Json.JsonSerializer.Serialize(orderTypesOptions),
+                    RecordId = orderTypesOptions.Id,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+                
                 return RedirectToAction(nameof(Index));
             }
             return View(orderTypesOptions);
@@ -92,6 +118,11 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 return NotFound();
             }
+            
+            // Get original entity for event logging
+            var originalEntity = await _context.OrderTypesOptions
+                .AsNoTracking()
+                .FirstOrDefaultAsync(o => o.Id == id);
 
             if (ModelState.IsValid)
             {
@@ -99,6 +130,23 @@ namespace EpicMarket.Admin.MVC.Controllers
                 {
                     _context.Update(orderTypesOptions);
                     await _context.SaveChangesAsync();
+                    
+                    // Log event
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.UPDATE,
+                        EntityName = EntityConstants.OrderTypesOption,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated order type option: {orderTypesOptions.Ordertype}",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = orderTypesOptions
+                        }),
+                        RecordId = orderTypesOptions.Id,
+                        BusinessID = 0,
+                        LoggedInUserName = User.Identity.Name
+                    });
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -143,6 +191,19 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (orderTypesOptions != null)
             {
                 _context.OrderTypesOptions.Remove(orderTypesOptions);
+                
+                // Log event before saving changes
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DELETE,
+                    EntityName = EntityConstants.OrderTypesOption,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted order type option: {orderTypesOptions.Ordertype}",
+                    Data = System.Text.Json.JsonSerializer.Serialize(orderTypesOptions),
+                    RecordId = orderTypesOptions.Id,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
             }
 
             await _context.SaveChangesAsync();

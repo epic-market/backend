@@ -7,19 +7,28 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Authorization;
-using EpicMarket.Entities.CustomModels;
 using System.Security.Claims;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
-    [Authorize(Roles = $"{ROLES.ADMIN}")]
+    [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
     public class FAQsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public FAQsController(ApplicationDbContext context)
+        public FAQsController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: FAQs
@@ -60,16 +69,26 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Description,CategoryId,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] FAQ fAQ)
+        public async Task<IActionResult> Create([Bind("Id,Title,Description,CategoryId")] FAQ fAQ)
         {
-
-            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
-            fAQ.CreateBy = userName;
-            fAQ.CreateDate = DateTime.UtcNow;
             if (ModelState.IsValid)
             {
                 _context.Add(fAQ);
                 await _context.SaveChangesAsync();
+                
+                // Log event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.CreateFAQ,
+                    EntityName = EntityConstants.FAQ,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Created FAQ: {fAQ.Title}",
+                    Data = System.Text.Json.JsonSerializer.Serialize(fAQ),
+                    RecordId = fAQ.Id,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+                
                 return RedirectToAction(nameof(Index));
             }
             ViewData["CategoryId"] = new SelectList(_context.FAQCategories, "Id", "CategoryTitle", fAQ.CategoryId);
@@ -98,16 +117,17 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,CategoryId,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] FAQ fAQ)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,CategoryId")] FAQ fAQ)
         {
-
-            var userName = this.User.FindFirst(ClaimTypes.Name).Value;
-            fAQ.ModifiedBy = userName;
-            fAQ.ModifiedDate = DateTime.UtcNow;
             if (id != fAQ.Id)
             {
                 return NotFound();
             }
+            
+            // Get original entity for event logging
+            var originalEntity = await _context.FAQs
+                .AsNoTracking()
+                .FirstOrDefaultAsync(f => f.Id == id);
 
             if (ModelState.IsValid)
             {
@@ -115,6 +135,23 @@ namespace EpicMarket.Admin.MVC.Controllers
                 {
                     _context.Update(fAQ);
                     await _context.SaveChangesAsync();
+                    
+                    // Log event
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditFAQ,
+                        EntityName = EntityConstants.FAQ,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated FAQ: {fAQ.Title}",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = fAQ
+                        }),
+                        RecordId = fAQ.Id,
+                        BusinessID = 0,
+                        LoggedInUserName = User.Identity.Name
+                    });
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -161,6 +198,19 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (fAQ != null)
             {
                 _context.FAQs.Remove(fAQ);
+                
+                // Log event before saving changes
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteFAQ,
+                    EntityName = EntityConstants.FAQ,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted FAQ: {fAQ.Title}",
+                    Data = System.Text.Json.JsonSerializer.Serialize(fAQ),
+                    RecordId = fAQ.Id,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
             }
 
             await _context.SaveChangesAsync();

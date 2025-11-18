@@ -8,16 +8,28 @@ using Microsoft.EntityFrameworkCore;
 using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
 using System.Security.Claims;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
+using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
+    [Authorize(Roles = $"{ROLES.ROOT}")]
     public class TaskStatusTypesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public TaskStatusTypesController(ApplicationDbContext context)
+        public TaskStatusTypesController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: TaskStatusTypes
@@ -35,7 +47,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
 
             var taskStatusType = await _context.TaskStatusTypes
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.ID == id);
             if (taskStatusType == null)
             {
                 return NotFound();
@@ -60,10 +72,24 @@ namespace EpicMarket.Admin.MVC.Controllers
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             taskStatusType.CreateBy = userName;
             taskStatusType.CreateDate = DateTime.UtcNow;
+            
             if (ModelState.IsValid)
             {
                 _context.Add(taskStatusType);
                 await _context.SaveChangesAsync();
+                
+                // Log the event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddTaskStatusType,
+                    EntityName = EntityConstants.TaskStatusType,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Added task status type '{taskStatusType.Status}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(taskStatusType),
+                    RecordId = taskStatusType.ID,
+                    LoggedInUserName = User.Identity.Name
+                });
+                
                 return RedirectToAction(nameof(Index));
             }
             return View(taskStatusType);
@@ -95,21 +121,43 @@ namespace EpicMarket.Admin.MVC.Controllers
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             taskStatusType.ModifiedBy = userName;
             taskStatusType.ModifiedDate = DateTime.UtcNow;
-            if (id != taskStatusType.Id)
+            
+            if (id != taskStatusType.ID)
             {
                 return NotFound();
             }
+
+            // Get the original entity for comparison
+            var originalTaskStatusType = await _context.TaskStatusTypes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.ID == id);
 
             if (ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(taskStatusType);
+                    
+                    // Log the event
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditTaskStatusType,
+                        EntityName = EntityConstants.TaskStatusType,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated task status type '{taskStatusType.Status}'",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new { 
+                            Original = originalTaskStatusType, 
+                            Updated = taskStatusType 
+                        }),
+                        RecordId = taskStatusType.ID,
+                        LoggedInUserName = User.Identity.Name
+                    });
+                    
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TaskStatusTypeExists(taskStatusType.Id))
+                    if (!TaskStatusTypeExists(taskStatusType.ID))
                     {
                         return NotFound();
                     }
@@ -132,7 +180,7 @@ namespace EpicMarket.Admin.MVC.Controllers
             }
 
             var taskStatusType = await _context.TaskStatusTypes
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.ID == id);
             if (taskStatusType == null)
             {
                 return NotFound();
@@ -150,6 +198,18 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (taskStatusType != null)
             {
                 _context.TaskStatusTypes.Remove(taskStatusType);
+                
+                // Log the event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteTaskStatusType,
+                    EntityName = EntityConstants.TaskStatusType,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted task status type '{taskStatusType.Status}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(taskStatusType),
+                    RecordId = taskStatusType.ID,
+                    LoggedInUserName = User.Identity.Name
+                });
             }
 
             await _context.SaveChangesAsync();
@@ -158,7 +218,7 @@ namespace EpicMarket.Admin.MVC.Controllers
 
         private bool TaskStatusTypeExists(int id)
         {
-            return _context.TaskStatusTypes.Any(e => e.Id == id);
+            return _context.TaskStatusTypes.Any(e => e.ID == id);
         }
     }
 }

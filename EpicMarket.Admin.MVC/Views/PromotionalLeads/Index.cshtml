@@ -18,9 +18,18 @@
     </div>
 </div>
 
-<p class="d-flex justify-content-end">
+<p class="d-flex justify-content-end gap-2">
+    <a asp-action="Upload" class="btn btn-success px-5"><i class='bx bx-upload mr-1'></i>Upload</a>
     <a asp-action="Create" class="btn btn-primary px-5"><i class='bx bx-plus mr-1'></i>Create New</a>
 </p>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
 
 <div class="card">
     <div class="card-body">

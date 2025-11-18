@@ -1,0 +1,865 @@
+﻿@{
+    ViewData["Title"] = "Products";
+}
+
+<!-- Page Header -->
+<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+    <div class="breadcrumb-title pe-3">Products</div>
+    <div class="ps-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 p-0">
+                <li class="breadcrumb-item">
+                    <a asp-action="Index"><i class="bx bx-home-alt"></i></a>
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<!-- Filter Card -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h5 class="card-title mb-0">
+                <i class="bx bx-filter me-2 text-primary"></i>Search & Filter
+            </h5>
+            <button class="btn btn-sm btn-link text-decoration-none" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="true">
+                <i class="bx bx-chevron-down"></i>
+            </button>
+        </div>
+        <div class="collapse show" id="filterCollapse">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Product ID</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bx bx-hash"></i></span>
+                        <input type="text" class="form-control border-start-0 ps-0" id="catalogIdFilter" placeholder="Search by ID">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Product Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bx bx-package"></i></span>
+                        <input type="text" class="form-control border-start-0 ps-0" id="catalogNameFilter" placeholder="Search by name">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Business Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bx bx-store"></i></span>
+                        <input type="text" class="form-control border-start-0 ps-0" id="businessNameFilter" placeholder="Search by business">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Business ID</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bx bx-building"></i></span>
+                        <input type="text" class="form-control border-start-0 ps-0" id="businessIdFilter" placeholder="Search by business ID">
+                    </div>
+                </div>
+                <div class="col-md-12 d-flex justify-content-end">
+                    <button type="button" class="btn btn-primary me-2 px-4" id="searchBtn">
+                        <i class='bx bx-search me-1'></i>Search
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="resetFilter">
+                        <i class='bx bx-reset me-1'></i>Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Card -->
+<div class="card border-0 shadow-sm">
+	<div class="card-body">
+        <!-- Action Bar -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex align-items-center">
+                <h5 class="mb-0 me-2">Product List</h5>
+                <span class="badge bg-primary rounded-pill" id="tableRecordsCount">0</span>
+            </div>
+            <div class="d-flex">
+                <a asp-action="Create" class="btn btn-primary d-flex align-items-center me-2">
+                <i class='bx bx-plus me-1'></i>Add Product
+            </a>
+                <button id="mapToOutletBtn" class="btn btn-secondary d-flex align-items-center" disabled data-bs-toggle="tooltip" title="Select products from the same business">
+                    <i class='bx bx-map-pin me-1'></i>Map to Outlet
+                </button>
+            </div>
+        </div>
+        
+        <!-- Table Wrapper -->
+		<div class="table-responsive">
+            <table id="example" class="table table-hover align-middle" style="width:100%">
+                <thead class="table-light">
+                    <tr>
+                        <th>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="selectAllCheckbox">
+                            </div>
+                        </th>
+                        <th data-sort="id" class="cursor-pointer">
+                            <div class="d-flex align-items-center">
+                                ID <i class="bx bx-sort-alt-2 ms-1 text-muted"></i>
+                            </div>
+                        </th>
+                        <th data-sort="name" class="cursor-pointer">
+                            <div class="d-flex align-items-center">
+                                Product Name <i class="bx bx-sort-alt-2 ms-1 text-muted"></i>
+                            </div>
+                        </th>
+                        <th data-sort="businessname" class="cursor-pointer">
+                            <div class="d-flex align-items-center">
+                                Business <i class="bx bx-sort-alt-2 ms-1 text-muted"></i>
+                            </div>
+                        </th>          
+                        <th data-sort="category">Category</th>
+                        <th data-sort="rating" class="cursor-pointer">
+                            <div class="d-flex align-items-center">
+                                Rating <i class="bx bx-sort-alt-2 ms-1 text-muted"></i>
+                            </div>
+                        </th>
+                        <th data-sort="status">Status</th>
+                        <th data-sort="recommended">Recommended</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Table data will be loaded dynamically -->
+                </tbody>
+							</table>
+            
+            <!-- Loading Indicator -->
+            <div id="loading-indicator" class="text-center py-5 d-none">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading catalogs...</p>
+            </div>
+            
+            <!-- Empty State -->
+            <div id="empty-state" class="text-center py-5 d-none">
+                <i class="bx bx-package text-muted" style="font-size: 4rem;"></i>
+                <h5 class="mt-3">No catalogs found</h5>
+                <p class="text-muted">Try adjusting your search criteria or add a new catalog</p>
+                <a asp-action="Create" class="btn btn-primary mt-2">
+                    <i class='bx bx-plus me-1'></i>Add Product
+                </a>
+            </div>
+        </div>
+        
+        <!-- Pagination Info and Controls -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mt-4">
+            <div id="pagination-info" class="text-muted mb-3 mb-md-0">
+                Showing 0 to 0 of 0 entries
+            </div>
+            <div id="pagination-controls"></div>
+						</div>
+					</div>
+				</div>
+
+<!-- Map to Outlet Modal -->
+<div class="modal fade" id="mapToOutletModal" tabindex="-1" aria-labelledby="mapToOutletModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mapToOutletModalLabel">Map Products to Outlet</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="outletSelect" class="form-label">Select Outlet</label>
+                    <select class="form-select" id="outletSelect">
+                        <option value="">Loading outlets...</option>
+                    </select>
+                </div>
+                <div id="selectedProductsInfo" class="alert alert-info">
+                    <p class="mb-0"><span id="selectedProductsCount">0</span> products selected</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveMapToOutletBtn">Save</button>
+            </div>
+						</div>
+					</div>
+				</div>
+
+<!-- Custom CSS -->
+<style>
+    .cursor-pointer { cursor: pointer; }
+    .table th { font-weight: 600; }
+    .status-badge {
+        padding: 5px 10px;
+        border-radius: 30px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    .status-active {
+        background-color: rgba(25, 135, 84, 0.1);
+        color: rgb(25, 135, 84);
+    }
+    .status-pending {
+        background-color: rgba(255, 193, 7, 0.1);
+        color: rgb(255, 193, 7);
+    }
+    .status-inactive {
+        background-color: rgba(108, 117, 125, 0.1);
+        color: rgb(108, 117, 125);
+    }
+    .action-btn {
+        padding: 5px;
+        margin-right: 5px;
+        border-radius: 4px;
+    }
+    .action-btn:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+</style>
+
+ @section Scripts {
+	<script>
+		$(document).ready(function () {
+            let currentPage = 1;
+            let pageSize = 10;
+            let sortColumn = 'id';
+            let sortDirection = 'asc';
+            let isLoading = false;
+            let selectedProducts = [];
+            let selectedBusinessId = null;
+            let tooltipList = [];
+
+            // Initialize tooltips
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
+            // Check URL parameters and set filter values
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('catalogId')) {
+                $('#catalogIdFilter').val(urlParams.get('catalogId'));
+            }
+            if (urlParams.has('catalogName')) {
+                $('#catalogNameFilter').val(urlParams.get('catalogName'));
+            }
+            if (urlParams.has('businessName')) {
+                $('#businessNameFilter').val(urlParams.get('businessName'));
+            }
+            if (urlParams.has('businessId')) {
+                $('#businessIdFilter').val(urlParams.get('businessId'));
+            }
+            if (urlParams.has('page')) {
+                currentPage = parseInt(urlParams.get('page')) || 1;
+            }
+            if (urlParams.has('sort')) {
+                sortColumn = urlParams.get('sort');
+            }
+            if (urlParams.has('dir')) {
+                sortDirection = urlParams.get('dir');
+            }
+
+            function updateUrl() {
+                const params = new URLSearchParams();
+                const catalogId = $('#catalogIdFilter').val();
+                const catalogName = $('#catalogNameFilter').val();
+                const businessName = $('#businessNameFilter').val();
+                const businessId = $('#businessIdFilter').val();
+                
+                if (catalogId) params.set('catalogId', catalogId);
+                if (catalogName) params.set('catalogName', catalogName);
+                if (businessName) params.set('businessName', businessName);
+                if (businessId) params.set('businessId', businessId);
+                if (currentPage > 1) params.set('page', currentPage);
+                if (sortColumn !== 'id') params.set('sort', sortColumn);
+                if (sortDirection !== 'asc') params.set('dir', sortDirection);
+                
+                const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+                history.pushState({}, '', newUrl);
+            }
+
+            function loadData() {
+                // Show loading indicator
+                $('#loading-indicator').removeClass('d-none');
+                $('#empty-state').addClass('d-none');
+                $('#example tbody').empty();
+                
+                isLoading = true;
+                
+                $.ajax({
+                    url: '/Product/GetFilteredData',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        catalogId: $('#catalogIdFilter').val(),
+                        catalogName: $('#catalogNameFilter').val(),
+                        businessName: $('#businessNameFilter').val(),
+                        businessId: $('#businessIdFilter').val(),
+                        pageNumber: currentPage,
+                        pageSize: pageSize,
+                        sortColumn: sortColumn,
+                        sortDirection: sortDirection
+                    }),
+                    success: function (response) {
+                        isLoading = false;
+                        $('#loading-indicator').addClass('d-none');
+                        
+                        if (response.error) {
+                            console.error(response.error);
+                            showToast('Error loading data: ' + response.error, 'error');
+                            return;
+                        }
+                        
+                        // Update record count
+                        $('#tableRecordsCount').text(response.totalRecords);
+                        
+                        if (response.data && response.data.length > 0) {
+                            updateTable(response.data);
+                            updatePagination(response.totalRecords);
+                            
+                            // Restore selected checkboxes
+                            restoreSelectedCheckboxes();
+                        } else {
+                            $('#empty-state').removeClass('d-none');
+                            $('#pagination-info').text('Showing 0 to 0 of 0 entries');
+                            $('#pagination-controls').empty();
+                        }
+                        
+                        // Update URL with current filters
+                        updateUrl();
+                    },
+                    error: function (xhr, status, error) {
+                        isLoading = false;
+                        $('#loading-indicator').addClass('d-none');
+                        console.error('Error:', error);
+                        showToast('Failed to load data. Please try again.', 'error');
+                    }
+                });
+            }
+
+            function updateTable(data) {
+                const tbody = $('#example tbody');
+                tbody.empty();
+
+                data.forEach(function (item) {
+                    // Determine status class based on status name
+                    let statusClass = 'status-pending';
+                    if (item.statusName && item.statusName.toLowerCase() === 'active') {
+                        statusClass = 'status-active';
+                    } else if (item.statusName && (item.statusName.toLowerCase() === 'inactive' || item.statusName.toLowerCase() === 'disabled')) {
+                        statusClass = 'status-inactive';
+                    }
+                    
+                    // Format rating with stars
+                    const ratingStars = getRatingStars(item.rating);
+                    
+                    const row = `
+                    <tr data-id="${item.id}" data-business-id="${item.businessID}">
+                        <td>
+                            <div class="form-check">
+                                <input class="form-check-input catalog-checkbox" type="checkbox" value="${item.id}" data-business-id="${item.businessID}">
+                            </div>
+                        </td>
+                        <td><span class="fw-medium">${item.id}</span></td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm bg-light rounded-circle text-center me-2" style="width: 32px; height: 32px; line-height: 32px;">
+                                    <i class="bx bx-package text-primary"></i>
+                                </div>
+                                <div>
+                                    <span class="fw-medium">${item.name || ''}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="/Businesses/Details/${item.businessID}" class="text-decoration-none">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm bg-light rounded-circle text-center me-2" style="width: 28px; height: 28px; line-height: 28px;">
+                                        <i class="bx bx-store text-secondary"></i>
+                                    </div>
+                                    <span>${item.businessName || '-'}</span>
+                                </div>
+                            </a>
+                        </td>
+                        <td><span class="badge bg-light text-dark">${item.categoryName || '-'}</span></td>
+                        <td>${ratingStars}</td>
+                        <td><span class="status-badge ${statusClass}">${item.statusName || ''}</span></td>
+                        <td>
+                            <span class="badge ${item.isRecommended ? 'bg-success' : 'bg-secondary'}">
+                                ${item.isRecommended ? 'Yes' : 'No'}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex justify-content-end">
+                                <a href="/Products/Details/${item.id}" class="action-btn text-primary" title="View Details">
+                                    <i class="bx bx-show"></i>
+                                </a>
+                                <a href="/Products/Edit/${item.id}" class="action-btn text-warning" title="Edit">
+                                    <i class="bx bx-edit"></i>
+                                </a>
+                                <a href="/Products/Delete/${item.id}" class="action-btn text-danger" title="Delete">
+                                    <i class="bx bx-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>`;
+                    tbody.append(row);
+                });
+            }
+            
+            function getRatingStars(rating) {
+                if (rating === undefined || rating === null) return '-';
+                
+                const fullStars = Math.floor(rating);
+                const halfStar = rating % 1 >= 0.5;
+                const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+                
+                let starsHtml = '';
+                
+                // Full stars
+                for (let i = 0; i < fullStars; i++) {
+                    starsHtml += '<i class="bx bxs-star text-warning"></i>';
+                }
+                
+                // Half star if needed
+                if (halfStar) {
+                    starsHtml += '<i class="bx bxs-star-half text-warning"></i>';
+                }
+                
+                // Empty stars
+                for (let i = 0; i < emptyStars; i++) {
+                    starsHtml += '<i class="bx bx-star text-warning"></i>';
+                }
+                
+                return `<div>${starsHtml} <span class="ms-1 small text-muted">(${rating.toFixed(1)})</span></div>`;
+            }
+
+            function updatePagination(totalRecords) {
+                const totalPages = Math.ceil(totalRecords / pageSize);
+                const start = ((currentPage - 1) * pageSize) + 1;
+                const end = Math.min(currentPage * pageSize, totalRecords);
+
+                $('#pagination-info').text(`Showing ${start} to ${end} of ${totalRecords} entries`);
+
+                let paginationHtml = '<ul class="pagination pagination-sm mb-0 justify-content-end">';
+
+                // Previous button
+                paginationHtml += `
+                    <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                        <a class="page-link" href="#" data-page="${currentPage - 1}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>`;
+
+                // Determine page range to show
+                let startPage = Math.max(1, currentPage - 2);
+                let endPage = Math.min(totalPages, startPage + 4);
+                
+                if (endPage - startPage < 4) {
+                    startPage = Math.max(1, endPage - 4);
+                }
+
+                // First page if not in range
+                if (startPage > 1) {
+                    paginationHtml += `
+                        <li class="page-item">
+                            <a class="page-link" href="#" data-page="1">1</a>
+                        </li>`;
+                    
+                    if (startPage > 2) {
+                        paginationHtml += `
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#">...</a>
+                            </li>`;
+                    }
+                }
+                
+                // Page numbers
+                for (let i = startPage; i <= endPage; i++) {
+                    paginationHtml += `
+                        <li class="page-item ${currentPage === i ? 'active' : ''}">
+                            <a class="page-link" href="#" data-page="${i}">${i}</a>
+                        </li>`;
+                }
+                
+                // Last page if not in range
+                if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) {
+                        paginationHtml += `
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#">...</a>
+                            </li>`;
+                    }
+                    
+                    paginationHtml += `
+                        <li class="page-item">
+                            <a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a>
+                        </li>`;
+                }
+
+                // Next button
+                paginationHtml += `
+                    <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                        <a class="page-link" href="#" data-page="${currentPage + 1}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>`;
+
+                paginationHtml += '</ul>';
+                $('#pagination-controls').html(paginationHtml);
+            }
+
+            // Toast notification
+            function showToast(message, type = 'info') {
+                // Implementation depends on your toast library
+                console.log(`Toast (${type}): ${message}`);
+                
+                // Simple bootstrap toast implementation
+                const toastHtml = `
+                <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+                    <div class="toast align-items-center text-white bg-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'primary'}" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                ${message}
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>
+                </div>`;
+                
+                const toastElement = $(toastHtml);
+                $('body').append(toastElement);
+                
+                const toast = new bootstrap.Toast(toastElement.find('.toast')[0], {
+                    delay: 5000
+                });
+                toast.show();
+                
+                // Remove toast element after it's hidden
+                toastElement.find('.toast').on('hidden.bs.toast', function () {
+                    toastElement.remove();
+                });
+            }
+
+            // Event handlers
+            $('#searchBtn').click(function () {
+                if (isLoading) return;
+                currentPage = 1;
+                loadData();
+            });
+
+            $('#resetFilter').click(function () {
+                if (isLoading) return;
+                $('#catalogIdFilter, #catalogNameFilter, #businessNameFilter, #businessIdFilter').val('');
+                currentPage = 1;
+                loadData();
+            });
+
+            // Handle Enter key in filter inputs
+            $('#catalogIdFilter, #catalogNameFilter, #businessNameFilter, #businessIdFilter').keypress(function(e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    $('#searchBtn').click();
+                }
+            });
+
+            $(document).on('click', '.page-link', function (e) {
+                e.preventDefault();
+                if (isLoading) return;
+                
+                const newPage = $(this).data('page');
+                if (newPage >= 1) {
+                    currentPage = newPage;
+                    loadData();
+                    // Scroll back to top of table on page change
+                    $('html, body').animate({
+                        scrollTop: $("#example").offset().top - 100
+                    }, 200);
+                }
+            });
+
+            $('#example th[data-sort]').click(function () {
+                if (isLoading) return;
+                
+                const newSortColumn = $(this).data('sort');
+                
+                // Update visual indicators
+                $('#example th i').removeClass('text-primary').addClass('text-muted');
+                $(this).find('i').removeClass('text-muted').addClass('text-primary');
+                
+                if (sortColumn === newSortColumn) {
+                    sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                    // Update icon
+                    if (sortDirection === 'asc') {
+                        $(this).find('i').removeClass('bx-sort-down').addClass('bx-sort-up');
+                    } else {
+                        $(this).find('i').removeClass('bx-sort-up').addClass('bx-sort-down');
+                    }
+                } else {
+                    sortColumn = newSortColumn;
+                    sortDirection = 'asc';
+                    // Reset and set new icon
+                    $('#example th i').removeClass('bx-sort-up bx-sort-down').addClass('bx-sort-alt-2');
+                    $(this).find('i').removeClass('bx-sort-alt-2').addClass('bx-sort-up');
+                }
+                
+                currentPage = 1;
+                loadData();
+            });
+
+            // Handle checkbox selection
+            $(document).on('change', '.catalog-checkbox', function() {
+                const catalogId = parseInt($(this).val());
+                const businessId = parseInt($(this).data('business-id'));
+                
+                if ($(this).is(':checked')) {
+                    // Add to selected catalogs
+                    if (!selectedProducts.includes(catalogId)) {
+                        selectedProducts.push(catalogId);
+                    }
+                    
+                    // If this is the first selection, set the business ID
+                    if (selectedBusinessId === null) {
+                        selectedBusinessId = businessId;
+                    }
+                } else {
+                    // Remove from selected catalogs
+                    selectedProducts = selectedProducts.filter(id => id !== catalogId);
+                    
+                    // If no catalogs are selected, reset the business ID
+                    if (selectedProducts.length === 0) {
+                        selectedBusinessId = null;
+                    }
+                }
+                
+                updateMapToOutletButton();
+            });
+            
+            // Handle "Select All" checkbox
+            $('#selectAllCheckbox').change(function() {
+                const isChecked = $(this).is(':checked');
+                
+                if (isChecked) {
+                    // Get all visible checkboxes
+                    const visibleCheckboxes = $('.catalog-checkbox:visible');
+                    
+                    // If there are no visible checkboxes, do nothing
+                    if (visibleCheckboxes.length === 0) {
+                        $(this).prop('checked', false);
+                        return;
+                    }
+                    
+                    // Get the business ID of the first visible checkbox
+                    const firstBusinessId = parseInt(visibleCheckboxes.first().data('business-id'));
+                    
+                    // Check if all visible checkboxes have the same business ID
+                    const allSameBusiness = visibleCheckboxes.toArray().every(checkbox => 
+                        parseInt($(checkbox).data('business-id')) === firstBusinessId
+                    );
+                    
+                    if (allSameBusiness) {
+                        // Select all checkboxes
+                        visibleCheckboxes.prop('checked', true);
+                        
+                        // Update selected catalogs and business ID
+                        selectedProducts = visibleCheckboxes.map(function() {
+                            return parseInt($(this).val());
+                        }).get();
+                        
+                        selectedBusinessId = firstBusinessId;
+                    } else {
+                        // If not all same business, show warning and uncheck "Select All"
+                        $(this).prop('checked', false);
+                        showToast('Cannot select all - products belong to different businesses', 'error');
+                    }
+                } else {
+                    // Uncheck all checkboxes
+                    $('.catalog-checkbox').prop('checked', false);
+                    
+                    // Clear selected catalogs and business ID
+                    selectedProducts = [];
+                    selectedBusinessId = null;
+                }
+                
+                updateMapToOutletButton();
+            });
+            
+            // Update "Map to Outlet" button state
+            function updateMapToOutletButton() {
+                const mapBtn = $('#mapToOutletBtn');
+                
+                // Update tooltip and button state based on selection
+                if (selectedProducts.length === 0) {
+                    mapBtn.attr('title', 'Select products to map to an outlet');
+                    mapBtn.prop('disabled', true);
+                    updateTooltip(mapBtn, 'Select products to map to an outlet');
+                } else {
+                    // Check if all selected catalogs have the same business ID
+                    const allSameBusiness = $('.catalog-checkbox:checked').toArray().every(checkbox => 
+                        parseInt($(checkbox).data('business-id')) === selectedBusinessId
+                    );
+                    
+                    if (allSameBusiness) {
+                        mapBtn.attr('title', `Map ${selectedProducts.length} selected product(s) to outlet`);
+                        mapBtn.prop('disabled', false);
+                        updateTooltip(mapBtn, `Map ${selectedProducts.length} selected product(s) to outlet`);
+                    } else {
+                        mapBtn.attr('title', 'Select products from the same business only');
+                        mapBtn.prop('disabled', true);
+                        updateTooltip(mapBtn, 'Select products from the same business only');
+                    }
+                }
+            }
+            
+            // Update tooltip content
+            function updateTooltip(element, newTitle) {
+                const tooltip = bootstrap.Tooltip.getInstance(element[0]);
+                if (tooltip) {
+                    tooltip.dispose();
+                }
+                
+                element.attr('data-bs-original-title', newTitle);
+                new bootstrap.Tooltip(element[0]);
+            }
+            
+            // Restore selected checkboxes after page reload or pagination
+            function restoreSelectedCheckboxes() {
+                if (selectedProducts.length > 0) {
+                    selectedProducts.forEach(catalogId => {
+                        $(`.catalog-checkbox[value="${catalogId}"]`).prop('checked', true);
+                    });
+                    
+                    // Update "Select All" checkbox if all visible items are selected
+                    const visibleCheckboxes = $('.catalog-checkbox:visible');
+                    const allSelected = visibleCheckboxes.length > 0 && 
+                                       visibleCheckboxes.filter(':checked').length === visibleCheckboxes.length;
+                    
+                    $('#selectAllCheckbox').prop('checked', allSelected);
+                }
+            }
+            
+            // Handle "Map to Outlet" button click
+            $('#mapToOutletBtn').click(function() {
+                if (selectedProducts.length === 0 || selectedBusinessId === null) {
+                    return;
+                }
+                
+                // Load outlets for the selected business
+                loadOutletsForBusiness(selectedBusinessId);
+                
+                // Update selected products count in modal
+                $('#selectedProductsCount').text(selectedProducts.length);
+                
+                // Show the modal
+                const modal = new bootstrap.Modal(document.getElementById('mapToOutletModal'));
+                modal.show();
+            });
+            
+            // Load outlets for a business
+            function loadOutletsForBusiness(businessId) {
+                $('#outletSelect').html('<option value="">Loading outlets...</option>');
+                
+                $.ajax({
+                    url: `/Products/GetOutletsByBusiness/${businessId}`,
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.success && response.data) {
+                            const outlets = response.data;
+                            
+                            if (outlets.length === 0) {
+                                $('#outletSelect').html('<option value="">No outlets found for this business</option>');
+                                $('#saveMapToOutletBtn').prop('disabled', true);
+                            } else {
+                                let options = '<option value="">Select an outlet</option>';
+                                
+                                outlets.forEach(outlet => {
+                                    // Fix the display of outlet information
+                                    const outletName = outlet.name || 'Unnamed Outlet';
+                                    const outletAddress = outlet.address ? outlet.address : 'No address';
+                                    options += `<option value="${outlet.id}">${outletName} - ${outletAddress}</option>`;
+                                });
+                                
+                                $('#outletSelect').html(options);
+                                $('#saveMapToOutletBtn').prop('disabled', true); // Disabled until an outlet is selected
+                            }
+                        } else {
+                            $('#outletSelect').html('<option value="">Error loading outlets</option>');
+                            $('#saveMapToOutletBtn').prop('disabled', true);
+                            
+                            if (response.message) {
+                                showToast(response.message, 'error');
+                            }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#outletSelect').html('<option value="">Error loading outlets</option>');
+                        $('#saveMapToOutletBtn').prop('disabled', true);
+                        showToast('Failed to load outlets. Please try again.', 'error');
+                    }
+                });
+            }
+            
+            // Handle outlet selection change
+            $('#outletSelect').change(function() {
+                const outletId = $(this).val();
+                $('#saveMapToOutletBtn').prop('disabled', !outletId);
+            });
+            
+            // Handle save button in modal
+            $('#saveMapToOutletBtn').click(function() {
+                const outletId = $('#outletSelect').val();
+                
+                if (!outletId || selectedProducts.length === 0) {
+                    showToast('Please select an outlet', 'error');
+                    return;
+                }
+                
+                // Show loading state
+                const saveBtn = $(this);
+                const originalText = saveBtn.text();
+                saveBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...');
+                
+                // Send request to map catalogs to outlet
+                $.ajax({
+                    url: '/Products/MapToOutlet',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        outletId: parseInt(outletId),
+                        catalogIds: selectedProducts
+                    }),
+                    success: function(response) {
+                        // Reset button state
+                        saveBtn.prop('disabled', false).text(originalText);
+                        
+                        if (response.success) {
+                            // Close the modal
+                            bootstrap.Modal.getInstance(document.getElementById('mapToOutletModal')).hide();
+                            
+                            // Show success message
+                            showToast(response.message, 'success');
+                            
+                            // Clear selections
+                            selectedProducts = [];
+                            selectedBusinessId = null;
+                            $('.catalog-checkbox, #selectAllCheckbox').prop('checked', false);
+                            updateMapToOutletButton();
+                        } else {
+                            showToast(response.message || 'Failed to map products to outlet', 'error');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // Reset button state
+                        saveBtn.prop('disabled', false).text(originalText);
+                        
+                        // Log the error details for debugging
+                        console.error('Error mapping products to outlet:', xhr.responseText);
+                        showToast('Failed to map products to outlet. Please try again.', 'error');
+                    }
+                });
+            });
+
+            // Initial load
+            loadData();
+		});
+	</script>
+}

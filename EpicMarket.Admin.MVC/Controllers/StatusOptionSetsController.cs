@@ -7,8 +7,10 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Data.Models;
 using Microsoft.AspNetCore.Authorization;
-using EpicMarket.Entities.CustomModels;
 using System.Security.Claims;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
@@ -16,10 +18,17 @@ namespace EpicMarket.Admin.MVC.Controllers
     public class StatusOptionSetsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public StatusOptionSetsController(ApplicationDbContext context)
+        public StatusOptionSetsController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: StatusOptionSets
@@ -62,10 +71,24 @@ namespace EpicMarket.Admin.MVC.Controllers
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             statusOptionSet.CreateBy = userName;
             statusOptionSet.CreateDate = DateTime.UtcNow;
+            
             if (ModelState.IsValid)
             {
                 _context.Add(statusOptionSet);
                 await _context.SaveChangesAsync();
+                
+                // Log the event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddStatusOptionSet,
+                    EntityName = EntityConstants.StatusOptionSet,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Added status option '{statusOptionSet.Status}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(statusOptionSet),
+                    RecordId = statusOptionSet.Id,
+                    LoggedInUserName = User.Identity.Name
+                });
+                
                 return RedirectToAction(nameof(Index));
             }
             return View(statusOptionSet);
@@ -92,22 +115,43 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Status,StatusDescription,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] StatusOptionSet statusOptionSet)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Status,StatusDescription,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] StatusOptionSet statusOptionSet)
         {
             var userName = this.User.FindFirst(ClaimTypes.Name).Value;
             statusOptionSet.ModifiedBy = userName;
             statusOptionSet.ModifiedDate = DateTime.UtcNow;
-
+            
             if (id != statusOptionSet.Id)
             {
                 return NotFound();
             }
+
+            // Get the original entity for comparison
+            var originalStatusOptionSet = await _context.StatusOptionSets
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.Id == id);
 
             if (ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(statusOptionSet);
+                    
+                    // Log the event
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditStatusOptionSet,
+                        EntityName = EntityConstants.StatusOptionSet,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated status option '{statusOptionSet.Status}'",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new { 
+                            Original = originalStatusOptionSet, 
+                            Updated = statusOptionSet 
+                        }),
+                        RecordId = statusOptionSet.Id,
+                        LoggedInUserName = User.Identity.Name
+                    });
+                    
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -153,6 +197,18 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (statusOptionSet != null)
             {
                 _context.StatusOptionSets.Remove(statusOptionSet);
+                
+                // Log the event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteStatusOptionSet,
+                    EntityName = EntityConstants.StatusOptionSet,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted status option '{statusOptionSet.Status}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(statusOptionSet),
+                    RecordId = statusOptionSet.Id,
+                    LoggedInUserName = User.Identity.Name
+                });
             }
 
             await _context.SaveChangesAsync();

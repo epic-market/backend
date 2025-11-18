@@ -1,0 +1,278 @@
+﻿@model EpicMarket.Data.Models.Inventory
+
+@{
+    ViewData["Title"] = "Create Inventory";
+}
+
+<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+    <div class="breadcrumb-title pe-3">Inventory</div>
+    <div class="ps-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 p-0">
+                <li class="breadcrumb-item">
+                    <a asp-action="Index"><i class="bx bx-home-alt"></i></a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Create</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<hr />
+
+<div class="row">
+    <div class="col-xl-9 mx-auto">
+        <div class="card border-top border-0 border-4 border-info">
+            <div class="card-body">
+                <div class="border p-4 rounded">
+                    <div class="card-title d-flex align-items-center">
+                        <div>
+                            <i class="bx bxs-box me-1 font-22 text-info"></i>
+                        </div>
+                        <h5 class="mb-0 text-info">Create Inventory</h5>
+                    </div>
+                    <hr />
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Business</label>
+                            <div class="col-sm-9">
+                                <select id="BusinessID" class="single-select form-control" asp-items="ViewBag.BusinessID" required>
+                                    <option value="">-- Select Business --</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Outlet</label>
+                            <div class="col-sm-9">
+                                <select id="OutletID" name="OutletID" class="single-select form-control" asp-items="ViewBag.OutletID" required>
+                                    <option value="">-- Select Outlet --</option>
+                                </select>
+                                <span asp-validation-for="OutletID" class="text-danger"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Product</label>
+                            <div class="col-sm-9">
+                                <select id="ProductID" class="single-select form-control" required>
+                                    <option value="">-- Select Product --</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Product Variant</label>
+                            <div class="col-sm-9">
+                                <select id="ProductVariantID" name="ProductVariantID" class="single-select form-control" asp-items="ViewBag.ProductVariantID" required>
+                                    <option value="">-- Select Product Variant --</option>
+                                </select>
+                                <span asp-validation-for="ProductVariantID" class="text-danger"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <div class="form-check">
+                                    <input class="form-check-input" asp-for="TrackInventory" id="TrackInventory" />
+                                    <label class="form-check-label" for="TrackInventory">@Html.DisplayNameFor(model => model.TrackInventory)</label>
+                                    <span asp-validation-for="TrackInventory" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <div class="form-check">
+                                    <input class="form-check-input" asp-for="IsInStock" id="IsInStock" />
+                                    <label class="form-check-label" for="IsInStock">@Html.DisplayNameFor(model => model.IsInStock)</label>
+                                    <span asp-validation-for="IsInStock" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="inventory-details">
+                            <div class="row mb-3">
+                                <label asp-for="QuantityAvailable" class="col-sm-3 col-form-label"></label>
+                                <div class="col-sm-9">
+                                    <input asp-for="QuantityAvailable" class="form-control" />
+                                    <span asp-validation-for="QuantityAvailable" class="text-danger"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <label asp-for="MinimumStockLevel" class="col-sm-3 col-form-label"></label>
+                                <div class="col-sm-9">
+                                    <input asp-for="MinimumStockLevel" class="form-control" />
+                                    <span asp-validation-for="MinimumStockLevel" class="text-danger"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <label asp-for="MaximumStockLevel" class="col-sm-3 col-form-label"></label>
+                                <div class="col-sm-9">
+                                    <input asp-for="MaximumStockLevel" class="form-control" />
+                                    <span asp-validation-for="MaximumStockLevel" class="text-danger"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <label asp-for="ReorderPoint" class="col-sm-3 col-form-label"></label>
+                                <div class="col-sm-9">
+                                    <input asp-for="ReorderPoint" class="form-control" />
+                                    <span asp-validation-for="ReorderPoint" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <div class="form-check">
+                                    <input class="form-check-input" asp-for="BackOrders" id="BackOrders" />
+                                    <label class="form-check-label" for="BackOrders">@Html.DisplayNameFor(model => model.BackOrders)</label>
+                                    <span asp-validation-for="BackOrders" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <label class="col-sm-3 col-form-label"></label>
+                            <div class="col-sm-9">
+                                <button type="submit" class="btn btn-info px-5">Save</button>
+                            </div>
+                            <div>
+                                <a href="javascript:history.go(-1)" class="btn btn-secondary">
+                                    <i class="bx bx-arrow-back me-1"></i> Back
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function () {
+            // Initialize select2
+            $('.single-select').select2({
+                theme: 'bootstrap4',
+                width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+                placeholder: $(this).data('placeholder'),
+                allowClear: Boolean($(this).data('allow-clear')),
+            });
+            
+            // Toggle inventory details based on TrackInventory checkbox
+            $('#TrackInventory').change(function() {
+                if ($(this).is(':checked')) {
+                    $('.inventory-details').show();
+                } else {
+                    $('.inventory-details').hide();
+                }
+            });
+            
+            // Trigger initial state
+            $('#TrackInventory').trigger('change');
+            
+            // Cascading dropdowns
+            $('#BusinessID').change(function() {
+                var businessId = $(this).val();
+                if (businessId) {
+                    loadOutlets(businessId);
+                    loadProducts(businessId);
+                } else {
+                    $('#OutletID').empty().append('<option value="">-- Select Outlet --</option>');
+                    $('#ProductID').empty().append('<option value="">-- Select Product --</option>');
+                    $('#ProductVariantID').empty().append('<option value="">-- Select Product Variant --</option>');
+                }
+            });
+            
+            $('#ProductID').change(function() {
+                var catalogId = $(this).val();
+                if (catalogId) {
+                    loadVariants(catalogId);
+                } else {
+                    $('#ProductVariantID').empty().append('<option value="">-- Select Product Variant --</option>');
+                }
+            });
+            
+            // Check if inventory already exists when both outlet and variant are selected
+            $('#OutletID, #ProductVariantID').change(function() {
+                checkInventoryExists();
+            });
+            
+            function loadOutlets(businessId) {
+                $.ajax({
+                    url: '/Inventories/GetOutletsByBusiness',
+                    type: 'GET',
+                    data: { businessId: businessId },
+                    success: function (data) {
+                        var options = '<option value="">-- Select Outlet --</option>';
+                        $.each(data, function (i, item) {
+                            options += `<option value="${item.id}">${item.name}</option>`;
+                        });
+                        $('#OutletID').html(options);
+                    }
+                });
+            }
+            
+            function loadProducts(businessId) {
+                $.ajax({
+                    url: '/Inventories/GetProductsByBusiness',
+                    type: 'GET',
+                    data: { businessId: businessId },
+                    success: function (data) {
+                        var options = '<option value="">-- Select Product --</option>';
+                        $.each(data, function (i, item) {
+                            options += `<option value="${item.id}">${item.name}</option>`;
+                        });
+                        $('#ProductID').html(options);
+                    }
+                });
+            }
+            
+            function loadVariants(catalogId) {
+                $.ajax({
+                    url: '/Inventories/GetVariantsByProduct',
+                    type: 'GET',
+                    data: { catalogId: catalogId },
+                    success: function (data) {
+                        var options = '<option value="">-- Select Product Variant --</option>';
+                        $.each(data, function (i, item) {
+                            options += `<option value="${item.id}">${item.name}</option>`;
+                        });
+                        $('#ProductVariantID').html(options);
+                    }
+                });
+            }
+            
+            function checkInventoryExists() {
+                var outletId = $('#OutletID').val();
+                var variantId = $('#ProductVariantID').val();
+                
+                if (outletId && variantId) {
+                    $.ajax({
+                        url: '/Inventories/CheckInventoryExists',
+                        type: 'GET',
+                        data: { outletId: outletId, variantId: variantId },
+                        success: function (data) {
+                            if (data.exists) {
+                                toastr.warning('Inventory for this outlet and product variant already exists.');
+                                $('#ProductVariantID').val('').trigger('change');
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    </script>
+}
+

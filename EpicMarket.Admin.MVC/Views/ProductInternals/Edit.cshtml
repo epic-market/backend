@@ -66,9 +66,9 @@
                             <label class="col-sm-3 col-form-label">Existing Images</label>
                             <div class="col-sm-9">
                                 <div class="row" id="existingImagesContainer">
-                                    @if (ViewBag.attachments != null)
+                                    @if (ViewBag.ProductImages != null)
                                     {
-                                        foreach (var imageKey in ViewBag.attachments as List<string>)
+                                        foreach (var imageKey in ViewBag.ProductImages as List<string>)
                                         {
                                             <div class="col-md-3 mb-3 position-relative" data-image-key="@imageKey">
                                                 <img src="@Url.Action("DisplayImage", "File", new { key = imageKey })" width="100%" height="150" class="img-fluid" />
@@ -86,13 +86,11 @@
                         <div class="row mb-3">
                             <label class="col-sm-3 col-form-label">Upload New Images</label>
                             <div class="col-sm-9">
-                                <input type="file" multiple class="form-control" id="newImages" name="newImages" multiple />
+                                <input type="file" multiple class="form-control" id="files" name="files" multiple />
                             </div>
                         </div>
-                        <!-- Hidden Fields for Removed and Added Images -->
+                        <!-- Hidden Field for Removed Images -->
                         <input type="hidden" id="removedImages" name="removedImages" />
-                        <input type="hidden" id="addedImages" name="addedImages" />
-
 
                         <div class="row">
                             <label class="col-sm-3 col-form-label"></label>
@@ -134,7 +132,7 @@
                         }
                     }
 
-                    document.getElementById('newImages').addEventListener('change', function () {
+                    document.getElementById('files').addEventListener('change', function () {
                         const addedImagesInput = document.getElementById('addedImages');
                         const files = this.files;
                         const fileNames = Array.from(files).map(file => file.name);

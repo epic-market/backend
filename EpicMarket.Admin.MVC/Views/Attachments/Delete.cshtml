@@ -20,7 +20,7 @@
 <div class="card">
     <div class="card-body">
         <h3 class="card-title">Confirm Attachment Deletion</h3>
-        <p class="card-text">Are you sure you want to delete this attachment?</p>
+        <p class="card-text text-danger">Are you sure you want to delete this attachment? This action cannot be undone.</p>
 
         <div class="table-responsive">
             <table class="table table-bordered">
@@ -33,7 +33,7 @@
                     <td>@Html.DisplayFor(model => model.Comment)</td>
                 </tr>
                 <tr>
-                    <th class="bg-light">@Html.DisplayNameFor(model => model.DocumentType)</th>
+                    <th class="bg-light">Document Type</th>
                     <td>@Html.DisplayFor(model => model.DocumentType)</td>
                 </tr>
                 <tr>
@@ -41,11 +41,7 @@
                     <td>@Html.DisplayFor(model => model.DocumentFileType)</td>
                 </tr>
                 <tr>
-                    <th class="bg-light">@Html.DisplayNameFor(model => model.DocumentFolderPath)</th>
-                    <td>@Html.DisplayFor(model => model.DocumentFolderPath)</td>
-                </tr>
-                <tr>
-                    <th class="bg-light">@Html.DisplayNameFor(model => model.DocumentFile)</th>
+                    <th class="bg-light">File Name</th>
                     <td>@Html.DisplayFor(model => model.DocumentFile)</td>
                 </tr>
                 <tr>
@@ -55,14 +51,6 @@
                 <tr>
                     <th class="bg-light">@Html.DisplayNameFor(model => model.CreateBy)</th>
                     <td>@Html.DisplayFor(model => model.CreateBy)</td>
-                </tr>
-                <tr>
-                    <th class="bg-light">@Html.DisplayNameFor(model => model.ModifiedDate)</th>
-                    <td>@Html.DisplayFor(model => model.ModifiedDate)</td>
-                </tr>
-                <tr>
-                    <th class="bg-light">@Html.DisplayNameFor(model => model.ModifiedBy)</th>
-                    <td>@Html.DisplayFor(model => model.ModifiedBy)</td>
                 </tr>
             </table>
         </div>

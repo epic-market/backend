@@ -1,0 +1,1018 @@
+﻿@model EpicMarket.Data.Models.Catalog
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+    <div class="breadcrumb-title pe-3">Product</div>
+    <div class="ps-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 p-0">
+                <li class="breadcrumb-item">
+                    <a asp-action="Index"><i class="bx bx-home-alt"></i></a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Edit Product</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<hr />
+<div class="row">
+    <div class="col-xl-10 mx-auto">
+        <form asp-action="Edit" enctype="multipart/form-data" id="editProductForm">
+            <!-- Step 1: Business Selection -->
+            <div class="card border-top border-0 border-4 border-info mb-4 shadow-sm">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="bx bx-store-alt me-2"></i>Select Business
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <label asp-for="BusinessID" class="col-sm-3 col-form-label fw-bold">Business</label>
+                        <div class="col-sm-9">
+                            <select class="form-select select2" asp-for="BusinessID" asp-items="ViewBag.BusinessID" 
+                                    required>
+                                <option value="">Select Business</option>
+                            </select>
+                            <div class="form-text text-muted">Select the business this product belongs to</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Basic Details -->
+            <div class="card border-top border-0 border-4 border-info mb-4 shadow-sm product-details-section">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="bx bx-info-circle me-2"></i>Basic Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="ID" />
+                    <input type="hidden" asp-for="OrderCount" />
+                    <input type="hidden" asp-for="Rating" />
+                    <input type="hidden" asp-for="ReviewCount" />
+                    <input type="hidden" asp-for="CreateDate" />
+                    <input type="hidden" asp-for="CreateBy" />
+                    <input type="hidden" asp-for="ModifiedDate" />
+                    <input type="hidden" asp-for="ModifiedBy" />
+                    <input type="hidden" asp-for="IsActive" />
+
+                    <div class="row mb-3">
+                        <label asp-for="Name" class="col-sm-3 col-form-label fw-bold">Product Name</label>
+                        <div class="col-sm-9">
+                            <input asp-for="Name" class="form-control" required />
+                            <div class="form-text text-muted">Enter a descriptive name for your product</div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label asp-for="Description" class="col-sm-3 col-form-label fw-bold">Description</label>
+                        <div class="col-sm-9">
+                            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                            <div class="form-text text-muted">Provide a detailed description of your product</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Highlights Section -->
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label fw-bold">Highlights</label>
+                        <div class="col-sm-9">
+                            <div id="highlightsContainer" class="mb-2">
+                                <!-- Highlight entries will be added here -->
+                            </div>
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="addHighlight">
+                                <i class="bx bx-plus"></i> Add Highlight
+                            </button>
+                            <div class="form-text text-muted">Add key features or specifications of your product</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Pricing & Settings -->
+            <div class="card border-top border-0 border-4 border-info mb-4 shadow-sm product-details-section">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="bx bx-cog me-2"></i>Pricing & Settings
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label fw-bold">Product Settings</label>
+                        <div class="col-sm-9">
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" asp-for="RequiresRefrigeration" />
+                                <label class="form-check-label">Requires Refrigeration</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" asp-for="IsRecommended" />
+                                <label class="form-check-label">Is Recommended</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label asp-for="StatusId" class="col-sm-3 col-form-label fw-bold">Status</label>
+                        <div class="col-sm-9">
+                            <select class="form-select select2" asp-for="StatusId" asp-items="ViewBag.StatusId"></select>
+                            <span asp-validation-for="StatusId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Variants Section -->
+            <div id="variantsSection" class="card border-top border-0 border-4 border-info mb-4 shadow-sm product-details-section">
+                <div class="card-header bg-transparent border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bx bx-layer me-2"></i>Product Variants
+                        </h5>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="hasVariantsToggle">
+                            <label class="form-check-label" for="hasVariantsToggle">Has Variants</label>
+                            <input type="hidden" name="hasVariants" id="hasVariantsField" value="false">
+                            <div class="form-text text-muted small mt-1" id="variantToggleHelp">
+                                Note: Single variants with default option can use the simple view. Products with multiple variants or non-default variants must use variant mode.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Default Variant Card -->
+                    <div id="defaultVariantCard">
+                        <div class="card border shadow-sm">
+                            <div class="card-body">
+                                <h6 class="card-title mb-4">
+                                    <i class="bx bx-package me-2"></i>Default Product Details
+                                </h6>
+                                
+                                <!-- Basic Info -->
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">SKU</label>
+                                            <input type="text" class="form-control" name="defaultVariant_SKU" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Barcode</label>
+                                            <input type="text" class="form-control" name="defaultVariant_Barcode">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Cost Price</label>
+                                            <input type="number" step="0.01" class="form-control" 
+                                                   name="defaultVariant_CostPrice" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Sale Price</label>
+                                            <input type="number" step="0.01" class="form-control" 
+                                                   name="defaultVariant_SalePrice" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Compare At Price</label>
+                                            <input type="number" step="0.01" class="form-control" 
+                                                   name="defaultVariant_CompareAtPrice">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Dimensions Toggle -->
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="showDimensionsToggle">
+                                        <label class="form-check-label" for="showDimensionsToggle">
+                                            Show Dimensions & Weight
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Dimensions Section (hidden by default) -->
+                                <div id="dimensionsSection" style="display: none;">
+                                    <!-- Order Quantities -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Minimum Order Quantity</label>
+                                            <input type="number" class="form-control" 
+                                                   name="defaultVariant_MinimumOrderQuantity">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Maximum Order Quantity</label>
+                                            <input type="number" class="form-control" 
+                                                   name="defaultVariant_MaximumOrderQuantity">
+                                        </div>
+                                    </div>
+
+                                    <!-- Dimensions -->
+                                    <div class="mb-4">
+                                        <label class="form-label fw-bold">Package Dimensions</label>
+                                        <div class="row g-3">
+                                            <div class="col-md-4">
+                                                <input type="number" step="0.01" class="form-control" 
+                                                       placeholder="Height" 
+                                                       name="defaultVariant_PackedHeight">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="number" step="0.01" class="form-control" 
+                                                       placeholder="Width" 
+                                                       name="defaultVariant_PackedWidth">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="number" step="0.01" class="form-control" 
+                                                       placeholder="Depth" 
+                                                       name="defaultVariant_PackedDepth">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Weight -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Weight Unit</label>
+                                            <select class="form-select" name="defaultVariant_WeightUnit">
+                                                <option value="kg">Kilogram (kg)</option>
+                                                <option value="g">Gram (g)</option>
+                                                <option value="lbs">Pound (lbs)</option>
+                                                <option value="oz">Ounce (oz)</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Weight</label>
+                                            <input type="number" step="0.01" class="form-control" 
+                                                   name="defaultVariant_Weight">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Image Uploads -->
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Thumbnail Image</label>
+                                        <input type="file" class="form-control" 
+                                               name="defaultVariant_thumbnail" 
+                                               accept="image/*">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Product Images</label>
+                                        <input type="file" class="form-control" 
+                                               name="defaultVariant_productImages" 
+                                               accept="image/*" multiple>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Variants Section (hidden by default) -->
+                    <div id="variantsContainer" style="display: none;">
+                        <!-- Variant Options Definition -->
+                        <div class="mb-4">
+                            <button type="button" class="btn btn-primary" id="addVariantOption">
+                                <i class="bx bx-plus"></i> Add Variant Option (e.g., Size, Color)
+                            </button>
+                            <div id="variantOptionsContainer" class="mt-3">
+                                <!-- Variant options will be added here -->
+                            </div>
+                        </div>
+
+                        <!-- Generated Variants -->
+                        <div id="generatedVariants">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0">
+                                    <i class="bx bx-list-ul me-2"></i>Generated Variants
+                                </h6>
+                                <button type="button" class="btn btn-success btn-sm" id="addMissingVariant">
+                                    <i class="bx bx-plus"></i> Add Missing Variant
+                                </button>
+                            </div>
+                            <div id="variantCombinations">
+                                <!-- Generated variant combinations will appear here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-sm-9 offset-sm-3">
+                    <button type="submit" class="btn btn-info">
+                        <i class="bx bx-save me-2"></i>Save Product
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="saveDraft">
+                        <i class="bx bx-file me-2"></i>Save Draft
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Missing Variants Modal -->
+<div class="modal fade" id="missingVariantsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bx bx-list-plus me-2"></i>Select Missing Variants
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="selectAllVariants">
+                        <label class="form-check-label fw-bold" for="selectAllVariants">
+                            Select All
+                        </label>
+                    </div>
+                </div>
+                <div id="missingVariantsList" class="row">
+                    <!-- Missing variants will be listed here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="addSelectedVariants">
+                    <i class="bx bx-plus"></i> Add Selected Variants
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Store all possible combinations
+        let allPossibleCombinations = [];
+
+        function updateVariants() {
+            const options = [];
+            $('.variant-option').each(function() {
+                const optionName = $(this).find('.option-name').val();
+                const values = [];
+                $(this).find('.option-value').each(function() {
+                    const value = $(this).val();
+                    if (value) values.push(value);
+                });
+                if (optionName && values.length > 0) {
+                    options.push({ name: optionName, values: values });
+                }
+            });
+
+            // Generate all possible combinations
+            allPossibleCombinations = generateCombinations(options);
+            
+            // Get current combinations from existing variants
+            const currentCombinations = [];
+            $('.variant-combination').each(function() {
+                currentCombinations.push(JSON.parse($(this).attr('data-combo')));
+            });
+
+            // Display current combinations
+            displayVariantCombinations(currentCombinations);
+        }
+
+        function generateCombinations(options) {
+            if (options.length === 0) return [];
+            
+            let combinations = [{}];
+            
+            options.forEach(option => {
+                const newCombinations = [];
+                combinations.forEach(combo => {
+                    option.values.forEach(value => {
+                        const newCombo = { ...combo };
+                        newCombo[option.name] = value;
+                        newCombinations.push(newCombo);
+                    });
+                });
+                combinations = newCombinations;
+            });
+            
+            return combinations;
+        }
+
+        function displayVariantCombinations(combinations) {
+            const container = $('#variantCombinations');
+            container.empty();
+
+            combinations.forEach((combo, index) => {
+                const attributes = Object.entries(combo)
+                    .map(([key, value]) => `${key}: ${value}`)
+                    .join(', ');
+                    
+                const variantHtml = `
+                    <div class="card mb-3 variant-combination" data-combo='${JSON.stringify(combo)}'>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6>Variant ${index + 1} (${attributes})</h6>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input set-as-default" type="radio" 
+                                               name="defaultVariantIndex" value="${index}">
+                                        <label class="form-check-label">Set as Default</label>
+                                    </div>
+                                    <button type="button" class="btn btn-danger btn-sm remove-variant">
+                                        <i class="bx bx-trash"></i> Remove
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Basic Info -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <label>SKU</label>
+                                        <input type="text" class="form-control" name="variants_${index}_SKU" required>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label>Barcode</label>
+                                        <input type="text" class="form-control" name="variants_${index}_Barcode">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <label>Cost Price</label>
+                                        <input type="number" step="0.01" class="form-control" 
+                                               name="variants_${index}_CostPrice" required>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label>Sale Price</label>
+                                        <input type="number" step="0.01" class="form-control" 
+                                               name="variants_${index}_SalePrice" required>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label>Compare At Price</label>
+                                        <input type="number" step="0.01" class="form-control" 
+                                               name="variants_${index}_CompareAtPrice">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Dimensions Section -->
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input variant-dimensions-toggle" type="checkbox" 
+                                           id="variantDimensionsToggle${index}">
+                                    <label class="form-check-label" for="variantDimensionsToggle${index}">
+                                        Show Dimensions & Weight
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="variant-dimensions-section" style="display: none;">
+                                <!-- Order Quantities -->
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label>Minimum Order Quantity</label>
+                                        <input type="number" class="form-control" 
+                                               name="variants_${index}_MinimumOrderQuantity">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label>Maximum Order Quantity</label>
+                                        <input type="number" class="form-control" 
+                                               name="variants_${index}_MaximumOrderQuantity">
+                                    </div>
+                                </div>
+
+                                <!-- Dimensions -->
+                                <div class="mb-3">
+                                    <label>Package Dimensions</label>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <input type="number" step="0.01" class="form-control" 
+                                                   placeholder="Height" 
+                                                   name="variants_${index}_PackedHeight">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="number" step="0.01" class="form-control" 
+                                                   placeholder="Width" 
+                                                   name="variants_${index}_PackedWidth">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="number" step="0.01" class="form-control" 
+                                                   placeholder="Depth" 
+                                                   name="variants_${index}_PackedDepth">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Weight -->
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label>Weight Unit</label>
+                                        <select class="form-control" name="variants_${index}_WeightUnit">
+                                            <option value="kg">Kilogram (kg)</option>
+                                            <option value="g">Gram (g)</option>
+                                            <option value="lbs">Pound (lbs)</option>
+                                            <option value="oz">Ounce (oz)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label>Weight</label>
+                                        <input type="number" step="0.01" class="form-control" 
+                                               name="variants_${index}_Weight">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Image Uploads -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label>Thumbnail Image</label>
+                                    <input type="file" class="form-control" 
+                                           name="variants_${index}_thumbnail" 
+                                           accept="image/*">
+                                </div>
+                                <div class="col-md-6">
+                                    <label>Product Images</label>
+                                    <input type="file" class="form-control" 
+                                           name="variants_${index}_productImages" 
+                                           accept="image/*" multiple>
+                                </div>
+                            </div>
+
+                            <input type="hidden" name="variants_${index}_Attributes" 
+                                   value='${JSON.stringify(combo)}'>
+                        </div>
+                    </div>
+                `;
+                container.append(variantHtml);
+            });
+        }
+
+        // Function to find missing combinations
+        function findMissingCombinations() {
+            const currentCombinations = [];
+            $('.variant-combination').each(function() {
+                currentCombinations.push(JSON.parse($(this).attr('data-combo')));
+            });
+
+            return allPossibleCombinations.filter(combo => 
+                !currentCombinations.some(current => 
+                    JSON.stringify(current) === JSON.stringify(combo)
+                )
+            );
+        }
+
+        // Function to display missing combinations in the modal
+        function displayMissingCombinations() {
+            const missingCombinations = findMissingCombinations();
+            const container = $('#missingVariantsList');
+            container.empty();
+            
+            if (missingCombinations.length === 0) {
+                container.html('<div class="col-12"><p class="text-center">No missing variants found!</p></div>');
+                $('#addSelectedVariants').prop('disabled', true);
+                return;
+            }
+            
+            $('#addSelectedVariants').prop('disabled', false);
+            
+            missingCombinations.forEach((combo, index) => {
+                const attributes = Object.entries(combo)
+                    .map(([key, value]) => `${key}: ${value}`)
+                    .join(', ');
+                
+                const variantHtml = `
+                    <div class="col-md-6 mb-2">
+                        <div class="form-check">
+                            <input class="form-check-input missing-variant-checkbox" type="checkbox" 
+                                   id="missingVariant${index}" data-combo='${JSON.stringify(combo)}'>
+                            <label class="form-check-label" for="missingVariant${index}">
+                                ${attributes}
+                            </label>
+                        </div>
+                    </div>
+                `;
+                container.append(variantHtml);
+            });
+        }
+
+        $(document).ready(function() {
+            // Initialize select2 if it's available
+            if ($.fn.select2) {
+                $('.select2').select2({
+                    theme: 'bootstrap4',
+                    width: '100%',
+                    placeholder: "Select a business"
+                });
+            } else {
+                // Add custom styling for the dropdown if select2 is not available
+                $('.form-select').addClass('form-control-lg');
+            }
+
+            // Show/hide sections based on Business ID selection
+            $('#BusinessID').change(function() {
+                if ($(this).val()) {
+                    $('.product-details-section').show();
+                } else {
+                    $('.product-details-section').hide();
+                }
+            });
+
+            // Highlights handling
+            $('#addHighlight').click(function() {
+                const highlightHtml = `
+                    <div class="highlight-entry mb-2">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Key" name="highlightKey[]">
+                            <input type="text" class="form-control" placeholder="Value" name="highlightValue[]">
+                            <button type="button" class="btn btn-danger remove-highlight">×</button>
+                        </div>
+                    </div>
+                `;
+                $('#highlightsContainer').append(highlightHtml);
+            });
+
+            $(document).on('click', '.remove-highlight', function() {
+                $(this).closest('.highlight-entry').remove();
+            });
+
+            // Form submission
+            $('#editProductForm').submit(function(e) {
+                e.preventDefault();
+                
+                // Collect highlights
+                const highlights = [];
+                $('.highlight-entry').each(function() {
+                    const key = $(this).find('input[name="highlightKey[]"]').val();
+                    const value = $(this).find('input[name="highlightValue[]"]').val();
+                    if (key && value) {
+                        highlights.push({ key, value });
+                    }
+                });
+
+                // Add to hidden input
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: 'BaseHightlights',
+                    value: JSON.stringify(highlights)
+                }).appendTo(this);
+
+                // Collect variant options in the required format
+                const hasVariants = $('#hasVariantsToggle').is(':checked');
+                
+                if (hasVariants) {
+                    const variantOptions = {};
+                    
+                    // Collect all option names and their values
+                    $('.variant-option').each(function() {
+                        const optionName = $(this).find('.option-name').val();
+                        if (optionName) {
+                            const values = [];
+                            $(this).find('.option-value').each(function() {
+                                const value = $(this).val();
+                                if (value) values.push(value);
+                            });
+                            
+                            if (values.length > 0) {
+                                variantOptions[optionName] = values;
+                            }
+                        }
+                    });
+                    
+                    // Only add VarientOptions if we have actual variant options and variants
+                    if (Object.keys(variantOptions).length > 0 && $('.variant-combination').length > 0) {
+                        $('<input>').attr({
+                            type: 'hidden',
+                            name: 'VarientOptions',
+                            value: JSON.stringify(variantOptions)
+                        }).appendTo(this);
+                    } else {
+                        // Add empty value to clear existing options when switching back to no variants
+                        $('<input>').attr({
+                            type: 'hidden',
+                            name: 'VarientOptions',
+                            value: ""
+                        }).appendTo(this);
+                    }
+                } else {
+                    // Clear variant options when not using variants
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: 'VarientOptions',
+                        value: ""
+                    }).appendTo(this);
+                }
+
+                // Collect variants with all fields
+                const variants = [];
+                $('.variant-combination').each(function(index) {
+                    const variantHighlights = [];
+                    $(this).find('.highlight-entry').each(function() {
+                        const key = $(this).find('input[name$="highlightKey[]"]').val();
+                        const value = $(this).find('input[name$="highlightValue[]"]').val();
+                        if (key && value) {
+                            variantHighlights.push({ key, value });
+                        }
+                    });
+
+                    const variant = {
+                        SKU: $(this).find(`input[name="variants_${index}_SKU"]`).val(),
+                        Barcode: $(this).find(`input[name="variants_${index}_Barcode"]`).val(),
+                        CostPrice: $(this).find(`input[name="variants_${index}_CostPrice"]`).val(),
+                        SalePrice: $(this).find(`input[name="variants_${index}_SalePrice"]`).val(),
+                        CompareAtPrice: $(this).find(`input[name="variants_${index}_CompareAtPrice"]`).val(),
+                        MinimumOrderQuantity: $(this).find(`input[name="variants_${index}_MinimumOrderQuantity"]`).val(),
+                        MaximumOrderQuantity: $(this).find(`input[name="variants_${index}_MaximumOrderQuantity"]`).val(),
+                        PackedHeight: $(this).find(`input[name="variants_${index}_PackedHeight"]`).val(),
+                        PackedWidth: $(this).find(`input[name="variants_${index}_PackedWidth"]`).val(),
+                        PackedDepth: $(this).find(`input[name="variants_${index}_PackedDepth"]`).val(),
+                        WeightUnit: $(this).find(`select[name="variants_${index}_WeightUnit"]`).val(),
+                        Weight: $(this).find(`input[name="variants_${index}_Weight"]`).val(),
+                        AdditionalHighlights: JSON.stringify(variantHighlights),
+                        Attributes: $(this).find(`input[name="variants_${index}_Attributes"]`).val()
+                    };
+                    variants.push(variant);
+                });
+
+                // Add variants to form
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: 'VariantData',
+                    value: JSON.stringify(variants)
+                }).appendTo(this);
+
+                // Submit the form
+                this.submit();
+            });
+
+            // Variant Management
+            let variantOptions = [];
+
+            $('#addVariantOption').click(function() {
+                const optionId = Date.now();
+                const optionHtml = `
+                    <div class="variant-option mb-3" data-option-id="${optionId}">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row mb-2">
+                                    <div class="col">
+                                        <input type="text" class="form-control option-name" 
+                                               placeholder="Option Name (e.g., Size, Color)">
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="button" class="btn btn-danger btn-sm remove-option">
+                                            Remove Option
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="option-values">
+                                    <div class="input-group mb-2">
+                                        <input type="text" class="form-control option-value" 
+                                               placeholder="Option Value (e.g., Small, Red)">
+                                        <button type="button" class="btn btn-outline-danger remove-value">×</button>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-primary add-value">
+                                    Add Value
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                $('#variantOptionsContainer').append(optionHtml);
+            });
+
+            // Handle variant option changes
+            $(document).on('change', '.option-name, .option-value', function() {
+                updateVariants();
+            });
+
+            // Remove variant option
+            $(document).on('click', '.remove-option', function() {
+                $(this).closest('.variant-option').remove();
+                updateVariants();
+            });
+
+            // Add value to variant option
+            $(document).on('click', '.add-value', function() {
+                const valueHtml = `
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control option-value" 
+                               placeholder="Option Value (e.g., Small, Red)">
+                        <button type="button" class="btn btn-outline-danger remove-value">×</button>
+                    </div>
+                `;
+                $(this).siblings('.option-values').append(valueHtml);
+            });
+
+            // Remove value from variant option
+            $(document).on('click', '.remove-value', function() {
+                $(this).closest('.input-group').remove();
+                updateVariants();
+            });
+
+            // Handle remove variant
+            $(document).on('click', '.remove-variant', function() {
+                $(this).closest('.variant-combination').remove();
+            });
+
+            // Handle add missing variant
+            $('#addMissingVariant').click(function() {
+                displayMissingCombinations();
+                $('#missingVariantsModal').modal('show');
+            });
+            
+            // Handle select all checkbox
+            $('#selectAllVariants').change(function() {
+                $('.missing-variant-checkbox').prop('checked', this.checked);
+            });
+            
+            // Add selected variants
+            $('#addSelectedVariants').click(function() {
+                const selectedCombos = [];
+                
+                // Get current combinations
+                const currentCombinations = [];
+                $('.variant-combination').each(function() {
+                    currentCombinations.push(JSON.parse($(this).attr('data-combo')));
+                });
+                
+                // Add selected combinations
+                $('.missing-variant-checkbox:checked').each(function() {
+                    const combo = JSON.parse($(this).attr('data-combo'));
+                    selectedCombos.push(combo);
+                });
+                
+                if (selectedCombos.length > 0) {
+                    // Combine current and selected combinations
+                    const allCombinations = [...currentCombinations, ...selectedCombos];
+                    displayVariantCombinations(allCombinations);
+                    $('#missingVariantsModal').modal('hide');
+                } else {
+                    alert('Please select at least one variant to add.');
+                }
+            });
+
+            // Handle variants toggle
+            $('#hasVariantsToggle').change(function() {
+                const hasVariants = this.checked;
+                $('#hasVariantsField').val(hasVariants ? "true" : "false");
+                $('#defaultVariantCard').toggle(!hasVariants);
+                $('#variantsContainer').toggle(hasVariants);
+                
+                if (!hasVariants) {
+                    // Clear variant options and combinations when switching to default
+                    $('#variantOptionsContainer').empty();
+                    $('#variantCombinations').empty();
+                    allPossibleCombinations = [];
+                }
+            });
+
+            // Handle "Set as Default" radio buttons
+            $(document).on('change', '.set-as-default', function() {
+                $('.set-as-default').prop('checked', false);
+                $(this).prop('checked', true);
+            });
+
+            // Handle dimensions toggle for default variant
+            $('#showDimensionsToggle').change(function() {
+                $('#dimensionsSection').toggle(this.checked);
+            });
+
+            // Handle dimensions toggle for variant combinations
+            $(document).on('change', '.variant-dimensions-toggle', function() {
+                $(this).closest('.variant-combination')
+                    .find('.variant-dimensions-section')
+                    .toggle(this.checked);
+            });
+
+            // Load existing variants if any
+            @if (Model.ProductVariants != null && Model.ProductVariants.Any())
+            {
+                <text>
+                // Check if we should force variant view (multiple variants or single non-default variant)
+                const variantCount = @Model.ProductVariants.Count();
+                    const hasDefaultVariant = @(Model.ProductVariants.Any(v => v.IsDefaultVariant) ? "true" : "false");
+                const forceVariantView = variantCount > 1 || !hasDefaultVariant;
+                
+                // Set has variants toggle to true if multiple variants or the single one is not default
+                $('#hasVariantsToggle').prop('checked', true).trigger('change');
+                
+                // Disable the toggle if in forced variant view
+                if (forceVariantView) {
+                    $('#hasVariantsToggle').prop('disabled', true);
+                    // Hide the default help text and add a more specific message
+                    $('#variantToggleHelp').html(
+                        variantCount > 1 
+                        ? '<strong>Multiple variants exist</strong> - This product has multiple variants and cannot be switched to default view.' 
+                        : '<strong>Non-default variant</strong> - This product has a variant that is not marked as default and must use variant mode.'
+                    );
+                }
+                
+                // Load variant options from the first variant's attributes
+                const firstVariant = @Html.Raw(Json.Serialize(Model.ProductVariants.First().Attributes));
+                if (firstVariant) {
+                    Object.entries(firstVariant).forEach(([name, value]) => {
+                        const optionId = Date.now();
+                        const optionHtml = `
+                            <div class="variant-option mb-3" data-option-id="${optionId}">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row mb-2">
+                                            <div class="col">
+                                                <input type="text" class="form-control option-name" 
+                                                       value="${name}" readonly>
+                                            </div>
+                                            <div class="col-auto">
+                                                <button type="button" class="btn btn-danger btn-sm remove-option">
+                                                    Remove Option
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="option-values">
+                                            <div class="input-group mb-2">
+                                                <input type="text" class="form-control option-value" 
+                                                       value="${value}" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        $('#variantOptionsContainer').append(optionHtml);
+                    });
+                }
+                
+                // Also load from saved VarientOptions if available
+                @if (!string.IsNullOrEmpty(Model.VariantOptions)) 
+                {
+                    <text>
+                    try {
+                        // Parse the VarientOptions JSON
+                        const savedOptions = JSON.parse('@Html.Raw(Model.VariantOptions)');
+                        
+                        // If there are variant options saved and we don't have options from attributes
+                        if (savedOptions && (!firstVariant || Object.keys(firstVariant).length === 0)) {
+                            // For each option (e.g., Size, Color)
+                            Object.entries(savedOptions).forEach(([optionName, optionValues]) => {
+                                const optionId = Date.now() + Math.random();
+                                
+                                let optionHtml = `
+                                    <div class="variant-option mb-3" data-option-id="${optionId}">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="row mb-2">
+                                                    <div class="col">
+                                                        <input type="text" class="form-control option-name" 
+                                                               value="${optionName}">
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <button type="button" class="btn btn-danger btn-sm remove-option">
+                                                            Remove Option
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="option-values">`;
+                                
+                                // Add each value for this option
+                                optionValues.forEach(value => {
+                                    optionHtml += `
+                                        <div class="input-group mb-2">
+                                            <input type="text" class="form-control option-value" 
+                                                   value="${value}">
+                                            <button type="button" class="btn btn-outline-danger remove-value">×</button>
+                                        </div>`;
+                                });
+                                
+                                optionHtml += `
+                                                </div>
+                                                <button type="button" class="btn btn-sm btn-outline-primary add-value">
+                                                    Add Value
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>`;
+                                
+                                $('#variantOptionsContainer').append(optionHtml);
+                            });
+                        }
+                    } catch (e) {
+                        console.error('Error parsing variant options:', e);
+                    }
+                    </text>
+                }
+                
+                // Generate combinations and display variants
+                updateVariants();
+                
+                // Set default variant
+                const defaultVariant = @Html.Raw(Json.Serialize(Model.ProductVariants.FirstOrDefault(v => v.IsDefaultVariant)));
+                if (defaultVariant) {
+                    $(`.variant-combination[data-combo='${JSON.stringify(defaultVariant.Attributes)}']`)
+                        .find('.set-as-default')
+                        .prop('checked', true);
+                }
+                </text>
+            }
+        });
+    </script>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

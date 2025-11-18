@@ -11,6 +11,12 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace EpicMarket.Business.API.Controllers
 {
+    /// <summary>
+    /// Dashboard analytics API. Provides onboarding progress and business performance metrics for outlets.
+    /// </summary>
+    /// <remarks>
+    /// Route prefix: <c>api/dashboard</c>
+    /// </remarks>
     [Route("api/dashboard")]
     public class DashboardController : BaseApiController
     {
@@ -27,6 +33,13 @@ namespace EpicMarket.Business.API.Controllers
         }
 
 
+            /// <summary>
+            /// Gets onboarding checklist steps for the currently authenticated user.
+            /// </summary>
+            /// <remarks>
+            /// Route: <c>GET api/dashboard/OnboardingSteps</c>
+            /// Auth: <c>Authorize</c>
+            /// </remarks>
             [HttpGet("OnboardingSteps")]
             [Authorize]
             public async Task<IActionResult> GetAllOnBoardSteps()
@@ -49,7 +62,14 @@ namespace EpicMarket.Business.API.Controllers
             }
 
 
-
+            /// <summary>
+            /// Marks an onboarding step as completed for the current user.
+            /// </summary>
+            /// <remarks>
+            /// Route: <c>POST api/dashboard/completed</c>
+            /// Auth: <c>Authorize</c>
+            /// Query/Form: <c>stepId</c> identifier.
+            /// </remarks>
             [HttpPost("completed")]
             public async Task<IActionResult> UpdateStatusOfOnBoardingStep(int stepId)
             {
@@ -71,6 +91,13 @@ namespace EpicMarket.Business.API.Controllers
             }
    
 
+            /// <summary>
+            /// Gets weekly and monthly active user counts for an outlet.
+            /// </summary>
+            /// <remarks>
+            /// Route: <c>GET api/dashboard/active-users/{{outletId}}</c>
+            /// Auth: <c>Authorize</c>
+            /// </remarks>
             [HttpGet("active-users/{outletId}")]
             public async Task<IActionResult> GetActiveUsers(int outletId)
             {
@@ -86,6 +113,13 @@ namespace EpicMarket.Business.API.Controllers
                 return Ok(response);
             }
 
+            /// <summary>
+            /// Retrieves gross merchandise value (GMV) trend data for an outlet.
+            /// </summary>
+            /// <remarks>
+            /// Route: <c>GET api/dashboard/gmv/{{outletId}}</c>
+            /// Auth: <c>Authorize</c>
+            /// </remarks>
             [HttpGet("gmv/{outletId}")]
             public async Task<IActionResult> GetGrossMerchandiseValue(int outletId)
             {
@@ -101,6 +135,13 @@ namespace EpicMarket.Business.API.Controllers
                 return Ok(response);
             }
 
+            /// <summary>
+            /// Gets the customer retention rate percentage for an outlet.
+            /// </summary>
+            /// <remarks>
+            /// Route: <c>GET api/dashboard/retention-rate/{{outletId}}</c>
+            /// Auth: <c>Authorize</c>
+            /// </remarks>
             [HttpGet("retention-rate/{outletId}")]
             public async Task<IActionResult> GetCustomerRetentionRate(int outletId)
             {
@@ -116,6 +157,13 @@ namespace EpicMarket.Business.API.Controllers
                 return Ok(response);
             }
 
+            /// <summary>
+            /// Retrieves the top selling products for an outlet.
+            /// </summary>
+            /// <remarks>
+            /// Route: <c>GET api/dashboard/top-products/{{outletId}}</c>
+            /// Auth: <c>Authorize</c>
+            /// </remarks>
             [HttpGet("top-products/{outletId}")]
             public async Task<IActionResult> GetTopSellingProducts(int outletId)
             {
@@ -131,6 +179,14 @@ namespace EpicMarket.Business.API.Controllers
                 return Ok(response);
             }
 
+            /// <summary>
+            /// Gets order status distribution for the specified date and aggregation period.
+            /// </summary>
+            /// <remarks>
+            /// Route: <c>GET api/dashboard/order-status/{{outletId}}</c>
+            /// Auth: <c>Authorize</c>
+            /// Query: <c>date</c>, optional <c>period</c> (day/week/month).
+            /// </remarks>
             [HttpGet("order-status/{outletId}")]
             public async Task<IActionResult> GetOrderStatusDistribution(int outletId, [FromQuery] DateTime date, [FromQuery] string period = "day")
             {

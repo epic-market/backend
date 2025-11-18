@@ -11,12 +11,12 @@ namespace EpicMarket.Contracts
 {
     public interface IHomeService
     {
-        Task<List<FaqCategoryDto>> GetAllFaqCategoryAsync(string typeOfFAQ);
+        Task<List<FaqCategoryDto>> GetAllFaqCategoryAsync();
 
-        Task<List<FaqDto>> GetAllFaqByCategoryAsync(int Category);
+        Task<List<FaqDto>> GetAllFaqByCategoryAsync(int CategoryId, string search = null);
 
         Task<List<BlogDto>> GetAllBlogs(BlogParams blogParams);
-        Task<List<BlogDto>> GetAllBlogsByCategory(BlogsByCategoryParams blogParams);
+        Task<List<BlogCategoryDto>> GetAllBlogCategories();
 
         Task<BlogDto> GetBlogDetails(int blogId);
 

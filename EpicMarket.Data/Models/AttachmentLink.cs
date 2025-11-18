@@ -21,12 +21,11 @@ namespace EpicMarket.Data.Models
 
         [ForeignKey("Entity")]
         public int EntityID { get; set; }
-        public virtual Entity Entity { get; set; }
-
+        public virtual Entity Entity { get; set; } 
 
 		[ForeignKey("AttachmentType")]
 		public int AttachmentTypeID { get; set; }
-		public virtual AttachmentType AttachmentType { get; set; }
+		public virtual AttachmentType AttachmentType { get; set; } //to know which attachment type for perticular entity 
 
 		public int RecordID { get; set; }
     }

@@ -1,4 +1,4 @@
-﻿@using EpicMarket.Entities.CustomModels
+﻿@using EpicMarket.Entities.Constants
 @model EpicMarket.Admin.MVC.Models.TaskDetailsModel
 @{
     ViewData["Title"] = "Details";
@@ -6,117 +6,155 @@
 }
 
 <style>
-
+    /* Base styling with reduced spacing */
     .task-data-links {
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
+        margin-top: 8px;
     }
 
-        .task-data-links .btn-link {
-            padding: 6px 12px;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            text-decoration: none;
-            transition: all 0.2s;
-            background-color: #f8f9fa;
-        }
-
-            .task-data-links .btn-link:hover {
-                background-color: #e9ecef;
-                border-color: #ced4da;
-                transform: translateY(-1px);
-            }
-
-        .task-data-links i {
-            font-size: 16px;
-        }
-    .task-header {
-        background: #f8f9fa;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 24px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-
-    .status-badge {
+    .task-data-links .btn-link {
         padding: 6px 12px;
-        border-radius: 20px;
-        font-weight: 500;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        background-color: #f8f9fa;
+        color: #495057;
     }
 
-    .timeline-item {
-        position: relative;
-        padding: 16px;
-        border-left: 2px solid #e9ecef;
-        margin-bottom: 16px;
+    .task-data-links .btn-link:hover {
+        background-color: #e9ecef;
+        border-color: #ced4da;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
     }
 
-    .timeline-dot {
-        position: absolute;
-        left: -6px;
-        top: 24px;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: #primary;
-    }
-
-    .comment-section {
-        max-height: 400px;
-        overflow-y: auto;
-        padding: 16px;
-    }
-
-    .task-grid {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 24px;
-        margin-bottom: 24px;
-    }
-
-    .card {
+    .task-header {
+        background: linear-gradient(to right, #f8f9fa, #ffffff);
         border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        transition: transform 0.2s;
+        padding: 16px 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        border-left: 4px solid #0d6efd;
     }
-
-        .card:hover {
-            transform: translateY(-2px);
-        }
 
     .status-badge {
         padding: 4px 10px;
-        border-radius: 15px;
-        font-size: 0.85rem;
+        border-radius: 20px;
         font-weight: 500;
+        margin-right: 6px;
+        font-size: 0.8rem;
         display: inline-flex;
         align-items: center;
+        gap: 4px;
         border: 1px solid transparent;
     }
 
     .bg-primary-subtle {
         background-color: rgba(13, 110, 253, 0.1);
-        border-color: rgba(13, 110, 253, 0.1);
+        border-color: rgba(13, 110, 253, 0.2);
+        color: #0d6efd;
     }
 
     .bg-success-subtle {
         background-color: rgba(25, 135, 84, 0.1);
-        border-color: rgba(25, 135, 84, 0.1);
+        border-color: rgba(25, 135, 84, 0.2);
+        color: #198754;
     }
 
-    .status-badge i {
-        font-size: 14px;
+    .timeline-item {
+        position: relative;
+        padding: 12px 16px;
+        border-left: 3px solid #e9ecef;
+        margin-bottom: 12px;
+        background-color: #f8f9fa;
+        border-radius: 0 6px 6px 0;
+        transition: all 0.2s ease;
     }
 
-    <style >
+    .timeline-item:hover {
+        background-color: #f0f2f5;
+        border-left-color: #0d6efd;
+    }
+
+    .timeline-dot {
+        position: absolute;
+        left: -6px;
+        top: 18px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #0d6efd;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 1px rgba(13, 110, 253, 0.2);
+    }
+
+    .comment-section {
+        max-height: 350px;
+        overflow-y: auto;
+        padding: 0;
+        margin-right: -5px;
+    }
+
+    .comment-section::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .comment-section::-webkit-scrollbar-thumb {
+        background-color: rgba(0,0,0,0.1);
+        border-radius: 8px;
+    }
+
+    .task-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    @@media (max-width: 992px) {
+        .task-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .card {
+        border-radius: 8px;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: none;
+        overflow: hidden;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    .card-header {
+        background-color: #ffffff;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding: 12px 16px;
+    }
+
+    .card-body {
+        padding: 16px;
+    }
+
     .comment-item {
         border-left: 3px solid #0d6efd;
         transition: transform 0.2s ease;
+        margin-bottom: 10px;
+        background-color: #f8f9fa;
+        border-radius: 0 6px 6px 0;
+        padding: 10px;
     }
 
     .comment-item:hover {
-        transform: translateX(4px);
+        transform: translateX(2px);
+        background-color: #f0f2f5;
     }
 
     .comment-content {
@@ -129,19 +167,170 @@
         padding: 20px;
         background: #f8f9fa;
         border-radius: 8px;
+        text-align: center;
     }
 
     .font-40 {
-        font-size: 40px;
+        font-size: 32px;
+    }
+
+    /* Tab styling */
+    .nav-tabs .nav-link {
+        color: #6c757d;
+        border: none;
+        padding: 8px 12px;
+        font-weight: 500;
+        position: relative;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #0d6efd;
+        background: transparent;
+        border: none;
+    }
+
+    .nav-tabs .nav-link.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background-color: #0d6efd;
+        border-radius: 2px;
+    }
+
+    .nav-tabs .nav-link:hover:not(.active) {
+        color: #495057;
+        border: none;
+    }
+
+    /* Details Section - more compact */
+    .details-section dl.row {
+        margin-bottom: 0;
+    }
+    
+    .details-section dl dt {
+        color: #6c757d;
+        font-weight: 500;
+        margin-bottom: 4px;
+    }
+
+    .details-section dl dd {
+        color: #343a40;
+        font-weight: 400;
+        margin-bottom: 8px;
+    }
+
+    /* Table styling - more compact */
+    .table {
+        border-collapse: separate;
+        border-spacing: 0 3px;
+        margin-bottom: 0;
+    }
+
+    .table thead th {
+        border-bottom: none;
+        background-color: #f8f9fa;
+        color: #495057;
+        font-weight: 500;
+        padding: 8px 12px;
+    }
+
+    .table tbody tr {
+        background-color: #ffffff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        border-radius: 4px;
+        transition: transform 0.2s;
+    }
+
+    .table tbody tr:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+    }
+
+    .table tbody td {
+        padding: 8px 12px;
+        vertical-align: middle;
+        border-top: none;
+    }
+
+    /* Buttons and actions - more compact */
+    .btn {
+        border-radius: 4px;
+        padding: 6px 12px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .btn-primary {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .btn-primary:hover {
+        background-color: #0b5ed7;
+        border-color: #0a58ca;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 6px rgba(13, 110, 253, 0.2);
+    }
+
+    .btn-group .btn {
+        padding: 4px 8px;
+    }
+
+    /* Breadcrumb styling - more compact */
+    .page-breadcrumb {
+        padding: 8px 0;
+        margin-bottom: 16px;
+    }
+
+    .breadcrumb-item a {
+        color: #6c757d;
+        transition: color 0.2s;
+    }
+
+    .breadcrumb-item a:hover {
+        color: #0d6efd;
+    }
+
+    .breadcrumb-item.active {
+        color: #343a40;
+    }
+    
+    /* Utility classes for spacing */
+    .mb-3 {
+        margin-bottom: 0.75rem !important;
+    }
+    
+    .mb-4 {
+        margin-bottom: 1rem !important;
+    }
+    
+    .mt-3 {
+        margin-top: 0.75rem !important;
+    }
+    
+    .mt-4 {
+        margin-top: 1rem !important;
+    }
+    
+    .p-3 {
+        padding: 0.75rem !important;
+    }
+    
+    .py-3 {
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
     }
 </style>
 
 
 <div class="container-fluid">
-    <!-- Breadcrumb -->
+    <!-- Breadcrumb - more compact -->
     <div class="page-breadcrumb d-flex align-items-center mb-3">
-        <div class="breadcrumb-title pe-3">Tasks</div>
-        <nav aria-label="breadcrumb" class="ms-3">
+        <div class="breadcrumb-title pe-2 fw-medium">Tasks</div>
+        <nav aria-label="breadcrumb" class="ms-2">
             <ol class="breadcrumb m-0">
                 <li class="breadcrumb-item"><a href="@Url.Action("Index")"><i class="bx bx-home-alt"></i></a></li>
                 <li class="breadcrumb-item active">Details</li>
@@ -149,67 +338,73 @@
         </nav>
     </div>
 
-    <!-- Task Header -->
+    <!-- Task Header - more compact -->
     <div class="task-header">
         <div class="d-flex justify-content-between align-items-center">
-            <h3 class="mb-0">#@Model.Task.ID - @Model.Task.Name</h3>
+            <h4 class="mb-0 fw-bold">#@Model.Task.ID - @Model.Task.Name</h4>
             <a asp-action="Edit" class="btn btn-primary" asp-route-id="@Model?.Task.ID">
                 <i class="bx bx-edit me-1"></i>Edit
             </a>
         </div>
-        <div class="d-flex gap-2 mt-3">
-            <span class="status-badge bg-primary-subtle text-primary">
-                <i class="bx bx-task me-1"></i>@Model.Task.TaskTypes.Name
+        <div class="d-flex gap-2 mt-2">
+            <span class="status-badge bg-primary-subtle">
+                <i class="bx bx-task"></i>@Model.Task.TaskTypes.Name
             </span>
-            <span class="status-badge bg-success-subtle text-success">
-                <i class="bx bx-check-circle me-1"></i>@Model.Task.TaskStatusType.Status
+            <span class="status-badge bg-success-subtle">
+                <i class="bx bx-check-circle"></i>@Model.Task.TaskStatusType.Status
             </span>
         </div>
     </div>
 
-    <!-- Main Content Grid -->
+    <!-- Main Content Grid - more compact spacing -->
     <div class="task-grid">
         <!-- Left Column -->
         <div class="card">
             <div class="card-header">
                 <ul class="nav nav-tabs card-header-tabs" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link active" data-bs-toggle="tab" href="#details">Task Details</a>
+                        <a class="nav-link active" data-bs-toggle="tab" href="#details">
+                            <i class="bx bx-detail me-1"></i>Details
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="tab" href="#taskData">Task Data</a>
+                        <a class="nav-link" data-bs-toggle="tab" href="#taskData">
+                            <i class="bx bx-data me-1"></i>Data
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="tab" href="#activities">Activities</a>
+                        <a class="nav-link" data-bs-toggle="tab" href="#activities">
+                            <i class="bx bx-history me-1"></i>Activities
+                        </a>
                     </li>
                 </ul>
             </div>
             <div class="card-body">
                 <div class="tab-content">
                     <div class="tab-pane fade show active" id="details">
-                        <div class="mb-4">
-                            <h5 class="card-title mb-3"><i class="bx bx-align-left me-2"></i>Task Description</h5>
-                            <p class="card-text">@(string.IsNullOrEmpty(Model.Task.Description) ? "-" : Model.Task.Description)</p>
+                        <div class="mb-3">
+                            <h5 class="card-title mb-2"><i class="bx bx-align-left me-2"></i>Description</h5>
+                            <p class="card-text p-2 bg-light rounded">@(string.IsNullOrEmpty(Model.Task.Description) ? "No description provided" : Model.Task.Description)</p>
                         </div>
-                        <div class="row mt-4">
+                        <div class="row mt-3 details-section">
                             <dl class="row col-12">
-                                <dt class="col-sm-4">Assigned To</dt>
-                                <dd class="col-sm-8">@(Model.Task.AppUser?.UserName ?? "-")</dd>
+                                <dt class="col-sm-4 col-md-3"><i class="bx bx-user me-1 text-primary"></i>Assigned To</dt>
+                                <dd class="col-sm-8 col-md-9">@(Model.Task.AppUser?.UserName ?? "Not assigned")</dd>
 
-                                <dt class="col-sm-4">Assigned Date</dt>
-                                <dd class="col-sm-8">@(Model.Task.DateAssigned?.ToString() ?? "-")</dd>
+                                <dt class="col-sm-4 col-md-3"><i class="bx bx-calendar-check me-1 text-primary"></i>Assigned Date</dt>
+                                <dd class="col-sm-8 col-md-9">@(Model.Task.DateAssigned?.ToString("MMM dd, yyyy HH:mm") ?? "Not assigned")</dd>
 
-                                <dt class="col-sm-4">Due Date</dt>
-                                <dd class="col-sm-8">@(Model.Task.DateDue?.ToString() ?? "-")</dd>
+                                <dt class="col-sm-4 col-md-3"><i class="bx bx-time me-1 text-primary"></i>Due Date</dt>
+                                <dd class="col-sm-8 col-md-9">@(Model.Task.DateDue?.ToString("MMM dd, yyyy HH:mm") ?? "No due date")</dd>
 
-                                <dt class="col-sm-4">Started Date</dt>
-                                <dd class="col-sm-8">@(Model.Task.DateStarted?.ToString() ?? "-")</dd>
+                                <dt class="col-sm-4 col-md-3"><i class="bx bx-play-circle me-1 text-primary"></i>Started Date</dt>
+                                <dd class="col-sm-8 col-md-9">@(Model.Task.DateStarted?.ToString("MMM dd, yyyy HH:mm") ?? "Not started")</dd>
 
-                                <dt class="col-sm-4">Completed Date</dt>
-                                <dd class="col-sm-8">@(Model.Task.DateCompleted?.ToString() ?? "-")</dd>
+                                <dt class="col-sm-4 col-md-3"><i class="bx bx-check-circle me-1 text-primary"></i>Completed Date</dt>
+                                <dd class="col-sm-8 col-md-9">@(Model.Task.DateCompleted?.ToString("MMM dd, yyyy HH:mm") ?? "Not completed")</dd>
 
-                                <dt class="col-sm-4">Submitted By</dt>
-                                <dd class="col-sm-8">
+                                <dt class="col-sm-4 col-md-3"><i class="bx bx-user-check me-1 text-primary"></i>Submitted By</dt>
+                                <dd class="col-sm-8 col-md-9">
                                     @if (Model.Task.SubmittedByPersonID.HasValue)
                                     {
                                         <a asp-controller="AppUsers"
@@ -224,32 +419,32 @@
                                         <span>-</span>
                                     }
                                 </dd>
-                                <dt class="col-sm-4">Task Priority</dt>
-                                <dd class="col-sm-8">@(Model.Task.TaskPriorityID?.ToString() ?? "-")</dd>
+                                <dt class="col-sm-4 col-md-3"><i class="bx bx-flag me-1 text-primary"></i>Task Priority</dt>
+                                <dd class="col-sm-8 col-md-9">@(Model.Task.TaskPriorityID?.ToString() ?? "-")</dd>
 
-                                <dt class="col-sm-4">Create Date</dt>
-                                <dd class="col-sm-8">@(Model.Task.CreateDate.ToString() ?? "-")</dd>
+                                <dt class="col-sm-4 col-md-3"><i class="bx bx-calendar-plus me-1 text-primary"></i>Create Date</dt>
+                                <dd class="col-sm-8 col-md-9">@(Model.Task.CreateDate.ToString() ?? "-")</dd>
 
-                                <dt class="col-sm-4">Create By</dt>
-                                <dd class="col-sm-8">@(Model.Task.CreateBy ?? "-")</dd>
+                                <dt class="col-sm-4 col-md-3"><i class="bx bx-user-plus me-1 text-primary"></i>Create By</dt>
+                                <dd class="col-sm-8 col-md-9">@(Model.Task.CreateBy ?? "-")</dd>
 
-                                <dt class="col-sm-4">Modified Date</dt>
-                                <dd class="col-sm-8">@(Model.Task.ModifiedDate?.ToString() ?? "-")</dd>
+                                <dt class="col-sm-4 col-md-3"><i class="bx bx-calendar-edit me-1 text-primary"></i>Modified Date</dt>
+                                <dd class="col-sm-8 col-md-9">@(Model.Task.ModifiedDate?.ToString() ?? "-")</dd>
 
-                                <dt class="col-sm-4">Modified By</dt>
-                                <dd class="col-sm-8">@(Model.Task.ModifiedBy ?? "-")</dd>
+                                <dt class="col-sm-4 col-md-3"><i class="bx bx-user-edit me-1 text-primary"></i>Modified By</dt>
+                                <dd class="col-sm-8 col-md-9">@(Model.Task.ModifiedBy ?? "-")</dd>
                             </dl>
                         </div>
                     </div>
                     <div class="tab-pane fade" id="taskData">
                         <div class="mb-4">
                             <h5 class="card-title mb-3"><i class="bx bx-data me-2"></i>Task Data</h5>
-                                        @if (Model.Task.TaskEntityID.HasValue && !string.IsNullOrEmpty(Model.Task.TaskData))
-                                          {
-                                            try
-                                    {
-                                        var taskData = Model.Task.TaskData;
-                                        var entityType = Model.Task.Entity.Name;
+                            @if (Model.Task.TaskEntityID.HasValue && !string.IsNullOrEmpty(Model.Task.TaskData))
+                            {
+                                try
+                                {
+                                    var taskData = Model.Task.TaskData;
+                                    var entityType = Model.Task.Entity.Name;
 
                                     if (!string.IsNullOrEmpty(taskData))
                                     {
@@ -264,7 +459,7 @@
                                                 switch (entityType)
                                                 {
                                                     case EntityConstants.Catelog:
-                                                        <a href="@Url.Action("Details", "Catalogs", new { id = id })"
+                                                        <a href="@Url.Action("Details", "Products", new { id = id })"
                                                            class="btn btn-link">
                                                             <i class="bx bx-package me-1"></i>Product #@id
                                                         </a>
@@ -300,13 +495,13 @@
                                 {
                                     <div class="text-danger">Error parsing task data</div>
                                 }
-                                  }
-                                else
-                                {
+                            }
+                            else
+                            {
                                 <div class="task-data-content p-3 bg-light rounded">
-                                        @(string.IsNullOrEmpty(Model.Task.TaskData) ? "No task data available" : Model.Task.TaskData)
+                                    @(string.IsNullOrEmpty(Model.Task.TaskData) ? "No task data available" : Model.Task.TaskData)
                                 </div>
-                                }
+                            }
                         </div>
                     </div>
 
@@ -314,21 +509,26 @@
                         <h5 class="card-title mb-3"><i class="bx bx-history me-2"></i>Activities</h5>
                         @if (Model.EventLogs != null && Model.EventLogs.Any())
                         {
-                            @foreach (var log in Model.EventLogs)
-                            {
-                                <div class="timeline-item">
-                                    <div class="timeline-dot"></div>
-                                    <h6>@log.CreateBy</h6>
-                                    <small class="text-muted">@log.CreateDate</small>
-                                    <p class="mt-2">@log.Description</p>
-                                </div>
-                            }
+                            <div class="timeline">
+                                @foreach (var log in Model.EventLogs)
+                                {
+                                    <div class="timeline-item">
+                                        <div class="timeline-dot"></div>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="mb-0 fw-bold text-primary">@log.CreateBy</h6>
+                                            <small class="text-muted badge bg-light">@log.CreateDate.ToString("MMM dd, yyyy HH:mm")</small>
+                                        </div>
+                                        <p class="mt-2 mb-0">@log.Description</p>
+                                    </div>
+                                }
+                            </div>
                         }
                         else
                         {
-                            <div class="text-center py-5">
-                                <i class="bx bx-history font-30 text-muted mb-2 d-block"></i>
-                                <p class="text-muted mb-0">No activities found</p>
+                            <div class="empty-state">
+                                <i class="bx bx-history font-40 text-muted mb-3 d-block"></i>
+                                <p class="text-muted mb-0">No activity history found</p>
+                                <small>Activities will appear here when updates are made to this task</small>
                             </div>
                         }
                     </div>
@@ -337,13 +537,12 @@
             </div>
         </div>
 
-        <!-- Right Column -->
-        <div class="d-flex flex-column gap-4">
-
+        <!-- Right Column - more compact -->
+        <div class="d-flex flex-column gap-3">
             <!-- Attachments Card -->
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="bx bx-paperclip me-2"></i>Attachments</h5>
+                    <h5 class="mb-0"><i class="bx bx-paperclip me-1"></i>Attachments</h5>
                 </div>
                 <div class="card-body">
                     @if (ViewBag.attachments != null && ViewBag.attachments.Count > 0)
@@ -374,10 +573,11 @@
                     }
                 </div>
             </div>
-            <!-- Comments Section -->
+            
+            <!-- Comments Section - more compact -->
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="bx bx-comment me-2"></i>Comments</h5>
+                    <h5 class="mb-0"><i class="bx bx-comment me-1"></i>Comments</h5>
                 </div>
                 <div class="card-body d-flex flex-column">
                     <div class="comment-section mb-3">
@@ -435,19 +635,19 @@
         </div>
     </div>
 
-    <!-- Sub-Tasks Section -->
-    <div class="card mt-4">
+    <!-- Sub-Tasks Section - more compact -->
+    <div class="card mt-3">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bx bx-list-ul me-2"></i>Sub-Tasks</h5>
+            <h5 class="mb-0"><i class="bx bx-list-ul me-1"></i>Sub-Tasks</h5>
             <a asp-action="Create" class="btn btn-primary" asp-route-parentTaskId="@Model?.Task.ID">
                 <i class="bx bx-plus me-1"></i>Add Sub-Task
             </a>
         </div>
         <div class="card-body">
-            <div class="table-responsive">
-                @if (Model.SubTasks != null && Model.SubTasks.Any())
-                {
-                    <table class="table table-hover">
+            @if (Model.SubTasks != null && Model.SubTasks.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table">
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -461,11 +661,29 @@
                             @foreach (var item in Model.SubTasks)
                             {
                                 <tr>
-                                    <td>@item.ID</td>
-                                    <td>@item.Name</td>
-                                    <td>@(item.AppUser?.UserName ?? "-")</td>
+                                    <td>#@item.ID</td>
                                     <td>
-                                        <span class="badge bg-info">@(item.TaskStatusType?.Status ?? "-")</span>
+                                        <a href="@Url.Action("Details", new { id = item.ID })" class="text-decoration-none fw-medium">
+                                            @item.Name
+                                        </a>
+                                    </td>
+                                    <td>
+                                        @if (item.AppUser?.UserName != null)
+                                        {
+                                            <span class="d-inline-flex align-items-center">
+                                                <i class="bx bx-user-circle me-1 text-primary"></i>
+                                                @item.AppUser.UserName
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Not assigned</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="status-badge bg-primary-subtle">
+                                            @(item.TaskStatusType?.Status ?? "Unknown")
+                                        </span>
                                     </td>
                                     <td>
                                         <div class="btn-group">
@@ -484,15 +702,21 @@
                             }
                         </tbody>
                     </table>
-                }
-                else
-                {
-                    <div class="text-center py-5">
-                        <i class="bx bx-info-circle font-30 text-muted mb-2"></i>
-                        <p class="text-muted">No sub-tasks found</p>
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <i class="bx bx-list-plus font-40 text-muted mb-3"></i>
+                    <p class="text-muted mb-1">No sub-tasks found</p>
+                    <small class="text-muted mb-3 d-inline-block">Break down this task into smaller sub-tasks for better management</small>
+                    <div>
+                        <a asp-action="Create" class="btn btn-outline-primary" asp-route-parentTaskId="@Model?.Task.ID">
+                            <i class="bx bx-plus me-1"></i>Create Sub-Task
+                        </a>
                     </div>
-                }
-            </div>
+                </div>
+            }
         </div>
     </div>
 </div>

@@ -3,6 +3,7 @@ using Amazon.S3.Model;
 using EpicMarket.Contracts;
 using EpicMarket.Data.Models;
 using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -20,12 +21,17 @@ namespace EpicMarket.Services
         private readonly IUnitOfWork unitOfWork;
         private readonly string _bucketName;
 
-		public FileService(IAmazonS3 s3Client, ApplicationDbContext dbContext, IUnitOfWork unitOfWork)
+		private readonly IAttachmentService attachmentService;
+		private readonly IEntityService entityService;
+
+		public FileService(IAmazonS3 s3Client, ApplicationDbContext dbContext, IUnitOfWork unitOfWork,IAttachmentService attachmentService , IEntityService entityService )
         {
 			_s3Client = s3Client;
             this.dbContext = dbContext;
             this.unitOfWork = unitOfWork;
             _bucketName = "epic-market";
+			this.attachmentService = attachmentService;
+			this.entityService = entityService;
 		}
 
         public async Task<bool> DeleteFileAsync( string key)
@@ -70,7 +76,7 @@ namespace EpicMarket.Services
 			};
 		}
 
-		public async Task<string> UploadFileAsync(IFormFile file, string prefix , string fileNameKey)
+		public async Task<string> UploadFileAsync(IFormFile file, string prefix , string fileNameKey, string EntityName, int RecordId)
 		{
 			
 			var request = new PutObjectRequest()
@@ -80,8 +86,20 @@ namespace EpicMarket.Services
 				InputStream = file.OpenReadStream()
 			};
 			request.Metadata.Add("Content-Type", file.ContentType);
-			 await _s3Client.PutObjectAsync(request);
-			return fileNameKey;
+			await _s3Client.PutObjectAsync(request);
+
+			var attachment = await attachmentService.InsertAttachment(new AttachmentDTO
+			{
+				Name = EntityName,
+				DocumentFile = fileNameKey,
+				DocumentType = "file",
+				DocumentFileType = file.ContentType,
+				DocumentFolderPath = prefix,
+				EntityId = await this.entityService.GetEntityId(EntityName),
+				RecordId = RecordId
+			});
+
+			return prefix  + fileNameKey;
 		}
 
 

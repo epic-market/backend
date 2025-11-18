@@ -1,0 +1,687 @@
+using AutoMapper;
+using EpicMarket.Contracts;
+using EpicMarket.Data.Models;
+using EpicMarket.Entities;
+using EpicMarket.Entities.CustomModels;
+using EpicMarket.Entities.Entities;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using System.Security.Claims;
+using System.Collections.Generic;
+using EpicMarket.Services;
+using EpicMarket.Entities.Constants;
+
+//verified in postman
+namespace EpicMarket.Business.API.Controllers
+{
+
+    /// <summary>
+    /// User accounts API. Provides endpoints for registration, login, profile details,
+    /// password management, OTP flows, and basic customer info.
+    /// </summary>
+    [Route("api/user")]
+    public class UserController : BaseApiController
+    {
+        private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> _signInManager;
+        private readonly ITokenService _tokenService;
+        private readonly IMapper _mapper;
+        private readonly ILogger<UserController> _logger;
+        private readonly ICommunicationService _communication;
+        private readonly IProfileService _profileService;
+        private readonly IConfiguration _configuration;
+        private readonly IOTPService _otpService;
+        public UserController(
+                                UserManager<AppUser> userManager,
+                                SignInManager<AppUser> signInManager,
+                                ITokenService tokenService,
+                                IMapper mapper,
+                                ILogger<UserController> logger,
+                                ICommunicationService communication,
+                                ApplicationDbContext dbContext,
+                                IHttpContextAccessor httpContextAccessor,
+                                IProfileService profileService,
+                                IConfiguration configuration,
+                                IOTPService otpService
+                                    ) : base(dbContext, httpContextAccessor)
+		{
+            _signInManager = signInManager;
+            _userManager = userManager;
+            _mapper = mapper;
+            _logger = logger;  
+            _communication = communication;
+            _tokenService = tokenService;
+            _profileService = profileService;
+            _configuration = configuration;
+            _otpService = otpService;
+        }
+        /// <summary>
+        /// Registers a new user with the MEMBER role.
+        /// </summary>
+        /// <param name="registerDto">Registration details (email, password, phone, etc.).</param>
+        /// <returns>Returns a JWT token on success.</returns>
+        [HttpPost("register")]
+        [AllowAnonymous]
+        public async Task<ActionResult<OperationResult<TokenDto>>> Register(RegisterDto registerDto)
+        {
+            try
+            {
+                _logger.LogInformation("Account Controller -> Register()-> params {0}", JsonConvert.SerializeObject(new { Params = registerDto }));
+
+                var response = new OperationResult<TokenDto>();
+
+                if (registerDto == null)
+                {
+                    _logger.LogError("RegisterDto is null");
+                    return BadRequest("Invalid request");
+                }
+
+                if (await UserExists(registerDto.Email))
+                {
+                    _logger.LogWarning("Username is already taken for email: {email}", registerDto.Email);
+                    return BadRequest("Username is taken");
+                }
+
+                var user = _mapper.Map<AppUser>(registerDto);
+
+                user.UserName = registerDto.Email.ToLower();
+                user.Email = registerDto.Email.ToLower();
+                user.PhoneNumber = registerDto.Phone;
+
+                var result = await _userManager.CreateAsync(user, registerDto.Password);
+
+                if (!result.Succeeded)
+                {
+                    _logger.LogError("User creation failed with errors: {@errors}", result.Errors);
+                    return BadRequest(result.Errors);
+                }
+
+                var roleResult = await _userManager.AddToRoleAsync(user, ROLES.MEMBER);
+
+                if (!roleResult.Succeeded)
+                {
+                    _logger.LogError("Adding user to role failed with errors: {@errors}", roleResult.Errors);
+                    return BadRequest(result.Errors);
+                }
+
+                var emailModel = EmailModel.GetBusinessRegistrationCompleteModel();
+
+                await _communication.SendTemplatedEmailAsync(
+                    registerDto.Email,
+                    EmailSubjectConstants.BusinessRegistrationComplete,
+                    EmailTemplateConstants.BusinessRegistrationComplete,
+                    emailModel
+                );
+
+                response.Data = new TokenDto
+                {
+                    Token = await _tokenService.CreateToken(user)
+                };
+
+                _logger.LogInformation("Account Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = response }));
+                _logger.LogInformation("User registered successfully with email: {email}", registerDto.Email);
+                return CreatedAtAction(nameof(Register), response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while registering user with email: {email}", registerDto.Email);
+                return StatusCode(500, "An error occurred while registering user");
+            }
+        }
+
+
+
+        /// <summary>
+        /// Registers a new user with the BUSINESS_OWNER role.
+        /// </summary>
+        /// <param name="registerDto">Registration details (email, password, phone, etc.).</param>
+        /// <returns>Returns a JWT token on success.</returns>
+        [HttpPost("business/register")]
+        [AllowAnonymous]
+        public async Task<ActionResult<OperationResult<TokenDto>>> RegisterBusiness(RegisterDto registerDto)
+        {
+            try
+            {
+                _logger.LogInformation("Account Controller -> Register()-> params {0}", JsonConvert.SerializeObject(new { Params = registerDto }));
+
+                var response = new OperationResult<TokenDto>();
+
+                if (registerDto == null)
+                {
+                    _logger.LogError("RegisterDto is null");
+                    return BadRequest("Invalid request");
+                }
+
+                if (await UserExists(registerDto.Email))
+                {
+                    _logger.LogWarning("Username is already taken for email: {email}", registerDto.Email);
+                return BadRequest("Username is taken");
+                }
+
+                var user = _mapper.Map<AppUser>(registerDto);
+
+                user.UserName = registerDto.Email.ToLower();
+                user.Email = registerDto.Email.ToLower();
+                user.PhoneNumber = registerDto.Phone;
+
+                // if(registerDto.OTP != null)
+                // {
+                //     var isVerified = await _otpService.VerifyOTPAsync(registerDto.ReferenceId, registerDto.OTP);
+                //     if(!isVerified)
+                //     {
+                //         return BadRequest("Invalid OTP");
+                //     }
+                // }
+
+                //create new business and save it with this user
+               
+
+                var result = await _userManager.CreateAsync(user, registerDto.Password);
+
+                if (!result.Succeeded)
+                {
+                    _logger.LogError("User creation failed with errors: {@errors}", result.Errors);
+                    return BadRequest(result.Errors);
+                }
+
+                var roleResult = await _userManager.AddToRoleAsync(user, ROLES.BUSINESS_OWNER);
+
+                if (!roleResult.Succeeded)
+                {
+                    _logger.LogError("Adding user to role failed with errors: {@errors}", roleResult.Errors);
+                    return BadRequest(result.Errors);
+                }
+
+                response.Data = new TokenDto
+                {
+                    Token = await _tokenService.CreateToken(user)
+                };
+
+                _logger.LogInformation("Account Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = response }));
+                _logger.LogInformation("User registered successfully with email: {email}", registerDto.Email);
+                return CreatedAtAction(nameof(Register), response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while registering user with email: {email}", registerDto.Email);
+                return StatusCode(500, "An error occurred while registering user");
+            }
+        }
+
+        /// <summary>
+        /// Logs in or creates a guest user via phone and OTP verification.
+        /// Route: POST api/user/login/phone
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <param name="loginPhoneDto">Phone number, OTP reference ID and OTP.</param>
+        /// <returns>Returns a JWT token on success.</returns>
+        [HttpPost("login/phone")]
+        [AllowAnonymous]
+        public async Task<ActionResult<OperationResult<TokenDto>>> LoginPhone(LoginPhoneDto loginPhoneDto)
+        {
+
+            var result = await _otpService.VerifyOTPAsync(loginPhoneDto.ReferenceId, loginPhoneDto.OTP);
+
+            if(!result)
+            {
+                _logger.LogError("OTP verification failed for user: {phone}", loginPhoneDto.Phone);
+                return Unauthorized("Invalid OTP");
+            }
+
+            var user = await GetUserByPhone(loginPhoneDto.Phone);
+            if(user == null)
+            {
+                //create user
+                user = new AppUser();
+                user.UserName = loginPhoneDto.Phone;
+                user.PhoneNumber = loginPhoneDto.Phone;
+                user.Email = loginPhoneDto.Phone;
+                user.FirstName = "Guest";
+                user.LastName = "Guest";
+                user.IsActive = true;
+                await _userManager.CreateAsync(user, "Guest");
+                await _userManager.AddToRoleAsync(user, ROLES.MEMBER);
+                await _userManager.UpdateAsync(user);
+                await dbContext.SaveChangesAsync();
+            }
+
+            var token = await _tokenService.CreateToken(user);
+
+            if(string.IsNullOrEmpty(token))
+            {
+                _logger.LogError("Failed to generate token for user: {phone}", loginPhoneDto.Phone);
+                return StatusCode(500, "Failed to generate token");
+            }
+
+            var response = new OperationResult<TokenDto>
+            {
+                Data = new TokenDto
+                {
+                    Token = token
+                }
+            };
+
+            return Ok(response);
+        }   
+
+        /// <summary>
+        /// Logs in a user using email and password.
+        /// Route: POST api/user/login
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <param name="loginDto">Email and password.</param>
+        /// <returns>Returns a JWT token on success.</returns>
+        [HttpPost("login")]
+        [AllowAnonymous]
+        public async Task<ActionResult<OperationResult<TokenDto>>> Login(LoginDto loginDto)
+
+        {
+            if (loginDto == null)
+            {
+                _logger.LogError("LoginDto is null");
+                return BadRequest("Invalid request");
+            }
+
+            var user = await GetUser(loginDto.Email);
+
+                if (user == null)
+                {
+                _logger.LogWarning("User not found for email: {email}", loginDto.Email);
+                    return Unauthorized("Invalid username");
+                }   
+
+                var result = await _signInManager
+                .CheckPasswordSignInAsync(user, loginDto.Password, false);
+
+                if (!result.Succeeded)
+                {
+                _logger.LogError("Password check failed for user: {email}", loginDto.Email);
+                    return Unauthorized("Invalid password");
+                }
+                 
+            var token = await _tokenService.CreateToken(user);
+                if (string.IsNullOrEmpty(token))
+                {
+                _logger.LogError("Failed to generate token for user: {email}", loginDto.Email);
+                    return StatusCode(500, "Failed to generate token");
+                }
+           
+            var response = new OperationResult<TokenDto>
+            {
+                Data = new TokenDto
+                {
+                    Token = token
+                }
+            };
+
+            _logger.LogInformation("User logged in successfully with email: {email}", loginDto.Email);
+            return Ok(response);
+        }
+        
+        /// <summary>
+        /// Gets the logged-in user's basic details, roles, business summary, and securables.
+        /// Route: GET api/user/details/business
+        /// Auth: Authorize
+        /// </summary>
+        /// <returns>Returns user profile info and access control list.</returns>
+        [HttpGet("details/business")]
+        [Authorize]
+        public async Task<ActionResult<OperationResult<LoginResult>>> GetUserInfo()
+        {
+            try
+            {
+                var response = new OperationResult<LoginResult>();
+                var user = await GetUser(this.LoggedInUserName); ;
+
+                if (user == null) 
+                {
+                    _logger.LogWarning("User not found for username: {username}", this.LoggedInUserName);
+                    return NotFound("User not found");
+                }
+
+                var roles = await _userManager.GetRolesAsync(user);
+
+                var userBusinessDto = new UserBusinessDto();
+
+                if (roles.Contains(ROLES.BUSINESS_OWNER))
+                {
+                    userBusinessDto = dbContext.Businesses.Where(c => c.PersonID == user.Id).Include(c => c.Status).Select(c => new UserBusinessDto()
+                    {
+                        businessId = c.ID == 0 ? null : c.ID,
+                        businessStatus = c.Status.Status,
+                    }).FirstOrDefault();
+                }
+                else if (roles.Contains(ROLES.BUSINESS_EMPLOYEE))
+                {
+                    userBusinessDto = dbContext.BusinessEmployeeMaps.Where(c => c.EmployeeID == user.Id).Include(c => c.Bussiness).Include(c => c.Bussiness.Status).Select(c => new UserBusinessDto()
+                    {
+                        businessId = c.Bussiness.ID == 0 ? null : c.Bussiness.ID,
+                        businessStatus = c.Bussiness.Status.Status,
+                    }).FirstOrDefault();
+                }
+                List<AccessControlList_Result> permissions= _profileService.GetAccessControlList(new Profile_SearchParams() { ApplicationName = null, LoggedInUserName = this.LoggedInUserName, UserRole = null });
+
+                response.Data = new LoginResult()
+                {
+                    UserDetails = new UserLoginDto
+                    {
+                        Username = user.UserName,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Phone = user.PhoneNumber
+                    },
+                    UserBusiness = userBusinessDto,
+                    Securables=permissions
+                };
+
+                _logger.LogInformation("User info retrieved successfully for username: {username}", this.LoggedInUserName);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("An error occurred while retrieving user info for username: {username}. Error: {error}", this.LoggedInUserName, ex.Message);
+                return StatusCode(500, "An error occurred while retrieving user info");
+            }
+        }
+        
+        /// <summary>
+        /// Updates the logged-in user's profile information.
+        /// Route: PUT api/user/details/business
+        /// Auth: Authorize
+        /// </summary>
+        /// <param name="loginUserEditDTO">Editable user fields (first name, last name, email, phone).</param>
+        /// <returns>Success message on update.</returns>
+        [HttpPut("details/business")]
+        [Authorize]
+        public async Task<ActionResult<OperationResult<string>>> PutInfo(LoginUserEditDTO loginUserEditDTO)
+        {
+            var user = await GetUser(this.LoggedInUserName);
+
+            // Logging and handling the case where the user is not found
+            if (user == null)
+            {
+                _logger.LogError("Invalid username, Please LogOut and LogIn");
+                return Unauthorized("Invalid username, Please LogOut and LogIn");
+            }
+
+            // Updating user information
+            user.Email = loginUserEditDTO.Email;
+            user.PhoneNumber = loginUserEditDTO.Phone;
+            user.FirstName = loginUserEditDTO.FirstName;
+            user.LastName = loginUserEditDTO.LastName;
+            user.UserName = loginUserEditDTO.Email;
+            
+            // Attempting to update the user
+            var result = await _userManager.UpdateAsync(user);
+
+            var response = new OperationResult<string>();
+
+            // Logging and handling the result of the update operation
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("User info updated successfully for username: {username}", this.LoggedInUserName);
+                response.Data = "User updated successfully.";
+                return Ok(response);
+            }
+            else
+            {
+                _logger.LogError("Failed to update user info for username: {username}. Error: {error}", this.LoggedInUserName, string.Join(", ", result.Errors.Select(e => e.Description)));
+                return BadRequest(result.Errors);
+            }
+        }
+
+        /// <summary>
+        /// Gets the logged-in customer's basic details.
+        /// Route: GET api/user/details/customer
+        /// Auth: Authorize
+        /// </summary>
+        /// <returns>Customer basic details.</returns>
+        [HttpGet("details/customer")]
+        [Authorize]
+        public async Task<ActionResult<CustomerBasicDetailsDto>> GetCustomerBasicDetails()
+        {
+            var customerDetails = await _profileService.GetCustomerBasicDetailsAsync(this.LoggedInUserName);
+
+            // Logging and handling the case where customer details are not found
+            if (customerDetails == null)
+            {
+                _logger.LogError("Customer details not found for username: {username}", this.LoggedInUserName);
+                return NotFound();
+            }
+
+            // Logging success
+            _logger.LogInformation("Customer basic details retrieved successfully for username: {username}", this.LoggedInUserName);
+
+            return Ok(customerDetails);
+        }
+
+        /// <summary>
+        /// Gets customer/person details by phone number or username.
+        /// Route: GET api/user/details/customer/{phoneOrUsername}
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <param name="phoneOrUsername">Phone number or username to search.</param>
+        /// <returns>List of matching customer details.</returns>
+        [HttpGet("details/customer/{phoneOrUsername}")]
+        [AllowAnonymous]
+        public async Task<ActionResult<OperationResult<List<CustomerDetails>>>> GetPersonDetails(string phoneOrUsername)
+        {
+            var response = new OperationResult<List<CustomerDetails>>();
+
+            // Attempting to get person details
+            response.Data = await _profileService.GetCustomerDetails(phoneOrUsername);
+
+            // Logging success
+            _logger.LogInformation("Person details retrieved successfully for PhoneOrUserName: {phoneOrUserName}", phoneOrUsername);
+
+            return response;
+        }
+
+        /// <summary>
+        /// Changes the logged-in user's password.
+        /// Route: POST api/user/change-password
+        /// Auth: Authorize
+        /// </summary>
+        /// <param name="changePasswordParams">Current password and new password.</param>
+        /// <returns>Success message on password change.</returns>
+        [HttpPost("change-password")]
+        [Authorize]
+        public async Task<ActionResult<OperationResult<string>>> ChangePassword(ChangePasswordParams changePasswordParams)
+        {
+            var response = new OperationResult<string>();
+
+            // Extracting UserID and UserName from the current user's claims
+            var UserID = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var UserName = this.User.FindFirst(ClaimTypes.Name).Value;
+
+            // Attempting to get the user from the database
+            var user = await GetUser(UserName);
+
+            // Logging if user is not found
+            if (user == null)
+            {
+                _logger.LogError("User not found for username: {username}", UserName);
+                return NotFound("User not found");
+            }
+
+            // Attempting to change the password
+            var result = await _userManager.ChangePasswordAsync(user, changePasswordParams.CurrentPassword, changePasswordParams.NewPassword);
+
+            // Logging and handling the result of the password change operation
+            if (!result.Succeeded)
+            {
+                _logger.LogError("Failed to change password for username: {username}. Error: {error}", UserName, string.Join(", ", result.Errors.Select(e => e.Description)));
+                return StatusCode(500, "Failed to change password");
+            }
+
+            // Logging success and setting the response data
+            _logger.LogInformation("Password changed successfully for username: {username}", UserName);
+            response.Data = "Password changed successfully";
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Initiates password reset for the given email (sends reset link/code).
+        /// Route: POST api/user/reset-password
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <param name="resetPassword">Reset password request parameters.</param>
+        /// <returns>Status of reset password initiation.</returns>
+        [HttpPost("reset-password")]
+        [AllowAnonymous]
+        public async Task<ActionResult<OperationResult<string>>> ResetPassword(ResetPasswordParams resetPassword)
+        {
+            var response = new OperationResult<string>();
+
+            // Checking if the user exists
+            if (await UserExists(resetPassword.Email))
+            {
+                // Attempting to reset the password
+                response.Data = await this._tokenService.ResetPassword(resetPassword);
+            }
+            else
+            {
+                // Logging and handling the case where the user is not found
+                _logger.LogError("Invalid User Name: {email}", resetPassword.Email);
+                response.Status = "ERROR";
+                response.Data = "Invalid User Name";
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// Validates a reset-password link or token.
+        /// Route: GET api/user/check-reset-password-link
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <param name="queryParam">Opaque query parameter from reset link.</param>
+        /// <returns>Result indicating validity and metadata.</returns>
+        [HttpGet("check-reset-password-link")]
+        [AllowAnonymous]
+        public ActionResult<OperationResult<CheckResetLinkResult>> CheckResetPasswordLink(string queryParam)
+        {
+            var response = new OperationResult<CheckResetLinkResult>();
+
+            // Attempting to check the reset password link
+            var result = _tokenService.CheckResetPasswordLink(queryParam);
+
+            // Logging and setting the response data
+            _logger.LogInformation("Reset password link checked for queryParam: {queryParam}", queryParam);
+            response.Data = result;
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Sets a new password using a valid reset token.
+        /// Route: POST api/user/set-new-password
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <param name="setNewPasswordParams">New password and reset token payload.</param>
+        /// <returns>Status of password update.</returns>
+        [HttpPost("set-new-password")]
+        [AllowAnonymous]
+        public async Task<ActionResult<OperationResult<string>>> SetNewPassword(SetNewPasswordParams setNewPasswordParams)
+        {
+            var response = new OperationResult<string>();
+
+            // Attempting to set a new password
+            response.Data = await this._tokenService.SetNewPassword(setNewPasswordParams);
+
+            // Logging success
+            _logger.LogInformation("New password set successfully for params: {setNewPasswordParams}", setNewPasswordParams);
+
+            return response;
+        }
+
+        /// <summary>
+        /// Sends an OTP to the specified username (email/phone) for the given purpose.
+        /// Route: POST api/user/send-otp
+        /// Auth: AllowAnonymous
+        /// </summary>
+        /// <param name="request">Username and OTP type (purpose).</param>
+        /// <returns>Reference ID and timestamp for the sent OTP.</returns>
+        [HttpPost("send-otp")]
+        [AllowAnonymous]
+        public async Task<ActionResult<OperationResult<OTPResponse>>> SendOTP(OTPRequest request)
+        {
+            try
+            {
+                var response = new OperationResult<OTPResponse>();
+
+                if (string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.Type))
+                {
+                    return BadRequest("Username and Type are required");
+                }
+
+                var (referenceId, timestamp) = await _otpService.SendOTPAsync(request.Username, request.Type);
+
+                response.Data = new OTPResponse
+                {
+                    ReferenceId = referenceId,
+                    Timestamp = timestamp
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending OTP to {username}", request.Username);
+                return StatusCode(500, "An error occurred while sending OTP");
+            }
+        }
+
+        //[HttpPost("verify-otp")]
+        //[AllowAnonymous]
+        //public async Task<ActionResult<OperationResult<bool>>> VerifyOTP(VerifyOTPRequest request)
+        //{
+        //    try
+        //    {
+        //        var response = new OperationResult<bool>();
+                
+        //        if (string.IsNullOrEmpty(request.ReferenceId) || string.IsNullOrEmpty(request.OTP))
+        //        {
+        //            return BadRequest("ReferenceId and OTP are required");
+        //        }
+
+        //        response.Data = await _otpService.VerifyOTPAsync(request.ReferenceId, request.OTP);
+                
+        //        return Ok(response);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error verifying OTP");
+        //        return StatusCode(500, "An error occurred while verifying OTP");
+        //    }
+        
+        
+        /// <summary>
+        /// Checks if a user exists in the system with the specified username.
+        /// Validates that the user is active and performs case-insensitive username comparison.
+        /// </summary>
+        /// <param name="username">The username to check for existence.</param>
+        /// <returns>Returns true if an active user with the specified username exists, otherwise false.</returns>
+        private async Task<bool> UserExists(string username)
+        {
+            return await _userManager.Users.AnyAsync(x => x.UserName == username.ToLower() && x.IsActive == true);
+        }
+
+        private async Task<AppUser> GetUser(string username)
+        {
+            return await _userManager.Users
+             .SingleOrDefaultAsync(x => x.UserName == username.ToLower() && x.IsActive == true);
+        }
+
+        private async Task<AppUser> GetUserByPhone(string phone)
+        {
+            return await _userManager.Users
+             .SingleOrDefaultAsync(x => x.PhoneNumber == phone && x.IsActive == true);
+        }
+
+
+    }
+}

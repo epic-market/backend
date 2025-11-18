@@ -35,7 +35,7 @@
                             <div class='row'>
                                 <div class='col-md-6'>
                                     <p class='mb-1'><strong>Order ID:</strong> @Model.OrderID</p>
-                                    <p class='mb-1'><strong>Catalog Name:</strong> @Model.Catalog.Name</p>
+                                    <p class='mb-1'><strong>Product Name:</strong> @Model.ProductVariants.ID</p>
                                 </div>
                                 <div class='col-md-6'>
                                     <p class='mb-1'><strong>Rate:</strong> ₹<span id="displayRate">@Model.Rate.ToString("F2")</span></p>
@@ -53,7 +53,7 @@
             <input type="hidden" asp-for="ModifiedDate" />
             <input type="hidden" asp-for="ModifiedBy" />
              <input type="hidden" asp-for="IsActive" />
-            <input type="hidden" asp-for="CatalogID" />
+            <input type="hidden" asp-for="VariantID" />
                         <input type="hidden" asp-for="OrderID" />
             <input type="hidden" asp-for="Rate" id="Rate" />
                         <input type="hidden" asp-for="TotalPrice" />

@@ -13,69 +13,101 @@ namespace EpicMarket.Entities
 {
 
 
-	public class AddProductsDto
+	public class AddProductsParams
 	{
-        public long? Barcode { get; set; }
         [Required]
 		public string Name { get; set; }
-
 		[Required]
 		public string Description { get; set; }
-		public string Category { get; set; }
-		
-        [Required]
-		public double Rate { get; set; }
+        public List<VarientOptionDto> VariantOptions { get; set; }
+        public int CategoryId { get; set; }
 		public bool IsRecommended { get; set; }= false;
-		public int? MaximumOrderPurchase { get; set; }
-
-        [Required]
-        public double CostPrice { get; set; }
-
-        public double? PackedHeight { get; set; }
-        public double? PackedWidhth { get; set; }
-        public double? PackedDepth { get; set; }
-        public double? Weight { get; set; }
         public bool RequiresRefrigeration { get; set; } = false;
-        public IFormFile[] Products { get; set; }
-		public IFormFile Thumbnail { get; set; }
+        public List<HighlightDto> BaseHightlights { get; set; }
+        public List<ProductVariantParams> Variants { get; set; }
 	}
 
-	public class ProductsDto
+    public class ProductVariantParams
     {
-        public int? Id { get; set; }
-		public long? Barcode { get; set; }
-		public string Name { get; set; }
-        public string Description { get; set; }
-        public string Category{ get; set; }
-        public double Rate { get; set; }
-        public List<string> Images { get; set; } 
-		public bool IsRecommended { get; set; }
-		public int? MaximumOrderPurchase { get; set; }
-        public string? Status { get; set; }
-		public string Thumbnail { get; set; }
-        public double CostPrice { get; set; }
+        public int? VariantId { get; set; }
+        public List<AttributeDto> Attributes { get; set; } //{"Size" : XL . Color: Red}
+        public string SKU { get; set; }
+         public string Barcode { get; set; }
+        public double SalePrice { get; set; }
+        public double? CompareAtPrice { get; set; }
+        public int? MaximumOrderQuantity { get; set; }
+        public int? MinimumOrderQuantity { get; set; }
         public double? PackedHeight { get; set; }
         public double? PackedWidhth { get; set; }
         public double? PackedDepth { get; set; }
+        public string WeightUnit { get; set; }
         public double? Weight { get; set; }
-        public bool RequiresRefrigeration { get; set; }
+        public List<HighlightDto> AdditionalHightlights { get; set; } 
+        public double CostPrice { get; set; }
+        public string[] ProductImages { get; set; }
+        public string Thumbnail { get; set; }
+        public bool IsDefaultVariant { get; set; }
     }
 
-    public class ProductAdvanced
+    public class AttributeDto
     {
-        public int CatelogId { get; set; }
+        public string Name { get; set; }
+        public string Value { get; set; }
+    }
 
+    public class HighlightDto
+    {
+        public string Key { get; set; }
+        public string Value { get; set; }
+    }
+
+    public class VarientOptionDto
+    {
+        public string Name { get; set; }
+        public List<string> Values { get; set; }
+    }
+
+
+	public class ProductParams
+    {
+        public int? Id { get; set; }
+		public string Name { get; set; }
+        public string Description { get; set; }
+        public CategoryDto Category{ get; set; }
+        public string  VariantOptions { get; set; }
+		public bool IsRecommended { get; set; }
+        public string BaseHightlights { get; set; }
+        public bool RequiresRefrigeration { get; set; }
+        public List<ProductVariantParams> Variants { get; set; }
+    }
+
+    public class CategoryDto {
+        public int CategoryId { get; set; }
+        public string CategoryName { get; set; }
+    }
+
+
+    public class VariantResult
+    {
+        public int VariantId { get; set; }
+        public string Attributes { get; set; }
+        public string SKU { get; set; }
+        public double SalePrice { get; set; }
+        public bool Selected { get; set; }
+        public string Thumbnail { get; set; }
+    }
+
+    public class InventoryResult
+    {
+        public int ProductVariantId { get; set; }
         public int BranchId { get; set; }
-        public int QuantityAvailable { get; set; }
-
-        public int MinimumStockLevel { get; set; }
-
-        public int MaximumStockLevel { get; set; }
-
-        public int ReorderPoint { get; set; }
-
+        public bool TrackInventory { get; set; }
+        public bool IsInStock { get; set; }
+        public int? QuantityAvailable { get; set; }
+        public int? MinimumStockLevel { get; set; }
+        public int? MaximumStockLevel { get; set; }
+        public int? ReorderPoint { get; set; }
         public bool BackOrders { get; set; }
-
     }
 
 
@@ -84,34 +116,43 @@ namespace EpicMarket.Entities
 
     public class ProductsMapOptionResult 
     {
-        public int Id { get; set; }
+
+        public int ProductId { get; set; }
 
         public string Name { get; set; }
 
         public string Description { get; set; }
 
-        public double Rate { get; set; }
+        public List<VariantResult> Variants { get; set; }
+    }
 
+
+
+
+    public class VariantResultTemp
+    {
+        public int VariantId { get; set; }
+        public string Attributes { get; set; }
+        public string SKU { get; set; }
+        public double SalePrice { get; set; }
         public bool Selected { get; set; }
-
         public string Thumbnail { get; set; }
     }
 
-    public class ProductParams
+    public class ProductListParams
     {
         public int PageIndex { get; set; } = 1;
         public int pageSize { get; set; } = 10;
         public string sortColumn { get; set; } = string.Empty;
         public bool ascending { get; set; } = true;
         public string searchTerm { get; set; } = string.Empty;
-
     }
 
 
     public class ProductMobileParams
     {
         public int OutletId { get; set; }
-        public string Category { get; set; }
+        public int CategoryId { get; set; }
         public string SearchTerm { get; set; }
         public string SortBy { get; set; } = "name"; // name, price, newest
         public string SortOrder { get; set; } = "asc"; // asc, desc
@@ -130,18 +171,80 @@ namespace EpicMarket.Entities
 
     }
 
-    public class ProductResult
+
+    public class ProductDetailsResult
     {
         public int ProductId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public double Rate { get; set; }
-        public double CostPrice { get; set; }
-        public int Count { get; set; }
-		public string Thumbnail { get; set; }
-		public string? Status { get; set; }
+        public CategoryDto Category { get; set; }
+        public bool RequiresRefrigeration { get; set; }
+        public bool IsRecommended { get; set; }
+        public List<VarientOptionDto> VariantOptions { get; set; }
+        public List<HighlightDto> BaseHightlights { get; set; }
+        public List<ProductVariantResult> Variants { get; set; }
+    }
 
+    public class ProductVariantResult
+    {
+        public int VariantId { get; set; }
+        public List<AttributeDto> Attributes { get; set; }
+        public string SKU { get; set; }
+        public double SalePrice { get; set; }
+        public double? CompareAtPrice { get; set; }
+        public double? CostPrice { get; set; }
+        public List<HighlightDto> AdditionalHightlights { get; set; }
+        public int? MaximumOrderQuantity { get; set; }
+        public int? MinimumOrderQuantity { get; set; }
+        public double? PackedHeight { get; set; }
+        public double? PackedWidth { get; set; }
+        public double? PackedDepth { get; set; }
+        public string WeightUnit { get; set; }
+        public double? Weight { get; set; }
+        public List<string> Images { get; set; }
+        public string Thumbnail { get; set; }
+
+        public bool IsDefaultVariant { get; set; }
+    }
+
+
+
+    public class ProductResult
+    {
+        public int ProductId { get; set; }
+        public string Name { get; set; }
+		public string Status { get; set; }
+        public string Category { get; set; }
+        public string  NoOfVariants { get; set; }
+        public string Thumbnail { get; set; }
+        public double Price { get; set; }
 	}
+
+
+    public class ProductForPOSResult
+    {
+        public string Category { get; set; }
+        public List<ProductsForCategory> Products { get; set; }
+	}
+
+    public class ProductsForCategory
+    {
+        public int ProductId { get; set; }
+        public string Name { get; set; }
+        public List<VarientResulForPos> VarientResulForPos { get; set; }
+    }
+    public class VarientResulForPos
+    {
+        public int VariantId { get; set; }
+        public string SKU { get; set; }
+        public string Attributes { get; set; }
+        public double SalePrice { get; set; }
+        public int QuantityAvailable { get; set; }
+        public string Barcode { get; set; }
+        public string Thumbnail { get; set; }
+
+    }
+
 
 
     public class CustomerProductResult
@@ -149,23 +252,21 @@ namespace EpicMarket.Entities
         public int ProductId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public double Rate { get; set; }
-        public string Thumbnail { get; set; }
         public double? Rating { get; set; }
         public int?  RatingCount { get; set; }
+        public bool IsRecommended { get; set; }
+        public List<VarientResultForCustomer> Variants { get; set; }
     }
-
-    public class CustomerResultBaseOnCatefory
+    public class VarientResultForCustomer
     {
-        public string Category { get; set; }
-
-        public List<CustomerProductResult> CustomerProductResults { get; set; }
+        public int VariantID { get; set; }
+        public List<AttributeDto> Attributes { get; set; }
+        public double SalePrice { get; set; }
+        public double? CompareAtPrice { get; set; }
+        public List<HighlightDto> AdditionalHightlights { get; set; }
+        public int? MaximumOrderQuantity { get; set; }
+        public int? MinimumOrderQuantity { get; set; }
     }
-
-
-
-
-
 
 
     public class ListOfImages
@@ -173,4 +274,43 @@ namespace EpicMarket.Entities
 		public List<string> ImageKeys { get; set; } 
 
 	}
+
+    public class SingleProductVariantsResult
+    {
+        public int VariantID { get; set; }
+        public int ProductID { get; set; }
+        public  List<AttributeDto> Attributes { get; set; }
+        public string SKU { get; set; }
+        public double SalePrice { get; set; }
+        public double CostPrice { get; set; }
+        public List<HighlightDto> AdditionalHightlights { get; set; }
+    }
+
+    public class CustomerProductDetailsResult
+    {
+        public int ProductId { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public CategoryDto Category { get; set; }
+        public double? Rating { get; set; }
+        public int? RatingCount { get; set; }
+        public bool IsRecommended { get; set; }
+        public List<HighlightDto> BaseHightlights { get; set; }
+        public List<CustomerProductVariantResult> Variants { get; set; }
+    }
+
+    public class CustomerProductVariantResult
+    {
+        public int VariantId { get; set; }
+        public List<AttributeDto> Attributes { get; set; }
+        public string SKU { get; set; }
+        public double SalePrice { get; set; }
+        public double? CompareAtPrice { get; set; }
+        public List<HighlightDto> AdditionalHightlights { get; set; }
+        public int? MaximumOrderQuantity { get; set; }
+        public int? MinimumOrderQuantity { get; set; }
+        public List<string> Images { get; set; }
+        public string Thumbnail { get; set; }
+    }
+
 }

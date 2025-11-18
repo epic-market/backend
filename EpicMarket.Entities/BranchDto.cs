@@ -34,9 +34,9 @@ namespace EpicMarket.Entities
         public double Longitude { get; set; }
         [Required]
         public int Pincode { get; set; }
+        public string Thumbnail { get; set; }
+        public string[] Photos { get; set; }
 
-        public IFormFile[] Photos { get; set; }
-        public IFormFile Thumbnail { get; set; }
     }
 
 
@@ -131,11 +131,11 @@ namespace EpicMarket.Entities
     }
 
 
-    public class BranchProductMapParams
+    public class BranchProductVariantMapParams
     {
         public int OutletId { get; set; }
-        public List<int> AddProductsId { get; set; }
-        public List<int> RemovedProductsId { get; set; }
+        public List<int> AddProductVariantId { get; set; }
+        public List<int> RemovedProductVariantId { get; set; }
     }
 
     public class BranchProductMapResult
@@ -150,9 +150,9 @@ namespace EpicMarket.Entities
 
     }
 
-    public class VerifyCatalogDto
+    public class VerifyProductDto
     {
-        public List<int> ListOfCatalogIDs { get; set; }
+        public List<int> ListOfProductIDs { get; set; }
 
     }
     public class QuickActionsParams
@@ -201,5 +201,41 @@ namespace EpicMarket.Entities
         public string Thumbnail { get; set; }
 
         public DateTime? SubscribedDate { get; set; }
+    }
+
+    public class CustomerOutletDetailResult
+    {
+        public int OutletId { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public long ContactNumber { get; set; }
+        public string ContactEmail { get; set; }
+        public string Address { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public int Pincode { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
+        public double? Rating { get; set; }
+        public int? ReviewCount { get; set; }
+        public bool IsOpen { get; set; }
+        public string Thumbnail { get; set; }
+        public List<string> Photos { get; set; }
+        public List<TimingDto> TimingList { get; set; }
+        public string SocialMediaLinkFacebook { get; set; }
+        public string SocialMediaLinkInstagram { get; set; }
+        public string SocialMediaLinkTwitter { get; set; }
+        public string SocialMediaLinkYoutube { get; set; }
+        public string SpecialNoteOfTheDay { get; set; }
+        public string BusinessCategory { get; set; }
+        public bool IsSubscribed { get; set; }
+    }
+
+
+    public class TimingDto
+    {
+        public string Day { get; set; }
+        public string OpenTime { get; set; }
+        public string CloseTime { get; set; }
     }
 }

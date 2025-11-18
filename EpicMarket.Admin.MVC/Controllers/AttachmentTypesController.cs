@@ -7,25 +7,40 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
+using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Admin.MVC.Attributes;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
+    [Authorize(Roles = $"{ROLES.ROOT}")]
     public class AttachmentTypesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public AttachmentTypesController(ApplicationDbContext context)
+        public AttachmentTypesController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: AttachmentTypes
+        [SecurableAuthorize(SecurableConstants.AttachmentTypesView)]
         public async Task<IActionResult> Index()
         {
             return View(await _context.AttachmentTypes.ToListAsync());
         }
 
         // GET: AttachmentTypes/Details/5
+        [SecurableAuthorize(SecurableConstants.AttachmentTypesView)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -44,6 +59,7 @@ namespace EpicMarket.Admin.MVC.Controllers
         }
 
         // GET: AttachmentTypes/Create
+        [SecurableAuthorize(SecurableConstants.AttachmentTypesAdd)]
         public IActionResult Create()
         {
             return View();
@@ -54,18 +70,33 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Name,Description")] AttachmentType attachmentType)
+        [SecurableAuthorize(SecurableConstants.AttachmentTypesAdd)]
+        public async Task<IActionResult> Create([Bind("ID,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] AttachmentType attachmentType)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(attachmentType);
                 await _context.SaveChangesAsync();
+
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddAttachmentType,
+                    EntityName = EntityConstants.AttachmentType,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Added attachment type '{attachmentType.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(attachmentType),
+                    RecordId = attachmentType.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
                 return RedirectToAction(nameof(Index));
             }
             return View(attachmentType);
         }
 
         // GET: AttachmentTypes/Edit/5
+        [SecurableAuthorize(SecurableConstants.AttachmentTypesEdit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -86,7 +117,8 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description")] AttachmentType attachmentType)
+        [SecurableAuthorize(SecurableConstants.AttachmentTypesEdit)]
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy")] AttachmentType attachmentType)
         {
             if (id != attachmentType.ID)
             {
@@ -97,8 +129,29 @@ namespace EpicMarket.Admin.MVC.Controllers
             {
                 try
                 {
+                    var originalEntity = await _context.AttachmentTypes.AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.ID == id);
+
                     _context.Update(attachmentType);
                     await _context.SaveChangesAsync();
+
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditAttachmentType,
+                        EntityName = EntityConstants.AttachmentType,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated attachment type '{attachmentType.Name}'",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = attachmentType
+                        }),
+                        RecordId = attachmentType.ID,
+                        BusinessID = 0,
+                        LoggedInUserName = User.Identity.Name
+                    });
+
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -111,12 +164,12 @@ namespace EpicMarket.Admin.MVC.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
             return View(attachmentType);
         }
 
         // GET: AttachmentTypes/Delete/5
+        [SecurableAuthorize(SecurableConstants.AttachmentTypesDelete)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -137,15 +190,28 @@ namespace EpicMarket.Admin.MVC.Controllers
         // POST: AttachmentTypes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [SecurableAuthorize(SecurableConstants.AttachmentTypesDelete)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var attachmentType = await _context.AttachmentTypes.FindAsync(id);
             if (attachmentType != null)
             {
                 _context.AttachmentTypes.Remove(attachmentType);
-            }
 
-            await _context.SaveChangesAsync();
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteAttachmentType,
+                    EntityName = EntityConstants.AttachmentType,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted attachment type '{attachmentType.Name}'",
+                    Data = System.Text.Json.JsonSerializer.Serialize(attachmentType),
+                    RecordId = attachmentType.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 

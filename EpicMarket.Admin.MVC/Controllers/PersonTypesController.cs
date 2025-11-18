@@ -7,16 +7,30 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Admin.MVC.Services;
+using System.Text.Json;
+using EpicMarket.Entities;
+using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Entities.Constants;
 
 namespace EpicMarket.Admin.MVC.Controllers
 {
+    [Authorize(Roles = $"{ROLES.ROOT}")]
     public class PersonTypesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public PersonTypesController(ApplicationDbContext context)
+        public PersonTypesController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: PersonTypes
@@ -54,12 +68,26 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Type,Description")] PersonType personType)
+        public async Task<IActionResult> Create([Bind("ID,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] PersonType personType)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(personType);
                 await _context.SaveChangesAsync();
+                
+                // Log event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.CREATE,
+                    EntityName = EntityConstants.PersonType,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Created person type: {personType.Type}",
+                    Data = JsonSerializer.Serialize(personType),
+                    RecordId = personType.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
+                
                 return RedirectToAction(nameof(Index));
             }
             return View(personType);
@@ -86,12 +114,17 @@ namespace EpicMarket.Admin.MVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Type,Description")] PersonType personType)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,Description,CreateDate,CreateBy,ModifiedDate,ModifiedBy,IsActive")] PersonType personType)
         {
             if (id != personType.ID)
             {
                 return NotFound();
             }
+            
+            // Get original entity for event logging
+            var originalEntity = await _context.PersonTypes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.ID == id);
 
             if (ModelState.IsValid)
             {
@@ -99,6 +132,23 @@ namespace EpicMarket.Admin.MVC.Controllers
                 {
                     _context.Update(personType);
                     await _context.SaveChangesAsync();
+                    
+                    // Log event
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.UPDATE,
+                        EntityName = EntityConstants.PersonType,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated person type: {personType.Type}",
+                        Data = JsonSerializer.Serialize(new
+                        {
+                            Original = originalEntity,
+                            Updated = personType
+                        }),
+                        RecordId = personType.ID,
+                        BusinessID = 0,
+                        LoggedInUserName = User.Identity.Name
+                    });
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -143,6 +193,19 @@ namespace EpicMarket.Admin.MVC.Controllers
             if (personType != null)
             {
                 _context.PersonTypes.Remove(personType);
+                
+                // Log event before saving changes
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DELETE,
+                    EntityName = EntityConstants.PersonType,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted person type: {personType.Type}",
+                    Data = JsonSerializer.Serialize(personType),
+                    RecordId = personType.ID,
+                    BusinessID = 0,
+                    LoggedInUserName = User.Identity.Name
+                });
             }
 
             await _context.SaveChangesAsync();

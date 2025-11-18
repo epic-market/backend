@@ -1,0 +1,53 @@
+@{
+    ViewData["Title"] = "Upload Promotional Leads";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+    <div class="breadcrumb-title pe-3">Promotional Leads</div>
+    <div class="ps-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 p-0">
+                <li class="breadcrumb-item">
+                    <a asp-action="Index"><i class="bx bx-home-alt"></i></a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Upload</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Upload Promotional Leads</h5>
+        
+        <div class="mb-3">
+            <a asp-action="DownloadSample" class="btn btn-outline-primary">
+                <i class="bx bx-download"></i> Download Sample CSV
+            </a>
+        </div>
+        
+        <form asp-action="Upload" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            
+            <div class="mb-3">
+                <label for="file" class="form-label">Select CSV File</label>
+                <input type="file" class="form-control" id="file" name="file" accept=".csv" required />
+                <div class="form-text">
+                    The file should have at least two columns: Gmail and WhichApplication.
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <h6>File Format:</h6>
+                <p>First row should be headers, with data in the format: Gmail,WhichApplication</p>
+                <p>Example: john.doe@gmail.com,Mobile App</p>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                <button type="submit" class="btn btn-primary">Upload</button>
+            </div>
+        </form>
+    </div>
+</div> 

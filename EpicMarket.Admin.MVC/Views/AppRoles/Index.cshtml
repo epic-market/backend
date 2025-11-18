@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<EpicMarket.Data.Models.AppRole>
+@using EpicMarket.Entities.Constants
 
 @{
     ViewData["Title"] = "Index";
@@ -19,7 +20,7 @@
 </div>
 
 <p class="d-flex justify-content-end">
-    <a asp-action="Create" class="btn btn-primary px-5"><i class='bx bx-plus mr-1'></i>Create New</a>
+    <a asp-action="Create" class="btn btn-primary px-5" securable="@SecurableConstants.AppRolesAdd"><i class='bx bx-plus mr-1'></i>Create New</a>
 </p>
 
 <div class="card">
@@ -53,9 +54,9 @@
                 @Html.DisplayFor(modelItem => item.ConcurrencyStamp)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a asp-action="Edit" asp-route-id="@item.Id" securable="@SecurableConstants.AppRolesEdit">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id" securable="@SecurableConstants.AppRolesView">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id" securable="@SecurableConstants.AppRolesDelete">Delete</a>
             </td>
         </tr>
 }

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your Verification Code - Epic Market</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        line-height: 1.6;
+        color: #1a1a1a;
+        background-color: #f5f5f5;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .main-container {
+        max-width: 600px;
+        margin: 40px auto;
+        background: #ffffff;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      }
+
+      .header {
+        background: linear-gradient(135deg, #000000, #1a1a1a);
+        padding: 40px 20px;
+        text-align: center;
+        color: #ffffff;
+      }
+
+      .logo {
+        font-size: 32px;
+        font-weight: 700;
+        letter-spacing: -1px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .logo-dot {
+        width: 8px;
+        height: 8px;
+        background: #ffffff;
+        border-radius: 50%;
+        display: inline-block;
+      }
+
+      .content {
+        padding: 40px 30px;
+      }
+
+      .verification-code {
+        text-align: center;
+        margin: 32px 0;
+      }
+
+      .code-display {
+        font-family: "SF Mono", "Courier New", Courier, monospace;
+        font-size: 32px;
+        font-weight: 700;
+        letter-spacing: 8px;
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 12px;
+        border: 2px dashed #000000;
+        margin: 16px 0;
+        display: inline-block;
+      }
+
+      .timer-notice {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        color: #dc2626;
+        font-weight: 500;
+        margin-top: 16px;
+      }
+
+      .security-box {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 24px;
+        margin: 32px 0;
+        border-left: 4px solid #000000;
+      }
+
+      .security-list {
+        list-style-type: none;
+        margin: 16px 0 0 0;
+      }
+
+      .security-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 12px;
+        color: #4b5563;
+      }
+
+      .security-list li svg {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+        margin-top: 4px;
+      }
+
+      .info-box {
+        background: #fef3c7;
+        border-radius: 8px;
+        padding: 16px;
+        margin: 24px 0;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        color: #92400e;
+      }
+
+      .footer {
+        text-align: center;
+        padding: 24px;
+        background: #f8fafc;
+        color: #6b7280;
+        font-size: 14px;
+        margin-top: 40px;
+        border-top: 1px solid #e5e7eb;
+      }
+
+      @media (max-width: 600px) {
+        .main-container {
+          margin: 0;
+          border-radius: 0;
+        }
+
+        .content {
+          padding: 24px 16px;
+        }
+
+        .code-display {
+          font-size: 28px;
+          letter-spacing: 6px;
+          padding: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-container">
+      <div class="header">
+        <div class="logo">
+          Epic Market
+          <span class="logo-dot"></span>
+        </div>
+      </div>
+
+      <div class="content">
+        <div style="text-align: center">
+          <h1 style="font-size: 24px; margin-bottom: 16px">
+            Verify Your Account
+          </h1>
+          <p style="color: #4b5563">
+            Please use the verification code below to complete your action.
+          </p>
+        </div>
+
+        <div class="verification-code">
+          <div class="code-display">{OTP_CODE}</div>
+          <div class="timer-notice">
+            <svg width="20" height="20" viewBox="0 0 24 24">
+              <path
+                fill="currentColor"
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-.5-13H13v5l4.25 2.52-.75 1.28L11 13V7z"
+              />
+            </svg>
+            Code expires in 5 minutes
+          </div>
+        </div>
+
+        <div class="info-box">
+          <svg width="24" height="24" viewBox="0 0 24 24">
+            <path
+              fill="currentColor"
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+            />
+          </svg>
+          <div>
+            <strong>Action Required:</strong> Enter this code on the
+            verification page to continue.
+          </div>
+        </div>
+
+        <div class="security-box">
+          <h3>Security Notice</h3>
+          <ul class="security-list">
+            <li>
+              <svg viewBox="0 0 24 24">
+                <path
+                  fill="currentColor"
+                  d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"
+                />
+              </svg>
+              Never share this code with anyone, including Epic Market support
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24">
+                <path
+                  fill="currentColor"
+                  d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"
+                />
+              </svg>
+              The code is valid for one use only and expires in 5 minutes
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24">
+                <path
+                  fill="currentColor"
+                  d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"
+                />
+              </svg>
+              If you didn't request this code, please ignore this email
+            </li>
+          </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 32px">
+          <p style="color: #4b5563">Need help? Contact our support team</p>
+          <p style="margin-top: 8px">
+            <a
+              href="mailto:{Support_Email}"
+              style="color: #000000; text-decoration: underline"
+              >{Support_Email}</a
+            >
+          </p>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>© {Current_Year} Epic Market. All rights reserved.</p>
+        <p style="margin-top: 8px">{Company_Address}</p>
+        <p style="margin-top: 16px">
+          <small
+            >This is an automated message. Please do not reply to this
+            email.</small
+          >
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

@@ -26,6 +26,7 @@ namespace EpicMarket.Entities
         public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
+        public string Thumbnail { get; set; }
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         public double Distance { get; set; }
@@ -36,10 +37,10 @@ namespace EpicMarket.Entities
         public int Id { get; set; }
         public string Name { get; set; }
         public double Price { get; set; }
+        public string Thumbnail { get; set; }
         public string BranchName { get; set; }
         public int BranchId { get; set; }
         public double Distance { get; set; }
-
     }
 
     public class TrendingOutletDto

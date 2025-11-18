@@ -5,10 +5,10 @@ namespace EpicMarket.Admin.MVC.Models
 {
 	public class CatelogModel
 	{
-        public Catalog Catalog { get; set; }
+        public EpicMarket.Data.Models.Catalog Product { get; set; }
 
-		public OutletProduct OutletProduct { get; set; }
+		public Inventory Inventory { get; set; }
 
-		public List<OutletProduct> OutletProducts { get; set; }
+		public List<Inventory> Inventorys { get; set; }
     }
 }

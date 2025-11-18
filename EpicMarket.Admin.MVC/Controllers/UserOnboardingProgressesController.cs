@@ -7,16 +7,27 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EpicMarket.Admin.MVC.Data;
 using EpicMarket.Data.Models;
-
+using EpicMarket.Admin.MVC.Contracts;
+using EpicMarket.Entities;
+using Microsoft.AspNetCore.Authorization;
+using EpicMarket.Entities.Constants;
 namespace EpicMarket.Admin.MVC.Controllers
 {
+    [Authorize(Roles = $"{ROLES.ADMIN},{ROLES.ROOT}")]
     public class UserOnboardingProgressesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEventService _eventService;
+        private readonly IUrlContextService _urlContextService;
 
-        public UserOnboardingProgressesController(ApplicationDbContext context)
+        public UserOnboardingProgressesController(
+            ApplicationDbContext context,
+            IEventService eventService,
+            IUrlContextService urlContextService)
         {
             _context = context;
+            _eventService = eventService;
+            _urlContextService = urlContextService;
         }
 
         // GET: UserOnboardingProgresses
@@ -61,17 +72,27 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,UserID,StepID,CompletedAt,IsCompleted")] UserOnboardingProgress userOnboardingProgress)
         {
-
-
             if (userOnboardingProgress.IsCompleted)
             { 
                 userOnboardingProgress.CompletedAt = DateTime.Now;
             }
 
-
             if (ModelState.IsValid)
             {
                 _context.Add(userOnboardingProgress);
+                
+                // Log the event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.AddUserOnboardingProgress,
+                    EntityName = EntityConstants.UserOnboardingProgress,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Created onboarding progress for user ID {userOnboardingProgress.UserID}, step ID {userOnboardingProgress.StepID}",
+                    Data = System.Text.Json.JsonSerializer.Serialize(userOnboardingProgress),
+                    RecordId = userOnboardingProgress.Id,
+                    LoggedInUserName = User.Identity.Name
+                });
+                
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -110,8 +131,6 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,UserID,StepID,CompletedAt,IsCompleted")] UserOnboardingProgress userOnboardingProgress)
         {
-
-
             if (userOnboardingProgress.IsCompleted)
             {
                 userOnboardingProgress.CompletedAt = DateTime.Now;
@@ -122,11 +141,32 @@ namespace EpicMarket.Admin.MVC.Controllers
                 return NotFound();
             }
 
+            // Get the original entity for comparison
+            var originalEntity = await _context.UserOnboardingProgresses
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.Id == id);
+
             if (ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(userOnboardingProgress);
+                    
+                    // Log the event
+                    await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                    {
+                        EventName = EventConstants.EditUserOnboardingProgress,
+                        EntityName = EntityConstants.UserOnboardingProgress,
+                        Source = _urlContextService.CurrentPageUrl,
+                        Description = $"Updated onboarding progress for user ID {userOnboardingProgress.UserID}, step ID {userOnboardingProgress.StepID}",
+                        Data = System.Text.Json.JsonSerializer.Serialize(new { 
+                            Original = originalEntity, 
+                            Updated = userOnboardingProgress 
+                        }),
+                        RecordId = userOnboardingProgress.Id,
+                        LoggedInUserName = User.Identity.Name
+                    });
+                    
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -172,10 +212,26 @@ namespace EpicMarket.Admin.MVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var userOnboardingProgress = await _context.UserOnboardingProgresses.FindAsync(id);
+            var userOnboardingProgress = await _context.UserOnboardingProgresses
+                .Include(u => u.Step)
+                .Include(u => u.User)
+                .FirstOrDefaultAsync(m => m.Id == id);
+                
             if (userOnboardingProgress != null)
             {
                 _context.UserOnboardingProgresses.Remove(userOnboardingProgress);
+                
+                // Log the event
+                await _eventService.LogEvent(new EVENT_LOG_SAVE_PARAMS
+                {
+                    EventName = EventConstants.DeleteUserOnboardingProgress,
+                    EntityName = EntityConstants.UserOnboardingProgress,
+                    Source = _urlContextService.CurrentPageUrl,
+                    Description = $"Deleted onboarding progress for user {userOnboardingProgress.User?.UserName}, step {userOnboardingProgress.Step?.StepName}",
+                    Data = System.Text.Json.JsonSerializer.Serialize(userOnboardingProgress),
+                    RecordId = userOnboardingProgress.Id,
+                    LoggedInUserName = User.Identity.Name
+                });
             }
 
             await _context.SaveChangesAsync();
