@@ -7,6 +7,8 @@ using EpicMarket.Admin.MVC.Contracts;
 using EpicMarket.Admin.MVC.Services;
 using EpicMarket.Admin.MVC.Middleware;
 using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
+using Microsoft.Identity.Web;
+using Microsoft.Identity.Web.UI;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +25,7 @@ var connectionString = builder.Configuration.GetConnectionString("AuthDbContextC
 
 // Add services to the container.
 builder.Services.AddControllersWithViews()
+    .AddMicrosoftIdentityUI()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
@@ -45,6 +48,9 @@ builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(connectionString));
 
+// Configure Entra ID (Azure AD) Authentication
+builder.Services.AddAuthentication()
+    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 
 builder.Services.AddDefaultIdentity<AppUser>().AddDefaultTokenProviders().
         AddRoles<AppRole>()
@@ -101,7 +107,9 @@ app.Use(async (context, next) =>
         "/Account/AccessDenied",  // Added this path format
         "/Identity/Account/LoginWith2fa",
         "/Identity/Account/LoginWithRecoveryCode",
-        
+        "/Identity/Account/ExternalLogin",  // Allow external login callback
+        "/signin-oidc",  // OIDC callback
+        "/signout-callback-oidc",  // OIDC signout callback
     };
 
     // Define URLs that require authentication
@@ -118,11 +126,15 @@ app.Use(async (context, next) =>
         "/Identity/Account/Register"
     };
 
-    // Check if the request path starts with the Identity segment
-    if (context.Request.Path.StartsWithSegments("/Identity", StringComparison.OrdinalIgnoreCase))
+    // Check if the request path starts with the Identity segment or OIDC callbacks
+    if (context.Request.Path.StartsWithSegments("/Identity", StringComparison.OrdinalIgnoreCase) ||
+        context.Request.Path.StartsWithSegments("/signin-oidc", StringComparison.OrdinalIgnoreCase) ||
+        context.Request.Path.StartsWithSegments("/signout-callback-oidc", StringComparison.OrdinalIgnoreCase))
     {
-        // Check if the request path is one of the public URLs
-        bool isPublicUrl = publicUrls.Any(path => context.Request.Path.Equals(path, StringComparison.OrdinalIgnoreCase));
+        // Check if the request path is one of the public URLs (exact match or starts with)
+        bool isPublicUrl = publicUrls.Any(path => 
+            context.Request.Path.Equals(path, StringComparison.OrdinalIgnoreCase) ||
+            context.Request.Path.StartsWithSegments(path, StringComparison.OrdinalIgnoreCase));
 
         // Check if the request path is one of the authenticated URLs
         bool isAuthenticatedUrl = authenticatedUrls.Any(path => context.Request.Path.Equals(path, StringComparison.OrdinalIgnoreCase));
