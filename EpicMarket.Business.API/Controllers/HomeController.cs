@@ -172,5 +172,44 @@ namespace EpicMarket.Business.API.Controllers
 
             return Ok(response);
         }
+
+        //create an endpoint to get all the categories here we need to take the latitude and longitude and return the categories
+        [HttpGet("get-categories")]
+        [Authorize]
+        public async Task<ActionResult<OperationResult<List<CategoryDto>>>> GetAllCategories([FromQuery] CategoryParams categoryParams)
+        {
+            var reponse = new OperationResult<List<CategoryDto>>();
+
+            this.logger.LogInformation("Home Controller -> GetAllCategories()");
+
+            var list = await homeService.GetAllCategories(categoryParams);
+
+            this.logger.LogInformation("Home Controller-> GetAllCategories()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = list }));
+
+            reponse.Data = list;
+
+            return Ok(list);
+        }
+
+    
+
+        [HttpGet("get-trending-businesses")]
+        public async Task<ActionResult<OperationResult<List<TrendingBusinessDto>>>> GetTrendingBusinesses([FromQuery] TrendingBusinessParams trendingBusinessParams)
+        {
+            var reponse = new OperationResult<List<TrendingBusinessDto>>();
+
+            this.logger.LogInformation("Home Controller -> GetTrendingBusinesses()");
+
+            var list = await homeService.GetTrendingBusinesses(trendingBusinessParams);
+
+            this.logger.LogInformation("Home Controller-> GetTrendingBusinesses()-> return {0}", JsonConvert.SerializeObject(new { ListofOptions = list }));
+
+            reponse.Data = list;
+
+            return Ok(list);
+        }
+
+
+
     }
 }

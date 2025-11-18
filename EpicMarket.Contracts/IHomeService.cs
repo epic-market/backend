@@ -20,5 +20,11 @@ namespace EpicMarket.Contracts
 
         Task<BlogDto> GetBlogDetails(int blogId);
 
+        Task<List<FaqDto>> GetAllFaqsCustomerAsync();
+
+        Task<List<CategoryDto>> GetAllCategories(CategoryParams categoryParams);
+
+        Task<List<TrendingBusinessDto>> GetTrendingBusinesses(TrendingBusinessParams trendingBusinessParams);
+        
     }
 }

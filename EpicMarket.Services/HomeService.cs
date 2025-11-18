@@ -208,5 +208,17 @@ namespace EpicMarket.Services
                 })
                 .ToListAsync();
         }
+
+        public async Task<List<CategoryDto>> GetAllCategories(CategoryParams categoryParams)
+        {
+            return await context.BusinessCategories.Select(c=> new CategoryDto() { 
+            Id = c.ID,
+            Name = c.Name,
+            Description = c.Description
+            }).ToListAsync();
+        }
+
+
+        
     }
 }
