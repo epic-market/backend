@@ -1,6 +1,6 @@
 namespace EpicMarket.Entities
 {
-    public class CategoryDto
+    public class HomeCategoryDto
     {
         public int Id { get; set; }
         public string Name { get; set; }

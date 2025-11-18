@@ -209,16 +209,28 @@ namespace EpicMarket.Services
                 .ToListAsync();
         }
 
-        public async Task<List<CategoryDto>> GetAllCategories(CategoryParams categoryParams)
+        public async Task<List<HomeCategoryDto>> GetAllCategories(CategoryParams categoryParams)
         {
-            return await context.BusinessCategories.Select(c=> new CategoryDto() { 
+            return await context.BusinessCategories.Select(c=> new HomeCategoryDto() { 
             Id = c.ID,
             Name = c.Name,
             Description = c.Description
             }).ToListAsync();
         }
 
+        public Task<List<FaqDto>> GetAllFaqsCustomerAsync()
+        {
+            throw new NotImplementedException();
+        }
 
-        
+        public Task<List<TrendingBusinessDto>> GetTrendingBusinesses(TrendingBusinessParams trendingBusinessParams)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<List<CategoryDto>> IHomeService.GetAllCategories(CategoryParams categoryParams)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
