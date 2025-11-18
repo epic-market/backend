@@ -25,13 +25,13 @@ namespace EpicMarket.Business.API.Controllers
     [Route("api/user")]
     public class UserController : BaseApiController
     {
-        private readonly ITokenService _tokenService;
-        private readonly IMapper _mapper;
-        private readonly ILogger<UserController> logger;
-        private readonly ICommunicationService communication;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
-        private readonly IProfileService profileService;
+        private readonly ITokenService _tokenService;
+        private readonly IMapper _mapper;
+        private readonly ILogger<UserController> _logger;
+        private readonly ICommunicationService _communication;
+        private readonly IProfileService _profileService;
         private readonly IConfiguration _configuration;
         private readonly IOTPService _otpService;
         public UserController(
@@ -51,10 +51,10 @@ namespace EpicMarket.Business.API.Controllers
             _signInManager = signInManager;
             _userManager = userManager;
             _mapper = mapper;
-            this.logger = logger;
-            this.communication = communication;
+            _logger = logger;  
+            _communication = communication;
             _tokenService = tokenService;
-            this.profileService = profileService;
+            _profileService = profileService;
             _configuration = configuration;
             _otpService = otpService;
         }
@@ -69,19 +69,19 @@ namespace EpicMarket.Business.API.Controllers
         {
             try
             {
-                logger.LogInformation("Account Controller -> Register()-> params {0}", JsonConvert.SerializeObject(new { Params = registerDto }));
+                _logger.LogInformation("Account Controller -> Register()-> params {0}", JsonConvert.SerializeObject(new { Params = registerDto }));
 
                 var response = new OperationResult<TokenDto>();
 
                 if (registerDto == null)
                 {
-                    logger.LogError("RegisterDto is null");
+                    _logger.LogError("RegisterDto is null");
                     return BadRequest("Invalid request");
                 }
 
                 if (await UserExists(registerDto.Email))
                 {
-                    logger.LogWarning("Username is already taken for email: {email}", registerDto.Email);
+                    _logger.LogWarning("Username is already taken for email: {email}", registerDto.Email);
                     return BadRequest("Username is taken");
                 }
 
@@ -95,7 +95,7 @@ namespace EpicMarket.Business.API.Controllers
 
                 if (!result.Succeeded)
                 {
-                    logger.LogError("User creation failed with errors: {@errors}", result.Errors);
+                    _logger.LogError("User creation failed with errors: {@errors}", result.Errors);
                     return BadRequest(result.Errors);
                 }
 
@@ -103,13 +103,13 @@ namespace EpicMarket.Business.API.Controllers
 
                 if (!roleResult.Succeeded)
                 {
-                    logger.LogError("Adding user to role failed with errors: {@errors}", roleResult.Errors);
+                    _logger.LogError("Adding user to role failed with errors: {@errors}", roleResult.Errors);
                     return BadRequest(result.Errors);
                 }
 
                 var emailModel = EmailModel.GetBusinessRegistrationCompleteModel();
 
-                await communication.SendTemplatedEmailAsync(
+                await _communication.SendTemplatedEmailAsync(
                     registerDto.Email,
                     EmailSubjectConstants.BusinessRegistrationComplete,
                     EmailTemplateConstants.BusinessRegistrationComplete,
@@ -121,13 +121,13 @@ namespace EpicMarket.Business.API.Controllers
                     Token = await _tokenService.CreateToken(user)
                 };
 
-                logger.LogInformation("Account Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = response }));
-                logger.LogInformation("User registered successfully with email: {email}", registerDto.Email);
+                _logger.LogInformation("Account Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = response }));
+                _logger.LogInformation("User registered successfully with email: {email}", registerDto.Email);
                 return CreatedAtAction(nameof(Register), response);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while registering user with email: {email}", registerDto.Email);
+                _logger.LogError(ex, "An error occurred while registering user with email: {email}", registerDto.Email);
                 return StatusCode(500, "An error occurred while registering user");
             }
         }
@@ -136,8 +136,6 @@ namespace EpicMarket.Business.API.Controllers
 
         /// <summary>
         /// Registers a new user with the BUSINESS_OWNER role.
-        /// Route: POST api/user/business/register
-        /// Auth: AllowAnonymous
         /// </summary>
         /// <param name="registerDto">Registration details (email, password, phone, etc.).</param>
         /// <returns>Returns a JWT token on success.</returns>
@@ -147,19 +145,19 @@ namespace EpicMarket.Business.API.Controllers
         {
             try
             {
-                logger.LogInformation("Account Controller -> Register()-> params {0}", JsonConvert.SerializeObject(new { Params = registerDto }));
+                _logger.LogInformation("Account Controller -> Register()-> params {0}", JsonConvert.SerializeObject(new { Params = registerDto }));
 
                 var response = new OperationResult<TokenDto>();
 
                 if (registerDto == null)
                 {
-                    logger.LogError("RegisterDto is null");
+                    _logger.LogError("RegisterDto is null");
                     return BadRequest("Invalid request");
                 }
 
                 if (await UserExists(registerDto.Email))
                 {
-                    logger.LogWarning("Username is already taken for email: {email}", registerDto.Email);
+                    _logger.LogWarning("Username is already taken for email: {email}", registerDto.Email);
                 return BadRequest("Username is taken");
                 }
 
@@ -185,7 +183,7 @@ namespace EpicMarket.Business.API.Controllers
 
                 if (!result.Succeeded)
                 {
-                    logger.LogError("User creation failed with errors: {@errors}", result.Errors);
+                    _logger.LogError("User creation failed with errors: {@errors}", result.Errors);
                     return BadRequest(result.Errors);
                 }
 
@@ -193,7 +191,7 @@ namespace EpicMarket.Business.API.Controllers
 
                 if (!roleResult.Succeeded)
                 {
-                    logger.LogError("Adding user to role failed with errors: {@errors}", roleResult.Errors);
+                    _logger.LogError("Adding user to role failed with errors: {@errors}", roleResult.Errors);
                     return BadRequest(result.Errors);
                 }
 
@@ -202,13 +200,13 @@ namespace EpicMarket.Business.API.Controllers
                     Token = await _tokenService.CreateToken(user)
                 };
 
-                logger.LogInformation("Account Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = response }));
-                logger.LogInformation("User registered successfully with email: {email}", registerDto.Email);
+                _logger.LogInformation("Account Controller -> Register()-> return {0}", JsonConvert.SerializeObject(new { Value = response }));
+                _logger.LogInformation("User registered successfully with email: {email}", registerDto.Email);
                 return CreatedAtAction(nameof(Register), response);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while registering user with email: {email}", registerDto.Email);
+                _logger.LogError(ex, "An error occurred while registering user with email: {email}", registerDto.Email);
                 return StatusCode(500, "An error occurred while registering user");
             }
         }
@@ -229,7 +227,7 @@ namespace EpicMarket.Business.API.Controllers
 
             if(!result)
             {
-                logger.LogError("OTP verification failed for user: {phone}", loginPhoneDto.Phone);
+                _logger.LogError("OTP verification failed for user: {phone}", loginPhoneDto.Phone);
                 return Unauthorized("Invalid OTP");
             }
 
@@ -254,7 +252,7 @@ namespace EpicMarket.Business.API.Controllers
 
             if(string.IsNullOrEmpty(token))
             {
-                logger.LogError("Failed to generate token for user: {phone}", loginPhoneDto.Phone);
+                _logger.LogError("Failed to generate token for user: {phone}", loginPhoneDto.Phone);
                 return StatusCode(500, "Failed to generate token");
             }
 
@@ -283,7 +281,7 @@ namespace EpicMarket.Business.API.Controllers
         {
             if (loginDto == null)
             {
-                logger.LogError("LoginDto is null");
+                _logger.LogError("LoginDto is null");
                 return BadRequest("Invalid request");
             }
 
@@ -291,7 +289,7 @@ namespace EpicMarket.Business.API.Controllers
 
                 if (user == null)
                 {
-                logger.LogWarning("User not found for email: {email}", loginDto.Email);
+                _logger.LogWarning("User not found for email: {email}", loginDto.Email);
                     return Unauthorized("Invalid username");
                 }   
 
@@ -300,14 +298,14 @@ namespace EpicMarket.Business.API.Controllers
 
                 if (!result.Succeeded)
                 {
-                logger.LogError("Password check failed for user: {email}", loginDto.Email);
+                _logger.LogError("Password check failed for user: {email}", loginDto.Email);
                     return Unauthorized("Invalid password");
                 }
                  
             var token = await _tokenService.CreateToken(user);
                 if (string.IsNullOrEmpty(token))
                 {
-                logger.LogError("Failed to generate token for user: {email}", loginDto.Email);
+                _logger.LogError("Failed to generate token for user: {email}", loginDto.Email);
                     return StatusCode(500, "Failed to generate token");
                 }
            
@@ -319,7 +317,7 @@ namespace EpicMarket.Business.API.Controllers
                 }
             };
 
-            logger.LogInformation("User logged in successfully with email: {email}", loginDto.Email);
+            _logger.LogInformation("User logged in successfully with email: {email}", loginDto.Email);
             return Ok(response);
         }
         
@@ -340,7 +338,7 @@ namespace EpicMarket.Business.API.Controllers
 
                 if (user == null) 
                 {
-                    logger.LogWarning("User not found for username: {username}", this.LoggedInUserName);
+                    _logger.LogWarning("User not found for username: {username}", this.LoggedInUserName);
                     return NotFound("User not found");
                 }
 
@@ -364,7 +362,7 @@ namespace EpicMarket.Business.API.Controllers
                         businessStatus = c.Bussiness.Status.Status,
                     }).FirstOrDefault();
                 }
-                List<AccessControlList_Result> permissions= this.profileService.GetAccessControlList(new Profile_SearchParams() { ApplicationName = null, LoggedInUserName = this.LoggedInUserName, UserRole = null });
+                List<AccessControlList_Result> permissions= _profileService.GetAccessControlList(new Profile_SearchParams() { ApplicationName = null, LoggedInUserName = this.LoggedInUserName, UserRole = null });
 
                 response.Data = new LoginResult()
                 {
@@ -379,12 +377,12 @@ namespace EpicMarket.Business.API.Controllers
                     Securables=permissions
                 };
 
-                logger.LogInformation("User info retrieved successfully for username: {username}", this.LoggedInUserName);
+                _logger.LogInformation("User info retrieved successfully for username: {username}", this.LoggedInUserName);
                 return Ok(response);
             }
             catch (Exception ex)
             {
-                logger.LogError("An error occurred while retrieving user info for username: {username}. Error: {error}", this.LoggedInUserName, ex.Message);
+                _logger.LogError("An error occurred while retrieving user info for username: {username}. Error: {error}", this.LoggedInUserName, ex.Message);
                 return StatusCode(500, "An error occurred while retrieving user info");
             }
         }
@@ -405,7 +403,7 @@ namespace EpicMarket.Business.API.Controllers
             // Logging and handling the case where the user is not found
             if (user == null)
             {
-                logger.LogError("Invalid username, Please LogOut and LogIn");
+                _logger.LogError("Invalid username, Please LogOut and LogIn");
                 return Unauthorized("Invalid username, Please LogOut and LogIn");
             }
 
@@ -424,13 +422,13 @@ namespace EpicMarket.Business.API.Controllers
             // Logging and handling the result of the update operation
             if (result.Succeeded)
             {
-                logger.LogInformation("User info updated successfully for username: {username}", this.LoggedInUserName);
+                _logger.LogInformation("User info updated successfully for username: {username}", this.LoggedInUserName);
                 response.Data = "User updated successfully.";
                 return Ok(response);
             }
             else
             {
-                logger.LogError("Failed to update user info for username: {username}. Error: {error}", this.LoggedInUserName, string.Join(", ", result.Errors.Select(e => e.Description)));
+                _logger.LogError("Failed to update user info for username: {username}. Error: {error}", this.LoggedInUserName, string.Join(", ", result.Errors.Select(e => e.Description)));
                 return BadRequest(result.Errors);
             }
         }
@@ -445,17 +443,17 @@ namespace EpicMarket.Business.API.Controllers
         [Authorize]
         public async Task<ActionResult<CustomerBasicDetailsDto>> GetCustomerBasicDetails()
         {
-            var customerDetails = await profileService.GetCustomerBasicDetailsAsync(this.LoggedInUserName);
+            var customerDetails = await _profileService.GetCustomerBasicDetailsAsync(this.LoggedInUserName);
 
             // Logging and handling the case where customer details are not found
             if (customerDetails == null)
             {
-                logger.LogError("Customer details not found for username: {username}", this.LoggedInUserName);
+                _logger.LogError("Customer details not found for username: {username}", this.LoggedInUserName);
                 return NotFound();
             }
 
             // Logging success
-            logger.LogInformation("Customer basic details retrieved successfully for username: {username}", this.LoggedInUserName);
+            _logger.LogInformation("Customer basic details retrieved successfully for username: {username}", this.LoggedInUserName);
 
             return Ok(customerDetails);
         }
@@ -474,10 +472,10 @@ namespace EpicMarket.Business.API.Controllers
             var response = new OperationResult<List<CustomerDetails>>();
 
             // Attempting to get person details
-            response.Data = await this.profileService.GetCustomerDetails(phoneOrUsername);
+            response.Data = await _profileService.GetCustomerDetails(phoneOrUsername);
 
             // Logging success
-            logger.LogInformation("Person details retrieved successfully for PhoneOrUserName: {phoneOrUserName}", phoneOrUsername);
+            _logger.LogInformation("Person details retrieved successfully for PhoneOrUserName: {phoneOrUserName}", phoneOrUsername);
 
             return response;
         }
@@ -505,7 +503,7 @@ namespace EpicMarket.Business.API.Controllers
             // Logging if user is not found
             if (user == null)
             {
-                logger.LogError("User not found for username: {username}", UserName);
+                _logger.LogError("User not found for username: {username}", UserName);
                 return NotFound("User not found");
             }
 
@@ -515,12 +513,12 @@ namespace EpicMarket.Business.API.Controllers
             // Logging and handling the result of the password change operation
             if (!result.Succeeded)
             {
-                logger.LogError("Failed to change password for username: {username}. Error: {error}", UserName, string.Join(", ", result.Errors.Select(e => e.Description)));
+                _logger.LogError("Failed to change password for username: {username}. Error: {error}", UserName, string.Join(", ", result.Errors.Select(e => e.Description)));
                 return StatusCode(500, "Failed to change password");
             }
 
             // Logging success and setting the response data
-            logger.LogInformation("Password changed successfully for username: {username}", UserName);
+            _logger.LogInformation("Password changed successfully for username: {username}", UserName);
             response.Data = "Password changed successfully";
 
             return Ok(response);
@@ -548,7 +546,7 @@ namespace EpicMarket.Business.API.Controllers
             else
             {
                 // Logging and handling the case where the user is not found
-                logger.LogError("Invalid User Name: {email}", resetPassword.Email);
+                _logger.LogError("Invalid User Name: {email}", resetPassword.Email);
                 response.Status = "ERROR";
                 response.Data = "Invalid User Name";
             }
@@ -572,7 +570,7 @@ namespace EpicMarket.Business.API.Controllers
             var result = _tokenService.CheckResetPasswordLink(queryParam);
 
             // Logging and setting the response data
-            logger.LogInformation("Reset password link checked for queryParam: {queryParam}", queryParam);
+            _logger.LogInformation("Reset password link checked for queryParam: {queryParam}", queryParam);
             response.Data = result;
 
             return Ok(response);
@@ -595,7 +593,7 @@ namespace EpicMarket.Business.API.Controllers
             response.Data = await this._tokenService.SetNewPassword(setNewPasswordParams);
 
             // Logging success
-            logger.LogInformation("New password set successfully for params: {setNewPasswordParams}", setNewPasswordParams);
+            _logger.LogInformation("New password set successfully for params: {setNewPasswordParams}", setNewPasswordParams);
 
             return response;
         }
@@ -632,7 +630,7 @@ namespace EpicMarket.Business.API.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error sending OTP to {username}", request.Username);
+                _logger.LogError(ex, "Error sending OTP to {username}", request.Username);
                 return StatusCode(500, "An error occurred while sending OTP");
             }
         }
@@ -656,7 +654,7 @@ namespace EpicMarket.Business.API.Controllers
         //    }
         //    catch (Exception ex)
         //    {
-        //        logger.LogError(ex, "Error verifying OTP");
+        //        _logger.LogError(ex, "Error verifying OTP");
         //        return StatusCode(500, "An error occurred while verifying OTP");
         //    }
         

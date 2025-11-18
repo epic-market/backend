@@ -21,13 +21,14 @@ namespace EpicMarket.Business.API.Controllers
 		private readonly IHttpContextAccessor httpContextAccessor;
 		protected readonly ApplicationDbContext dbContext;
 
-		public BaseApiController(ApplicationDbContext dbContext,IHttpContextAccessor httpContextAccessor)
-        {
+		public BaseApiController(ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor)
+		{
 			this.httpContextAccessor = httpContextAccessor;
 			this.dbContext = dbContext;
-        }
-
-		public int BusinessId //we get the business id from the user role which is the last business id that the user is associated with
+		}
+         
+		 //we get the business id from the user role which is the last business id that the user is associated with
+		public int BusinessId 
         {
             get {
                 var usernameid = int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);

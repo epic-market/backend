@@ -14,13 +14,10 @@ namespace EpicMarket.Data.Models
     public class AppUser :IdentityUser<int>
     {
         // Foreign key to Address table
-
-
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string UniqueGuid { get; set; }
         public int OTP { get; set; }
-
         public bool IsActive { get; set; }
         public DateTime LastActive { get; set; } = DateTime.Now;
  
