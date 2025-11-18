@@ -57,7 +57,9 @@ namespace EpicMarket.Business.API.Extension
             services.AddScoped<IProductCategoryService, ProductCategoryService>();
             services.AddScoped<IEntityService, EntityService>();
             services.AddScoped<IEmailTemplateService, EmailTemplateService>();
-            services.AddScoped<IEmailService, EmailService>();
+            
+            // Register HttpClient for EmailService
+            services.AddHttpClient<IEmailService, EmailService>();
 
 
             services.AddScoped<LogUserActivity>();

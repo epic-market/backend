@@ -10,7 +10,6 @@
     <PackageReference Include="AWSSDK.S3" Version="3.7.307.29" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NVelocity" Version="1.2.0" />
-    <PackageReference Include="SendGrid" Version="9.29.3" />
   </ItemGroup>
 
   <ItemGroup>

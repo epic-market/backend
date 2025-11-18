@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using System.IO;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using Microsoft.Extensions.Configuration;
-using SendGrid;
-using SendGrid.Helpers.Mail;
+using Newtonsoft.Json;
 using EpicMarket.Entities.CustomModels;
 using EpicMarket.Contracts;
 
@@ -12,47 +14,75 @@ namespace EpicMarket.Services
 {
     public class EmailService : IEmailService
     {
-        private readonly string _apiKey;
+        private readonly string _apiToken;
         private readonly string _fromEmail;
         private readonly string _fromName;
+        private readonly HttpClient _httpClient;
 
-        public EmailService(IConfiguration configuration)
+        public EmailService(IConfiguration configuration, HttpClient httpClient)
         {
-            _apiKey = configuration["SendGrid:ApiKey"];
-            _fromEmail = configuration["SendGrid:FromEmail"] ?? "akhil@epicmarket.in";
-            _fromName = configuration["SendGrid:FromName"] ?? "Epic Market";
+            _apiToken = configuration["Mailtrap:ApiToken"] ?? throw new ArgumentNullException("Mailtrap:ApiToken");
+            _fromEmail = configuration["Mailtrap:FromEmail"] ?? "hello@epicmarket.in";
+            _fromName = configuration["Mailtrap:FromName"] ?? "Epic Market";
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            
+            // Configure HttpClient base address for Mailtrap API
+            _httpClient.BaseAddress = new Uri("https://send.api.mailtrap.io");
         }
         
         public async Task SendEmailAsync(string toEmail, string subject, string body, List<EmailAttachmentModel> attachments = null)
         {
-            try {
-                var client = new SendGridClient(_apiKey);
-                var from = new EmailAddress(_fromEmail, _fromName);
-                var to = new EmailAddress(toEmail);
+            try
+            {
+                // Determine if body is HTML or plain text
+                bool isHtml = body.Contains("<html", StringComparison.OrdinalIgnoreCase) || 
+                             body.Contains("<!DOCTYPE", StringComparison.OrdinalIgnoreCase) ||
+                             body.Contains("<body", StringComparison.OrdinalIgnoreCase);
 
-                var msg = MailHelper.CreateSingleEmail(
-                    from,
-                    to, 
-                    subject,
-                    plainTextContent: body, // Plain text version
-                    htmlContent: body // HTML version
-                );
-                
-                // Add attachments if any
-                if (attachments != null && attachments.Count > 0)
+                // Build Mailtrap API request payload
+                var payload = new
                 {
-                    foreach (var attachment in attachments)
+                    from = new
                     {
-                        msg.AddAttachment(attachment.Filename, attachment.Content, 
-                            attachment.Type, attachment.Disposition, attachment.ContentId);
-                    }
-                }
+                        email = _fromEmail,
+                        name = _fromName
+                    },
+                    to = new[]
+                    {
+                        new { email = toEmail }
+                    },
+                    subject = subject,
+                    text = isHtml ? null : body,
+                    html = isHtml ? body : null,
+                    category = "EpicMarket Application",
+                    attachments = attachments != null && attachments.Count > 0
+                        ? attachments.Select(a => new
+                        {
+                            content = a.Content, // Should be base64 encoded
+                            filename = a.Filename,
+                            type = a.Type ?? "application/octet-stream",
+                            disposition = a.Disposition ?? "attachment"
+                        }).ToArray()
+                        : null
+                };
 
-                var response = await client.SendEmailAsync(msg);
+                var jsonPayload = JsonConvert.SerializeObject(payload);
+                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+                // Create request with proper headers
+                var request = new HttpRequestMessage(HttpMethod.Post, "/api/send")
+                {
+                    Content = content
+                };
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiToken);
+                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var response = await _httpClient.SendAsync(request);
+                var responseContent = await response.Content.ReadAsStringAsync();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new Exception($"SendGrid API returned status code: {response.StatusCode}");
+                    throw new Exception($"Mailtrap API returned status code: {response.StatusCode}. Response: {responseContent}");
                 }
             }
             catch (Exception ex)
@@ -62,13 +92,4 @@ namespace EpicMarket.Services
             }
         }
     }
-    
-    // Attachment class to simplify adding attachments
-}
-
-// Class to handle token response
-public class TokenResponse
-{
-    public string TokenType { get; set; }
-    public string AccessToken { get; set; }
 }
