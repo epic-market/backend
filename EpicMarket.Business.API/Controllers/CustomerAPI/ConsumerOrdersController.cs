@@ -121,14 +121,14 @@ namespace EpicMarket.Business.API.Controllers.CustomerAPI
 
                 // Get default order status
                 var pendingStatus = await _dbContext.OrderStatusOptions
-                    .FirstOrDefaultAsync(s => s.Status == "Pending" || s.Status == "confirmed");
+                    .FirstOrDefaultAsync(s => s.OrderStatus == "Pending" || s.OrderStatus == "confirmed");
                 
                 var statusId = pendingStatus?.Id ?? 1;
 
                 // Get default order type (online)
                 var onlineOrderType = await _dbContext.OrderTypesOptions
-                    .FirstOrDefaultAsync(t => t.OrderType == "Online");
-                var orderTypeId = onlineOrderType?.ID ?? 1;
+                    .FirstOrDefaultAsync(t => t.Ordertype == "Online");
+                var orderTypeId = onlineOrderType?.Id ?? 1;
 
                 // Create order
                 var order = new Order
@@ -157,7 +157,7 @@ namespace EpicMarket.Business.API.Controllers.CustomerAPI
                 response.Message = "Order placed successfully";
                 response.Data = await MapToOrderResponse(order.ID);
 
-                _logger.LogInformation("ConsumerOrdersController -> CreateOrder() -> Order created: {orderNumber}", orderNumber);
+                _logger.LogInformation("ConsumerOrdersController -> CreateOrder() -> Order created with ID: {orderId}", order.ID);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -344,7 +344,7 @@ namespace EpicMarket.Business.API.Controllers.CustomerAPI
 
                 // Check if order can be cancelled
                 var nonCancellableStatuses = new[] { "delivered", "cancelled", "refunded" };
-                var currentStatus = order.OrderStatusOptions?.Status?.ToLower() ?? "";
+                var currentStatus = order.OrderStatusOptions?.OrderStatus?.ToLower() ?? "";
                 
                 if (nonCancellableStatuses.Contains(currentStatus))
                 {
@@ -356,7 +356,7 @@ namespace EpicMarket.Business.API.Controllers.CustomerAPI
 
                 // Get cancelled status
                 var cancelledStatus = await _dbContext.OrderStatusOptions
-                    .FirstOrDefaultAsync(s => s.Status.ToLower() == "cancelled");
+                    .FirstOrDefaultAsync(s => s.OrderStatus.ToLower() == "cancelled");
 
                 if (cancelledStatus != null)
                 {
@@ -373,7 +373,7 @@ namespace EpicMarket.Business.API.Controllers.CustomerAPI
                 response.Data = new OrderCancelResponse
                 {
                     OrderId = order.ID,
-                    OrderNumber = order.OrderNumber,
+                    OrderNumber = $"ORD{order.ID:D6}",
                     Status = "cancelled",
                     ModifiedDate = DateTime.UtcNow
                 };
@@ -421,7 +421,7 @@ namespace EpicMarket.Business.API.Controllers.CustomerAPI
                 Quantity = od.Quantity,
                 UnitPrice = (decimal)od.Rate,
                 TotalPrice = (decimal)od.TotalPrice,
-                Image = od.ProductVariants?.Product?.Thumbnail,
+                Image = null, // Product thumbnail would need to be fetched from attachments
                 Attributes = !string.IsNullOrEmpty(od.ProductVariants?.Attributes) ? new List<VariantAttribute>
                 {
                     new VariantAttribute { Name = "Option", Value = od.ProductVariants.Attributes }
@@ -457,7 +457,7 @@ namespace EpicMarket.Business.API.Controllers.CustomerAPI
                 Taxes = 0,
                 Discount = 0,
                 Total = (decimal)order.TotalPrice,
-                Status = order.OrderStatusOptions?.Status?.ToLower() ?? "pending",
+                Status = order.OrderStatusOptions?.OrderStatus?.ToLower() ?? "pending",
                 PaymentMethod = order.PaymentMode,
                 PaymentStatus = "completed",
                 DeliveryAddress = deliveryAddress,

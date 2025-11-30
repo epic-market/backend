@@ -194,7 +194,7 @@ namespace EpicMarket.Business.API.Controllers.CustomerAPI
                 // Apply category filter
                 if (!string.IsNullOrWhiteSpace(category))
                 {
-                    query = query.Where(o => o.Bussiness.BusinessCategory.CategoryName == category);
+                    query = query.Where(o => o.Bussiness.BusinessCategory.Name == category);
                 }
 
                 // Apply new only filter (created in last 30 days)
@@ -210,7 +210,7 @@ namespace EpicMarket.Business.API.Controllers.CustomerAPI
                     "name" => query.OrderBy(o => o.Name),
                     "newest" => query.OrderByDescending(o => o.CreateDate),
                     "reviewcount" => query.OrderByDescending(o => o.Ratings.Count),
-                    _ => query.OrderByDescending(o => o.Ratings.Any() ? o.Ratings.Average(r => r.RatingValue) : 0)
+                    _ => query.OrderByDescending(o => o.Ratings.Any() ? o.Ratings.Average(r => r.Stars) : 0)
                 };
 
                 var outlets = await query.ToListAsync();
@@ -432,7 +432,7 @@ namespace EpicMarket.Business.API.Controllers.CustomerAPI
                     Id = o.ID,
                     Name = o.Name,
                     Description = o.Description,
-                    Thumbnail = o.Thumbnail,
+                    Thumbnail = null,
                     Latitude = o.Address?.Latitude ?? 0,
                     Longitude = o.Address?.Longitude ?? 0,
                     Distance = latitude.HasValue && longitude.HasValue && o.Address != null
@@ -443,7 +443,6 @@ namespace EpicMarket.Business.API.Controllers.CustomerAPI
                 // Search products
                 var productsQuery = _dbContext.Products
                     .Include(p => p.ProductVariants)
-                    .Include(p => p.Outlet)
                     .Where(p => p.IsActive &&
                         (p.Name.Contains(searchTerm) ||
                          p.Description.Contains(searchTerm)));
@@ -454,10 +453,10 @@ namespace EpicMarket.Business.API.Controllers.CustomerAPI
                 {
                     Id = p.ID,
                     Name = p.Name,
-                    Price = p.ProductVariants.FirstOrDefault()?.SalePrice ?? 0,
-                    Thumbnail = p.Thumbnail,
-                    BranchName = p.Outlet?.Name ?? "",
-                    BranchId = p.OutletID ?? 0,
+                    Price = (decimal)(p.ProductVariants.FirstOrDefault()?.SalePrice ?? 0),
+                    Thumbnail = null, // Product thumbnail would need to be fetched from attachments
+                    BranchName = "", // Catalog doesn't have outlet relationship
+                    BranchId = 0, // Catalog doesn't have outlet relationship
                     Distance = null // Can be calculated if product has outlet location
                 }).ToList();
 
@@ -579,8 +578,8 @@ namespace EpicMarket.Business.API.Controllers.CustomerAPI
             {
                 var attachmentLinks = await _dbContext.AttachmentLinks
                     .Include(al => al.Attachments)
-                    .Where(al => al.Entity == "Branch" && al.RecordID == outletId)
-                    .Select(al => al.Attachments.FileKey)
+                    .Where(al => al.Entity.ToString() == "Branch" && al.RecordID == outletId)
+                    .Select(al => al.Attachments.DocumentFile)
                     .ToListAsync();
 
                 return attachmentLinks ?? new List<string>();

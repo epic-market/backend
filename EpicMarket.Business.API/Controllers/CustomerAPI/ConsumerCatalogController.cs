@@ -166,8 +166,8 @@ namespace EpicMarket.Business.API.Controllers.CustomerAPI
                 {
                     ("price", "desc") => query.OrderByDescending(p => p.ProductVariants.FirstOrDefault().SalePrice),
                     ("price", _) => query.OrderBy(p => p.ProductVariants.FirstOrDefault().SalePrice),
-                    ("rating", "desc") => query.OrderByDescending(p => p.Ratings.Any() ? p.Ratings.Average(r => r.RatingValue) : 0),
-                    ("rating", _) => query.OrderBy(p => p.Ratings.Any() ? p.Ratings.Average(r => r.RatingValue) : 0),
+                    ("rating", "desc") => query.OrderByDescending(p => p.Ratings.Any() ? p.Ratings.Average(r => r.Stars) : 0),
+                    ("rating", _) => query.OrderBy(p => p.Ratings.Any() ? p.Ratings.Average(r => r.Stars) : 0),
                     ("name", "desc") => query.OrderByDescending(p => p.Name),
                     _ => query.OrderBy(p => p.Name)
                 };
@@ -334,7 +334,7 @@ namespace EpicMarket.Business.API.Controllers.CustomerAPI
                 Variants = variants.Select(v => MapToVariantResponse(v)).ToList(),
                 IsActive = product.IsActive,
                 CreatedDate = product.CreateDate,
-                ModifiedDate = product.ModifiedDate
+                ModifiedDate = product.ModifiedDate ?? DateTime.UtcNow
             };
         }
 

@@ -24,13 +24,11 @@ namespace EpicMarket.Business.API.Controllers
     {
         private readonly ILogger<OrderController> logger;
         private readonly IOrderService orderService;
-        private readonly ApplicationDbContext dbContext;
 
         public OrderController(ILogger<OrderController> logger, IOrderService orderService, ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
         {
             this.logger = logger;
             this.orderService = orderService;
-            this.dbContext = dbContext;
         }
 
        

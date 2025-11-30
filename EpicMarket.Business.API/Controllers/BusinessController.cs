@@ -31,7 +31,6 @@ namespace EpicMarket.Business.API.Controllers
         private readonly ILogger<BusinessController> logger;
 		private readonly UserManager<AppUser> userManager;
 		private readonly IBusinessService businessService;
-        private readonly ApplicationDbContext dbContext;
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly IAttachmentService attachmentService;
         private readonly IFileService fileStoreService;
@@ -55,7 +54,6 @@ namespace EpicMarket.Business.API.Controllers
             this.logger = logger;
 			userManager = _userManager;
 			this.businessService = businessService;
-            this.dbContext = dbContext;
             this.httpContextAccessor = httpContextAccessor;
             this.attachmentService = attachmentService;
             this.fileStoreService = fileStoreService;

@@ -21,13 +21,11 @@ namespace EpicMarket.Business.API.Controllers
 	public class NotificationController : BaseApiController
     {
         private readonly ILogger<NotificationController> logger;
-        private readonly ApplicationDbContext dbContext;
         private readonly INotificationService notificationService;
 
         public NotificationController(ILogger<NotificationController> logger , ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor,INotificationService notificationService) : base(dbContext, httpContextAccessor)
         {
             this.logger = logger;
-            this.dbContext = dbContext;
             this.notificationService = notificationService;
         }
 

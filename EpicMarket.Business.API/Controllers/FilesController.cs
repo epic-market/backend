@@ -25,14 +25,12 @@ namespace EpicMarket.Business.API.Controllers
     {
 
 		private readonly IFileService fileService;
-        private readonly ApplicationDbContext dbContext;
         private readonly IUnitOfWork unitOfWork;
         private readonly IApplicationConfigurationService applicationConfigurationService;
 
 		public FilesController(IFileService fileService, ApplicationDbContext dbContext ,IUnitOfWork unitOfWork, IApplicationConfigurationService applicationConfigurationService, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
 		{
 			this.fileService = fileService;
-            this.dbContext = dbContext;
             this.unitOfWork = unitOfWork;
             this.applicationConfigurationService = applicationConfigurationService;
 		}

@@ -74,7 +74,7 @@ namespace EpicMarket.Business.API.Controllers
         {
             var response = new OperationResult<CheckLinkResult>();
 			this.logger.LogInformation("Employee Controller -> CheckEmployeeLink()-> params {0}", JsonConvert.SerializeObject(new { Params = queryParam }));
-            var result =  employeeService.CheckEmployeeLink(queryParam);
+            var result = await Task.FromResult(employeeService.CheckEmployeeLink(queryParam));
             this.logger.LogInformation("Employee Controller -> CheckEmployeeLink()-> return {0}", JsonConvert.SerializeObject(new { Value = result }));
             response.Data = result;  
             return Ok(response);

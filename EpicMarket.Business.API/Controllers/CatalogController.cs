@@ -30,12 +30,8 @@ namespace EpicMarket.Business.API.Controllers
         private readonly IRatingService ratingService;
         private readonly IAttachmentService attachmentService;
 		private readonly IFileService fileStoreService;
-        private readonly IProductCategoryService catalogCategoryService;
-        private readonly ApplicationDbContext dbContext;
-		private readonly IHttpContextAccessor httpContextAccessor;
-		private readonly IOutletService branchService;
-
-		public ProductController(ILogger<ProductController> logger, IProductService productService, IApplicationConfigurationService applicationConfigurationService,IRatingService ratingService,
+		private readonly IProductCategoryService catalogCategoryService;
+		private readonly IHttpContextAccessor httpContextAccessor;		public ProductController(ILogger<ProductController> logger, IProductService productService, IApplicationConfigurationService applicationConfigurationService,IRatingService ratingService,
 			IAttachmentService attachmentService, IFileService fileStoreService,IProductCategoryService catalogCategoryService , ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor) : base(dbContext, httpContextAccessor)
 		{
 			this.logger = logger;
@@ -45,7 +41,6 @@ namespace EpicMarket.Business.API.Controllers
             this.attachmentService = attachmentService;
 			this.fileStoreService = fileStoreService;
             this.catalogCategoryService = catalogCategoryService;
-            this.dbContext = dbContext;
 			this.httpContextAccessor = httpContextAccessor;
 
 		}
