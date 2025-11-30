@@ -13,7 +13,7 @@ namespace EpicMarket.Business.API.Controllers.CustomerAPI
     /// Consumer-facing Business API.
     /// Provides endpoints for categories, businesses, outlets, listings, and search.
     /// </summary>
-    [Route("api/business")]
+    [Route("api/consumer/business")]
     [ApiController]
     public class ConsumerBusinessController : ControllerBase
     {
@@ -41,7 +41,7 @@ namespace EpicMarket.Business.API.Controllers.CustomerAPI
         /// Get all business categories.
         /// </summary>
         /// <remarks>
-        /// Route: GET api/business/categories
+        /// Route: GET api/consumer/business/categories
         /// Auth: AllowAnonymous
         /// </remarks>
         /// <returns>List of business categories</returns>
@@ -91,7 +91,7 @@ namespace EpicMarket.Business.API.Controllers.CustomerAPI
         /// Get a specific business category by ID.
         /// </summary>
         /// <remarks>
-        /// Route: GET api/business/categories/{id}
+        /// Route: GET api/consumer/business/categories/{id}
         /// Auth: AllowAnonymous
         /// </remarks>
         /// <param name="id">Category ID</param>
@@ -148,7 +148,7 @@ namespace EpicMarket.Business.API.Controllers.CustomerAPI
         /// Get all business outlets with optional filtering.
         /// </summary>
         /// <remarks>
-        /// Route: GET api/business/businesses
+        /// Route: GET api/consumer/business/businesses
         /// Auth: AllowAnonymous
         /// </remarks>
         /// <param name="search">Search term for name/description</param>
@@ -237,7 +237,7 @@ namespace EpicMarket.Business.API.Controllers.CustomerAPI
         /// Get detailed information about a specific outlet.
         /// </summary>
         /// <remarks>
-        /// Route: GET api/business/outlets/{outletId}
+        /// Route: GET api/consumer/business/outlets/{outletId}
         /// Auth: AllowAnonymous
         /// </remarks>
         /// <param name="outletId">Outlet ID</param>
@@ -315,7 +315,7 @@ namespace EpicMarket.Business.API.Controllers.CustomerAPI
         /// Get business listings grouped by categories.
         /// </summary>
         /// <remarks>
-        /// Route: GET api/business/listings
+        /// Route: GET api/consumer/business/listings
         /// Auth: AllowAnonymous
         /// </remarks>
         /// <param name="category">Optional category filter</param>
@@ -389,7 +389,7 @@ namespace EpicMarket.Business.API.Controllers.CustomerAPI
         /// Search for businesses and products.
         /// </summary>
         /// <remarks>
-        /// Route: GET api/business/search
+        /// Route: GET api/consumer/business/search
         /// Auth: AllowAnonymous
         /// </remarks>
         /// <param name="searchTerm">Search query</param>
